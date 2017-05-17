@@ -26,7 +26,7 @@ The <b>TimeLapse</b> class enables processing with an ImageSequence object. Came
 Contains classes for measuring surface areas and distances from oblique imagery. This module has not yet been fully incorporated into the most up-to-date version of PyTrx.<br>
 The <b>Area</b> class performs automated and manual detection of surface areas from imagery and georectifies polygons to real-world coordinates.<br>
 The <b>Length</b> class performs manual detection of lines from imagery (e.g. glacier terminus position) and georectifies lines to real-world coordinates.
-<br><br>
+<br>
 
 <b><u>Utilities.py</b></u><br>
 This module contains a set of functions for plotting data.
