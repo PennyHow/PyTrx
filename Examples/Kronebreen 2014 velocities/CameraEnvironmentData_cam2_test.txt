@@ -1,0 +1,35 @@
+### KRONEBREEN CAMERA 2 camera environment data
+ 
+### FORMAT: Camera environment name, GCP path, DEM path, Image path, 
+### Calibration path, Camera location, Yaw pitch roll
+
+
+
+Camera_environment_name # Name of CamEnv class
+KR2_2014
+
+
+#GCP_path # Path name where Ground Control Point data can be found
+#.\Data\GCPdata\gcps\c2_2014.txt
+
+
+DEM_path # Path name where DEM data can be found
+.\Data\GCPdata\dem\dem.mat
+
+image_path #Path name where master image can be found (i.e. calibration image where GCPs have been plotted)
+.\Data\GCPdata\images\c2_2014.JPG
+
+
+Calibration_path #Path name where camera calibration file can be found
+[.\Data\GCPdata\calib\c2_2014_1.txt,.\Data\GCPdata\calib\c2_2014_2.txt,.\Data\GCPdata\calib\c2_2014_3.txt,.\Data\GCPdata\calib\c2_2014_4.txt] 
+
+
+Camera_location #Location of camera in xyz coordinates
+[447948.820 8759457.100 407.092]
+
+
+Yaw_pitch_roll # Yaw, pitch, roll of camera (set to [0 0 0] if unknown) 
+[4.80926012548059 0.0576786149965093 0.149141422649056] 
+
+#Dem_densification # Amount to densify the DEM to permit better mapping of image
+#2
