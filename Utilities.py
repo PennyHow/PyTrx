@@ -404,7 +404,6 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=T
         xd=XYZs[:,0]-XYZd[:,0]
         yd=XYZs[:,1]-XYZd[:,1]
         speed=np.sqrt(xd*xd+yd*yd)
-    
         v_all=np.vstack((XYZs[:,0],XYZs[:,1],XYZd[:,0],XYZd[:,1],speed))
         print 'vshape',v_all.shape
         
@@ -451,141 +450,127 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=T
         plt.show()
   
     
-def interpolateHelper(data, method='linear'):
+def interpolateHelper(xyz1, xyz2, method='linear', filt=True):
     '''Function to interpolate a point dataset. This uses functions of 
     the SciPy package to set up a grid (grid) and then interpolate using a
     linear interpolation method (griddata).
     Methods are those compatible with SciPy's interpolate.griddata function: 
     "nearest", "cubic" and "linear"
-    '''        
-    #Get the points data and calculate the x and y extents
-    xs, ys, vs, snrs = data
+    '''   
     
+    #Get point positions and differences   
+    x1=[]
+    y1=[]
+    x2=[]
+    y2=[]
+    xdif=[]
+    ydif=[]
+    for i,j in zip(xyz1,xyz2):
+        x1.append(i[0])
+        y1.append(i[1])
+        x2.append(j[0])
+        y2.append(j[1])
+        xdif.append(i[0]-j[0])
+        ydif.append(i[1]-j[1])
+    
+    #Calculate velocity with Pythagoras' theorem
+    speed=[]
+    for i,j in zip(xdif, ydif):
+        sp = np.sqrt(i*i+j*j)
+        speed.append(sp)
+
+    #Filter points if flag is true
+    if filt is True:
+        #Compile point data and speed 
+        v_all=np.vstack((x1,y1,x2,y2,speed))
+        v_all=v_all.transpose()
+        
+        #Filter points and extract xy positions and speed
+        filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)
+        x1=filtered[:,0]
+        y1=filtered[:,1]
+        x2=filtered[:,2]
+        y2=filtered[:,3]            
+        speed=filtered[:,4]           
+            
+    #Bound point positions in array for grid construction
+    newpts=np.array([x1,y1]).T  
+       
     #Define gridsize
     gridsize=10.
     
     #Define grid using point extent
-    minx=divmod(min(xs),gridsize)[0]*gridsize
-    miny=divmod(min(ys),gridsize)[0]*gridsize
-    maxx=(divmod(max(xs),gridsize)[0]+1)*gridsize
-    maxy=(divmod(max(ys),gridsize)[0]+1)*gridsize
+    minx=divmod(min(x1),gridsize)[0]*gridsize
+    miny=divmod(min(y1),gridsize)[0]*gridsize
+    maxx=(divmod(max(x2),gridsize)[0]+1)*gridsize
+    maxy=(divmod(max(y2),gridsize)[0]+1)*gridsize
     pointsextent=[minx,maxx,miny,maxy]   
+     
+     ###NEED TO SORT OUT THIS PART OF THE CODE. Doesn't work currently, but 
+     ###seems like an important step   
+#    #Find the new point, with the adjusted origin
+#    newx = [(x-pointsextent[0]) for x in xs]
+#    newy = [(y-pointsextent[2]) for y in ys]
+#    newmaxx = math.floor(max(newx))+1
+#    newmaxy = math.floor(max(newy))+1
+#    #newpts = np.array([newx, newy]).T    
+#    newpts=data[:,0:2]
     
-    print pointsextent
-    
-    #Find the new point, with the adjusted origin
-    newx = [(x-pointsextent[0]) for x in xs]
-    newy = [(y-pointsextent[2]) for y in ys]
-    newmaxx = math.floor(max(newx))+1
-    newmaxy = math.floor(max(newy))+1
-    #newpts = np.array([newx, newy]).T    
-    newpts=data[:,0:2]
-    
-    print 'newpoints',newpts.shape
-    print 'vs',np.array(vs).shape
-    print len(xs),len(ys),len(vs),len(snrs)
-    print newmaxx,newmaxy
-    
-#    #Make a grid for the interpolated data
-#    grid_x, grid_y = np.mgrid[0:newmaxx:complex(0,newmaxx),
-#                               0:newmaxy:complex(0,newmaxy)]
-#    grid_x, grid_y = np.mgrid[0:newmaxx:complex(0,newmaxx),
-#                               0:newmaxy:complex(0,newmaxy)]
-    
+    #Generate buffer around grid
     incrsx=((maxx-minx)/gridsize)+1
     incrsy=((maxy-miny)/gridsize)+1
-    print 'increments x:y',incrsx,incrsy
-    
+
+    #Construct grid dimensions
     grid_y,grid_x = np.mgrid[miny:maxy:complex(incrsy),
                              minx:maxx:complex(incrsx)]
-    print grid_x.shape,grid_y.shape
-    print grid_x[0:10],grid_y[0:10]
     
     #Interpolate the velocity and error points to the grid
-    grid = griddata(newpts, np.float64(vs), (grid_x, grid_y), method=method)
-    error = griddata(newpts, np.float64(snrs), (grid_x, grid_y), method=method)      
+    ###WORK OUT HOW TO INCORPORATE SNR GRID
+    grid = griddata(newpts, np.float64(speed), (grid_x, grid_y), method=method)
+#    error = griddata(newpts, np.float64(snrs), (grid_x, grid_y), method=method)      
                 
-    return grid, error, pointsextent        
-
-
-def interpolate(timelapse):
-    '''A function to implement the interpolation function (interpolateHelper)
-    to each velocity and error of each timestep of each timelapse. The 
-    interpolated array for velocity and error, and the geographical extent, 
-    are then assigned to the raster set list of the object.'''        
+    return grid, pointsextent        
     
-    #Get the points from a timeLapse object
-    timelapse = self.getPoints()
 
-    #Cycle through each timestep 
-    rasterset = []
-    for i in range(len(timelapse)):
-        timesteps = timelapse[i]
-        trackdata = []
+def plotInterpolate(dem, lims, grid, pointextent, save=False):
+    '''Function to plot the results of the interpolation process for 
+    a particular timestep.
+
+    Inputs:
+    dem:            A DEM object.
+    lims:           DEM extent (x1,x2,y1,y2).
+    grid:           Numpy grid. It is recommended that this is constructed 
+                    using the interpolateHelper function.
+    pointextent:    Grid extent.
+    save:           Flag to denote whether the figure is saved or not.
+    '''   
+    #Plot DEM
+    plt.figure()
+    plt.xlim(lims[0],lims[1])
+    plt.ylim(lims[2],lims[3])
+    plt.locator_params(axis = 'x', nbins=8)
+    plt.tick_params(axis='both', which='major', labelsize=10)
+    img = plt.imshow(dem, origin='lower', extent=lims)
+    img.set_cmap('gray') 
+    
+    #Plot grid onto DEM
+    plt.imshow(grid, 
+               origin='lower', 
+               cmap=plt.get_cmap("gist_ncar"), 
+               extent=pointextent, 
+               alpha=0.5) #alpha=1
+               
+#    plt.scatter(data[:,0], data[:,1], c=data[:,2], cmap=plt.get_cmap("gist_ncar"), s=10, edgecolors='none')
+#    plt.suptitle('Velocity of camera ' + str(i+1) + ' Interpolated', fontsize=14)
+    col=plt.colorbar()
+#    col.set_clim(0,4)
+    
+    #Save if flag is true
+    if save is True:
+        plt.savefig('interpv.png', bbox_inches='tight')
         
-        #Cycle through each timestep
-        for j in range(len(timesteps)):
-            data = timesteps[j]
-            
-            #Interpolate to find the velocity raster, error raster and extent
-            velocity, error, extent = interpolateHelper(data)
-            trackdata.append([velocity, error, extent])
-            
-        #Add the data to the all data list
-        rasterset.append(trackdata)
-        
-    return rasterset  
-    
-
-def plotInterpolate(self, no, errorshow=False):
-    '''A function to plot the results of the interpolation process for 
-    a particular timestep. If errorshow is true, the error raster will 
-    be shown in addition to the velocity raster.'''
-    
-    if self._rasterSet is None:
-        self.interpolate()
-    
-    # Get the rasters and points
-    rasters = self.getRasterSet()
-    points = self.getPoints()
-    
-    # Plot each velocity raster with velocity points
-    for i in range(len(rasters)):
-        timelapse = rasters[i]
-        velocity, error, rasterextent = timelapse[no]
-        demextent = self.getDEM()[1]            
-        timestep = points[i]
-        data = timestep[no]
-    
-        plt.figure()
-        plt.xlim(demextent[0],demextent[1])
-        plt.ylim(demextent[2],demextent[3])
-        plt.locator_params(axis = 'x', nbins=8)
-        plt.tick_params(axis='both', which='major', labelsize=10)
-        img = plt.imshow(self.getDEM()[0], origin='lower', extent=demextent)
-        img.set_cmap('gray') 
-        plt.imshow(velocity, origin='lower', cmap=plt.get_cmap("gist_ncar"), extent=rasterextent, alpha=0.5) #alpha=1 
-        plt.scatter(data[:,0], data[:,1], c=data[:,2], cmap=plt.get_cmap("gist_ncar"), s=10, edgecolors='none')
-        plt.suptitle('Velocity of camera ' + str(i+1) + ' Interpolated', fontsize=14)
-        plt.colorbar()
-        plt.show()
-#        plt.savefig('interpv.png', bbox_inches='tight')
-        
-        # Plot each SNR raster with SNR points
-        if errorshow == True:
-            plt.figure()
-            plt.xlim(demextent[0],demextent[1])
-            plt.ylim(demextent[2],demextent[3])
-            plt.locator_params(axis = 'x', nbins=8)
-            plt.tick_params(axis='both', which='major', labelsize=10)
-            img = plt.imshow(self.getDEM()[0], origin='lower', extent=demextent)
-            img.set_cmap('gray') 
-            plt.imshow(error, origin='lower', cmap=plt.get_cmap("gist_ncar"), extent=rasterextent, alpha=0.5) #alpha=1 
-            plt.scatter(data[:,0], data[:,1], c=data[:,2], cmap=plt.get_cmap("gist_ncar"), s=10, edgecolors='none')
-            plt.suptitle('Error of camera ' + str(i+1) + ' Interpolated', fontsize=14)
-            plt.colorbar()
-            plt.show() 
-#            plt.savefig('interpsnr.png', bbox_inches='tight')   
+    #Show plot
+    plt.show()
 
 
 #------------------------------------------------------------------------------

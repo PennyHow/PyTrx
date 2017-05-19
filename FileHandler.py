@@ -71,6 +71,7 @@ import scipy.io as sio
 from osgeo import ogr,osr
 import gdal
 import glob
+from Utilities import filterSparse
 
 #------------------------------------------------------------------------------
 
@@ -553,6 +554,110 @@ def writeTIFF(outFileName,OutArray,affineT,EPSGcode=32633,units="SRS_UL_METER",u
     print 'Output tiff file: ',outFileName
 
 
+def writeVelocityFile(veloset, timeLapse, fname='velocity.csv',span=[0,-1]):
+    '''Function to write all velocity data from a given timeLapse sequence to 
+    .csv file. Data is formatted as sequential columns containing the following
+    information:
+    Image pair 1 name
+    Image pair 2 name
+    Average velocity
+    Number of features tracked
+    Error
+    Signal-to-noise ratio
+    
+    Input variables:
+    veloset:            List of xyz and uv points over multiple images 
+                        ([xyz,uv], [xyz,uv]...).
+    timeLapse:          A TimeLapse object.
+    fname:              Filename for output file. File destination can also 
+                        specified.
+    span:               The range of images within the image sequence to 
+                        iterate over. Default set to all images.
+    '''
+    #Initialise file writing
+    f=open(fname,'w')
+
+    #Write active directory to file
+    im1=timeLapse.getImageObj(0)
+    pathnam=im1.getImagePath().split('\\')
+    dirnam=pathnam[0]
+    fn1=pathnam[-1]
+    f.write(dirnam+'\n')
+    
+    #Define column headers
+    header=('Image 0, Image 1, Average velocity (unfiltered),'
+            'Features tracked (unfiltered),Average velocity (filtered),'
+            'Features Tracked,Error, SNR')    
+    f.write(header+'\n')
+
+    #Iterate through timeLapse object
+    for i in range(timeLapse.getLength()-1)[span[0]:span[1]]:
+        
+        #Re-define image0 for each iteration
+        fn0=fn1
+        
+        #Get image1
+        im1=timeLapse.getImageObj(i+1)
+        
+        #Write image file names to file        
+        fn1=im1.getImagePath().split('\\')[-1]
+        out=fn0+','+fn1
+        
+        if veloset[i]!=None:
+
+            #Get velocity data          
+            xyz, uv = veloset[i]
+                
+            #Get xyz coordinates from points in image pair
+            xyz1 = xyz[0]               #Pts from image pair 1
+            xyz2 = xyz[1]               #Pts from image pair 2
+                        
+            #Get point positions and differences   
+            x1=[]
+            y1=[]
+            x2=[]
+            y2=[]
+            xdif=[]
+            ydif=[]
+            for i,j in zip(xyz1,xyz2):
+                x1.append(i[0])
+                y1.append(i[1])
+                x2.append(j[0])
+                y2.append(j[1])
+                xdif.append(i[0]-j[0])
+                ydif.append(i[1]-j[1])
+        
+            #Calculate velocity with Pythagoras' theorem
+            speed=[]
+            for i,j in zip(xdif, ydif):
+                sp = np.sqrt(i*i+j*j)
+                speed.append(sp)
+            
+            #Calculate average unfiltered velocity
+            velav = sum(speed)/len(speed)
+            
+            #Determine number of features (unfiltered) tracked
+            numtrack = len(speed)
+
+            #Filter outlier points 
+            v_all=np.vstack((x1,y1,x2,y2,speed))
+            v_all=v_all.transpose()
+            filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)           
+            fspeed=filtered[:,4]
+            
+            #Calculate average unfiltered velocity
+            velfav = sum(fspeed)/len(fspeed)
+            
+            #Determine number of features (unfiltered) tracked
+            numtrackf = len(fspeed)
+            
+            #Compile all data for output file
+            out=out+','+str(velav)+','+str(velfav)+','+str(numtrack)+','+str(numtrackf)
+        
+        #Write to output file
+        f.write(out+'\n')
+        
+    
 def writeHomographyFile(homogset,timeLapse,fname='homography.csv',span=[0,-1]):
     '''Function to write all homography data from a given timeLapse sequence to 
     .csv file. Data is formatted as sequential columns containing the following 
