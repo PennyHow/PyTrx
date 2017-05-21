@@ -68,7 +68,6 @@ demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
 lims=demred.getExtent()
 demred=demred.getZ()
 
-print lims
 #cameraenvironment._setInvProjVars()
 
 
@@ -92,7 +91,6 @@ save = False
 
 span=[0,-1]
 im1=tl.getImageObj(0)
-print 'TIMELAPSE LENGTH: ' + str(tl.getLength())
 
 for i in range(tl.getLength()-1)[span[0]:span[1]]:
     for vel in outputV:
@@ -102,7 +100,6 @@ for i in range(tl.getLength()-1)[span[0]:span[1]]:
                      plotcams,plotcombined,plotspeed,plotmaps)
 
 for vel in outputV:
-    print len(outputV)
     xy1 = vel[0][0]
     xy2 = vel[0][1]
     method='linear'
