@@ -1,2 +1,4 @@
 ../Examples/images/c2_2014_subset
 Image 0, Image 1, Average velocity (unfiltered),Features tracked (unfiltered),Average velocity (filtered),Features Tracked,Error, SNR
+IMG_2254_D14-05-08__T12_0.JPG,IMG_2302_D14-05-09__T12_0.JPG,2.35519140714,2.30397611371,1909,1763
+IMG_2302_D14-05-09__T12_0.JPG,IMG_2350_D14-05-10__T12_0.JPG,2.33858753172,2.23268281181,1995,1857
