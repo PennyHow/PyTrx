@@ -408,7 +408,6 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=T
         v_all=v_all.transpose()
         
         filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)
-        print 'filtered',filtered.shape
         
         ax1.scatter(filtered[:,0],filtered[:,1])
         
@@ -483,7 +482,7 @@ def interpolateHelper(xyz1, xyz2, method='linear', filt=True):
         #Compile point data and speed 
         v_all=np.vstack((x1,y1,x2,y2,speed))
         v_all=v_all.transpose()
-
+        
         #Filter points and extract xy positions and speed
         filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)
         x1=filtered[:,0]

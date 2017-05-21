@@ -71,6 +71,9 @@ import scipy.io as sio
 from osgeo import ogr,osr
 import gdal
 import glob
+import math
+
+#Import PyTrx modules
 from Utilities import filterSparse
 
 #------------------------------------------------------------------------------
@@ -620,12 +623,15 @@ def writeVelocityFile(veloset, timeLapse, fname='velocity.csv',span=[0,-1]):
             xdif=[]
             ydif=[]
             for i,j in zip(xyz1,xyz2):
-                x1.append(i[0])
-                y1.append(i[1])
-                x2.append(j[0])
-                y2.append(j[1])
-                xdif.append(i[0]-j[0])
-                ydif.append(i[1]-j[1])
+                if math.isnan(i[0]):
+                    pass
+                else:
+                    x1.append(i[0])
+                    y1.append(i[1])
+                    x2.append(j[0])
+                    y2.append(j[1])
+                    xdif.append(i[0]-j[0])
+                    ydif.append(i[1]-j[1])
         
             #Calculate velocity with Pythagoras' theorem
             speed=[]
