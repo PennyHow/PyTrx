@@ -744,7 +744,7 @@ class CamEnv(CamCalib):
         Y=self._invProjVars[1]
         Z=self._invProjVars[2]
         uv0=self._invProjVars[3]
-
+        
         #Snap uv and xyz grids together
         xi=interpolate.griddata(uv0, X, uv, method='linear')
         yi=interpolate.griddata(uv0, Y, uv, method='linear')
