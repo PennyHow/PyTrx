@@ -129,7 +129,7 @@ def filterSparse(data,numNearest=12,threshold=2,item=2):
     XY=data[:,0:2]
 
     #Set up KD tree with XY point data
-    tree=spatial.KDTree(XY)
+    tree=spatial.KDTree(XY, 50)
     
     goodset=[]
     for point in XY:        
@@ -404,11 +404,8 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=T
         xd=XYZs[:,0]-XYZd[:,0]
         yd=XYZs[:,1]-XYZd[:,1]
         speed=np.sqrt(xd*xd+yd*yd)
-        v_all=np.vstack((XYZs[:,0],XYZs[:,1],XYZd[:,0],XYZd[:,1],speed))
-        print 'vshape',v_all.shape
-        
+        v_all=np.vstack((XYZs[:,0],XYZs[:,1],XYZd[:,0],XYZd[:,1],speed))       
         v_all=v_all.transpose()
-        print 'vshape',v_all.shape
         
         filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)
         print 'filtered',filtered.shape
@@ -456,8 +453,7 @@ def interpolateHelper(xyz1, xyz2, method='linear', filt=True):
     linear interpolation method (griddata).
     Methods are those compatible with SciPy's interpolate.griddata function: 
     "nearest", "cubic" and "linear"
-    '''   
-    
+    '''         
     #Get point positions and differences   
     x1=[]
     y1=[]
@@ -466,25 +462,28 @@ def interpolateHelper(xyz1, xyz2, method='linear', filt=True):
     xdif=[]
     ydif=[]
     for i,j in zip(xyz1,xyz2):
-        x1.append(i[0])
-        y1.append(i[1])
-        x2.append(j[0])
-        y2.append(j[1])
-        xdif.append(i[0]-j[0])
-        ydif.append(i[1]-j[1])
+        if math.isnan(i[0]):
+            pass
+        else:
+            x1.append(i[0])
+            y1.append(i[1])
+            x2.append(j[0])
+            y2.append(j[1])
+            xdif.append(i[0]-j[0])
+            ydif.append(i[1]-j[1])
     
     #Calculate velocity with Pythagoras' theorem
     speed=[]
     for i,j in zip(xdif, ydif):
         sp = np.sqrt(i*i+j*j)
         speed.append(sp)
-
+    
     #Filter points if flag is true
     if filt is True:
         #Compile point data and speed 
         v_all=np.vstack((x1,y1,x2,y2,speed))
         v_all=v_all.transpose()
-        
+
         #Filter points and extract xy positions and speed
         filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)
         x1=filtered[:,0]
@@ -529,10 +528,10 @@ def interpolateHelper(xyz1, xyz2, method='linear', filt=True):
     grid = griddata(newpts, np.float64(speed), (grid_x, grid_y), method=method)
 #    error = griddata(newpts, np.float64(snrs), (grid_x, grid_y), method=method)      
                 
-    return grid, pointsextent        
+    return grid, pointsextent          
     
 
-def plotInterpolate(dem, lims, grid, pointextent, save=False):
+def plotInterpolate(dem, lims, grid, pointextent, save=None):
     '''Function to plot the results of the interpolation process for 
     a particular timestep.
 
@@ -566,8 +565,8 @@ def plotInterpolate(dem, lims, grid, pointextent, save=False):
 #    col.set_clim(0,4)
     
     #Save if flag is true
-    if save is True:
-        plt.savefig('interpv.png', bbox_inches='tight')
+    if save != None:
+        plt.savefig(save, bbox_inches='tight')
         
     #Show plot
     plt.show()
