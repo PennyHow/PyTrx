@@ -138,7 +138,7 @@ class CamImage(object):
             
             #Check file type
             ftype=imghdr.what(path)
-            if ftype==None:
+            if ftype is None:
                 if self._quiet>0:
                     print '\nFile exists but not image type'
                 return False
@@ -165,7 +165,7 @@ class CamImage(object):
 
     def getImage(self):
         '''Return the image.'''
-        if self._image==None:
+        if self._image is None:
             self._readImage()
         return self._image
 
@@ -174,7 +174,7 @@ class CamImage(object):
         '''Return the image array that is corrected for the specificied 
         camera matrix and distortion parameters.'''
         #Get image array        
-        if self._imageArray==None:
+        if self._imageArray is None:
             self._readImageData()
             
         if self._quiet>1:    
@@ -202,14 +202,14 @@ class CamImage(object):
         
     def getImageArray(self):
         '''Return the image as an array.'''
-        if self._imageArray==None:
+        if self._imageArray is None:
             self._readImageData()   
         return self._imageArray
         
     def getImageSize(self):
         '''Return the size of the image (which is obtained from the image Exif 
         information).'''        
-        if self._imsize==None:
+        if self._imsize is None:
             self._imsize,self._timestamp=self.getExif()
         return self._imsize
 
@@ -217,7 +217,7 @@ class CamImage(object):
     def getImageTime(self):
         '''Return the time of the image (which is obtained from the image Exif
         information).'''        
-        if self._timestamp==None:
+        if self._timestamp is None:
             self._imsize,self._timestamp=self.getExif()
         return self._timestamp
  
@@ -228,7 +228,7 @@ class CamImage(object):
         returned as a Python datetime object.'''
         #Get the Exif data
         exif = {}
-        if self._image==None:
+        if self._image is None:
             self._image=Image.open(self._impath)
         
         info = self._image._getexif()
@@ -280,7 +280,7 @@ class CamImage(object):
         a desired band or grayscale, then returning a copy.'''
         
         #Open image from file using PIL
-        if self._image==None:
+        if self._image is None:
             self._image=Image.open(self._impath)
         
         #Apply histogram equalisation
@@ -972,9 +972,10 @@ class TimeLapse(ImageSequence):
         #Project good points (original and tracked) to obtain XYZ coordinates
         uvs=src_pts_corr[:,0,:]
         uvd=dst_pts_homog[:,0,:]
+
         xyzs=self._camEnv.invproject(uvs)
         xyzd=self._camEnv.invproject(uvd)
-        
+
         #Return real-world point positions (original and tracked points),
         #and xy pixel positions (original, tracked, and homography)
         return [[xyzs,xyzd],[src_pts_corr,dst_pts_corr,dst_pts_homog]]
@@ -999,6 +1000,7 @@ class TimeLapse(ImageSequence):
         
         #Cycle through image pairs (numbered from 0)
         for i in range(self.getLength()-1)[span[0]:span[1]]:
+
             #Re-assign first image in image pair
             im0=im1
             imn0=imn1
@@ -1007,7 +1009,7 @@ class TimeLapse(ImageSequence):
             im1=self._imageSet[i+1].getImageArray()
             imn1=self._imageSet[i+1].getImagePath().split('\\')[1]       
             self._imageSet[i].clearAll()
-            
+           
             #Optional commentary
             if self._quiet>1:
                 print '\nProcessing velocities for images: ',imn0,' and ',imn1
