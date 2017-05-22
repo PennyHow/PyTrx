@@ -21,6 +21,7 @@ TimeLapse:     A class for the processing of an ImageSet to find glacier
                velocity as points, with methods to track in the xy image plane 
                and project tracks to real-world (xyz) coordinates.
 
+
 @author: Nick Hulton (Nick.Hulton@ed.ac.uk), 
          Lynne Addison
          Penny How (p.how@ed.ac.uk)
@@ -35,13 +36,11 @@ from datetime import datetime
 import glob
 import imghdr
 import os
-from FileHandler import readMask
 import cv2
-import itertools
 import math
-import sys
-import time
 
+#Import PyTrx modules
+from FileHandler import readMask
 
 #------------------------------------------------------------------------------
 
@@ -86,8 +85,8 @@ class CamImage(object):
             self._image:      Floating point array of image data [rows,columns].
             self._timestamp:  Python datetime object derived from exif data, if 
                               present (otherwise set as None).
-            self._quiet:      Integer value between 0 and 3 denoting amount of 
-                              commentary whilst processing.
+            self._quiet:      Integer value denoting amount of commentary 
+                              whilst processing.
         '''
         #Define class properties
         self._imageGood=True
@@ -140,16 +139,16 @@ class CamImage(object):
             ftype=imghdr.what(path)
             if ftype is None:
                 if self._quiet>0:
-                    print '\nFile exists but not image type'
+                    print 'File exists but not image type'
                 return False
             else:
                 if self._quiet>0:
-                    print '\nFile found of image type: ',ftype
+                    print 'File found of image type: ', ftype
                 return True
 
         else:
             if self._quiet>0:            
-                print '\nFile does not exist'
+                print 'File does not exist'
             return False
 
         
@@ -178,11 +177,12 @@ class CamImage(object):
             self._readImageData()
             
         if self._quiet>1:    
-            print '\nmatirix,distortion',cameraMatrix, distortP
+            print '\nMatrix: ' + str(cameraMatrix)
+            print 'Distortion: ' + str(distortP)
             
         size=self.getImageSize()
         if self._quiet>1:        
-            print 'image size',size
+            print 'Image size: ', size
         
         #Calculate optimal camera matrix 
         h = size[0]
@@ -277,8 +277,7 @@ class CamImage(object):
     
     def _readImageData(self):
         '''Function to prepare an image by opening, equalising, converting to 
-        a desired band or grayscale, then returning a copy.'''
-        
+        a desired band or grayscale, then returning a copy.'''        
         #Open image from file using PIL
         if self._image is None:
             self._image=Image.open(self._impath)
@@ -340,8 +339,8 @@ class ImageSequence(object):
                    0 to 3).  
                      
     Class variables:
-        self._quiet:          Integer value between 0 and 3 denoting amount of 
-                              commentary whilst processing.
+        self._quiet:          Integer value denoting amount of commentary 
+                              whilst processing.
         self._imageList:      Inputted list of images.
         self._imageSet:       Sequence of CamImage objects.
         self._band:           String denoting the desired image band.
@@ -350,7 +349,7 @@ class ImageSequence(object):
         
         self._quiet=quiet        
         if self._quiet>0:
-            print '\nAttempting to define image sequence:'
+            print '\nAttempting to define image sequence'
         
         self._band=band
         self._imageList=imageList
@@ -360,35 +359,37 @@ class ImageSequence(object):
             
             #Construction from list of CamImage objects
             if isinstance(imageList[0],CamImage):
-                if self._quiet>0:
-                    print 'List of camera images assumed in image sequence'
+                if self._quiet>1:
+                    print '\nList of camera images assumed in image sequence'
                     print 'Attempting to add all to sequence'
                 self._imageSet = []
                 for item in list:
                     if isinstance(item,CamImage):
                         self._imageSet.append(item)
                     else:
-                        if self._quiet>0:
-                            print '\nWarning non-image item found in image set list specification - item not added'
+                        if self._quiet>1:
+                            print ('\nWarning non-image item found in image' 
+                                   'set list specification - item not added')
                 return
                 
             #Construction from list containing file name strings                
             elif isinstance(imageList[0],str):
-                if self._quiet>0:                
-                    print 'List of camera images assumed of image sequence'
+                if self._quiet>1:                
+                    print '\nList of camera images assumed of image sequence'
                     print 'Attempting to add all to sequence'
                 self._loadImageStringSequence(imageList,loadall)
                 
             else:
-                if self._quiet>0:                
-                    print 'List item type used to define image list neither image nor strings (filenames)'
+                if self._quiet>1:                
+                    print ('\nList item type used to define image list neither' 
+                           'image nor strings (filenames)')
                 return None
         
         #Construction from string of file paths
         if isinstance(imageList, str):
             if self._quiet>0:
-                print 'Image directory path assumed, searching for images there:'
-                print 'Attempting to add all to sequence'
+                print ('\nImage directory path assumed. Searching for images.' 
+                       'Attempting to add all to sequence')
                 print imageList
             self._imageList = glob.glob(imageList)
             self._loadImageStringSequence(self._imageList,loadall)
@@ -413,7 +414,7 @@ class ImageSequence(object):
         list of images. Sequence of image arrays will be loaded if the loadall 
         flag is set to true.'''
         if self._quiet>0:
-            print 'Construcing image sequence'
+            print '\nConstrucing image sequence'
         
         #Construct CamImage objects
         self._imageSet = []
@@ -428,7 +429,7 @@ class ImageSequence(object):
                     
             else:
                 if self._quiet>0:
-                    print 'Problem reading image: ',imageStr
+                    print '\nProblem reading image: ',imageStr
                     print 'Image:',imageStr,' not added to sequence'
 
                 
@@ -450,7 +451,7 @@ class ImageSequence(object):
 #------------------------------------------------------------------------------
 
 class TimeLapse(ImageSequence):
-    """ A class that handles the processing of an ImageSet to find glacier 
+    '''A class that handles the processing of an ImageSet to find glacier 
     velocity as points, with methods to track and project tracks from the uv
     image plane to xyz real-world coordinates.
     
@@ -487,12 +488,15 @@ class TimeLapse(ImageSequence):
         self._mask:     Mark array.
         self._invmask:  Inverse mask array.
         self._timings:  Timing between images.
-    """   
+        self._quiet:    Integer value between denoting amount of commentary 
+                        whilst processing.
+    '''   
         
     def __init__(self, imageList, camEnv, maskPath=None, invmaskPath=None, 
-                 image0=0, band='L', loadall=False, timingMethod='EXIF'):
+                 image0=0, band='L', quiet=1, loadall=False, 
+                 timingMethod='EXIF'):
         
-        ImageSequence.__init__(self, imageList, band, loadall)
+        ImageSequence.__init__(self, imageList, band, loadall, quiet)
         
         #Set initial class properties
         self._camEnv = camEnv
@@ -546,7 +550,8 @@ class TimeLapse(ImageSequence):
 
        
     def featureTrack(self, i0, iN, Mask, back_thresh=1.0, calcErrors=True,
-                     maxpoints=50000, quality=0.1, mindist=5.0, min_features=1):
+                     maxpoints=50000, quality=0.1, mindist=5.0, 
+                     min_features=1):
         '''Function to feature track between two masked images. The
         Shi-Tomasi algorithm with OpenCV's goodFeaturesToTrack function is used
         to initially seed points in the first image. Then, the Lucas Kanade 
@@ -578,7 +583,10 @@ class TimeLapse(ImageSequence):
                 
         #Check if there are enough points to initially track 
         if tracked<min_features:
-            print '\nNot enough features found to track.  Found: ',len(p0)
+ 
+            #Optional commentary
+            if self._quiet>0:
+                print '\nNot enough features found to track.  Found: ',len(p0)
             return None
             
         else:
@@ -607,11 +615,16 @@ class TimeLapse(ImageSequence):
             #Return None if number of tracked features is under the 
             #min_features threshold
             if p0.shape[0]<min_features:
-                print '\nNot enough features successfully tracked. Tracked: ',len(p0)
+                if self._quiet>0:
+                    print ('\nNot enough features successfully tracked.' 
+                           'Tracked: ',len(p0))
                 return None
-                
-        print '\n'+str(tracked)+" features tracked"
-        print str(p0.shape[0])+" features remaining after forward-backward error"
+        
+       #Optional commentary
+        if self._quiet>0:        
+            print '\n'+str(tracked)+' features tracked'
+            print (str(p0.shape[0]) + ' features remaining after' 
+                   'forward-backward error')
            
         #Optional step: Calculate signal-to-noise error               
         #Signal-to-noise is defined as the ratio between the distance 
@@ -674,9 +687,11 @@ class TimeLapse(ImageSequence):
                                       quality=quality,
                                       mindist=mindist, 
                                       min_features=min_features) 
-        
+
+        #Pass empty object if tracking insufficient
         if trackdata==None:
-            print '\nNo features to undertake Homography'
+            if self._quiet>0:
+                print '\nNo features to undertake Homography'
             return None
 
         #Separate raw tracked points and errors            
@@ -717,7 +732,10 @@ class TimeLapse(ImageSequence):
         #Homography error calculated from equivalent set of homography points
         #from original, uncorrected images
         if calcHomogError:
-            print 'Calculating Homography errors'
+            
+            #Optional commentary
+            if self._quiet>1:
+                print '\nCalculating Homography errors'
 
             #Apply global homography to source points
             homog_pts=self.apply_persp_homographyPts_array(src_pts_corr,
@@ -812,7 +830,8 @@ class TimeLapse(ImageSequence):
                             maxpoints=50000, quality=0.1, mindist=5.0,
                             calcHomogError=True, min_features=4, span=[0,-1]):
         '''Method to calculate homography between succesive image pairs in an 
-        image sequence.'''        
+        image sequence.''' 
+        #Optional commentary
         if self._quiet>0:
             print 'Calculating homography pairs'
         
@@ -836,6 +855,7 @@ class TimeLapse(ImageSequence):
             self._imageSet[i].clearImage()
             self._imageSet[i].clearImageArray()
             
+            #Optional commentary
             if self._quiet>1:
                 print '\nProcessing homograpy for images: ',imn0,' and ',imn1
                 
@@ -860,7 +880,7 @@ class TimeLapse(ImageSequence):
         - Mask status.
         - Inverse mask status.
         '''        
-        print '\nTimelapse object:\nData as follows:\n'
+        print '\nTimelapse object:'
         
         #Image sequence length
         print self.getLength,' images are defined in the sequence'
@@ -868,15 +888,19 @@ class TimeLapse(ImageSequence):
         
         #Mask status
         if self._mask==None:
-            print 'Mask file (to define mask area in which to track features) not set'
+            print ('Mask file (to define mask area in which to track features)' 
+                   'not set')
         else:
-            print 'Mask file (to define mask area in which to track features) set to: ',self._mask
+            print ('Mask file (to define mask area in which to track features)' 
+                   'set to: ', self._mask)
         
         #Inverse mask status
         if self._invmask==None:
-            print 'Inverse Mask File (to define mask area in which to track features) not set'
+            print ('Inverse Mask File (to define mask area in which to track' 
+                   'features) not set')
         else:
-            print 'Inverse Mask File (to define mask area in which to derive background area for homography) set to: ',self._invmask
+            print ('Inverse Mask File (to define mask area in which to derive' 
+                   'background area for homography) set to: ', self._invmask)
 
         ###ADD MORE CHECKS
 
@@ -896,8 +920,10 @@ class TimeLapse(ImageSequence):
                                       mindist=mindist, 
                                       min_features=min_features) 
         
+        #Pass empty object if tracking was insufficient
         if trackdata==None:
-            print '\nNo features to undertake velocity measurements'
+            if self._quiet>0:
+                print '\nNo features to undertake velocity measurements'
             return None        
             
         #Separate raw tracked points and errors            
@@ -930,7 +956,10 @@ class TimeLapse(ImageSequence):
 
         #Calculate homography if desired
         if homography!=None:
-            print 'Homography not found. Calculating homography...'
+            
+            #Optional commentary
+            if self._quiet>0:
+                print '\nHomography not found. Calculating homography.'
             
             #Get homography matrix
             homogMatrix=homography[0]
@@ -963,8 +992,10 @@ class TimeLapse(ImageSequence):
             #Determine number of points kept
             retained=dst_pts_corr.shape[0]
             
-            print 'Points removed because of homography uncertainty:'
-            print 'Before: ', tracked, ' After: ', retained
+            #Optional commentary
+            if self._quiet>0:
+                print 'Points removed because of homography uncertainty:'
+                print 'Before: ', tracked, ' After: ', retained
 
         else:
             dst_pts_homog=None
@@ -973,6 +1004,8 @@ class TimeLapse(ImageSequence):
         uvs=src_pts_corr[:,0,:]
         uvd=dst_pts_homog[:,0,:]
 
+        if self._quiet>0:
+            print '\nUndertaking inverse projection'
         xyzs=self._camEnv.invproject(uvs)
         xyzd=self._camEnv.invproject(uvd)
 
@@ -985,10 +1018,10 @@ class TimeLapse(ImageSequence):
                        ransacReprojThreshold=5.0, back_thresh=1.0, 
                        calcErrors=True, maxpoints=50000, quality=0.1, 
                        mindist=5.0, min_features=4):
-        '''Function to calculate velocities between succesive image
-        pairs.'''
+        '''Function to calculate velocities between succesive image pairs.'''
+        #Optional commentary
         if self._quiet>0:
-            print 'Calculating velocities'
+            print '\nCalculating velocities'
         
         #Create empty lists for velocities and homography
         pairwiseVelocities=[]
