@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 '''
 This script is part of PyTrx, an object-oriented programme created for the 
 purpose of calculating real-world measurements from oblique images and 
@@ -137,17 +136,15 @@ class CamCalib(object):
                     
             #Read calibration from several files        
             elif isinstance(args[0],list):
-                print('\nAttempting to read camera calibs from average over several files')
+                print('\nAttempting to read camera calibs from average over ' 
+                      'several files')
                 intrMat=[]
                 tanCorr=[]
                 radCorr=[]               
                 for item in args[0]:
-                    print item
                     if isinstance(item,str):
                         arg=readMatrixDistortion(item)
-                        print arg
                         arg=self.checkMatrix(arg)
-                        print arg
                         if arg==None:
                             failed=True
                             break
@@ -157,21 +154,17 @@ class CamCalib(object):
                             radCorr.append(arg[2])
                     else:
                         failed=True
-                print intrMat
-                print sum(intrMat)
-                print len(intrMat)
+
                 self._intrMat = sum(intrMat)/len(intrMat)
                 self._tanCorr = sum(tanCorr)/len(tanCorr)
                 self._radCorr = sum(radCorr)/len(radCorr)
-                
-                print '\n\nint_matrix',self._intrMat,'\n'  
                 
             else:
                 failed=True
         
         #Read calibration from list
         elif len(args)==3:   
-            print('Attempting to make camera calibs from raw data sequences')
+            print('\nAttempting to make camera calibs from raw data sequences')
             args=self.checkMatrix(args)            
             self._intrMat=args[0]
             self._tanCorr=args[1]
@@ -180,8 +173,8 @@ class CamCalib(object):
             failed=True
             
         if failed:
-            print 'Error creating camera calibration object:'
-            print '\tPlease check calibration specification or files'
+            print '\nError creating camera calibration object:'
+            print 'Please check calibration specification or files'
             return None
             
         self._focLen=[self._intrMat[0,0], self._intrMat[1,1]]       
@@ -217,7 +210,7 @@ class CamCalib(object):
     def getCamMatrixCV2(self):
         '''Return camera matrix in a structure that is compatible with 
         subsequent photogrammetric processing using OpenCV.'''
-        if self._intrMatCV2==None:
+        if self._intrMatCV2 is None:
             
             # Transpose if 0's are not in correct places
             if (self._intrMat[2,0]!=0 and self._intrMat[2,1]!=0 and 
@@ -257,8 +250,7 @@ class CamCalib(object):
     def checkMatrix(self,matrix):
         '''Function to support the calibrate function. Checks and converts the 
         intrinsic matrix to the correct format for calibration with opencv.'''  
-        ### this is moved over from readfile.  Need to check calibration matrices
-        ### howevever obtained...
+        ###This is moved over from readfile. Need to check calibration matrices
         if matrix==None:
             return None
         
@@ -389,20 +381,24 @@ class CamEnv(CamCalib):
     
 #    def __init__(self, name, GCPpath, DEMpath, imagePath, calibPath, coords, ypr=[0,0,0]):
 
-    def __init__(self, envFile):
+    def __init__(self, envFile, quiet=2):
         '''Constructor to initiate Camera Environment object.''' 
         ### Eventually modify this to allow a more flexible
         ### constructor to take a raw input specification in addition to 
         ### file input.
-            
+        
+        #Set commentary level
+        self._quiet = quiet
         #Read parameters from the environment file             
         params = self.dataFromFile(envFile)
 
         if params==False:
-            print '\nUnable to define camera environment\n'
-            print '\nExiting programme\n'
+            print '\nUnable to define camera environment'
+            print '\nExiting programme'
             sys.exit()
         else:
+            if self._quiet>0:
+                print '\nINITIALISING CAMERA ENVIRONMENT'
             name, GCPpath, DEMpath, imagePath, calibPath, coords, ypr, DEMdensify = params           
         
         #Set up object parameters
@@ -413,6 +409,7 @@ class CamEnv(CamCalib):
         self._GCPpath = GCPpath
         self._imagePath = imagePath
         self._refImage=CamImage(imagePath)
+        
 
         #Set yaw, pitch and roll to 0 if no information is given        
         if ypr == None:
@@ -442,7 +439,8 @@ class CamEnv(CamCalib):
         
         #Initialise GCPs object for GCP and DEM information
         if (self._GCPpath!=None and self._imagePath!=None):
-            print '\nCreating GCP environment'
+            if self._quiet>1:
+                print '\nCreating GCP environment'
             self._gcp=GCPs(self._DEM, self._GCPpath, self._imagePath)        
         
        
@@ -479,7 +477,8 @@ class CamEnv(CamCalib):
         if lineNo!=None:
             name = self.__getFileDataLine__(lines,lineNo)
         else:
-            print "\nName not supplied in: " + filename              
+            if self._quiet>0:
+                print "\nName not supplied in: " + filename              
             return False
 
         #Define GCPpath if information is present in .txt file
@@ -487,7 +486,8 @@ class CamEnv(CamCalib):
         if lineNo!=None:
             GCPpath = self.__getFileDataLine__(lines,lineNo)
         else:
-            print "\nGCPpath not supplied in: " + filename              
+            if self._quiet>0:
+                print "\nGCPpath not supplied in: " + filename              
             GCPpath=None
             
         #Define DEMpath if information is present in .txt file
@@ -495,7 +495,8 @@ class CamEnv(CamCalib):
         if lineNo!=None:
             DEMpath = self.__getFileDataLine__(lines,lineNo)
         else:
-            print "\nDEMpath not supplied in: " + filename              
+            if self._quiet>0:
+                print "\nDEMpath not supplied in: " + filename              
             return False
             
         #Define imagePath if information is present in .txt file
@@ -503,18 +504,19 @@ class CamEnv(CamCalib):
         if lineNo!=None:
             imagePath = self.__getFileDataLine__(lines,lineNo)
         else:
-            print "\nimagePath not supplied in: " + filename              
+            if self._quiet>0:
+                print "\nimagePath not supplied in: " + filename              
             return False 
 
         #Define DEM densification specifications (DEMdensify)          
         lineNo=key_lines["DEMdensify"]
-        print "densify line",lineNo
         if lineNo!=None:
             DEMdensify = self.__getFileDataLine__(lines,lineNo)
             DEMdensify = int(DEMdensify)
         else:
-            print "\nDem densification level not supplied in: " + filename  
-            print "Setting to 1 (No densification)"
+            if self._quiet>1:
+                print "\nDem densification level not supplied in: " + filename  
+                print "Setting to 1 (No densification)"
             DEMdensify=1
 
         #Define calibPath if information is present in .txt file
@@ -528,7 +530,8 @@ class CamEnv(CamCalib):
             if len(calibPath) == 1:
                 calibPath = calibPath[0]                
         else:
-            print "\ncalibPath not supplied in: " + filename              
+            if self._quiet>0:
+                print "\ncalibPath not supplied in: " + filename              
             return False   
 
         #Define camera location coordinates (coords)
@@ -540,7 +543,8 @@ class CamEnv(CamCalib):
             for f in fields:
                 coords.append(float(f)) 
         else:
-            print "\ncoords not supplied in: " + filename              
+            if self._quiet>0:
+                print "\nCoordinates not supplied in: " + filename              
             return False 
 
         #Define yaw, pitch, roll if information is present in .txt file
@@ -552,10 +556,10 @@ class CamEnv(CamCalib):
             for f in fields:
                 ypr.append(float(f)) 
         else:
-            print "\nypr not supplied in: " + filename              
+            if self._quiet>0:
+                print "\nYPR not supplied in: " + filename              
             return False
            
-        print name,GCPpath,DEMpath,imagePath,calibPath,coords,ypr,DEMdensify
         return name,GCPpath,DEMpath,imagePath,calibPath,coords,ypr,DEMdensify
 
     
@@ -575,20 +579,17 @@ class CamEnv(CamCalib):
         #Prepare DEM from file if DEM parameter is empty
         if self._DEM==None:
             self._DEM=load_DEM(self._DEMpath)
-            print 'raw extent', self._DEM.getExtent()            
-            print 'DEM Loaded'
             
             #DEM densification
             if self._DEMdensify!=1:
                 self._DEM=self._DEM.densify(self._DEMdensify)
-                print 'densified extent ', self._DEM.getExtent()
                 
         return self._DEM
 
             
     def _setInvProjVars(self):
         '''Set the inverse projection variables, based on the DEM.'''
-        print 'Setting inverse projection coefficients'   
+        print '\nSetting inverse projection coefficients'   
         dem=self.getDEM()
         
         X=dem.getData(0)
@@ -639,8 +640,6 @@ class CamEnv(CamCalib):
         #xyz=bsxfun(@minus,xyz,cam.xyz);
         ###need to check xyz is an array of the correct size
         ###this does element-wise subtraction on the array columns
-            
-        print 'Doing forward projection of Real World Coordinates'
         
         #Get camera location
         xyz=xyz-self._camloc
@@ -717,7 +716,7 @@ class CamEnv(CamCalib):
         return uv,depth,inframe
 
  
-    def invproject(self,uv,quiet=1):  
+    def invproject(self,uv):  
         '''Inverse project image coordinates (uv) to xyz world coordinates
         using inverse projection variables (set using self._setInvProjVars).         
 
@@ -727,10 +726,7 @@ class CamEnv(CamCalib):
                uv: pixel coordinates in image           
         Outputs:
                xyz: world coordinates. 
-        '''
-        if quiet>0:
-            print 'Undertaking inverse projection'
-        
+        '''       
         #Set inverse projection variables if none exists
         if self._invProjVars==None:
             self._setInvProjVars()            
@@ -784,42 +780,44 @@ class CamEnv(CamCalib):
         - Camera matrix and distortion coefficients'''
         
         #Camera name and location
-        print '\nCamera Environment setup/data:\n'
-        print 'Camera Environment name: ',self._name 
-        print 'Camera Location [X,Y,Z]:  ',self._camloc
+        print '\nCamera Environment setup/data:'
+        print '\nCamera Environment name: ',self._name 
+        print '\nCamera Location [X,Y,Z]:  ',self._camloc
         
         #Reference image
-        print 'Reference image used for baseline homography and/or GCP control: ', self._imagePath
+        print ('\nReference image used for baseline homography and/or GCP' 
+               'control: ', self._imagePath)
         
         #DEM and densification        
-        print 'DEM file used for projection:',self._DEMpath
+        print '\nDEM file used for projection:',self._DEMpath
         if self._DEMdensify==1:
             print 'DEM is used at raw resolution'
         else:
-            print 'DEM is resampled at '+str(self._DEMdensify)+' times resolution'
+            print ('\nDEM is resampled at '+str(self._DEMdensify) + 
+                  ' times resolution')
         
         #GCPs        
         if self._GCPpath!=None:
-            print 'GCP file used to define camera pose: ',self._GCPpath
+            print '\nGCP file used to define camera pose: ',self._GCPpath
         else:
-            print 'No GCP file defined'
+            print '\nNo GCP file defined'
          
         #Yaw, pitch, roll
         if self._direction==[0,0,0]:
-            print 'Camera pose assumed unset (zero values)'
+            print '\nCamera pose assumed unset (zero values)'
         else:
-            print 'Camera Pose set as [Roll,Pitch,Yaw]: ',self._direction
+            print '\nCamera pose set as [Roll,Pitch,Yaw]: ',self._direction
 
         #Camera calibration (matrix and distortion coefficients)
         if isinstance(self._calibPath,list):
-            print 'Multiple camera calibration files defined:'
+            print '\nMultiple camera calibration files defined: '
             print self._calibPath
         else:
-            print 'Camera calibration file:'
+            print '\nCamera calibration file:'
         
         #Report raster DEM details from the DEM class
         if isinstance(self._DEM,ExplicitRaster):
-            print '\nDEM set:\n'
+            print '\nDEM set:'
             self._DEM.reportDEM()
 
         #Report calibration parameters from CamCalib class
