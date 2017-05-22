@@ -32,11 +32,16 @@ arrowplot:                      Function to plot arrows to denote the direction
                                 arrow.
 plotVelocity:                   Produce assorted velocity plots from a set of 
                                 velocity outputs.
-interpolateHelper: 
-plotInterpolate: 
+interpolateHelper:              Function to interpolate a point dataset. This 
+                                uses functions of the SciPy package to set up a 
+                                grid (grid) and then interpolate using a linear 
+                                interpolation method (griddata).
+plotInterpolate:                Function to plot the results of the 
+                                interpolation process for a particular 
+                                timestep.
              
-@author: Nick Hulton (nick.hulton@ed.ac.uk)
-         Penny How (p.how@ed.ac.uk)
+@authors: Nick Hulton (nick.hulton@ed.ac.uk)
+          Penny How (p.how@ed.ac.uk)
 '''
 
 #Import packages
@@ -46,9 +51,6 @@ from matplotlib.patches import Rectangle
 from matplotlib.collections import PatchCollection
 import numpy as np
 import math
-import cv2
-from PIL import Image 
-import glob
 from scipy import spatial
 from scipy.interpolate import griddata
 
@@ -318,7 +320,7 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=T
     cameraMatrix=camenv.getCamMatrixCV2()
     distortP=camenv.getDistortCoeffsCv2() 
     im0_dist=camim0.getImageCorr(cameraMatrix, distortP)
-    im1_dist=camim1.getImageCorr(cameraMatrix, distortP)
+#    im1_dist=camim1.getImageCorr(cameraMatrix, distortP)
     
     
     #Plot points (original, tracked and back-tracked) from cameras        
@@ -344,7 +346,6 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=T
         
 #        #For arrow plotting
 #        xar,yar=arrowplot(xen,yen,xst,yst,scale=5.0,headangle=15)
-
 #        ax1.plot(xar,yar,color='orange')
 #        ax2.plot(xar,yar,color='orange')
 #        xar,yar=arrowplot(xen,yen,xhom,yhom,scale=5.0,headangle=15)
@@ -558,8 +559,6 @@ def plotInterpolate(dem, lims, grid, pointextent, save=None):
                extent=pointextent, 
                alpha=0.5) #alpha=1
                
-#    plt.scatter(data[:,0], data[:,1], c=data[:,2], cmap=plt.get_cmap("gist_ncar"), s=10, edgecolors='none')
-#    plt.suptitle('Velocity of camera ' + str(i+1) + ' Interpolated', fontsize=14)
     col=plt.colorbar()
 #    col.set_clim(0,4)
     
