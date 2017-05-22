@@ -22,7 +22,7 @@ sys.path.append('../')
 from CamEnv import CamEnv
 from Images import TimeLapse
 from FileHandler import writeHomographyFile, writeVelocityFile
-from Utilities import plotVelocity, arrowplot, filterSparse,interpolateHelper,plotInterpolate
+from Utilities import plotVelocity, interpolateHelper, plotInterpolate
 
 
 #--------------------------   Initialisation   --------------------------------
@@ -47,7 +47,6 @@ cameraenvironment.report()
 
 #Get DEM from camera environment object
 dem=cameraenvironment.getDEM()
-print dem.getExtent()
 
 #Set extent
 xmin=446000
@@ -78,7 +77,6 @@ tl=TimeLapse(camimgs, cameraenvironment, camvmask, caminvmask)
 
 #Calculate homography and velocities    
 hg, outputV = tl.calcVelocities()
-print len(outputV)
    
    
 #---------------------------   Plotting functions   ---------------------------
