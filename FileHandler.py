@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 '''
 This script is part of PyTrx, an object-oriented programme created for the 
 purpose of calculating real-world measurements from oblique images and 
@@ -90,18 +89,22 @@ def readMask(img, writeMask=None):
         try:
             myMask = Image.open(writeMask)
             myMask = np.array(myMask)
-            print ('Mask loaded. It is recommended that you check this against' 
-                   'the start and end of the sequence using the self.checkMask()'
-                   'function of the TimeLapse object')
+            print ('\nMask loaded. It is recommended that you check this' 
+                   'against the start and end of the sequence using the' 
+                   'self.checkMask() function of the TimeLapse object')
             return myMask
         except:
-            print 'Image file not found. Proceeding to manually digitise...'
+            print '\nMask file not found. Proceeding to manually digitise...'
 
     #Plot mask manually on the selected image
+    fig=plt.gcf()
+    fig.canvas.set_window_title('Click to create mask. Press enter to record' 
+                                'points.')
     imgplot = plt.imshow(img, origin='upper')
     imgplot.set_cmap('gray')
-    x1 = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, mouse_stop=2)
-    print 'you clicked:', x1
+    x1 = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, 
+                    mouse_stop=2)
+    print '\n' + str(len(x1)) + ' points seeded'
     plt.show()
     
     #Close shape
@@ -126,12 +129,12 @@ def readMask(img, writeMask=None):
     
     #Write to .jpg file
     writeMask = writeMask.split('.')[0] + '.jpg'
-    print 'Mask plotted: ' + writeMask
+    print '\nMask plotted: ' + writeMask
     if writeMask!=None:
         try:
             img1.save(writeMask, 'jpeg', quality=75)
         except:
-            print 'Failed to write file: ' + writeMask
+            print '\nFailed to write file: ' + writeMask
         
     return myMask  
 
@@ -191,7 +194,7 @@ def readCalib(fileName, paramList):
    
     #Incompatible file types     
     else:
-        print ('You have specified an incorrect calibration file type'
+        print ('\nYou have specified an incorrect calibration file type'
                'Acceptable file types are .txt and .mat.')
 
 
@@ -253,7 +256,6 @@ def readMatrixDistortion(path):
     #Stop if there is an issue in reading calibration file    
     if calibDict==None:
         return None   
-    #print calibDict
 
     #Set calibration parameters in the correct format    
     intrMat = np.array(calibDict["IntrinsicMatrix"]) #fx,fy,s,cx,cy
@@ -512,7 +514,8 @@ def readDEMmat(matfile):
     return X,Y,Z  
     
     
-def writeTIFF(outFileName,OutArray,affineT,EPSGcode=32633,units="SRS_UL_METER",unitconvert=1.0):
+def writeTIFF(outFileName, OutArray, affineT, EPSGcode=32633, 
+              units="SRS_UL_METER",unitconvert=1.0):
     '''Write data to .tif file. A reference to the file's spatial coordinate 
     system is assigned using GDAL (compatible with ArcGIS and QGIS). 
     The input variable affineT should contain the following parameters for 
@@ -554,7 +557,7 @@ def writeTIFF(outFileName,OutArray,affineT,EPSGcode=32633,units="SRS_UL_METER",u
     #Clear memory   
     outdata = None 
 
-    print 'Output tiff file: ',outFileName
+    print '\nOutput tiff file: ',outFileName
 
 
 def writeVelocityFile(veloset, timeLapse, fname='velocity.csv',span=[0,-1]):
@@ -662,8 +665,9 @@ def writeVelocityFile(veloset, timeLapse, fname='velocity.csv',span=[0,-1]):
         
         #Write to output file
         f.write(out+'\n')
-        
-    
+        print '\nVelocity file written:' + fname        
+ 
+   
 def writeHomographyFile(homogset,timeLapse,fname='homography.csv',span=[0,-1]):
     '''Function to write all homography data from a given timeLapse sequence to 
     .csv file. Data is formatted as sequential columns containing the following 
@@ -770,7 +774,8 @@ def writeHomographyFile(homogset,timeLapse,fname='homography.csv',span=[0,-1]):
             out=out+','+str(meanerrdist)+','+str(meanhomogdist)+','+str(meansn)
         
         #Write to output file
-        f.write(out+'\n')
+        f.write(out+'\n')        
+        print '\nHomography file written' + fname
  
 
 def createThumbs(directory='.'):
@@ -792,7 +797,7 @@ def createThumbs(directory='.'):
         
         #Save thumbnail to file directory
         out=impath.split('\\')[0]+'/thumb_'+impath.split('\\')[1]
-        print 'Saving thumbnail image as',out
+        print '\nSaving thumbnail image as',out
         im.save(out, "JPEG")
 
         
