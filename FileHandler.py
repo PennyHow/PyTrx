@@ -1,4 +1,6 @@
 '''
+PYTRX FILEHANDLER MODULE
+
 This script is part of PyTrx, an object-oriented programme created for the 
 purpose of calculating real-world measurements from oblique images and 
 time-lapse image series.
@@ -49,6 +51,8 @@ readDEMmat:             Function to read xyz DEM data from a .mat file and
 writeTIFF:              Write data to .tif file. A reference to the file's 
                         spatial coordinate system is assigned using GDAL 
                         (compatible with ArcGIS and QGIS). 
+writeVelocityFile:      Function to write all velocity data from a given 
+                        timeLapse sequence to .csv file.
 writeHomography:        Function to write all homography data from a given 
                         timeLapse sequence to .csv file.
 createThumbs:           Function to create thumbnail images from a given image 
@@ -89,8 +93,8 @@ def readMask(img, writeMask=None):
         try:
             myMask = Image.open(writeMask)
             myMask = np.array(myMask)
-            print ('\nMask loaded. It is recommended that you check this' 
-                   'against the start and end of the sequence using the' 
+            print ('\nMask loaded. It is recommended that you check this ' 
+                   'against the start and end of the sequence using the ' 
                    'self.checkMask() function of the TimeLapse object')
             return myMask
         except:
@@ -802,6 +806,6 @@ def createThumbs(directory='.'):
 
         
 #------------------------------------------------------------------------------
-#Testing code. Requires suitable files in ..\Data\Images\Velocity test sets
-if __name__ == "__main__":   
-    createThumbs('./Data/Images/Velocity/c1_2014')
+##Testing code. Requires suitable files in ..\Data\Images\Velocity test sets
+#if __name__ == "__main__":   
+#    createThumbs('./Data/Images/Velocity/c1_2014')
