@@ -1,4 +1,6 @@
 '''
+PYTRX UTILITIES MODULE
+
 This script is part of PyTrx, an object-oriented programme created for the 
 purpose of calculating real-world measurements from oblique images and 
 time-lapse image series.
@@ -324,7 +326,7 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=T
     
     
     #Plot points (original, tracked and back-tracked) from cameras        
-    if plotcams==True:        
+    if plotcams is True:        
         #Plot image0 and image1
         f, (ax1, ax2) = plt.subplots(1, 2, sharey=True, sharex=True)
         imgplot1 = ax1.matshow(im0)
@@ -362,7 +364,7 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=T
 
     
     #Plot points from camera view and from dem view
-    if plotcombined==True:        
+    if plotcombined is True:        
         #f, (ax1, ax2) = plt.subplots(1, 2, sharey=True, sharex=True)
         f, (ax1, ax2) = plt.subplots(1, 2)
         
@@ -392,7 +394,7 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=T
   
   
     #Plot speed and direction from dem view   
-    if plotspeed==True:
+    if plotspeed is True:
         
         f, (ax1, ax2) = plt.subplots(1, 2)
         
@@ -428,7 +430,7 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=T
         plt.show()
     
     #Plot speed and direction onto dem view
-    if plotmaps==True:
+    if plotmaps is True:
         
         f, (ax1, ax2) = plt.subplots(1, 2)
         
