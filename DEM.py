@@ -1,4 +1,6 @@
 '''
+PYRX DEM MODULE
+
 This script is part of PyTrx, an object-oriented programme created for the 
 purpose of calculating real-world measurements from oblique images and 
 time-lapse image series.
