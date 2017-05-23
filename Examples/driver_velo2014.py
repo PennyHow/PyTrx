@@ -1,12 +1,21 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Fri May 05 11:04:41 2017
+'''
+PYTRX EXAMPLE DRIVER
 
-@author: Penny How, p.how@ed.ac.uk
+This script is part of PyTrx, an object-oriented programme created for the 
+purpose of calculating real-world measurements from oblique images and 
+time-lapse image series.
 
+This driver calculates surface velocities at Kronebreen, Svalbard, for the 2014 
+melt season using modules in PyTrx. Specifically this script performs feature
+tracking through sequential daily images of the glacier to derived surface
+velocities (spatial average, individual point displacements and interpolated
+velocity maps) which have been corrected for image distortion and camera 
+homography.
 
-Driver for velocity calculator from camera 2 (2014) at Kronebreen
-"""
+@author: Penny How (p.how@ed.ac.uk)
+         Nick Hulton (nick.hulton@ed.ac.uk)
+
+'''
 
 #Import packages
 import sys
@@ -39,8 +48,8 @@ destination = '../Examples/results/c2_2014_subset/'
 
 
 #Define camera environment
-cameraenvironment = CamEnv(camdata)
-cameraenvironment.report()
+cameraenvironment = CamEnv(camdata, quiet=2)
+#cameraenvironment.report()
 
 
 #----------------------------   Prepare DEM   ---------------------------------
@@ -73,14 +82,16 @@ demred=demred.getZ()
 #----------------------   Calculate velocities   ------------------------------
 
 #Set up TimeLapse object
-tl=TimeLapse(camimgs, cameraenvironment, camvmask, caminvmask) 
+tl=TimeLapse(camimgs, cameraenvironment, camvmask, caminvmask, image0=0, 
+             band='L', quiet=2) 
 
 #Calculate homography and velocities    
 hg, outputV = tl.calcVelocities()
    
    
-#---------------------------   Plotting functions   ---------------------------
+#----------------------------   Plot Results   --------------------------------
 
+print '\nData plotting...'
 plotcams = False
 plotcombined = False
 plotspeed = False
@@ -116,7 +127,7 @@ for vel in outputV:
 
 #---------------------------  Export data   -----------------------------------
 
-print 'Beginning file exporting...'
+print '\nBeginning file exporting...'
 
 #Write homography data to .csv file
 target1 = destination + 'homography.csv'
@@ -125,11 +136,6 @@ writeHomographyFile(hg,tl,target1)
 #Write out velocity data to .csv file
 target2 = destination + 'velo_output.csv'
 writeVelocityFile(outputV, tl, target2) 
-
-
-#--------------------------   Show results   ----------------------------------
-
-
 
 
 #------------------------------------------------------------------------------
