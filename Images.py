@@ -1,4 +1,6 @@
 '''
+PYTRX IMAGES MODULE
+
 This script is part of PyTrx, an object-oriented programme created for the 
 purpose of calculating real-world measurements from oblique images and 
 time-lapse image series.
@@ -56,19 +58,22 @@ class CamImage(object):
         
     No image calibration is undertaken.'''
     
-    def __init__(self, imagePath, band='l',quiet=1):
+    def __init__(self, imagePath, band='l',quiet=2):
         '''CamImage constructor to set image path, read in image data in the 
         specified band and access Exif data. 
         
         Inputs:
-            imagePath: The file path to a given image.
-            band:      Specified image band to pass forward
-                         'r': red band
-                         'b': blue band
-                         'g': green band
-                         'l': grayscale (default)
-            quiet:      Level of commentary during processing (integer input,
-                        0 to 3).
+        imagePath:      The file path to a given image.
+        band:           Specified image band to pass forward
+                        'r': red band
+                        'b': blue band
+                        'g': green band
+                        'l': grayscale (default)
+        quiet:          Level of commentary during processing. This can be a 
+                        integer value between 0 and 2.
+                        0: No commentary.
+                        1: Minimal commentary.
+                        2: Detailed commentary.
                           
         The default grayscale band option ('l') applies an equalization filter 
         on the image whereas the RGB splits are raw RGB. This could be modified 
@@ -128,7 +133,7 @@ class CamImage(object):
      
     def _checkImage(self,path):
         '''Check that the given image file path is correct.'''
-        if self._quiet>0:
+        if self._quiet>2:
             print '\nChecking image file ',path
         
         #Check file path using os package
@@ -138,17 +143,17 @@ class CamImage(object):
             #Check file type
             ftype=imghdr.what(path)
             if ftype is None:
-                if self._quiet>0:
+                if self._quiet>2:
                     print 'File exists but not image type'
                 return False
             else:
-                if self._quiet>0:
+                if self._quiet>2:
                     print 'File found of image type: ', ftype
                 return True
 
         else:
             if self._quiet>0:            
-                print 'File does not exist'
+                print 'File does not exist',path
             return False
 
         
@@ -176,12 +181,12 @@ class CamImage(object):
         if self._imageArray is None:
             self._readImageData()
             
-        if self._quiet>1:    
+        if self._quiet>2:    
             print '\nMatrix: ' + str(cameraMatrix)
             print 'Distortion: ' + str(distortP)
             
         size=self.getImageSize()
-        if self._quiet>1:        
+        if self._quiet>2:        
             print 'Image size: ', size
         
         #Calculate optimal camera matrix 
@@ -317,27 +322,31 @@ class ImageSequence(object):
       
     Inputs:
         imageList: The list of images, which can be passed in 3 ways:
-                     1) As a list of CamImage objects e.g.
-                     imageSet = ImageSet(["image1.JPG", "image2.JPG"])
-                     2) As a list of image paths e.g.
-                     imageSet = ImageSet([Image("image1.JPG"), Image("image2.JPG")])
-                     imageSet = ImageSet([ImageObject1, ImageObject2])
-                     3) As a folder containing images e.g.
-                     imageSet = ImageSet("Folder/*")
-                     4) (To implement) A file containing the sequence
-                     of images to be processed
+                   1) As a list of CamImage objects e.g.
+                   imageSet = ImageSet(["image1.JPG", "image2.JPG"])
+                   2) As a list of image paths e.g.
+                   imageSet = ImageSet([Image("image1.JPG"), 
+                              Image("image2.JPG")])
+                   imageSet = ImageSet([ImageObject1, ImageObject2])
+                   3) As a folder containing images e.g.
+                   imageSet = ImageSet("Folder/*")
+                   4) (To implement) A file containing the sequence
+                   of images to be processed
         band:      Specified image band to pass forward
-                     'r': red band
-                     'b': blue band
-                     'g': green band
-                     'l': grayscale (default)
+                    'r': red band
+                    'b': blue band
+                    'g': green band
+                    'l': grayscale (default)
         loadall:   Flag which, if true, will force all images in the sequence
                    to be loaded as images (array) initially and thus not 
                    re-loaded in subsequent processing. This is only advised
                    for small image sequences.
-        quiet:     Level of commentary during processing (integer input,
-                   0 to 3).  
-                     
+        quiet:     Level of commentary during processing. This can be a integer 
+                   value between 0 and 2.
+                   0: No commentary.
+                   1: Minimal commentary.
+                   2: Detailed commentary.
+                                               
     Class variables:
         self._quiet:          Integer value denoting amount of commentary 
                               whilst processing.
@@ -345,11 +354,11 @@ class ImageSequence(object):
         self._imageSet:       Sequence of CamImage objects.
         self._band:           String denoting the desired image band.
     '''
-    def __init__(self, imageList, band='L', loadall=False, quiet=1):
+    def __init__(self, imageList, band='L', loadall=False, quiet=2):
         
         self._quiet=quiet        
         if self._quiet>0:
-            print '\nAttempting to define image sequence'
+            print '\nCONSTRUCTING IMAGE SEQUENCE'
         
         self._band=band
         self._imageList=imageList
@@ -387,7 +396,7 @@ class ImageSequence(object):
         
         #Construction from string of file paths
         if isinstance(imageList, str):
-            if self._quiet>0:
+            if self._quiet>1:
                 print ('\nImage directory path assumed. Searching for images.' 
                        'Attempting to add all to sequence')
                 print imageList
@@ -412,10 +421,7 @@ class ImageSequence(object):
     def _loadImageStringSequence(self,imageList,loadall):
         '''Function for generating an image set (of CamImage objects) from a 
         list of images. Sequence of image arrays will be loaded if the loadall 
-        flag is set to true.'''
-        if self._quiet>0:
-            print '\nConstrucing image sequence'
-        
+        flag is set to true.'''       
         #Construct CamImage objects
         self._imageSet = []
         for imageStr in imageList:
@@ -474,11 +480,17 @@ class TimeLapse(ImageSequence):
                         analysis will commence. This is set to the first image 
                         in the ImageSet by default.
         band:           String denoting the desired image band.
+        quiet:          Level of commentary during processing. This can be a 
+                        integer value between 0 and 2.
+                        0: No commentary.
+                        1: Minimal commentary.
+                        2: Detailed commentary.                          
         loadall:        Flag which, if true, will force all images in the sequence
                         to be loaded as images (array) initially and thus not 
                         re-loaded in subsequent processing. This is only advised
                         for small image sequences. 
-        timingMethod:
+        timingMethod:   Method for deriving timings from imagery. By default, 
+                        timings are extracted from the image EXIF data.
     
     Class properties:
         self._camEnv:   The camera environment object (CamEnv).
@@ -493,7 +505,7 @@ class TimeLapse(ImageSequence):
     '''   
         
     def __init__(self, imageList, camEnv, maskPath=None, invmaskPath=None, 
-                 image0=0, band='L', quiet=1, loadall=False, 
+                 image0=0, band='L', quiet=2, loadall=False, 
                  timingMethod='EXIF'):
         
         ImageSequence.__init__(self, imageList, band, loadall, quiet)
@@ -621,7 +633,7 @@ class TimeLapse(ImageSequence):
                 return None
         
        #Optional commentary
-        if self._quiet>0:        
+        if self._quiet>1:        
             print '\n'+str(tracked)+' features tracked'
             print (str(p0.shape[0]) + ' features remaining after' 
                    'forward-backward error')
@@ -631,6 +643,8 @@ class TimeLapse(ImageSequence):
         #originally tracked and the error between the original and back-tracked 
         #point.
         if calcErrors is True:
+            if self._quiet>1:          
+                print '\nCalculating tracking errors'
             dist=dist[good]
             length,snr=self._calcTrackErrors(p0,p1,dist)
             
@@ -645,9 +659,7 @@ class TimeLapse(ImageSequence):
     def _calcTrackErrors(self,p0,p1,dist):
         '''Function to calculate signal-to-noise ratio with forward-backward 
         tracking data. The distance between the backtrack and original points
-        (dist) is assumed to be pre-calcuated.'''       
-        print 'Calculating tracking errors'
-        
+        (dist) is assumed to be pre-calcuated.'''               
         #Determine length between the two sets of points
         length=(p0-p1)*(p0-p1)
         length=np.sqrt(length[:,0,0]+length[:,0,1])
@@ -833,7 +845,7 @@ class TimeLapse(ImageSequence):
         image sequence.''' 
         #Optional commentary
         if self._quiet>0:
-            print 'Calculating homography pairs'
+            print 'CALCULATING HOMOGRAPHY'
         
         #Create empty list for output
         pairwiseHomography=[]
@@ -958,7 +970,7 @@ class TimeLapse(ImageSequence):
         if homography!=None:
             
             #Optional commentary
-            if self._quiet>0:
+            if self._quiet>1:
                 print '\nHomography not found. Calculating homography.'
             
             #Get homography matrix
@@ -993,7 +1005,7 @@ class TimeLapse(ImageSequence):
             retained=dst_pts_corr.shape[0]
             
             #Optional commentary
-            if self._quiet>0:
+            if self._quiet>1:
                 print 'Points removed because of homography uncertainty:'
                 print 'Before: ', tracked, ' After: ', retained
 
@@ -1004,7 +1016,7 @@ class TimeLapse(ImageSequence):
         uvs=src_pts_corr[:,0,:]
         uvd=dst_pts_homog[:,0,:]
 
-        if self._quiet>0:
+        if self._quiet>1:
             print '\nUndertaking inverse projection'
         xyzs=self._camEnv.invproject(uvs)
         xyzd=self._camEnv.invproject(uvd)
@@ -1021,7 +1033,7 @@ class TimeLapse(ImageSequence):
         '''Function to calculate velocities between succesive image pairs.'''
         #Optional commentary
         if self._quiet>0:
-            print '\nCalculating velocities'
+            print '\nCALCULATING VELOCITIES'
         
         #Create empty lists for velocities and homography
         pairwiseVelocities=[]
@@ -1037,15 +1049,15 @@ class TimeLapse(ImageSequence):
             #Re-assign first image in image pair
             im0=im1
             imn0=imn1
-            
+                            
             #Get second image in image pair (and subsequently clear memory)
             im1=self._imageSet[i+1].getImageArray()
             imn1=self._imageSet[i+1].getImagePath().split('\\')[1]       
             self._imageSet[i].clearAll()
            
             #Optional commentary
-            if self._quiet>1:
-                print '\nProcessing velocities for images: ',imn0,' and ',imn1
+            if self._quiet>0:
+                print '\nFeature-tracking for images: ',imn0,' and ',imn1
 
             #Determine homography between image pairif required
             #Set calcErrors true otherwise we can't calculate/ plot homography
@@ -1069,19 +1081,19 @@ class TimeLapse(ImageSequence):
 #------------------------------------------------------------------------------
 
 #Testing code. Requires suitable files in ..\Data\Images\Velocity test sets 
-if __name__ == "__main__":
-    from Development import allHomogTest
-    from PyTrx_Tests import doImageTests,doTimeLapseTests
-
-    #Test image loading capabilities    
-    doImageTests()
+#if __name__ == "__main__":
+#    from Development import allHomogTest
+#    from PyTrx_Tests import doImageTests,doTimeLapseTests
+#
+#    #Test image loading capabilities    
+#    doImageTests()
+#    
+#    #Test TimeLapse object initialisation
+#    doTimeLapseTests()
+#    
+#    #Test homography
+#    allHomogTest(min_features=50,maxpoints=2000)
     
-    #Test TimeLapse object initialisation
-    doTimeLapseTests()
-    
-    #Test homography
-    allHomogTest(min_features=50,maxpoints=2000)
-    
-    print '\nProgram finished'        
+#    print '\nProgram finished'        
 
 #------------------------------------------------------------------------------
