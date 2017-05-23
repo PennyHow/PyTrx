@@ -1,4 +1,6 @@
 '''
+PYTRX CAMERA ENVIRONMENT MODULE
+
 This script is part of PyTrx, an object-oriented programme created for the 
 purpose of calculating real-world measurements from oblique images and 
 time-lapse image series.
@@ -357,27 +359,37 @@ class CamEnv(CamCalib):
     matrix, distortion parameters and camera pose (position and direction).
     
     Also inherits the geography class, representing the ground control point 
-    data for the camera: two sets of points and the corresponding image and DEM.
+    data for the camera: two sets of points and the corresponding image and 
+    DEM.
     
     Inputs:
-        -name, the reference name for the camera
-        -GCPpath, the file path of the GCPs, for the GCPs object
-        -DEMpath, the file path for the DEM, for the GCPs object
-        -imagePath, the file path for the GCP reference image, for the GCPs object
-        -calibPath, the file path for the calibration file. This can be
-            either as a .mat Matlab file or a text file. The text file should 
-            be of the following tab delimited format:
-                RadialDistortion
-                [x y z]
-                TangentialDistortion
-                [x y]
-                IntrinsicMatrix
-                [x y z]
-                [x y z]
-                [x y z]
-                End
-        -coords, the x,y,z coordinates of the camera location, as a list
-        -ypr, the yaw, pitch and roll of the camera, as a list '''
+    name:           The reference name for the camera.
+    GCPpath:        The file path of the GCPs, for the GCPs object.
+    DEMpath:        The file path for the DEM, for the GCPs object.
+    imagePath:      The file path for the GCP reference image, for the GCPs 
+                    object.
+    calibPath:      The file path for the calibration file. This can be
+                    either as a .mat Matlab file or a text file. The text file 
+                    should be of the following tab delimited format:
+                    RadialDistortion
+                    [x y z]
+                    TangentialDistortion
+                    [x y]
+                    IntrinsicMatrix
+                    [x y z]
+                    [x y z]
+                    [x y z]
+                    End
+    coords:         The x,y,z coordinates of the camera location, as a list.
+    ypr:            The yaw, pitch and roll of the camera, as a list.
+    
+    quiet:          Unrelated to the camera calibration inputs, the quiet
+                    variable sets the level of commentary whilst the script is
+                    running. This can be a integer value between 0 and 2.
+                    0: No commentary.
+                    1: Minimal commentary.
+                    2: Detailed commentary.
+    '''
     
 #    def __init__(self, name, GCPpath, DEMpath, imagePath, calibPath, coords, ypr=[0,0,0]):
 
@@ -589,7 +601,8 @@ class CamEnv(CamCalib):
             
     def _setInvProjVars(self):
         '''Set the inverse projection variables, based on the DEM.'''
-        print '\nSetting inverse projection coefficients'   
+        if self._quiet>1:        
+            print '\nSetting inverse projection coefficients'   
         dem=self.getDEM()
         
         X=dem.getData(0)
@@ -824,11 +837,13 @@ class CamEnv(CamCalib):
         self.reportCalibData()
 
 
-#Tester code to run if main. Requires PyTrx_Tests.py module in visible path
-if __name__ == "__main__":
-    from PyTrx_Tests import doCalibrationTests,doCamEnvTests
-    
-    doCalibrationTests()
-    doCamEnvTests()
+#------------------------------------------------------------------------------
+
+##Tester code to run if main. Requires PyTrx_Tests.py module in visible path
+#if __name__ == "__main__":
+#    from PyTrx_Tests import doCalibrationTests,doCamEnvTests
+#    
+#    doCalibrationTests()
+#    doCamEnvTests()
         
 
