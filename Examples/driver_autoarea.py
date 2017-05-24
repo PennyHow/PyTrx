@@ -42,7 +42,7 @@ cammask = '../Examples/camenv_data/masks/c5_2014_amask.JPG'
 camimgs = '../Examples/images/KR5_2014_subset/*.JPG'
 
 #Define data output directory
-destination = '..Results/KR5_2014_lakes/'
+destination = '../Results/KR5_2014_lakes/'
 
 
 #-------------------------   Create camera object   ---------------------------
@@ -84,15 +84,17 @@ cameraenvironment = CamEnv(camdata)
 #------------------------   Calculate lake areas   ----------------------------
 
 #Set Area class initialisation variables
-calibFlag=True
-maxim = 0 
-imband = 'L'
-loadall = False
-timem = 'EXIF'
+method = 'auto'             #Method for detection ('auto' or 'manual')
+calibFlag = True              #Detect with corrected or uncorrected images
+maxim = 0                   #Image number of maximum areal extent 
+imband = 'L'                #Desired image band
+loadall = False             #Load all images?
+timem = 'EXIF'              #Method to derive image times
+quiet = 2                   #Level of commentary
 
 #Set up Area object, from which areal extent will be measured
-lakes = Area(camimgs, cameraenvironment, calibFlag, cammask, maxim, imband,
-             loadall, time,)
+lakes = Area(camimgs, cameraenvironment, method, calibFlag, cammask, maxim, 
+             imband, loadall, time, quiet)
                  
 #Set image enhancement parameters. If these are undefined then they will be 
 #set to a default enhancement of ('light', 50, 20)
