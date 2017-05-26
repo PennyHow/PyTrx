@@ -26,12 +26,6 @@ The <b>CamImage</b> class holds information about a singular image and contains 
 The <b>ImageSequence</b> class holds information about an image sequence, i.e. a collection of CamImage objects, from which specific images and image pairs can be called.<br>
 The <b>TimeLapse</b> class enables processing with an ImageSequence object. Camera homography and velocities are derived and held within this class.<br>
 
-<b>Measure.py</b><br>
-Contains classes for measuring surface areas and distances from oblique imagery. This module has not yet been fully incorporated into the most up-to-date version of PyTrx.<br>
-The <b>Area</b> class performs automated and manual detection of surface areas from imagery and georectifies polygons to real-world coordinates.<br>
-The <b>Length</b> class performs manual detection of lines from imagery (e.g. glacier terminus position) and georectifies lines to real-world coordinates.
-<br>
-
 <b>Utilities.py</b><br>
 This module contains a set of functions for plotting data.
 
