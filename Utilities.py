@@ -572,6 +572,90 @@ def plotInterpolate(dem, lims, grid, pointextent, save=None):
     plt.show()
 
 
+def plotAreaPX(a, number, dest=None, crop=False):
+    '''Return image overlayed with pixel extent polygons for a given image 
+    number.'''
+    #Call corrected/uncorrected image
+    if a._calibFlag is True:
+        img=a._imageSet[number].getImageCorr(a._camEnv.getCamMatrixCV2(), 
+                                            a._camEnv.getDistortCoeffsCv2())      
+    else:
+        img=a._imageSet[number].getImageArray() 
+                  
+    #Create image plotting window
+    fig=plt.gcf()
+    fig.canvas.set_window_title('Image extent output '+str(number))
+    imgplot = plt.imshow(img)        
+    imgplot.set_cmap('gray')
+    plt.axis('off')
+    
+    if crop is True:
+        if a._pxplot is not None:
+            plt.axis([a._pxplot[0],a._pxplot[1],a._pxplot[2],
+                     a._pxplot[3]])
+    
+    polys = a._pxpoly[number]
+
+    for p in polys:
+#            pts = np.vstack(p).squeeze()
+        x=[]
+        y=[]
+        for xy in p:
+            x.append(xy[0])
+            y.append(xy[1])            
+        plt.plot(x,y,'w-')                
+
+    if dest != None:
+        plt.savefig(dest + 'extentimg_' + str(number) + '.jpg') 
+        
+#        plt.show()  
+    plt.close()
+    
+    
+def plotAreaXYZ(a, number, dest=None, dem=True, show=True):
+    '''Plot xyz points of real polygons for a given image number'''                       
+    #Get xyz points for polygons in a given image
+    xyz = a._realpoly[number]
+            
+    #Prepare DEM
+    if dem is True:
+        demobj=a._camEnv.getDEM()
+        demextent=demobj.getExtent()
+        dem=demobj.getZ()
+   
+        #Get camera position (from the CamEnv class)
+        post = a._camEnv._camloc            
+    
+        #Plot DEM 
+        fig=plt.gcf()
+        fig.canvas.set_window_title('Area output '+str(number))
+        plt.locator_params(axis = 'x', nbins=8)
+        plt.tick_params(axis='both', which='major', labelsize=10)
+        plt.imshow(dem, origin='lower', extent=demextent, cmap='gray')
+        plt.scatter(post[0], post[1], c='g')
+    
+    #Extract xy data from poly pts
+    count=1                
+    for shp in xyz: 
+        xl=[]
+        yl=[]
+        for pt in shp:
+            xl.append(pt[0])
+            yl.append(pt[1])
+        lab = 'Area ' + str(count)
+        plt.plot(xl, yl, c=np.random.rand(3,1), linestyle='-', label=lab)
+        count=count+1
+    
+    plt.legend()
+    plt.suptitle('Projected extents', fontsize=14)
+    
+    if dest != None:
+        plt.savefig(dest + 'area_' + str(number) + '.jpg')        
+
+    if show is True:
+        plt.show()
+
+    plt.close()
 #------------------------------------------------------------------------------
 #Testing code. Requires suitable files in ..\Data\Images\Velocity test sets
 if __name__ == "__main__":  
