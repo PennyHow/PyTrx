@@ -65,6 +65,9 @@ writeLineSHP:
 importAreaData:
 importAreaXYZ:
 importAreaPX:
+importLineData:
+importLineXYZ:
+importLinePX:
 
 @authors: Lynne Addison 
           Nick Hulton (nick.hulton@ed.ac.uk) 
@@ -86,7 +89,8 @@ import sys
 
 #Import PyTrx modules
 from Utilities import filterSparse
-from Measure import Area, Line
+from Measure import Area
+from Measure import Line
 
 #------------------------------------------------------------------------------
 
@@ -1177,6 +1181,7 @@ def writeLineSHP(l, fileDirectory, projection=None):
 
 def importAreaData(a, fileDirectory):
     '''Get xyz and px data from text files and import into Areas class.
+    
     Inputs
     a:                  Area class object that data will be imported to.
     fileDirectory:      Path to the folder where the four text files are. The
@@ -1195,7 +1200,7 @@ def importAreaData(a, fileDirectory):
     pxarea:             Pixel areas of detected areas.
     
     All imported data is held in the Area class object specified as an input
-    variable. This can also be easily retrieved from the Area class object 
+    variable. This can be easily retrieved from the Area class object 
     itself.
     '''
     target1 = fileDirectory + 'area_coords.txt'
@@ -1378,32 +1383,51 @@ def importAreaPX(a, target1, target2):
 
 def importLineData(l, fileDirectory):
     '''Get xyz and px data from text files and import into Length class.
-    Inputs:
-    -fileDirectory: Path to the folder where the four text files are. The
-     text file containing the pixel coordinates must be named 
-     'line_pxcoords.txt' and 'line_pxlength.txt'. The text file containing 
-     real world polygon areas must be named 'line_realcoords.txt' and 
-     'line_reallength.txt'. Files will not be recognised if they are not 
-     named correctly.'''
+    
+    Inputs
+    l:                  Line class object that data will be imported to.
+    fileDirectory:      Path to the folder where the four text files are. The
+                        text file containing the pixel coordinates must be 
+                        named 'line_pxcoords.txt' and 'line_pxlength.txt'. The 
+                        text file containing real world polygon areas must be 
+                        named 'line_realcoords.txt' and 'line_reallength.txt'. 
+                        Files will not be recognised if they are not named 
+                        correctly. If files are located in different 
+                        directories or cannot be renamed, then use the 
+                        importLineXYZ and importLinePX functions.
+    
+    Outputs
+    rline:              XYZ line coordinates.
+    rlength:            Real-world distances along lines.
+    pxline:             XY line coordinates.
+    pxlength:           Pixel distances along lines.
+
+    All imported data is held in the Line class object specified as an input
+    variable. This can be easily retrieved from the Line class object 
+    itself.
+    '''
+    #Get real-world coordinates and distances
     target1 = fileDirectory + 'line_realcoords.txt'
     rline, rlength = importLineXYZ(l, target1)
     
+    #Get pixel coordinates and distances
     target2 = fileDirectory + 'line_pxcoords.txt'
     pxline, pxlength = importLinePX(l, target2)
+    
+    #Return all line data
     return rline, rlength, pxline, pxlength
      
      
 def importLineXYZ(l, filename):
-    '''Get xyz line and length data from text files and import into Length 
-    class.
-    Inputs:
-    -fileDirectory: Path to the folder where the two text files are. The
-     text file containing the line coordinates must be named
-     'line_realcoords.txt' and the text file containing the line lengths
-     must be names 'line_reallength.txt'. Files will not be recognised if 
-     they are not named correctly.'''
+    '''Get xyz line and length data from text files and import into a Line 
+    class object.
+    Inputs
+    l:                      Line class object that data will be imported to.
+    filename:               Path to the text file containing the xyz line 
+                            coordinates.
+    '''
     #Read file and detect number of images based on number of lines
-    xyz = coordFromTXT(filename, xyz=True)
+    xyz = _coordFromTXT(filename, xyz=True)
      
     #Create OGR line object
     ogrline=[]
@@ -1420,15 +1444,14 @@ def importLineXYZ(l, filename):
 
 def importLinePX(l, filename):
     '''Get px line and length data from multiple text files and import
-    into Length class.
-    Inputs:
-    -fileDirectory: Path to the folder where two text files are containing
-     the pixel coordinates and the pixel extents.
-     The text files must be in the same folder and named 'line_pxcoords' 
-     and 'line_pxlength'. Files will not be recognised if they are not 
-     named correctly.'''
+    into a Line class object.
+    Inputs
+    l:                      Line class object that data will be imported to.
+    filename:               Path to the folder where the text files containing
+                            the xy pixel coordinates.
+     '''
     #Read file and detect number of images based on number of lines
-    xy = coordFromTXT(filename, xyz=False)
+    xy = _coordFromTXT(filename, xyz=False)
        
     #Create OGR line object
     ogrline = []
@@ -1443,7 +1466,7 @@ def importLinePX(l, filename):
     return l._pxpts, l._pxline
 
      
-def coordFromTXT(filename, xyz=True):
+def _coordFromTXT(filename, xyz=True):
     '''Import XYZ pts data from text file. Return list of arrays with 
     xyz pts.'''
     #Read file and detect number of images based on number of lines
