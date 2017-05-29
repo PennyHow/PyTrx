@@ -94,8 +94,8 @@ quiet = 2                   #Level of commentary
 
 #Set up Area object, from which areal extent will be measured
 lakes = Area(camimgs, cameraenvironment, method, calibFlag, cammask, maxim, 
-             imband, loadall, time, quiet)
-                 
+             imband, quiet, loadall, time)
+                
 #Set image enhancement parameters. If these are undefined then they will be 
 #set to a default enhancement of ('light', 50, 20)
 lakes.setEnhance('light', 50, 20)
