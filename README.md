@@ -1,4 +1,4 @@
-# PyTrx
+# PyTrx v1.1 (under development)
 PyTrx is an object-oriented toolbox created for the purpose of calculating real-world measurements from oblique images and time-lapse image series. Its primary purpose is to obtain velocities, surface areas, and volume losses from imagery of glacial environments.<br>
 
 These scripts have not yet been published, but PyTrx has been used for data processing in the following publications: <br>
