@@ -62,6 +62,9 @@ writeAreaFile:
 WriteLineFile:
 writeAreaSHP:
 writeLineSHP:
+importAreaData:
+importAreaXYZ:
+importAreaPX:
 
 @authors: Lynne Addison 
           Nick Hulton (nick.hulton@ed.ac.uk) 
@@ -83,7 +86,7 @@ import sys
 
 #Import PyTrx modules
 from Utilities import filterSparse
-from Measure import Area
+from Measure import Area, Line
 
 #------------------------------------------------------------------------------
 
@@ -1174,74 +1177,49 @@ def writeLineSHP(l, fileDirectory, projection=None):
 
 def importAreaData(a, fileDirectory):
     '''Get xyz and px data from text files and import into Areas class.
-    Inputs:
-    -fileDirectory: Path to the folder where the four text files are. The
-     text file containing the pixel and real world polygon coordinates must 
-     be named 'px_coords.txt' and 'area_coords.txt'. The text file 
-     containing the pixel and real world polygon areas must be named 
-     'px_sum.txt' and 'area_all.txt'. Files will not be recognised if they 
-     are not named correctly.'''
-    rpoly, rarea = importXYZ(fileDirectory)
-    pxpoly, pxarea = importPX(fileDirectory)
+    Inputs
+    a:                  Area class object that data will be imported to.
+    fileDirectory:      Path to the folder where the four text files are. The
+                        text file containing the pixel and real world polygon 
+                        coordinates must be named 'px_coords.txt' and 
+                        'area_coords.txt'. The text file containing the pixel 
+                        and real world polygon areas must be named 'px_sum.txt' 
+                        and 'area_all.txt'. Files will not be recognised if 
+                        they are not named correctly. If files are located in 
+                        multiple directories or file names cannot be changed 
+                        then use the importAreaXYZ and importAreaPX functions.
+    Outputs
+    rpoly:              Real xyz polygon coordinates of detected areas.
+    rarea:              Real-world surface areas of detected areas.
+    pxpoly:             XY pixel coordinates of detected areas.
+    pxarea:             Pixel areas of detected areas.
+    
+    All imported data is held in the Area class object specified as an input
+    variable. This can also be easily retrieved from the Area class object 
+    itself.
+    '''
+    target1 = fileDirectory + 'area_coords.txt'
+    target2 = fileDirectory + 'area_all.txt'    
+    rpoly, rarea = importAreaXYZ(a, target1, target2)
+    
+    target3 = fileDirectory + 'px_coords.txt'
+    target4 = fileDirectory + 'px_sum.txt'
+    pxpoly, pxarea = importAreaPX(a, target3, target4)
+   
     a.setMethod('auto')
     return rpoly, rarea, pxpoly, pxarea
      
      
-def importXYZ(self, fileDirectory):
+def importAreaXYZ(a, target1, target2):
     '''Get xyz polygon and area data from text files and import into Areas 
     class.
-    Inputs:
-    -fileDirectory: Path to the folder where the two text files are. The
-     text file containing the polygon coordinates must be named
-     'area_coords.txt' and the text file containing the polygon areas must
-     be named 'area_all'. Files will not be recognised if they are not 
-     named correctly.'''
+    Inputs
+    a:             Area class object that data will be imported to.     
+    target1:       Path to the text file containing the xyz coordinate data. 
+    target2:       Path to the text file containing the polygon area data.
+    '''
     #Import polygon coordinates from text file
-    target1 = fileDirectory + 'area_coords.txt'
-    xyz = self.xyzFromTXT(target1)
-    
-    #Import polygon areas from text file
-    target2 = fileDirectory + 'area_all.txt'
-    area = self.areaFromTXT(target2) 
-    
-    #Import data into Area class
-    self._realpoly = xyz
-    self._area = area
-    
-    self.setMethod('auto')
-    return self._realpoly, self._area
-   
-
-def importPX(self, fileDirectory):
-    '''Get px polygon and extent data from multiple text files and import
-    into Areas class.
-    Inputs:
-    -fileDirectory: Path to the folder where two text files are containing
-     the pixel coordinates and the pixel extents.
-     The text files must be in the same folder and named 'px_coords' and
-     'px_sum'. Files will not be recognised if they are not named 
-     correctly.'''
-    #Import px polygon coordinates from text file
-    target1 = fileDirectory + 'px_coords.txt'
-    xy = self.xyFromTXT(target1)
-    
-    #Import px polygon extents from text file
-    target2 = fileDirectory + 'px_sum.txt'
-    extent = self.extentFromTXT(target2)
-    
-    #Import data into Area class
-    self._pxpoly = xy
-    self._pxextent = extent
-    
-    self.setMethod('auto')
-    return self._pxpoly, self._pxextent
-
-    
-def xyzFromTXT(self, filename):
-    '''Import XYZ polygon data from text file. Return list of arrays with 
-    xyz pts.'''
-    #Read file and detect number of images based on number of lines
-    f=file(filename,'r')                                
+    f=file(target1,'r')                                
     alllines=[]
     for line in f.readlines():
         if len(line) >= 6:
@@ -1276,16 +1254,9 @@ def xyzFromTXT(self, filename):
             polygon = np.array(coords).reshape(struc, 3)
             img.append(polygon)
         xyz.append(img)
-    
-    #Return xyz as list of arrays
-    return xyz        
-
-
-def areaFromTXT(self, filename):
-    '''Import real world area data from text file. Return list of areas 
-    detected from each image.'''
-    #Read in lines from file
-    f=file(filename,'r')                                
+     
+    #Import polygon areas from text file
+    f=file(target2,'r')                                
     alllines=[]
     for line in f.readlines():
          alllines.append(line)
@@ -1312,13 +1283,28 @@ def areaFromTXT(self, filename):
         #Compile areas from all images into a list of lists                                           
         areas.append(myimgs) 
         
-    return areas                                
+    #Import data into Area class
+    a._realpoly = xyz
+    a._area = areas
     
+    #Reset method
+    a.setMethod('auto')
+    
+    #Return polygon and area data
+    return a._realpoly, a._area
+   
 
-def xyFromTXT(self, filename):
-    '''Import px polygon data from text file. Return list of arrays with 
-    xy pts.'''
-    f=file(filename, 'r')
+def importAreaPX(a, target1, target2):
+    '''Get px polygon and extent data from multiple text files and import
+    into Areas class.
+    Inputs
+    a:             Area class object that data will be imported to.     
+    target1:       Path to the text file containing the xy coordinate data. 
+    target2:       Path to the text file containing the polygon pixel extent 
+                   data.              
+    '''
+    #Import px polygon coordinates from text file
+    f=file(target1, 'r')
     alllines=[]
     for line in f.readlines():
         if len(line) >=6:
@@ -1340,7 +1326,8 @@ def xyFromTXT(self, filename):
                 strpolys.append(i)
 
         count=count+1
-        print 'Detected ' + str(len(strpolys)) + ' polygons in image ' + (str(count))                
+        print ('Detected ' + str(len(strpolys)) + 
+               ' polygons in image ' + (str(count)))                
         
         #Extract polygon values from strings
         for strp in strpolys:
@@ -1354,17 +1341,10 @@ def xyFromTXT(self, filename):
             struc = len(coords)/2
             polygon = np.array(coords).reshape(struc, 2)
             img.append(polygon)
-        xy.append(img)
-    
-    #Return xyz as list of arrays
-    return xy
-    
-    
-def extentFromTXT(self, filename):
-    '''Import cumulative pixel extent data from text file. Return list of 
-    extents (total from all polygons) detected from each image.'''
-    #Read in lines from file
-    f=file(filename,'r')                                
+        xy.append(img)    
+        
+    #Import px polygon extents from text file
+    f=file(target2,'r')                                
     alllines=[]
     for line in f.readlines():
          alllines.append(line)
@@ -1386,7 +1366,126 @@ def extentFromTXT(self, filename):
         #Compile areas from all images into a list of lists                                           
         a.append(poly) 
         areas = [ext[0] for ext in a]            
-    return areas          
+    return areas
+    
+    #Import data into Area class
+    a._pxpoly = xy
+    a._pxextent = areas
+    
+    a.setMethod('auto')
+    return a._pxpoly, a._pxextent
+
+
+def importLineData(l, fileDirectory):
+    '''Get xyz and px data from text files and import into Length class.
+    Inputs:
+    -fileDirectory: Path to the folder where the four text files are. The
+     text file containing the pixel coordinates must be named 
+     'line_pxcoords.txt' and 'line_pxlength.txt'. The text file containing 
+     real world polygon areas must be named 'line_realcoords.txt' and 
+     'line_reallength.txt'. Files will not be recognised if they are not 
+     named correctly.'''
+    target1 = fileDirectory + 'line_realcoords.txt'
+    rline, rlength = importLineXYZ(l, target1)
+    
+    target2 = fileDirectory + 'line_pxcoords.txt'
+    pxline, pxlength = importLinePX(l, target2)
+    return rline, rlength, pxline, pxlength
+     
+     
+def importLineXYZ(l, filename):
+    '''Get xyz line and length data from text files and import into Length 
+    class.
+    Inputs:
+    -fileDirectory: Path to the folder where the two text files are. The
+     text file containing the line coordinates must be named
+     'line_realcoords.txt' and the text file containing the line lengths
+     must be names 'line_reallength.txt'. Files will not be recognised if 
+     they are not named correctly.'''
+    #Read file and detect number of images based on number of lines
+    xyz = coordFromTXT(filename, xyz=True)
+     
+    #Create OGR line object
+    ogrline=[]
+    for line in xyz: 
+        length = Line.ogrLine(line)
+        ogrline.append(length)
+    
+    #Import data into Area class
+    l._realpts = xyz
+    l._realline = ogrline
+    
+    return l._realpts, l._realline
+   
+
+def importLinePX(l, filename):
+    '''Get px line and length data from multiple text files and import
+    into Length class.
+    Inputs:
+    -fileDirectory: Path to the folder where two text files are containing
+     the pixel coordinates and the pixel extents.
+     The text files must be in the same folder and named 'line_pxcoords' 
+     and 'line_pxlength'. Files will not be recognised if they are not 
+     named correctly.'''
+    #Read file and detect number of images based on number of lines
+    xy = coordFromTXT(filename, xyz=False)
+       
+    #Create OGR line object
+    ogrline = []
+    for line in xy:        
+        length = Line.ogrLine(line)
+        ogrline.append(length)
+    
+    #Import data into Area class
+    l._pxpts = xy
+    l._pxline = ogrline
+    
+    return l._pxpts, l._pxline
+
+     
+def coordFromTXT(filename, xyz=True):
+    '''Import XYZ pts data from text file. Return list of arrays with 
+    xyz pts.'''
+    #Read file and detect number of images based on number of lines
+    f=file(filename,'r')      
+    alllines=[]
+    for line in f.readlines():
+        if len(line) >= 6:
+            alllines.append(line)  #Read lines in file             
+    print 'Detected coordinates from ' + str(len(alllines)) + ' images'
+    f.close()
+    
+    allcoords=[]  
+    
+    #Extract strings from lines         
+    for line in alllines:
+        vals = line.split('\t')
+        
+        coords=[]
+        raw=[]
+                      
+        #Extract coordinate values from strings
+        for v in vals:
+            try:
+                a=float(v)
+                raw.append(a)
+            except ValueError:
+                pass
+            
+        #Restructure coordinates based on whether 2 or 3 dimensions
+        if xyz is True:
+            dim = 3
+            struc = len(raw)/dim
+        elif xyz is False:
+            dim = 2
+            struc = len(raw)/dim
+            
+        coords = np.array(raw).reshape(struc, dim)
+        allcoords.append(coords)
+    
+    #Return xyz as list of arrays        
+    return allcoords        
+    
 #------------------------------------------------------------------------------
 ##Testing code. Requires suitable files in ..\Data\Images\Velocity test sets
 #if __name__ == "__main__":   
