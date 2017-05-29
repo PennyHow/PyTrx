@@ -58,7 +58,10 @@ writeHomography:        Function to write all homography data from a given
 createThumbs:           Function to create thumbnail images from a given image 
                         file directory using the PIL (Python Imaging Library) 
                         toolbox.
-
+writeAreaFile:
+WriteLineFile:
+writeAreaSHP:
+writeLineSHP:
 
 @authors: Lynne Addison 
           Nick Hulton (nick.hulton@ed.ac.uk) 
@@ -74,10 +77,13 @@ import scipy.io as sio
 from osgeo import ogr,osr
 import gdal
 import glob
+import os
 import math
+import sys
 
 #Import PyTrx modules
 from Utilities import filterSparse
+from Measure import Area
 
 #------------------------------------------------------------------------------
 
@@ -804,7 +810,583 @@ def createThumbs(directory='.'):
         print '\nSaving thumbnail image as',out
         im.save(out, "JPEG")
 
+
+def writeAreaFile(a, dest):
+    '''Write all area data (if it has been calculated) to separate files.
+    
+    Inputs
+    a:                                  Area class object that contains 
+                                        detected areas.
+    dest:                               Folder directory where output files 
+                                        will be written to (NOT a specific 
+                                        file).
+    
+    Outputs
+    Cumulative pixel extent:            Written as a single text file 
+                                        containing delineated values of total 
+                                        pixel area recorded for all images in 
+                                        the sequence.
+    Polygon pixel coordinates:          Written as a tab delimited text file 
+                                        containing polygon xy coordinates.
+    Polygon areas:                      Real world area for each polygon in an 
+                                        image sequence.
+    Cumulative area:                    Written as a single text file 
+                                        containing the total area of all the 
+                                        polgons from each image.
+    Polygon real coordinates:           Written as a tab delimited text file 
+                                        containing polygon xyz coordinates
+     
+    All these file types are compatible with the importing tools 
+    (importPX, importXYZ)'''        
+    #Cumulative area of all pixel extents       
+    if a._pxextent is not None:
+        target = dest + 'px_sum.txt'
+        if os.path.isfile(target):
+            print 'Pixel extents not exported'
+            print 'px_sum.txt already exists'
+        else:
+            imgcount=1 
+            f = open(target, 'w')            
+            for p in a._pxextent:
+                f.write('Img' + str(imgcount) + '_polysum(px)\t')
+                f.write(str(p) + '\n')
+                imgcount=imgcount+1
         
+        #Pixel cooridnates of all pixel extents
+        target = dest + 'px_coords.txt'
+        if os.path.isfile(target):
+            print 'Pixel coordinates not exported'
+            print 'px_coords.txt already exists'
+        else:
+            imgcount=1
+            polycount=1
+            target = dest + 'px_coords.txt'
+            f = open(target, 'w')
+            for im in a._pxpoly:
+                f.write('Img' + str(imgcount) + '\t')                
+                for pol in im:
+                    f.write('Poly' + str(polycount) + '\t')                    
+                    for pts in pol:
+                        if a._method is 'auto':
+                            for p in pts:
+                                f.write(str(p[0]) + '\t' + str(p[1]) + '\t')
+                        elif a._method is 'manual':
+                            f.write(str(pts[0]) + '\t' + str(pts[1]) + '\t')
+                        else:
+                            print "Invalid self._method string." 
+                            print "Reassign to either 'auto' or 'manual' using the setMethod function."
+                            sys.exit(1)
+                    polycount = polycount+1
+                f.write('\n\n')
+                imgcount = imgcount+1
+                polycount=1
+            
+    #Areas of polygons
+    if a._area is not None:
+        target = dest + 'area_all.txt'
+        if os.path.isfile(target):
+            print 'Areal extents not exported'
+            print 'area_all.txt already exists'
+        else: 
+            imgcount = 1
+            f = open(target, 'w')
+            for im in a._area:
+                f.write('Img' + str(imgcount) + '_polyareas\t')                
+                for a in im:
+                    f.write(str(a) + '\t')
+                f.write('\n')
+                imgcount=imgcount+1
+        
+        #Cumulative area of all polygons per image
+        target = dest + 'area_sum.txt'
+        if os.path.isfile(target):
+            print 'Cumulative areal extents not exported'
+            print 'area_sum.txt already exists'
+        else:
+            sumarea = []
+            for a in a._area:
+                all_areas = sum(a)
+                sumarea.append(all_areas)
+            imgcount=1                 
+            target = dest + 'area_sum.txt'
+            f = open(target, 'w')            
+            for s in sumarea:
+                f.write('Img' + str(imgcount) + '_totalpolyarea\t')
+                f.write(str(s) + '\n')
+                imgcount=imgcount+1
+                        
+        #Pt coordinates of polygons
+        target = dest + 'area_coords.txt'
+        if os.path.isfile(target):
+            print 'Areal coordinates not exported'
+            print 'area_coords.txt already exists'
+        else:                     
+            imgcount=1
+            polycount=1  
+            f = open(target, 'w')
+            for im in a._realpoly:                
+                f.write('Img' + str(imgcount) + '\t')
+                for p in im:
+                    f.write('Poly' + str(polycount) + '\t')
+                    for pts in p:
+                        f.write(str(pts[0]) + '\t' + str(pts[1]) + '\t' + 
+                                str(pts[2]) + '\t')
+                    polycount=polycount+1
+                f.write('\n\n')
+                imgcount=imgcount+1
+                polycount=1
+                    
+
+def writeLineFile(l, dest):
+    '''Write all area data (if it has been calculated) to separate files.
+    
+    Inputs
+    l:                                  Length class object containing detected
+                                        lines.
+    dest:                               Folder directory where output files 
+                                        will be written to (NOT a specific 
+                                        file).
+    
+    Outputs
+    -Pixel coordinates of lines:        Written as a single text file 
+                                        containing line xy coordinates for all 
+                                        images in the sequence.
+    -Pixel line lengths:                Contains pixel length of each line in 
+                                        all images.
+    -Real coordinates:                  Written as a tab delimited text file 
+                                        containing line xyz coordinates.
+    -Real line lengths:                 Real world length of each line in all 
+                                        images.
+     
+    All these file types are compatible with the importing tools 
+    (importAreaPX, importAreaXYZ)''' 
+    #Pixel line coordinates file generation             
+    if l._pxpts is not None:            
+        target = dest + 'line_pxcoords.txt'
+        if os.path.isfile(target):
+            print 'Pixel coordinates not exported'
+            print 'line_pxcoords.txt already exists'
+        else:
+            imgcount=1
+            f = open(target, 'w')
+            for im in l._pxpts:
+                f.write('Img' + str(imgcount) + '\t')                                   
+                for pts in im:
+                    f.write(str(pts[0]) + '\t' + str(pts[1]) + '\t')    
+                f.write('\n\n')
+                imgcount = imgcount+1
+    
+    #Pixel line length file generation            
+    if l._pxline is not None:
+        target = dest + 'line_pxlength.txt'
+        if os.path.isfile(target):
+            print 'Pixel line length not exported'
+            print 'line_pxlength.txt already exists'
+        else:
+            imgcount=1 
+            f = open(target, 'w')            
+            for p in l._pxline:
+                f.write('Img' + str(imgcount) + '_length(px)\t')
+                f.write(str(p.Length()) + '\n')
+                imgcount=imgcount+1 
+    
+    #Real line coordinates file generation
+    if l._realpts is not None:
+        target = dest + 'line_realcoords.txt'
+        if os.path.isfile(target):
+            print 'Real line coordinates not exported'
+            print 'line_realcoords.txt already exists'
+        else:                     
+            imgcount=1  
+            f = open(target, 'w')
+            for im in l._realpts:                
+                f.write('Img' + str(imgcount) + '\t')
+                for pts in im:
+                    f.write(str(pts[0]) + '\t' + 
+                            str(pts[1]) + '\t' + 
+                            str(pts[2]) + '\t')
+                f.write('\n\n')
+                imgcount=imgcount+1
+    
+    #Real line length file generation            
+    if l._realline is not None:
+        target = dest + 'line_reallength.txt'
+        if os.path.isfile(target):
+            print 'Real line length not exported'
+            print 'line_reallength.txt already exists'
+        else: 
+            imgcount = 1
+            f = open(target, 'w')
+            for p in l._realline:
+                f.write('Img' + str(imgcount) + '_length(m)\t')                
+                f.write(str(p.Length()) + '\n')
+                imgcount=imgcount+1
+
+
+def writeAreaSHP(a, fileDirectory, projection=None):
+    '''Write OGR real polygon areas (from ALL images) to file in a .shp
+    file type that is compatible with ESRI mapping software.
+    
+    Inputs
+    a:                          Area class object containing area detection
+                                results.
+    fileDirectory:              Destination that shapefiles will be written to           
+                                e.g. C:/python_workspace/Results/
+    projection:                 Coordinate projection that the shapefile will 
+                                exist in. This can either be an ESPG number 
+                                (expressed as an integer) or a well-known 
+                                geographical coordinate system (expressed as a 
+                                string). Well-known geographical coordinate 
+                                systems are: 'WGS84', 'WGS72', NAD83' or 
+                                'EPSG:n'
+    ''' 
+    
+    #Get driver and create shapeData in shp file directory        
+    typ = 'ESRI Shapefile'        
+    driver = ogr.GetDriverByName(typ)
+    if driver is None:
+        raise IOError('%s Driver not available:\n' % typ)
+        sys.exit(1)
+
+    xyz = a._realpoly
+    imgcount=1
+    
+    for polys in xyz:
+        #Create datasource in shapefile
+        shp = fileDirectory + 'area' + str(imgcount) + '.shp'
+        if os.path.exists(shp):
+            print 'Deleting pre-existing datasource'
+            driver.DeleteDataSource(shp)
+        ds = driver.CreateDataSource(shp)
+        if ds is None:
+            print 'Could not create file %s' %shp
+        
+        #Set projection and initialise layer depending on projection input            
+        if type(projection) is int:
+            print 'ESPG projection detected'
+            proj = osr.SpatialReference()
+            proj.ImportFromEPSG(projection)
+            layer = ds.CreateLayer(' ', proj, ogr.wkbPolygon)
+        elif type(projection) is str:
+            print 'Coordinate system detected'
+            proj = osr.SpatialReference()
+            proj.SetWellKnownGeogCS(projection)
+            layer = ds.CreateLayer(' ', proj, ogr.wkbPolygon)
+        else:
+            print 'Projection for shapefiles not recognised'
+            print 'Proceeding shapefile generation without projection'
+            layer = ds.CreateLayer(' ', None, ogr.wkbPolygon)
+        
+        #Add attributes
+        layer.CreateField(ogr.FieldDefn('id', ogr.OFTInteger))
+        layer.CreateField(ogr.FieldDefn('area', ogr.OFTReal))
+        
+        #Get ogr polygons from xyz areal data at given image 
+        ogrpolys = Area.ogrPolyN(polys)
+        polycount=1
+
+        #Create feature            
+        for p in ogrpolys:
+            feature = ogr.Feature(layer.GetLayerDefn())
+            feature.SetGeometry(p)
+            feature.SetField('id', polycount)
+            feature.SetField('area', p.Area())
+            layer.CreateFeature(feature)
+            feature.Destroy()                
+            polycount=polycount+1
+        
+        imgcount=imgcount+1
+        ds.Destroy()
+            
+            
+def writeLineSHP(l, fileDirectory, projection=None):
+    '''Write OGR lines (from ALL images) to file in a .shp
+    file type that is compatible with ESRI mapping software.
+    
+    Inputs
+    a:                          Line class object containing line detection
+                                results.
+    fileDirectory:              Destination that shapefiles will be written to           
+                                e.g. ../python_workspace/Results/
+    projection:                 Coordinate projection that the shapefile will 
+                                exist in. This can either be an ESPG number 
+                                (expressed as an integer) or a well-known 
+                                geographical coordinate system (expressed as a 
+                                string). Well-known geographical coordinate 
+                                systems are: 'WGS84', 'WGS72', NAD83' or 
+                                'EPSG:n'
+    '''        
+    #Get driver and create shapeData in shp file directory        
+    typ = 'ESRI Shapefile'        
+    driver = ogr.GetDriverByName(typ)
+    if driver is None:
+        raise IOError('%s Driver not available:\n' % typ)
+        sys.exit(1)
+
+    xyz = l._realline
+    imgcount=1
+    
+    for line in xyz:
+        #Create datasource in shapefile
+        shp = fileDirectory + 'line' + str(imgcount) + '.shp'
+        if os.path.exists(shp):
+            print 'Deleting pre-existing datasource'
+            driver.DeleteDataSource(shp)
+        ds = driver.CreateDataSource(shp)
+        if ds is None:
+            print 'Could not create file %s' %shp
+        
+        #Set projection and initialise layer depending on projection input            
+        if type(projection) is int:
+            print 'ESPG projection detected'
+            proj = osr.SpatialReference()
+            proj.ImportFromEPSG(projection)
+            layer = ds.CreateLayer(' ', proj, ogr.wkbLineString)
+        elif type(projection) is str:
+            print 'Coordinate system detected'
+            proj = osr.SpatialReference()
+            proj.SetWellKnownGeogCS(projection)
+            layer = ds.CreateLayer(' ', proj, ogr.wkbLineString)
+        else:
+            print 'Projection for shapefiles not recognised'
+            print 'Proceeding shapefile generation without projection'
+            layer = ds.CreateLayer(' ', None, ogr.wkbLineString)
+        
+        #Add attributes
+        layer.CreateField(ogr.FieldDefn('id', ogr.OFTInteger))
+        layer.CreateField(ogr.FieldDefn('length', ogr.OFTReal))
+        
+        #Get ogr polygons from xyz areal data at given image 
+        lcount=1
+
+        #Create feature            
+        feature = ogr.Feature(layer.GetLayerDefn())
+        feature.SetGeometry(line)
+        feature.SetField('id', lcount)
+        feature.SetField('length', line.Length())
+        layer.CreateFeature(feature)
+        feature.Destroy()                
+        lcount=lcount+1
+        
+        imgcount=imgcount+1
+        ds.Destroy()
+
+
+def importAreaData(a, fileDirectory):
+    '''Get xyz and px data from text files and import into Areas class.
+    Inputs:
+    -fileDirectory: Path to the folder where the four text files are. The
+     text file containing the pixel and real world polygon coordinates must 
+     be named 'px_coords.txt' and 'area_coords.txt'. The text file 
+     containing the pixel and real world polygon areas must be named 
+     'px_sum.txt' and 'area_all.txt'. Files will not be recognised if they 
+     are not named correctly.'''
+    rpoly, rarea = importXYZ(fileDirectory)
+    pxpoly, pxarea = importPX(fileDirectory)
+    a.setMethod('auto')
+    return rpoly, rarea, pxpoly, pxarea
+     
+     
+def importXYZ(self, fileDirectory):
+    '''Get xyz polygon and area data from text files and import into Areas 
+    class.
+    Inputs:
+    -fileDirectory: Path to the folder where the two text files are. The
+     text file containing the polygon coordinates must be named
+     'area_coords.txt' and the text file containing the polygon areas must
+     be named 'area_all'. Files will not be recognised if they are not 
+     named correctly.'''
+    #Import polygon coordinates from text file
+    target1 = fileDirectory + 'area_coords.txt'
+    xyz = self.xyzFromTXT(target1)
+    
+    #Import polygon areas from text file
+    target2 = fileDirectory + 'area_all.txt'
+    area = self.areaFromTXT(target2) 
+    
+    #Import data into Area class
+    self._realpoly = xyz
+    self._area = area
+    
+    self.setMethod('auto')
+    return self._realpoly, self._area
+   
+
+def importPX(self, fileDirectory):
+    '''Get px polygon and extent data from multiple text files and import
+    into Areas class.
+    Inputs:
+    -fileDirectory: Path to the folder where two text files are containing
+     the pixel coordinates and the pixel extents.
+     The text files must be in the same folder and named 'px_coords' and
+     'px_sum'. Files will not be recognised if they are not named 
+     correctly.'''
+    #Import px polygon coordinates from text file
+    target1 = fileDirectory + 'px_coords.txt'
+    xy = self.xyFromTXT(target1)
+    
+    #Import px polygon extents from text file
+    target2 = fileDirectory + 'px_sum.txt'
+    extent = self.extentFromTXT(target2)
+    
+    #Import data into Area class
+    self._pxpoly = xy
+    self._pxextent = extent
+    
+    self.setMethod('auto')
+    return self._pxpoly, self._pxextent
+
+    
+def xyzFromTXT(self, filename):
+    '''Import XYZ polygon data from text file. Return list of arrays with 
+    xyz pts.'''
+    #Read file and detect number of images based on number of lines
+    f=file(filename,'r')                                
+    alllines=[]
+    for line in f.readlines():
+        if len(line) >= 6:
+            alllines.append(line)  #Read lines in file             
+    print 'Detected xyz coordinates from ' + str(len(alllines)) + ' images'
+    f.close()
+    #Set up xyz object
+    xyz=[] 
+    count=0
+
+    #Extract polygon data as strings
+    for line in alllines:
+        img=[]
+        strpolys=[]            
+        temp=line.split('Pol')                                    
+        for i in temp:
+            if len(i) >=10:
+                strpolys.append(i)
+        count=count+1
+        print 'Detected '+str(len(strpolys))+' polygons in image '+(str(count))                
+        
+        #Extract polygon values from strings
+        for strp in strpolys:
+            pts = strp.split('\t')
+            coords=[]
+            for p in pts:
+                try:
+                    coords.append(float(p))
+                except ValueError:
+                    pass
+            struc = len(coords)/3
+            polygon = np.array(coords).reshape(struc, 3)
+            img.append(polygon)
+        xyz.append(img)
+    
+    #Return xyz as list of arrays
+    return xyz        
+
+
+def areaFromTXT(self, filename):
+    '''Import real world area data from text file. Return list of areas 
+    detected from each image.'''
+    #Read in lines from file
+    f=file(filename,'r')                                
+    alllines=[]
+    for line in f.readlines():
+         alllines.append(line)
+    print 'Detected areas from ' + str(len(alllines)) + ' images'
+    f.close()
+    
+    #Extract area values from lines
+    areas=[]          
+    for line in alllines:
+        vals = line.split('\t')
+        imgs=[]
+        
+        #Change area values from strings to floats
+        for v in vals:
+            polys=[]
+            try:
+                a = float(v)
+                polys.append(a) 
+                imgs.append(polys)
+                myimgs = [p[0] for p in imgs]                    
+            except ValueError:
+                myimgs=None
+        
+        #Compile areas from all images into a list of lists                                           
+        areas.append(myimgs) 
+        
+    return areas                                
+    
+
+def xyFromTXT(self, filename):
+    '''Import px polygon data from text file. Return list of arrays with 
+    xy pts.'''
+    f=file(filename, 'r')
+    alllines=[]
+    for line in f.readlines():
+        if len(line) >=6:
+            alllines.append(line)
+    print 'Detected px coordinates from ' + str(len(alllines)) + ' images'
+    f.close()
+    
+    #Set up xyz object
+    xy=[] 
+    count=0
+
+    #Extract polygon data as strings
+    for line in alllines:
+        img=[]
+        strpolys=[]           
+        temp=line.split('Pol')                                    
+        for i in temp:
+            if len(i) >=10:
+                strpolys.append(i)
+
+        count=count+1
+        print 'Detected ' + str(len(strpolys)) + ' polygons in image ' + (str(count))                
+        
+        #Extract polygon values from strings
+        for strp in strpolys:
+            pts = strp.split('\t')
+            coords=[]
+            for p in pts:
+                try:
+                    coords.append(float(p))
+                except ValueError:
+                    pass
+            struc = len(coords)/2
+            polygon = np.array(coords).reshape(struc, 2)
+            img.append(polygon)
+        xy.append(img)
+    
+    #Return xyz as list of arrays
+    return xy
+    
+    
+def extentFromTXT(self, filename):
+    '''Import cumulative pixel extent data from text file. Return list of 
+    extents (total from all polygons) detected from each image.'''
+    #Read in lines from file
+    f=file(filename,'r')                                
+    alllines=[]
+    for line in f.readlines():
+         alllines.append(line)
+    print 'Detected cumulative extents from ' + str(len(alllines)) + ' images'
+    f.close()
+    
+    #Extract area values from lines
+    areas=[]
+    a=[]          
+    for line in alllines:
+        vals = line.split('\t')          
+        #Change area values from strings to floats
+        for v in vals:
+            poly=[]
+            try:
+                poly.append(float(v)) 
+            except ValueError:
+                pass
+        #Compile areas from all images into a list of lists                                           
+        a.append(poly) 
+        areas = [ext[0] for ext in a]            
+    return areas          
 #------------------------------------------------------------------------------
 ##Testing code. Requires suitable files in ..\Data\Images\Velocity test sets
 #if __name__ == "__main__":   
