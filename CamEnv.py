@@ -601,8 +601,10 @@ class CamEnv(CamCalib):
             
     def _setInvProjVars(self):
         '''Set the inverse projection variables, based on the DEM.'''
+        #Optional commentary        
         if self._quiet>1:        
             print '\nSetting inverse projection coefficients'   
+       
         dem=self.getDEM()
         
         X=dem.getData(0)
