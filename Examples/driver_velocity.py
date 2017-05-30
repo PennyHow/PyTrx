@@ -19,17 +19,12 @@ homography.
 
 #Import packages
 import sys
-import time
-import math
-import numpy as np
-import matplotlib.image as mpimg
-import matplotlib.pyplot as plt
-from scipy import interpolate
+
 
 #Import PyTrx packages
 sys.path.append('../')
 from CamEnv import CamEnv
-from Images import TimeLapse
+from Measure import Velocity
 from FileHandler import writeHomographyFile, writeVelocityFile
 from Utilities import plotVelocity, interpolateHelper, plotInterpolate
 
@@ -51,17 +46,16 @@ destination = '../Examples/results/KR2_velocity/'
 
 #Define camera environment
 cameraenvironment = CamEnv(camdata, quiet=2)
-#cameraenvironment.report()
 
 
 #----------------------   Calculate velocities   ------------------------------
 
 #Set up TimeLapse object
-tl=TimeLapse(camimgs, cameraenvironment, camvmask, caminvmask, image0=0, 
-             band='L', quiet=2) 
+vels=Velocity(camimgs, cameraenvironment, camvmask, caminvmask, image0=0, 
+            band='L', quiet=2) 
 
 #Calculate homography and velocities    
-hg, outputV = tl.calcVelocities()
+hg, outputV = vels.calcVelocities()
    
    
 #----------------------------   Plot Results   --------------------------------
@@ -98,12 +92,12 @@ demred=demred.getZ()
 
 
 span=[0,-1]
-im1=tl.getImageObj(0)
+im1=vels.getImageObj(0)
 
-for i in range(tl.getLength()-1)[span[0]:span[1]]:
+for i in range(vels.getLength()-1)[span[0]:span[1]]:
     for vel in outputV:
         im0=im1
-        im1=tl.getImageObj(i+1)
+        im1=vels.getImageObj(i+1)
         plotVelocity(vel,im0,im1,cameraenvironment,demred,lims,None,
                      plotcams,plotcombined,plotspeed,plotmaps)
 
@@ -130,12 +124,12 @@ print '\nBeginning file exporting...'
 
 #Write homography data to .csv file
 target1 = destination + 'homography.csv'
-writeHomographyFile(hg,tl,target1)
+writeHomographyFile(hg,vels,target1)
 
 #Write out velocity data to .csv file
 target2 = destination + 'velo_output.csv'
-writeVelocityFile(outputV, tl, target2) 
+writeVelocityFile(outputV, vels, target2) 
 
 
 #------------------------------------------------------------------------------
-print 'Finished'
+print '\nFinished'
