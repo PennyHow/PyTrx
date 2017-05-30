@@ -370,7 +370,7 @@ class ImageSequence(object):
             if isinstance(imageList[0],CamImage):
                 if self._quiet>1:
                     print '\nList of camera images assumed in image sequence'
-                    print 'Attempting to add all to sequence'
+                    print ' Attempting to add all to sequence'
                 self._imageSet = []
                 for item in list:
                     if isinstance(item,CamImage):
@@ -378,27 +378,27 @@ class ImageSequence(object):
                     else:
                         if self._quiet>1:
                             print ('\nWarning non-image item found in image' 
-                                   'set list specification - item not added')
+                                   ' set list specification - item not added')
                 return
                 
             #Construction from list containing file name strings                
             elif isinstance(imageList[0],str):
                 if self._quiet>1:                
                     print '\nList of camera images assumed of image sequence'
-                    print 'Attempting to add all to sequence'
+                    print ' Attempting to add all to sequence'
                 self._loadImageStringSequence(imageList,loadall)
                 
             else:
                 if self._quiet>1:                
                     print ('\nList item type used to define image list neither' 
-                           'image nor strings (filenames)')
+                           ' image nor strings (filenames)')
                 return None
         
         #Construction from string of file paths
         if isinstance(imageList, str):
             if self._quiet>1:
                 print ('\nImage directory path assumed. Searching for images.' 
-                       'Attempting to add all to sequence')
+                       ' Attempting to add all to sequence')
                 print imageList
             self._imageList = glob.glob(imageList)
             self._loadImageStringSequence(self._imageList,loadall)
