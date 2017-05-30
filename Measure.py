@@ -55,9 +55,10 @@ class Area(TimeLapse):
     maxim:              Image with maximum areal extent to be detected (for 
                         mask generation).     
     band:
+    quiet:
     loadall:
     timingMethod:
-    quiet:'''
+    '''
     
     #Initialisation of Area class object          
     def __init__(self, imageList, cameraenv, method='auto', calibFlag=True, 
@@ -70,7 +71,7 @@ class Area(TimeLapse):
 
         #Optional commentary        
         if self._quiet>0:
-            print '\nAREA DETECTION COMMENCING'
+            print '\n\nAREA DETECTION COMMENCING'
             
         self._maximg = maxim
         self._pxplot = None
@@ -107,7 +108,7 @@ class Area(TimeLapse):
         
         #Optional commentary
         if self._quiet>0:
-            print '\nCOMMENCING GEORECTIFICATION OF AREAS'
+            print '\n\nCOMMENCING GEORECTIFICATION OF AREAS'
             
         xyz = []
         area = []
@@ -240,7 +241,7 @@ class Area(TimeLapse):
             
             if 1:             
                 if self._quiet>0:                
-                    print 'VERIFYING DETECTED AREAS'
+                    print '\n\nVERIFYING DETECTED AREAS'
                 verf = []
                 
                 def onpick(event):
@@ -869,181 +870,12 @@ class Line(Area):
         rline = self._ogrLine(rpts)    
            
         return rpts, rline  
+        
 
-    
- 
-#--------------------------   PLOTTING FUNCTIONS   ----------------------------
-#Plotting functions for visualising the pixel lines on an image (plotPX) and 
-#the real world lines on a DEM (plotXYZ). Use the number variable to define 
-#which image in the sequence you want to plot along with its corresponding
-#lines (defined as a integer e.g. number=1). The plot will be saved to a 
-#specific filepath if defined in the dest variable.
-#e.g. C:/python_workspace/pytrx/results/plot_output.jpg
-#A simple for loop can be used to plot pixel/real areas in all images.
-        
-    def plotPX(self, number, dest=None):
-        '''Return image overlayed with pixel lines for a given image 
-        number.'''
-        #Get requested image in grayscale 
-        img = self.getImageNo(number)
-                      
-        #Create image plotting window
-        fig=plt.gcf()
-        fig.canvas.set_window_title('Image extent output '+str(number))
-        imgplot = plt.imshow(img)        
-        imgplot.set_cmap('gray')
-        plt.axis('off')
-    
-        #Get xy pixel coordinates and plot on figure        
-        line = self._pxpts[number]        
-        x=[]
-        y=[]
-        for xy in line:
-            x.append(xy[0])
-            y.append(xy[1])            
-        plt.plot(x,y,'w-')                
-        
-        #Save figure if destination is defined
-        if dest != None:
-            plt.savefig(dest + 'extentimg_' + str(number) + '.jpg') 
-            
-        plt.show()  
-        plt.close()
-        
-        
-    def plotXYZ(self, number, dest=None):
-        '''Plot xyz points of real lines for a given image number'''                       
-        #Get xyz points for lines in a given image
-        line = self._realpts[number]
-        
-        #Get xy data from line pts
-        xl=[]
-        yl=[]        
-        for pt in line:
-            xl.append(pt[0])
-            yl.append(pt[1])
-                
-        #Prepare DEM
-        demobj=self._CamEnv.getDEM()
-        demextent=demobj.getExtent()
-        dem=demobj.getZ()
-       
-        #Get camera position (getCameraPose is from the CamEnv class)
-        post, pose = self._CamEnv.getCameraPose()             
-        
-        #Plot DEM 
-        fig=plt.gcf()
-        fig.canvas.set_window_title('Line output '+str(number))
-        plt.xlim(demextent[0],demextent[1])
-        plt.ylim(demextent[2],demextent[3])
-#        plt.xlim(449000, 451000)
-#        plt.ylim(8757500, 8758500)
-        plt.locator_params(axis = 'x', nbins=8)
-        plt.tick_params(axis='both', which='major', labelsize=10)
-        plt.imshow(dem, origin='lower', extent=demextent, cmap='gray')
-        
-        #Plot line points and camera position on to DEM image        
-        plt.plot(xl, yl, 'y-')
-        plt.scatter(post[0], post[1], c='g')
-        plt.suptitle('Projected extents', fontsize=14)
-        
-        #Save figure if destination is defined
-        if dest != None:
-            plt.savefig(dest + 'line_' + str(number) + '.jpg')        
-        
-        plt.show()
-        plt.close()
+#------------------------------------------------------------------------------
+
+#Testing code.
+#if __name__ == "__main__":
 
 
-#----------------------------------  END   ------------------------------------
-if __name__ == "__main__":
-
-    #Main file directory
-    fileDirectory = 'C:/Users/s0824923/Local Documents/python_workspace/pytrx/'
-    
-    #Directory to related files
-    cam2data = fileDirectory + 'Data/GCPdata/CameraEnvironmentData_cam2_2014.txt'
-    cam2mask = fileDirectory + 'Data/GCPdata/masks/c2_2014_amask.JPG'
-    cam2imgs = fileDirectory + 'Data/Images/Area/cam2_2014_plume/demo/*.JPG'
-    
-    #Define data output directory
-    destination = fileDirectory + 'Results/cam2/'
-    
-    #Define camera environment object
-    cam2 = CamEnv(cam2data)
-    
-    #Define area object where our data can be processed
-    plume = Area(cam2imgs, cam2, cam2mask)
-    
-
-#------------------------   Manually define areas   ---------------------------
-    
-    #OPTION 1. ONLY USE OPTION 1, 2 OR 3.
-    #Calculate real areas by manually defining them on the image (point and click)
-    rpoly, rarea = plume.calcAreas('manual')
-    
-    
-#--------------------   Automatically calculate areas   -----------------------
-    
-    ##OPTION 2. ONLY USE OPTION 1, 2 OR 3.
-    ##Automatically calculate areas by first enhancing the images to excentuate 
-    ##target areas and then defining the area by a colour range
-    #
-    ##Set image that contains the biggest target area (i.e. the biggest plume extent)
-    #plume.setMaxImg(33)
-    #
-    ##Set image enhancement parameters
-    #plume.setEnhance('light', 50, 20)
-    #
-    ##Show example of image enhancement
-    #im=plume.getMaxImgData()
-    #im=plume.maskImg(im)  
-    #im=plume.enhanceImg(im)
-    #plt.imshow(im)
-    #plt.show()
-    #
-    ##Set colour range that areas will be detected in
-    #plume.setColourrange(10, 1)
-    #
-    ##Set number of areas that will be extracted from detection
-    #plume.setThreshold(1)
-    #
-    ##Calculate real areas
-    #rpoly, rarea = plume.calcAreas(method='auto')
-    
-    
-#------------------------   Import existing data   ----------------------------
-    
-    ##OPTION 3. ONLY USE OPTION 1, 2 OR 3.
-    ##Import data. If you already have pixel polygon shapes, then use this to
-    ##directly import shapes for further processing (e.g. georectification, plotting)
-    
-    #print 'Importing data...'
-    #target = fileDirectory + 'Results/cam2/run01/'
-    #pxpolys, pxareas = plume.importPX(target)
-    
-    
-    #----------------------------   Export data   ---------------------------------
-    
-    #Write data to text file (this can be imported into other software such as Excel)
-    plume.writeData(destination)
-    
-    #Export areal polygons as shape files
-    geodata = destination + 'shp_proj/'
-    proj = 32633
-#    plume.exportSHP(geodata, proj)
-    
-    print plume.getFileList()
-    #----------------------------   Show results   --------------------------------
-    
-    #Plot and save all extent and area images
-    length=len(rpoly)
-    for i in range(length):         #This loops through all the areas measured
-        plume.plotPX(i)             #Plot pixel area onto image
-        plume.plotXYZ(i)            #Plot real area onto DEM
-    
-    
-    print 'Finished'
-    
-    
-    #--------------------------------   END   -------------------------------------
+#------------------------------------------------------------------------------
