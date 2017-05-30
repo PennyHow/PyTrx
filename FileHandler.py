@@ -89,8 +89,7 @@ import sys
 
 #Import PyTrx modules
 from Utilities import filterSparse
-from Measure import Area
-from Measure import Line
+
 
 #------------------------------------------------------------------------------
 
@@ -848,100 +847,79 @@ def writeAreaFile(a, dest):
     #Cumulative area of all pixel extents       
     if a._pxextent is not None:
         target = dest + 'px_sum.txt'
-        if os.path.isfile(target):
-            print 'Pixel extents not exported'
-            print 'px_sum.txt already exists'
-        else:
-            imgcount=1 
-            f = open(target, 'w')            
-            for p in a._pxextent:
-                f.write('Img' + str(imgcount) + '_polysum(px)\t')
-                f.write(str(p) + '\n')
-                imgcount=imgcount+1
+        imgcount=1 
+        f = open(target, 'w')            
+        for p in a._pxextent:
+            f.write('Img' + str(imgcount) + '_polysum(px)\t')
+            f.write(str(p) + '\n')
+            imgcount=imgcount+1
         
         #Pixel cooridnates of all pixel extents
         target = dest + 'px_coords.txt'
-        if os.path.isfile(target):
-            print 'Pixel coordinates not exported'
-            print 'px_coords.txt already exists'
-        else:
-            imgcount=1
+        imgcount=1
+        polycount=1
+        f = open(target, 'w')
+        for im in a._pxpoly:
+            f.write('Img' + str(imgcount) + '\t')                
+            for pol in im:
+                f.write('Poly' + str(polycount) + '\t')                    
+                for pts in pol:
+                    if a._method is 'auto':
+                        for p in pts:
+                            f.write(str(p[0]) + '\t' + str(p[1]) + '\t')
+                    elif a._method is 'manual':
+                        f.write(str(pts[0]) + '\t' + str(pts[1]) + '\t')
+                    else:
+                        print "Invalid self._method string." 
+                        print "Reassign to either 'auto' or 'manual' using the setMethod function."
+                        sys.exit(1)
+                polycount = polycount+1
+            f.write('\n\n')
+            imgcount = imgcount+1
             polycount=1
-            target = dest + 'px_coords.txt'
-            f = open(target, 'w')
-            for im in a._pxpoly:
-                f.write('Img' + str(imgcount) + '\t')                
-                for pol in im:
-                    f.write('Poly' + str(polycount) + '\t')                    
-                    for pts in pol:
-                        if a._method is 'auto':
-                            for p in pts:
-                                f.write(str(p[0]) + '\t' + str(p[1]) + '\t')
-                        elif a._method is 'manual':
-                            f.write(str(pts[0]) + '\t' + str(pts[1]) + '\t')
-                        else:
-                            print "Invalid self._method string." 
-                            print "Reassign to either 'auto' or 'manual' using the setMethod function."
-                            sys.exit(1)
-                    polycount = polycount+1
-                f.write('\n\n')
-                imgcount = imgcount+1
-                polycount=1
             
     #Areas of polygons
     if a._area is not None:
         target = dest + 'area_all.txt'
-        if os.path.isfile(target):
-            print 'Areal extents not exported'
-            print 'area_all.txt already exists'
-        else: 
-            imgcount = 1
-            f = open(target, 'w')
-            for im in a._area:
-                f.write('Img' + str(imgcount) + '_polyareas\t')                
-                for a in im:
-                    f.write(str(a) + '\t')
-                f.write('\n')
-                imgcount=imgcount+1
+        imgcount = 1
+        f = open(target, 'w')
+        for im in a._area:
+            f.write('Img' + str(imgcount) + '_polyareas\t')                
+            for a in im:
+                f.write(str(a) + '\t')
+            f.write('\n')
+            imgcount=imgcount+1
         
         #Cumulative area of all polygons per image
         target = dest + 'area_sum.txt'
-        if os.path.isfile(target):
-            print 'Cumulative areal extents not exported'
-            print 'area_sum.txt already exists'
-        else:
-            sumarea = []
-            for a in a._area:
-                all_areas = sum(a)
-                sumarea.append(all_areas)
-            imgcount=1                 
-            target = dest + 'area_sum.txt'
-            f = open(target, 'w')            
-            for s in sumarea:
-                f.write('Img' + str(imgcount) + '_totalpolyarea\t')
-                f.write(str(s) + '\n')
-                imgcount=imgcount+1
-                        
+        sumarea = []
+        for a in a._area:
+            all_areas = sum(a)
+            sumarea.append(all_areas)
+        imgcount=1                 
+        target = dest + 'area_sum.txt'
+        f = open(target, 'w')            
+        for s in sumarea:
+            f.write('Img' + str(imgcount) + '_totalpolyarea\t')
+            f.write(str(s) + '\n')
+            imgcount=imgcount+1
+                    
         #Pt coordinates of polygons
-        target = dest + 'area_coords.txt'
-        if os.path.isfile(target):
-            print 'Areal coordinates not exported'
-            print 'area_coords.txt already exists'
-        else:                     
-            imgcount=1
-            polycount=1  
-            f = open(target, 'w')
-            for im in a._realpoly:                
-                f.write('Img' + str(imgcount) + '\t')
-                for p in im:
-                    f.write('Poly' + str(polycount) + '\t')
-                    for pts in p:
-                        f.write(str(pts[0]) + '\t' + str(pts[1]) + '\t' + 
-                                str(pts[2]) + '\t')
-                    polycount=polycount+1
-                f.write('\n\n')
-                imgcount=imgcount+1
-                polycount=1
+        target = dest + 'area_coords.txt'                   
+        imgcount=1
+        polycount=1  
+        f = open(target, 'w')
+        for im in a._realpoly:                
+            f.write('Img' + str(imgcount) + '\t')
+            for p in im:
+                f.write('Poly' + str(polycount) + '\t')
+                for pts in p:
+                    f.write(str(pts[0]) + '\t' + str(pts[1]) + '\t' + 
+                            str(pts[2]) + '\t')
+                polycount=polycount+1
+            f.write('\n\n')
+            imgcount=imgcount+1
+            polycount=1
                     
 
 def writeLineFile(l, dest):
@@ -1089,7 +1067,16 @@ def writeAreaSHP(a, fileDirectory, projection=None):
         layer.CreateField(ogr.FieldDefn('area', ogr.OFTReal))
         
         #Get ogr polygons from xyz areal data at given image 
-        ogrpolys = Area.ogrPolyN(polys)
+        ogrpolys = []        
+        for shape in polys:
+            ring = ogr.Geometry(ogr.wkbLinearRing)
+            for pt in shape:
+                if np.isnan(pt[0]) == False:                   
+                    ring.AddPoint(pt[0],pt[1],pt[2])
+            poly = ogr.Geometry(ogr.wkbPolygon)
+            poly.AddGeometry(ring)
+            ogrpolys.append(poly)
+            
         polycount=1
 
         #Create feature            
@@ -1431,8 +1418,10 @@ def importLineXYZ(l, filename):
      
     #Create OGR line object
     ogrline=[]
-    for line in xyz: 
-        length = Line.ogrLine(line)
+    for line in xyz:        
+        length = ogr.Geometry(ogr.wkbLineString)   
+        for p in line:
+            length.AddPoint(p[0],p[1])
         ogrline.append(length)
     
     #Import data into Area class
