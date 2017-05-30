@@ -843,13 +843,19 @@ def writeAreaFile(a, dest):
                                         containing polygon xyz coordinates
      
     All these file types are compatible with the importing tools 
-    (importPX, importXYZ)'''        
+    (importPX, importXYZ).
+    '''        
+    pxextent = a._pxextent
+    pxpoly = a._pxpoly
+    rarea = a._area
+    rpoly = a._realpoly
+    
     #Cumulative area of all pixel extents       
-    if a._pxextent is not None:
+    if pxextent is not None:
         target = dest + 'px_sum.txt'
         imgcount=1 
         f = open(target, 'w')            
-        for p in a._pxextent:
+        for p in pxextent:
             f.write('Img' + str(imgcount) + '_polysum(px)\t')
             f.write(str(p) + '\n')
             imgcount=imgcount+1
@@ -859,7 +865,7 @@ def writeAreaFile(a, dest):
         imgcount=1
         polycount=1
         f = open(target, 'w')
-        for im in a._pxpoly:
+        for im in pxpoly:
             f.write('Img' + str(imgcount) + '\t')                
             for pol in im:
                 f.write('Poly' + str(polycount) + '\t')                    
@@ -878,38 +884,37 @@ def writeAreaFile(a, dest):
             imgcount = imgcount+1
             polycount=1
             
-    #Areas of polygons
-    if a._area is not None:
+    #Areas and cumulative areas of polygons
+    if rarea is not None:
+        sumarea=[]
         target = dest + 'area_all.txt'
         imgcount = 1
         f = open(target, 'w')
-        for im in a._area:
+
+        for im in rarea:            
+            all_areas = sum(im)
+            sumarea.append(all_areas)
+            
             f.write('Img' + str(imgcount) + '_polyareas\t')                
-            for a in im:
-                f.write(str(a) + '\t')
+            for ara in im:
+                f.write(str(ara) + '\t')
             f.write('\n')
             imgcount=imgcount+1
-        
-        #Cumulative area of all polygons per image
+
         target = dest + 'area_sum.txt'
-        sumarea = []
-        for a in a._area:
-            all_areas = sum(a)
-            sumarea.append(all_areas)
-        imgcount=1                 
-        target = dest + 'area_sum.txt'
-        f = open(target, 'w')            
+        f = open(target, 'w')  
+        imgcount=1                          
         for s in sumarea:
             f.write('Img' + str(imgcount) + '_totalpolyarea\t')
             f.write(str(s) + '\n')
             imgcount=imgcount+1
-                    
+             
         #Pt coordinates of polygons
         target = dest + 'area_coords.txt'                   
         imgcount=1
         polycount=1  
         f = open(target, 'w')
-        for im in a._realpoly:                
+        for im in rpoly:                
             f.write('Img' + str(imgcount) + '\t')
             for p in im:
                 f.write('Poly' + str(polycount) + '\t')
@@ -948,64 +953,48 @@ def writeLineFile(l, dest):
     #Pixel line coordinates file generation             
     if l._pxpts is not None:            
         target = dest + 'line_pxcoords.txt'
-        if os.path.isfile(target):
-            print 'Pixel coordinates not exported'
-            print 'line_pxcoords.txt already exists'
-        else:
-            imgcount=1
-            f = open(target, 'w')
-            for im in l._pxpts:
-                f.write('Img' + str(imgcount) + '\t')                                   
-                for pts in im:
-                    f.write(str(pts[0]) + '\t' + str(pts[1]) + '\t')    
-                f.write('\n\n')
-                imgcount = imgcount+1
-    
+        imgcount=1
+        f = open(target, 'w')
+        for im in l._pxpts:
+            f.write('Img' + str(imgcount) + '\t')                                   
+            for pts in im:
+                f.write(str(pts[0]) + '\t' + str(pts[1]) + '\t')    
+            f.write('\n\n')
+            imgcount = imgcount+1
+
     #Pixel line length file generation            
     if l._pxline is not None:
         target = dest + 'line_pxlength.txt'
-        if os.path.isfile(target):
-            print 'Pixel line length not exported'
-            print 'line_pxlength.txt already exists'
-        else:
-            imgcount=1 
-            f = open(target, 'w')            
-            for p in l._pxline:
-                f.write('Img' + str(imgcount) + '_length(px)\t')
-                f.write(str(p.Length()) + '\n')
-                imgcount=imgcount+1 
+        imgcount=1 
+        f = open(target, 'w')            
+        for p in l._pxline:
+            f.write('Img' + str(imgcount) + '_length(px)\t')
+            f.write(str(p.Length()) + '\n')
+            imgcount=imgcount+1 
     
     #Real line coordinates file generation
     if l._realpts is not None:
-        target = dest + 'line_realcoords.txt'
-        if os.path.isfile(target):
-            print 'Real line coordinates not exported'
-            print 'line_realcoords.txt already exists'
-        else:                     
-            imgcount=1  
-            f = open(target, 'w')
-            for im in l._realpts:                
-                f.write('Img' + str(imgcount) + '\t')
-                for pts in im:
-                    f.write(str(pts[0]) + '\t' + 
-                            str(pts[1]) + '\t' + 
-                            str(pts[2]) + '\t')
-                f.write('\n\n')
-                imgcount=imgcount+1
+        target = dest + 'line_realcoords.txt'                   
+        imgcount=1  
+        f = open(target, 'w')
+        for im in l._realpts:                
+            f.write('Img' + str(imgcount) + '\t')
+            for pts in im:
+                f.write(str(pts[0]) + '\t' + 
+                        str(pts[1]) + '\t' + 
+                        str(pts[2]) + '\t')
+            f.write('\n\n')
+            imgcount=imgcount+1
     
     #Real line length file generation            
     if l._realline is not None:
         target = dest + 'line_reallength.txt'
-        if os.path.isfile(target):
-            print 'Real line length not exported'
-            print 'line_reallength.txt already exists'
-        else: 
-            imgcount = 1
-            f = open(target, 'w')
-            for p in l._realline:
-                f.write('Img' + str(imgcount) + '_length(m)\t')                
-                f.write(str(p.Length()) + '\n')
-                imgcount=imgcount+1
+        imgcount = 1
+        f = open(target, 'w')
+        for p in l._realline:
+            f.write('Img' + str(imgcount) + '_length(m)\t')                
+            f.write(str(p.Length()) + '\n')
+            imgcount=imgcount+1
 
 
 def writeAreaSHP(a, fileDirectory, projection=None):
@@ -1445,7 +1434,9 @@ def importLinePX(l, filename):
     #Create OGR line object
     ogrline = []
     for line in xy:        
-        length = Line.ogrLine(line)
+        length = ogr.Geometry(ogr.wkbLineString)   
+        for p in line:
+            length.AddPoint(p[0],p[1])
         ogrline.append(length)
     
     #Import data into Area class
