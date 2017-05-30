@@ -92,6 +92,7 @@ class Area(TimeLapse):
             self._maxMaskPath=maxMaskPath
             self._setMaxMask()
 
+
     def calcAreas(self, color=False, verify=False):
         '''Get real world areas from an image set. Calculates the polygon 
         extents for each image and the area of each given polygon.'''                
@@ -99,23 +100,22 @@ class Area(TimeLapse):
         if self._method is 'auto':
             if self._pxpoly is None:
                 self.calcExtents(color, verify)
-            xyz = []
-            area = []
-            for p in self._pxpoly:
-                pts, a = self.calcArea(p)
-                xyz.append(pts)
-                area.append(a)
         
         elif self._method is 'manual':
             if self._pxpoly is None:
                 self.manualExtents()
+        
+        #Optional commentary
+        if self._quiet>0:
+            print '\nCOMMENCING GEORECTIFICATION OF AREAS'
             
-            xyz = []
-            area = []
-            for p in self._pxpoly:
-                pts, a = self.calcArea(p)
-                xyz.append(pts)
-                area.append(a)
+        xyz = []
+        area = []
+        
+        for p in self._pxpoly:
+            pts, a = self.calcArea(p)
+            xyz.append(pts)
+            area.append(a)
         
         self._realpoly = xyz
         self._area = area
@@ -135,7 +135,7 @@ class Area(TimeLapse):
             xyz.append(allxyz)                  
         
         #Create polygons
-        rpoly = self._ogrPolyN(xyz)              
+        rpoly = self._ogrPoly(xyz)              
         
         #Determine area of each polygon
         for r in rpoly:
@@ -159,7 +159,7 @@ class Area(TimeLapse):
                 maximg = self._imageSet[self._maximg].getImageArray() 
 
             #Get image name
-            maximn=self._imageSet[self._maximg].getImagePath()
+            maximn=self._imageSet[self._maximg].getImagePath().split('\\')[1]
               
             #Get mask and mask image if present
             if self._mask is not None:
@@ -186,15 +186,17 @@ class Area(TimeLapse):
                 img1=self._imageSet[i].getImageArray()
 
             #Get image name
-            imn=self._imageSet[i].getImagePath()
-        
+            imn=self._imageSet[i].getImagePath().split('\\')[1]
+               
             img2 = np.copy(img1)
             if self._mask is not None:
                 img2 = self._maskImg(img2)
             if self._enhance is not None:
-                img2 = self.enhanceImg(img2)
+                img2 = self._enhanceImg(img2)
             if color is True:
                 self.defineColourrange(img2, imn)
+            if self._quiet>0:
+                print '\nCalculating extent for ' + imn
             polys,extent = self.calcExtent(img2)        
             areas.append(polys)
             px.append(extent)
@@ -231,7 +233,7 @@ class Area(TimeLapse):
                 img1=self._imageSet[i].getImageArray()            
             
             #Get image name
-            imn = self._imageSet[i].getImagePath()
+            imn=self._imageSet[i].getImagePath().split('\\')[1]
             
             #Verify polygons
             img2 = np.copy(img1)
@@ -324,7 +326,7 @@ class Area(TimeLapse):
                 img=self._imageSet[i].getImageArray()          
 
             #Get image name
-            imn = self._imageSet[i].getImagePath()
+            imn=self._imageSet[i].getImagePath().split('\\')[1]
             
             polys,extent = self.manualExtent(img, imn)        
             areas.append(polys)
@@ -407,7 +409,7 @@ class Area(TimeLapse):
         
         #Optional commentary
         if self._quiet>1:
-            print 'Extent: ', pxextent, 'px (out of ', pxcount, 'px) \n'
+            print 'Extent: ', pxextent, 'px (out of ', pxcount, 'px)'
         
         return pxpoly, pxextent
         
@@ -717,7 +719,7 @@ class Area(TimeLapse):
         return img1   
    
     
-    def _ogrPolyN(self, xyz):
+    def _ogrPoly(self, xyz):
         '''Get real world OGR polygons (.shp) from xyz poly pts with real world 
         points which are compatible with mapping software (e.g. ArcGIS)'''                       
         #Create geometries from xyz coordinates using ogr        
@@ -771,10 +773,10 @@ class Line(Area):
                 img1=self._imageSet[i].getImageArray()
 
             #Get image name
-            imn=self._imageSet[i].getImagePath()
+            imn=self._imageSet[i].getImagePath().split('\\')[1]
             
             #Define line
-            pt,length = self.manualLinePX(img, imn)
+            pt,length = self.manualLinePX(img1, imn)
             if self._quiet>1:            
                 print '\nLine defined in ' + imn                
                 print 'Img%i line length: %d px' % (count, length.Length())
@@ -953,95 +955,95 @@ class Line(Area):
         plt.close()
 
 
-##----------------------------------  END   ------------------------------------
-#if __name__ == "__main__":
-#
-#    #Main file directory
-#    fileDirectory = 'C:/Users/s0824923/Local Documents/python_workspace/pytrx/'
-#    
-#    #Directory to related files
-#    cam2data = fileDirectory + 'Data/GCPdata/CameraEnvironmentData_cam2_2014.txt'
-#    cam2mask = fileDirectory + 'Data/GCPdata/masks/c2_2014_amask.JPG'
-#    cam2imgs = fileDirectory + 'Data/Images/Area/cam2_2014_plume/demo/*.JPG'
-#    
-#    #Define data output directory
-#    destination = fileDirectory + 'Results/cam2/'
-#    
-#    #Define camera environment object
-#    cam2 = CamEnv(cam2data)
-#    
-#    #Define area object where our data can be processed
-#    plume = Area(cam2imgs, cam2, cam2mask)
-#    
-#
-##------------------------   Manually define areas   ---------------------------
-#    
-#    #OPTION 1. ONLY USE OPTION 1, 2 OR 3.
-#    #Calculate real areas by manually defining them on the image (point and click)
-#    rpoly, rarea = plume.calcAreas('manual')
-#    
-#    
-##--------------------   Automatically calculate areas   -----------------------
-#    
-#    ##OPTION 2. ONLY USE OPTION 1, 2 OR 3.
-#    ##Automatically calculate areas by first enhancing the images to excentuate 
-#    ##target areas and then defining the area by a colour range
-#    #
-#    ##Set image that contains the biggest target area (i.e. the biggest plume extent)
-#    #plume.setMaxImg(33)
-#    #
-#    ##Set image enhancement parameters
-#    #plume.setEnhance('light', 50, 20)
-#    #
-#    ##Show example of image enhancement
-#    #im=plume.getMaxImgData()
-#    #im=plume.maskImg(im)  
-#    #im=plume.enhanceImg(im)
-#    #plt.imshow(im)
-#    #plt.show()
-#    #
-#    ##Set colour range that areas will be detected in
-#    #plume.setColourrange(10, 1)
-#    #
-#    ##Set number of areas that will be extracted from detection
-#    #plume.setThreshold(1)
-#    #
-#    ##Calculate real areas
-#    #rpoly, rarea = plume.calcAreas(method='auto')
-#    
-#    
-##------------------------   Import existing data   ----------------------------
-#    
-#    ##OPTION 3. ONLY USE OPTION 1, 2 OR 3.
-#    ##Import data. If you already have pixel polygon shapes, then use this to
-#    ##directly import shapes for further processing (e.g. georectification, plotting)
-#    
-#    #print 'Importing data...'
-#    #target = fileDirectory + 'Results/cam2/run01/'
-#    #pxpolys, pxareas = plume.importPX(target)
-#    
-#    
-#    #----------------------------   Export data   ---------------------------------
-#    
-#    #Write data to text file (this can be imported into other software such as Excel)
-#    plume.writeData(destination)
-#    
-#    #Export areal polygons as shape files
-#    geodata = destination + 'shp_proj/'
-#    proj = 32633
-##    plume.exportSHP(geodata, proj)
-#    
-#    print plume.getFileList()
-#    #----------------------------   Show results   --------------------------------
-#    
-#    #Plot and save all extent and area images
-#    length=len(rpoly)
-#    for i in range(length):         #This loops through all the areas measured
-#        plume.plotPX(i)             #Plot pixel area onto image
-#        plume.plotXYZ(i)            #Plot real area onto DEM
-#    
-#    
-#    print 'Finished'
-#    
-#    
-#    #--------------------------------   END   -------------------------------------
+#----------------------------------  END   ------------------------------------
+if __name__ == "__main__":
+
+    #Main file directory
+    fileDirectory = 'C:/Users/s0824923/Local Documents/python_workspace/pytrx/'
+    
+    #Directory to related files
+    cam2data = fileDirectory + 'Data/GCPdata/CameraEnvironmentData_cam2_2014.txt'
+    cam2mask = fileDirectory + 'Data/GCPdata/masks/c2_2014_amask.JPG'
+    cam2imgs = fileDirectory + 'Data/Images/Area/cam2_2014_plume/demo/*.JPG'
+    
+    #Define data output directory
+    destination = fileDirectory + 'Results/cam2/'
+    
+    #Define camera environment object
+    cam2 = CamEnv(cam2data)
+    
+    #Define area object where our data can be processed
+    plume = Area(cam2imgs, cam2, cam2mask)
+    
+
+#------------------------   Manually define areas   ---------------------------
+    
+    #OPTION 1. ONLY USE OPTION 1, 2 OR 3.
+    #Calculate real areas by manually defining them on the image (point and click)
+    rpoly, rarea = plume.calcAreas('manual')
+    
+    
+#--------------------   Automatically calculate areas   -----------------------
+    
+    ##OPTION 2. ONLY USE OPTION 1, 2 OR 3.
+    ##Automatically calculate areas by first enhancing the images to excentuate 
+    ##target areas and then defining the area by a colour range
+    #
+    ##Set image that contains the biggest target area (i.e. the biggest plume extent)
+    #plume.setMaxImg(33)
+    #
+    ##Set image enhancement parameters
+    #plume.setEnhance('light', 50, 20)
+    #
+    ##Show example of image enhancement
+    #im=plume.getMaxImgData()
+    #im=plume.maskImg(im)  
+    #im=plume.enhanceImg(im)
+    #plt.imshow(im)
+    #plt.show()
+    #
+    ##Set colour range that areas will be detected in
+    #plume.setColourrange(10, 1)
+    #
+    ##Set number of areas that will be extracted from detection
+    #plume.setThreshold(1)
+    #
+    ##Calculate real areas
+    #rpoly, rarea = plume.calcAreas(method='auto')
+    
+    
+#------------------------   Import existing data   ----------------------------
+    
+    ##OPTION 3. ONLY USE OPTION 1, 2 OR 3.
+    ##Import data. If you already have pixel polygon shapes, then use this to
+    ##directly import shapes for further processing (e.g. georectification, plotting)
+    
+    #print 'Importing data...'
+    #target = fileDirectory + 'Results/cam2/run01/'
+    #pxpolys, pxareas = plume.importPX(target)
+    
+    
+    #----------------------------   Export data   ---------------------------------
+    
+    #Write data to text file (this can be imported into other software such as Excel)
+    plume.writeData(destination)
+    
+    #Export areal polygons as shape files
+    geodata = destination + 'shp_proj/'
+    proj = 32633
+#    plume.exportSHP(geodata, proj)
+    
+    print plume.getFileList()
+    #----------------------------   Show results   --------------------------------
+    
+    #Plot and save all extent and area images
+    length=len(rpoly)
+    for i in range(length):         #This loops through all the areas measured
+        plume.plotPX(i)             #Plot pixel area onto image
+        plume.plotXYZ(i)            #Plot real area onto DEM
+    
+    
+    print 'Finished'
+    
+    
+    #--------------------------------   END   -------------------------------------
