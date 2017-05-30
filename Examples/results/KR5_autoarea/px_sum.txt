@@ -1,0 +1,4 @@
+Img1_polysum(px)	20412
+Img2_polysum(px)	20574
+Img3_polysum(px)	26026
+Img4_polysum(px)	4066
