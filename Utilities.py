@@ -572,19 +572,25 @@ def plotInterpolate(dem, lims, grid, pointextent, save=None):
     plt.show()
 
 
-def plotAreaPX(a, number, dest=None, crop=False):
+def plotPX(a, number, dest=None, show=True, crop=False):
     '''Return image overlayed with pixel extent polygons for a given image 
     number.'''
+    
+    print type(a)
+    
     #Call corrected/uncorrected image
     if a._calibFlag is True:
         img=a._imageSet[number].getImageCorr(a._camEnv.getCamMatrixCV2(), 
                                             a._camEnv.getDistortCoeffsCv2())      
     else:
         img=a._imageSet[number].getImageArray() 
-                  
+    
+    #Get image name
+    imn=a._imageSet[number].getImagePath().split('\\')[1]    
+          
     #Create image plotting window
     fig=plt.gcf()
-    fig.canvas.set_window_title('Image extent output '+str(number))
+    fig.canvas.set_window_title(imn + ': Image extent output ')
     imgplot = plt.imshow(img)        
     imgplot.set_cmap('gray')
     plt.axis('off')
@@ -594,29 +600,48 @@ def plotAreaPX(a, number, dest=None, crop=False):
             plt.axis([a._pxplot[0],a._pxplot[1],a._pxplot[2],
                      a._pxplot[3]])
     
-    polys = a._pxpoly[number]
-
-    for p in polys:
-#            pts = np.vstack(p).squeeze()
+    if type(a) == "<class 'Measure.Area'>":
+        polys = a._pxpoly[number]
+        for p in polys:
+            x=[]
+            y=[]
+            for xy in p:
+                x.append(xy[0][0])
+                y.append(xy[0][1])            
+            plt.plot(x,y,'w-')
+    
+        if dest != None:
+            plt.savefig(dest + 'extentimg_' + imn) 
+            
+        if show is True:
+            plt.show()    
+            
+    elif type(a) == "<class 'Measure.Line'>":               
+        line = a._pxpts[number]        
         x=[]
         y=[]
-        for xy in p:
+        for xy in line:
             x.append(xy[0])
             y.append(xy[1])            
-        plt.plot(x,y,'w-')                
-
-    if dest != None:
-        plt.savefig(dest + 'extentimg_' + str(number) + '.jpg') 
-        
-#        plt.show()  
+        plt.plot(x,y,'w-')
+        if dest != None:
+            plt.savefig(dest + 'pxline_' + imn) 
+            
+        if show is True:
+            plt.show() 
+            
+    else:
+        print '\nUnrecognised Area/Line class object'
+        pass
+                
     plt.close()
     
     
-def plotAreaXYZ(a, number, dest=None, dem=True, show=True):
-    '''Plot xyz points of real polygons for a given image number'''                       
-    #Get xyz points for polygons in a given image
-    xyz = a._realpoly[number]
-            
+def plotXYZ(a, number, dest=None, dem=True, show=True):
+    '''Plot xyz points of real polygons for a given image number'''                           
+    #Get image name
+    imn=a._imageSet[number].getImagePath().split('\\')[1]   
+        
     #Prepare DEM
     if dem is True:
         demobj=a._camEnv.getDEM()
@@ -628,34 +653,64 @@ def plotAreaXYZ(a, number, dest=None, dem=True, show=True):
     
         #Plot DEM 
         fig=plt.gcf()
-        fig.canvas.set_window_title('Area output '+str(number))
+        fig.canvas.set_window_title(imn + ': Area output')
         plt.locator_params(axis = 'x', nbins=8)
         plt.tick_params(axis='both', which='major', labelsize=10)
         plt.imshow(dem, origin='lower', extent=demextent, cmap='gray')
         plt.scatter(post[0], post[1], c='g')
-    
-    #Extract xy data from poly pts
-    count=1                
-    for shp in xyz: 
+   
+    if type(a) == "<class 'Measure.Area'>":
+        #Get xyz points for polygons in a given image
+        xyz = a._realpoly[number]
+        
+        #Extract xy data from poly pts
+        count=1                
+        for shp in xyz: 
+            xl=[]
+            yl=[]
+            for pt in shp:
+                xl.append(pt[0])
+                yl.append(pt[1])
+            lab = 'Area ' + str(count)
+            plt.plot(xl, yl, c=np.random.rand(3,1), linestyle='-', label=lab)
+            count=count+1
+        
+        plt.legend()
+        plt.suptitle('Projected extents', fontsize=14)
+        
+        if dest != None:
+            plt.savefig(dest + 'area_' + imn) 
+            
+        if show is True:
+            plt.show() 
+            
+    elif type(a) == "<class 'Measure.Line'>":
+        #Get xyz points for lines in a given image
+        line = a._realpts[number]
+        
+        #Get xy data from line pts
         xl=[]
-        yl=[]
-        for pt in shp:
+        yl=[]        
+        for pt in line:
             xl.append(pt[0])
             yl.append(pt[1])
-        lab = 'Area ' + str(count)
-        plt.plot(xl, yl, c=np.random.rand(3,1), linestyle='-', label=lab)
-        count=count+1
-    
-    plt.legend()
-    plt.suptitle('Projected extents', fontsize=14)
-    
-    if dest != None:
-        plt.savefig(dest + 'area_' + str(number) + '.jpg')        
-
-    if show is True:
-        plt.show()
+        
+        #Plot line points and camera position on to DEM image        
+        plt.plot(xl, yl, 'y-')
+        plt.suptitle('Projected line', fontsize=14)
+        
+        if dest != None:
+            plt.savefig(dest + 'realline_' + imn) 
+            
+        if show is True:
+            plt.show() 
+    else:
+        print '\nUnrecognised Area/Line class object'
+        pass
 
     plt.close()
+    
+    
 #------------------------------------------------------------------------------
 #Testing code. Requires suitable files in ..\Data\Images\Velocity test sets
 if __name__ == "__main__":  
