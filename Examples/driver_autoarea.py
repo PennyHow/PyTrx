@@ -31,7 +31,7 @@ from Measure import Area
 from CamEnv import CamEnv
 from Images import TimeLapse
 from FileHandler import writeAreaFile, writeAreaSHP
-from Utilities import plotPXarea, plotXYZarea
+from Utilities import plotAreaPX, plotAreaXYZ
 
 
 #-----------------------------   Map data files   -----------------------------
@@ -42,7 +42,7 @@ cammask = '../Examples/camenv_data/masks/c5_2014_amask.JPG'
 camimgs = '../Examples/images/KR5_2014_subset/*.JPG'
 
 #Define data output directory
-destination = '../results/KR5_2014_lakes/'
+destination = '../results/KR5_autoarea/'
 
 
 #-------------------------   Create camera object   ---------------------------
@@ -123,7 +123,7 @@ lakes.setThreshold(5)
 #polys, areas = lakes.calcExtents()
 
 #Calculate real areas
-rpolys, rareas = lakes.calcAreas(method='auto', color=False, verify=False)
+rpolys, rareas = lakes.calcAreas(color=False, verify=False)
 
 ##Import data from file
 #rpolys, rareas, pxpolys, pxareas = lakes.importData(destination)
@@ -143,8 +143,8 @@ writeAreaSHP(target, proj)
 target=destination + 'extentimgs/'
 length=len(rpolys)
 for i in range(length):
-    plotPXarea(i, None)
-    plotXYZarea(i, None, dem=True, show=True)
+    plotAreaPX(i, None)
+    plotAreaXYZ(i, None, dem=True, show=True)
 
 
 #Show image path list for checking

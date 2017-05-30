@@ -8,27 +8,28 @@ Camera_environment_name # Name of CamEnv class
 KR5_2014
 
 
-GCP_path # Path name where Ground Control Point data can be found
+GCP_path #Path name where Ground Control Point data can be found
 ..\Examples\camenv_data\gcps\c5_2014.txt
 
 
-DEM_path # Path name where DEM data can be found
+DEM_path #Path name where DEM data can be found
 ..\Examples\camenv_data\dem\dem.mat
 
 
 image_path #Path name where master image can be found (i.e. calibration image where GCPs have been plotted
-..\Examples\refimages\c5_2014.JPG
+..\Examples\camenv_data\refimages\c5_2014.JPG
 
 
 Calibration_path #Path name where camera calibration file can be found
-[..\Examples\calib\c5_2014_1.txt,..\Examples\calib\c5_2014_2.txt,..\Examples\calib\c5_2014_3.txt,..\Examples\calib\c5_2014_4.txt]
+[..\Examples\camenv_data\calib\c5_2014_1.txt,..\Examples\camenv_data\calib\c5_2014_2.txt,..\Examples\camenv_data\calib\c5_2014_3.txt,..\Examples\camenv_data\calib\c5_2014_4.txt]
 
 
 Camera_location #Location of camera in xyz coordinates
 [451632.669 8754648.786 624.699]
 
 
-Yaw_pitch_roll # Yaw, pitch, roll of camera (set to [0 0 0] if unknown) 
+Yaw_pitch_roll #Yaw, pitch, roll of camera (set to [0 0 0] if unknown) 
 [1.579041671082559 0.118710657630846 -0.077962283202197] 
 
-
+Dem_densification #Amount to densify the DEM to permit better mapping of image
+2

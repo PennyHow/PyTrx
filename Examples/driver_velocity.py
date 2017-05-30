@@ -44,7 +44,7 @@ camimgs = '../Examples/images/KR2_2014_subset/*.JPG'
 
 
 #Define data output directory
-destination = '../Examples/results/KR2_2014_velocities/'
+destination = '../Examples/results/KR2_velocity/'
 
 
 #-----------------------   Create camera object   -----------------------------
