@@ -358,7 +358,7 @@ class ImageSequence(object):
         
         self._quiet=quiet        
         if self._quiet>0:
-            print '\nCONSTRUCTING IMAGE SEQUENCE'
+            print '\n\nCONSTRUCTING IMAGE SEQUENCE'
         
         self._band=band
         self._imageList=imageList
@@ -845,7 +845,7 @@ class TimeLapse(ImageSequence):
         image sequence.''' 
         #Optional commentary
         if self._quiet>0:
-            print 'CALCULATING HOMOGRAPHY'
+            print '\n\nCALCULATING HOMOGRAPHY'
         
         #Create empty list for output
         pairwiseHomography=[]
@@ -1033,7 +1033,7 @@ class TimeLapse(ImageSequence):
         '''Function to calculate velocities between succesive image pairs.'''
         #Optional commentary
         if self._quiet>0:
-            print '\nCALCULATING VELOCITIES'
+            print '\n\nCALCULATING VELOCITIES'
         
         #Create empty lists for velocities and homography
         pairwiseVelocities=[]
