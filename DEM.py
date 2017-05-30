@@ -102,11 +102,13 @@ class ExplicitRaster(object):
     def getNoData(self):
         '''Return fill value for no data in DEM array.''' 
         return self._nodata
-        
+ 
+       
     def getExtent(self):
         '''Return DEM extent.'''     
         return self._extents
-        
+ 
+       
     def subset(self,cmin,cmax,rmin,rmax):
         '''Return a specified subset of the DEM array.'''
         #Find minimum extent value
@@ -183,8 +185,6 @@ class ExplicitRaster(object):
         print ('Data Extent Coordinates are [xmin,xmax,ymin,ymax]: ',
                self.getExtent())
     
-
-#------------------------------------------------------------------------------
         
 def load_DEM(demfile):
     '''Function for loading DEM data from different file types, which is 
@@ -218,7 +218,7 @@ def DEM_FromMat(matfile):
 
     #Flip array if not compatible
     if Y[0][0]>Y[-1][0]:
-        print 'Flipping input DEM'
+        print '\nFlipping input DEM'
         X = np.flipud(X)
         Y = np.flipud(Y)
         Z = np.flipud(Z)
