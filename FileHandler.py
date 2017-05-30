@@ -1490,6 +1490,8 @@ def _coordFromTXT(filename, xyz=True):
     return allcoords        
     
 #------------------------------------------------------------------------------
-##Testing code. Requires suitable files in ..\Data\Images\Velocity test sets
+
 #if __name__ == "__main__":   
-#    createThumbs('./Data/Images/Velocity/c1_2014')
+#    print '\nProgram finished'
+
+#------------------------------------------------------------------------------   

@@ -712,6 +712,8 @@ def plotXYZ(a, number, dest=None, dem=True, show=True):
     
     
 #------------------------------------------------------------------------------
-#Testing code. Requires suitable files in ..\Data\Images\Velocity test sets
-if __name__ == "__main__":  
-    print 'Finished'
+
+#if __name__ == "__main__":   
+#    print '\nProgram finished'
+
+#------------------------------------------------------------------------------   

@@ -5,23 +5,40 @@ This script is part of PyTrx, an object-oriented programme created for the
 purpose of calculating real-world measurements from oblique images and 
 time-lapse image series.
 
-This is the Images module of PyTrx. This module contains the object-constructors and
-functions for:
+This is the Images module of PyTrx. This module contains the object-
+constructors and functions for:
 (1) Importing and handling image data, specifically RBG, one-band (R, B or G), 
     and grayscale images 
 (2) Handling image sequences (i.e. a set of multiple images)
-(3) Camera registration from static point feature tracking (referred to here as 
-    homography)
-(4) Feature tracking and calculating the associated errors
+
 
 Classes:
-CamImage:      A class to represent raw images and holds information on image 
-               properties (image size, exif data, bands for subsequent 
-               processing).
-ImageSequence: A class to model a raw collection of CamImage objects.
-TimeLapse:     A class for the processing of an ImageSet to find glacier 
-               velocity as points, with methods to track in the xy image plane 
-               and project tracks to real-world (xyz) coordinates.
+CamImage:                       A class to represent raw images and holds 
+                                information on image properties (image size, 
+                                exif data, bands for subsequent processing).
+ImageSequence:                  A class to model a raw collection of CamImage 
+                                objects.
+
+
+Key functions in CamImage:
+getImagePath():                 Return the file path of the image.
+getImageCorr():                 Return the image array that is corrected for 
+                                the specified camera matrix and distortion 
+                                parameters.
+getImageArray():                Return the image as an array.
+getExif():                      Return the exif image size and time stamp data 
+                                from an image. Image size is returned as a 
+                                string (height, width). The time stamp is 
+                                returned as a Python datetime object.
+ 
+                       
+Key functions in ImageSequence:
+getImageArrNo(i):               Get image array i from image sequence.
+getImageObj(i):                 Get CamImage object i from image sequence.
+getImages():                    Return image set (i.e. a sequence of CamImage 
+                                objects).
+getFileList():                  Return list of image file paths.
+getLength():                    Return length of image set.
 
 
 @author: Nick Hulton (Nick.Hulton@ed.ac.uk), 
@@ -39,10 +56,7 @@ import glob
 import imghdr
 import os
 import cv2
-import math
 
-#Import PyTrx modules
-from FileHandler import readMask
 
 #------------------------------------------------------------------------------
 
@@ -456,25 +470,7 @@ class ImageSequence(object):
 
 #------------------------------------------------------------------------------
 
-
-        
-        
-#------------------------------------------------------------------------------
-
-#Testing code. Requires suitable files in ..\Data\Images\Velocity test sets 
-#if __name__ == "__main__":
-#    from Development import allHomogTest
-#    from PyTrx_Tests import doImageTests,doTimeLapseTests
-#
-#    #Test image loading capabilities    
-#    doImageTests()
-#    
-#    #Test TimeLapse object initialisation
-#    doTimeLapseTests()
-#    
-#    #Test homography
-#    allHomogTest(min_features=50,maxpoints=2000)
-    
+#if __name__ == "__main__":   
 #    print '\nProgram finished'        
 
 #------------------------------------------------------------------------------

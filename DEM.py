@@ -8,11 +8,13 @@ time-lapse image series.
 This module, DEM, contains functionality for handling DEM data and implementing
 this data into the camera environment (CamEnv) object class.
 
+
 Classes:
 ExplicitRaster:      A class to represent a numeric Raster with explicit XY 
                      cell referencing in each grid cell.
 
-Functions:
+
+Key functions:
 loadDEM:            Function for loading DEM data from different file types, 
                     which is automatically detected. Recognised file types: 
                     .mat and .tif.
@@ -385,9 +387,8 @@ def voxelviewshed(dem,viewpoint):
 
 
 #------------------------------------------------------------------------------
-    
-##Testing code. Requires suitable files in ..\Data\Images\Velocity test sets
-#if __name__ == "__main__":    
-#    from PyTrx_Tests import doDEMTests
-    
-#    doDEMTests() 
+
+#if __name__ == "__main__":   
+#    print '\nProgram finished'
+
+#------------------------------------------------------------------------------   

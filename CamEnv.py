@@ -12,19 +12,45 @@ object-constructors and functions for:
     real-world coordinates
 The projection and inverse transformation functions are based on 
 those available in the ImGRAFT toolbox for Matlab. Translations from
-ImGRAFT are noted in the comments.
+ImGRAFT are noted in related script comments.
+
 
 Classes:
-GCPs:       A class to represent the geography of the camera scene and handle 
-            data associated with this (Ground Control Points, the DEM and the 
-            image that the GCPs correspond to).
-CamCalib:   A class that handles the camera calibration values and provides
-            image correction functionality. 
-CamEnv:     A class that represents the camera object. This object inherits
-            from the GCPs and CamCalib classes, containing information about 
-            the intrinsic matrix, lens distortion parameters, camera pose 
-            (position and direction), GCPs, and the DEM.
-    
+GCPs:                       A class to represent the geography of the camera 
+                            scene and handle data associated with this (Ground 
+                            Control Points, the DEM and the image that the GCPs 
+                            correspond to).
+CamCalib:                   A class that handles the camera calibration values 
+                            and provides image correction functionality. 
+CamEnv:                     A class that represents the camera object. This 
+                            object inherits from the GCPs and CamCalib classes, 
+                            containing information about the intrinsic matrix, 
+                            lens distortion parameters, camera pose (position 
+                            and direction), GCPs, and the DEM.
+
+
+Key functions in GCPs:
+getGCPs():                  Return the world and image GCPs.      
+getDEM():                   Return the dem object. 
+getImage():                 Return the GCP reference image.
+
+
+Key functions in CamCalib:
+getDistortCoeffsCv2():      Return radial and tangential distortion 
+                            coefficients.
+getCamMatrixCV2():          Return camera matrix in a structure that is 
+                            compatible with subsequent photogrammetric 
+                            processing using OpenCV.
+reportCalibData():          Self reporter for Camera Calibration object data.
+
+
+Key function in CamEnv:
+project(xyz):               Project xyz world coordinates into corresponding 
+                            image coordinates (uv). Translated from the ImGRAFT 
+                            projection function found in camera.m.  
+invproject(uv):             Inverse project image coordinates (uv) to xyz world 
+                            coordinates using inverse projection variables.         
+
 @author: Nick Hulton (Nick.Hulton@ed.ac.uk)
          Lynne Addison
          Penny How (p.how@ed.ac.uk)
@@ -841,11 +867,7 @@ class CamEnv(CamCalib):
 
 #------------------------------------------------------------------------------
 
-##Tester code to run if main. Requires PyTrx_Tests.py module in visible path
-#if __name__ == "__main__":
-#    from PyTrx_Tests import doCalibrationTests,doCamEnvTests
-#    
-#    doCalibrationTests()
-#    doCamEnvTests()
-        
+#if __name__ == "__main__":   
+#    print '\nProgram finished'
 
+#------------------------------------------------------------------------------   

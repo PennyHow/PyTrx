@@ -6,8 +6,63 @@ purpose of calculating real-world measurements from oblique images and
 time-lapse image series.
 
 This is the Measure module of PyTrx.
+(1) Camera registration from static point feature tracking (referred to here as 
+    homography).
+(2) Surface velocities derived from feature tracking, with associated errors 
+    and signal-to-noise ratio calculated.
+(3) Automated and manual detection of areal extents in oblique imagery.
+(4) Manual detection of lines in oblique imagery.
+(5) Extraction of real-world surface areas and distances from oblique imagery.
 
-@author: Penny How, p.how@ed.ac.uk
+
+Classes:
+Velocity:                       A class for the processing of an ImageSet to 
+                                determine pixel displacements and real-world 
+                                velocities from a sparse set of points, with 
+                                methods to track in the xy image plane and 
+                                project tracks to real-world (xyz) coordinates.
+Area:                           A class for processing change in area (i.e. a 
+                                lake or plume) through an image sequence, with 
+                                methods to calculate extent change in an image 
+                                plane (px) and real areal change via 
+                                georectification.  
+Line: 
+
+
+Key functions in Velocity:
+calcHomographyPairs():          Method to calculate homography between 
+                                succesive image pairs in an image sequence.
+calcVelocities():               Method to calculate velocities between 
+                                succesive image pairs in an image sequence.
+      
+                          
+Key functions in Area:
+calcAreas():                    Method to obtain real world areas from an image 
+                                set. Calculates the polygon extents for each 
+                                image and the area of each given polygon. 
+calcExtents():                  Method to obtain pixel extent from a series of 
+                                images. Return the extent polygons and 
+                                cumulative extent values (px).
+manualExtents():                Method to manually select pixel extents from a 
+                                series of images. Return the extent polygons 
+                                and cumulative extent values (px).
+verifyExtents():                Method to manuall verify all detected polygons 
+                                in an image sequence.
+                             
+                                
+Key functions in Line:
+calcLinesXYZ():                 Method to obtain real world lines/distances 
+                                from an image set. Calculates the line 
+                                coordinates and length of each given set of 
+                                pixel points.
+manualLinesPX():                Method to manually define a pixel line through
+                                a series of images. Returns the line pixel 
+                                coordinates and pixel length.
+                                
+                                
+@author: Nick Hulton, nick.hulton@ed.ac.uk
+         Penny How, p.how@ed.ac.uk
+         Lynne Addison
 '''
 
 import matplotlib.pyplot as plt
@@ -28,9 +83,10 @@ from Images import ImageSequence
 #------------------------------------------------------------------------------
 
 class Velocity(ImageSequence):
-    '''A class that handles the processing of an ImageSet to find glacier 
-    velocity as points, with methods to track and project tracks from the uv
-    image plane to xyz real-world coordinates.
+    '''A class for the processing of an ImageSet to determine pixel 
+    displacements and real-world velocities from a sparse set of points, with 
+    methods to track in the xy image plane and project tracks to real-world 
+    (xyz) coordinates.
     
     This class treats the images as a contigous sequence of name references by
     default
@@ -1495,19 +1551,7 @@ class Line(Area):
 
 #------------------------------------------------------------------------------
 
+#if __name__ == "__main__":   
+#    print '\nProgram finished'
 
-#Testing code. Requires suitable files in ..\Data\Images\Velocity test sets 
-#if __name__ == "__main__":
-#    from Development import allHomogTest
-#    from PyTrx_Tests import doTimeLapseTests
-    
-#    #Test TimeLapse object initialisation
-#    doTimeLapseTests()
-#    
-#    #Test homography
-#    allHomogTest(min_features=50,maxpoints=2000)
-    
-#    print '\nProgram finished'  
-
-
-#------------------------------------------------------------------------------
+#------------------------------------------------------------------------------   
