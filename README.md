@@ -21,13 +21,14 @@ The <b>ExplicitRaster</b> class represents a DEM as a numeric raster with explic
 This module contains a set of functions for reading in data from files (such as image data and calibration information) and writing out data (currently this is limited to just writing out homography data, but soon velocities and velocity maps will be incorporated into this).<br>
 
 <b><u>Images.py</b></u><br>
-Handles the image data, the image sequence, and homography/feature-tracking functionality.<br> 
+Handles the image data and image sequence functionality.<br> 
 The <b>CamImage</b> class holds information about a singular image and contains functionality for importing image data from file and passing specific image bands forward for subsequent processing.<br>
 The <b>ImageSequence</b> class holds information about an image sequence, i.e. a collection of CamImage objects, from which specific images and image pairs can be called.<br>
-The <b>TimeLapse</b> class enables processing with an ImageSequence object. Camera homography and velocities are derived and held within this class.<br>
+
 
 <b><u>Measure.py</b></u><br>
-Contains classes for measuring surface areas and distances from oblique imagery. This module has not yet been fully incorporated into the most up-to-date version of PyTrx.<br>
+Contains classes for calculating homography and velocities, and measuring surface areas and distances from oblique imagery. This module has not yet been fully incorporated into the most up-to-date version of PyTrx.<br>
+The <b>Velocity</b> class enables processing with an ImageSequence object. Camera homography and velocities are derived and held within this class.<br>
 The <b>Area</b> class performs automated and manual detection of surface areas from imagery and georectifies polygons to real-world coordinates.<br>
 The <b>Length</b> class performs manual detection of lines from imagery (e.g. glacier terminus position) and georectifies lines to real-world coordinates.
 <br>
