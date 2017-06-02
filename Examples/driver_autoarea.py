@@ -18,13 +18,12 @@ corrected for image distortion.
 
 #Import packages
 import sys
-import time
 
 #Import PyTrx packages
 sys.path.append('../')
 from Measure import Area
 from CamEnv import CamEnv
-from FileHandler import writeAreaFile, writeAreaSHP
+from FileHandler import writeAreaFile, writeSHPFile
 from Utilities import plotPX, plotXYZ
 
 
@@ -46,24 +45,24 @@ cameraenvironment = CamEnv(camdata)
 
 
 #Define Area class initialisation variables
-method = 'auto'             #Method for detection ('auto' or 'manual')
 calibFlag = True            #Detect with corrected or uncorrected images
 maxim = 0                   #Image number of maximum areal extent 
-imband = 'L'                #Desired image band
+imband = 'R'                #Desired image band
+quiet = 2                   #Level of commentary
 loadall = False             #Load all images?
 timem = 'EXIF'              #Method to derive image times
-quiet = 2                   #Level of commentary
+
 
 #Set up Area object, from which areal extent will be measured
-lakes = Area(camimgs, cameraenvironment, method, calibFlag, cammask, maxim, 
-             imband, quiet, loadall, time)
+lakes = Area(camimgs, cameraenvironment, calibFlag, cammask, maxim, imband, 
+             quiet, loadall, timem)
 
 
 #---------------------   Set area detection parameters   ----------------------             
 
-#Set image enhancement parameters. If these are undefined then they will be 
-#set to a default enhancement of ('light', 50, 20)
-lakes.setEnhance('light', 50, 20)
+##Set image enhancement parameters. If these are undefined then they will be 
+##set to a default enhancement of ('light', 50, 20)
+#lakes.setEnhance('light', 50, 20)
 
 
 #Set colour range, from which extents will be distinguished. If colour range 
@@ -71,18 +70,21 @@ lakes.setEnhance('light', 50, 20)
 lakes.setColourrange(8, 1)                                                                                                                                                      
 
 
-#Set plotting extent for easier colour range definition and area verification
+#Set px plotting extent for easier colourrange definition and area verification
 lakes.setPXExt(0,1200,2000,1500)
 
 
 #Set polygon threshold (i.e. number of polygons kept)
 lakes.setThreshold(5)
 
+#Set automated area detection input arguments
+colour=False            #Define colour range for every image?
+verify=False            #Manually verify detected areas?
 
 #-------------------------   Calculate areas   --------------------------------
 
 #Calculate real areas
-rpolys, rareas = lakes.calcAreas(color=False, verify=False)
+rpolys, rareas = lakes.calcAutoAreas(colour, verify)
 
 ##Calculate pixel extents. Use this function if pixel extents are only needed, 
 ##or a DEM is not available. Pixel extents are automatically calculated if 
@@ -102,7 +104,7 @@ writeAreaFile(lakes, destination)
 #Create shapefiles
 target1 = destination + 'shpfiles/'
 proj = 32633
-writeAreaSHP(lakes, target1, proj) 
+writeSHPFile(lakes, target1, proj) 
 
 
 #Write all image extents and dems 
@@ -114,4 +116,4 @@ for i in range(len(rpolys)):
 
 #------------------------------------------------------------------------------                                                                                                                                                                                                                                                                                                      
 
-print 'Finished'
+print '\n\nFINISHED'

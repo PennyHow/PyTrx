@@ -1,4 +1,4 @@
-Img1_polysum(px)	20412
-Img2_polysum(px)	20574
-Img3_polysum(px)	26026
-Img4_polysum(px)	4066
+Img1_polysum(px)	8566
+Img2_polysum(px)	12852
+Img3_polysum(px)	12640
+Img4_polysum(px)	2586
