@@ -56,6 +56,9 @@ import math
 from scipy import spatial
 from scipy.interpolate import griddata
 
+#Import PyTrx packages
+import Measure
+
 #------------------------------------------------------------------------------
 
 def plotTrackRose(pts0, pts1, xcen=None,ycen=None):
@@ -576,8 +579,6 @@ def plotPX(a, number, dest=None, show=True, crop=False):
     '''Return image overlayed with pixel extent polygons for a given image 
     number.'''
     
-    print type(a)
-    
     #Call corrected/uncorrected image
     if a._calibFlag is True:
         img=a._imageSet[number].getImageCorr(a._camEnv.getCamMatrixCV2(), 
@@ -600,14 +601,18 @@ def plotPX(a, number, dest=None, show=True, crop=False):
             plt.axis([a._pxplot[0],a._pxplot[1],a._pxplot[2],
                      a._pxplot[3]])
     
-    if type(a) == "<class 'Measure.Area'>":
+    if isinstance(a, Measure.Area) is True:
         polys = a._pxpoly[number]
         for p in polys:
             x=[]
             y=[]
             for xy in p:
-                x.append(xy[0][0])
-                y.append(xy[0][1])            
+                if len(xy)==1:
+                    x.append(xy[0][0])
+                    y.append(xy[0][1])
+                elif len(xy)==2:
+                    x.append(xy[0])
+                    y.append(xy[1])
             plt.plot(x,y,'w-')
     
         if dest != None:
@@ -616,7 +621,7 @@ def plotPX(a, number, dest=None, show=True, crop=False):
         if show is True:
             plt.show()    
             
-    elif type(a) == "<class 'Measure.Line'>":               
+    elif isinstance(a, Measure.Line) is True:               
         line = a._pxpts[number]        
         x=[]
         y=[]
@@ -629,7 +634,7 @@ def plotPX(a, number, dest=None, show=True, crop=False):
             
         if show is True:
             plt.show() 
-            
+
     else:
         print '\nUnrecognised Area/Line class object'
         pass
@@ -657,9 +662,11 @@ def plotXYZ(a, number, dest=None, dem=True, show=True):
         plt.locator_params(axis = 'x', nbins=8)
         plt.tick_params(axis='both', which='major', labelsize=10)
         plt.imshow(dem, origin='lower', extent=demextent, cmap='gray')
+        plt.xlim(demextent[0], demextent[1])
+        plt.ylim(demextent[2], demextent[3])
         plt.scatter(post[0], post[1], c='g')
    
-    if type(a) == "<class 'Measure.Area'>":
+    if isinstance(a, Measure.Area) is True:
         #Get xyz points for polygons in a given image
         xyz = a._realpoly[number]
         
@@ -684,7 +691,7 @@ def plotXYZ(a, number, dest=None, dem=True, show=True):
         if show is True:
             plt.show() 
             
-    elif type(a) == "<class 'Measure.Line'>":
+    elif isinstance(a, Measure.Line) is True:
         #Get xyz points for lines in a given image
         line = a._realpts[number]
         
