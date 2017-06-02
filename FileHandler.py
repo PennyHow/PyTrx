@@ -89,6 +89,7 @@ import sys
 
 #Import PyTrx modules
 from Utilities import filterSparse
+import Measure
 
 
 #------------------------------------------------------------------------------
@@ -870,15 +871,10 @@ def writeAreaFile(a, dest):
             for pol in im:
                 f.write('Poly' + str(polycount) + '\t')                    
                 for pts in pol:
-                    if a._method is 'auto':
-                        for p in pts:
-                            f.write(str(p[0]) + '\t' + str(p[1]) + '\t')
-                    elif a._method is 'manual':
+                    if len(pts)==1:
+                        f.write(str(pts[0][0]) + '\t' + str(pts[0][1]) + '\t')
+                    elif len(pts)==2:
                         f.write(str(pts[0]) + '\t' + str(pts[1]) + '\t')
-                    else:
-                        print "Invalid self._method string." 
-                        print "Reassign to either 'auto' or 'manual' using the setMethod function."
-                        sys.exit(1)
                 polycount = polycount+1
             f.write('\n\n')
             imgcount = imgcount+1
@@ -997,7 +993,7 @@ def writeLineFile(l, dest):
             imgcount=imgcount+1
 
 
-def writeAreaSHP(a, fileDirectory, projection=None):
+def writeSHPFile(a, fileDirectory, projection=None):
     '''Write OGR real polygon areas (from ALL images) to file in a .shp
     file type that is compatible with ESRI mapping software.
     
@@ -1027,171 +1023,168 @@ def writeAreaSHP(a, fileDirectory, projection=None):
     
     for polys in xyz:
         #Create datasource in shapefile
-        shp = fileDirectory + 'area' + str(imgcount) + '.shp'
+        if isinstance(a, Measure.Area) is True:
+            shp = fileDirectory + 'area' + str(imgcount) + '.shp'
+        if isinstance(a, Measure.Line) is True:
+            shp = fileDirectory + 'line' + str(imgcount) + '.shp'
+        
         if os.path.exists(shp):
-            print 'Deleting pre-existing datasource'
+            print '\nDeleting pre-existing datasource'
             driver.DeleteDataSource(shp)
         ds = driver.CreateDataSource(shp)
         if ds is None:
             print 'Could not create file %s' %shp
         
         #Set projection and initialise layer depending on projection input            
-        if type(projection) is int:
-            print 'ESPG projection detected'
-            proj = osr.SpatialReference()
-            proj.ImportFromEPSG(projection)
-            layer = ds.CreateLayer(' ', proj, ogr.wkbPolygon)
-        elif type(projection) is str:
-            print 'Coordinate system detected'
-            proj = osr.SpatialReference()
-            proj.SetWellKnownGeogCS(projection)
-            layer = ds.CreateLayer(' ', proj, ogr.wkbPolygon)
-        else:
-            print 'Projection for shapefiles not recognised'
-            print 'Proceeding shapefile generation without projection'
-            layer = ds.CreateLayer(' ', None, ogr.wkbPolygon)
+        if isinstance(a, Measure.Area) is True:
+            if type(projection) is int:
+                print '\nESPG projection detected'
+                proj = osr.SpatialReference()
+                proj.ImportFromEPSG(projection)
+                layer = ds.CreateLayer(' ', proj, ogr.wkbPolygon)
+            elif type(projection) is str:
+                print '\nCoordinate system detected'
+                proj = osr.SpatialReference()
+                proj.SetWellKnownGeogCS(projection)
+                layer = ds.CreateLayer(' ', proj, ogr.wkbPolygon)
+            else:
+                print '\nProjection for shapefiles not recognised'
+                print 'Proceeding shapefile generation without projection'
+                layer = ds.CreateLayer(' ', None, ogr.wkbPolygon)
         
-        #Add attributes
-        layer.CreateField(ogr.FieldDefn('id', ogr.OFTInteger))
-        layer.CreateField(ogr.FieldDefn('area', ogr.OFTReal))
-        
-        #Get ogr polygons from xyz areal data at given image 
-        ogrpolys = []        
-        for shape in polys:
-            ring = ogr.Geometry(ogr.wkbLinearRing)
-            for pt in shape:
-                if np.isnan(pt[0]) == False:                   
-                    ring.AddPoint(pt[0],pt[1],pt[2])
-            poly = ogr.Geometry(ogr.wkbPolygon)
-            poly.AddGeometry(ring)
-            ogrpolys.append(poly)
+            #Add attributes
+            layer.CreateField(ogr.FieldDefn('id', ogr.OFTInteger))
+            layer.CreateField(ogr.FieldDefn('area', ogr.OFTReal))
             
-        polycount=1
+            #Get ogr polygons from xyz areal data at given image 
+            ogrpolys = []        
+            for shape in polys:
+                ring = ogr.Geometry(ogr.wkbLinearRing)
+                for pt in shape:
+                    if np.isnan(pt[0]) == False:                   
+                        ring.AddPoint(pt[0],pt[1],pt[2])
+                poly = ogr.Geometry(ogr.wkbPolygon)
+                poly.AddGeometry(ring)
+                ogrpolys.append(poly)
+                
+            polycount=1
+    
+            #Create feature            
+            for p in ogrpolys:
+                feature = ogr.Feature(layer.GetLayerDefn())
+                feature.SetGeometry(p)
+                feature.SetField('id', polycount)
+                feature.SetField('area', p.Area())
+                layer.CreateFeature(feature)
+                feature.Destroy()                
+                polycount=polycount+1
+            
+            imgcount=imgcount+1
+            ds.Destroy()
+            
+        #Set projection and initialise layer depending on projection input            
+        elif isinstance(a, Measure.Line) is True: 
+            if type(projection) is int:
+                print '\nESPG projection detected'
+                proj = osr.SpatialReference()
+                proj.ImportFromEPSG(projection)
+                layer = ds.CreateLayer(' ', proj, ogr.wkbLineString)
+            elif type(projection) is str:
+                print '\nCoordinate system detected'
+                proj = osr.SpatialReference()
+                proj.SetWellKnownGeogCS(projection)
+                layer = ds.CreateLayer(' ', proj, ogr.wkbLineString)
+            else:
+                print '\nProjection for shapefiles not recognised'
+                print 'Proceeding shapefile generation without projection'
+                layer = ds.CreateLayer(' ', None, ogr.wkbLineString)
+            
+            #Add attributes
+            layer.CreateField(ogr.FieldDefn('id', ogr.OFTInteger))
+            layer.CreateField(ogr.FieldDefn('length', ogr.OFTReal))
 
-        #Create feature            
-        for p in ogrpolys:
-            feature = ogr.Feature(layer.GetLayerDefn())
-            feature.SetGeometry(p)
-            feature.SetField('id', polycount)
-            feature.SetField('area', p.Area())
-            layer.CreateFeature(feature)
-            feature.Destroy()                
-            polycount=polycount+1
-        
-        imgcount=imgcount+1
-        ds.Destroy()
+            lcount=1
             
+            for shape in polys:
+                line = ogr.Geometry(ogr.wkbLineString)   
+                for p in shape:
+                    line.AddPoint(p[0],p[1])
             
-def writeLineSHP(l, fileDirectory, projection=None):
-    '''Write OGR lines (from ALL images) to file in a .shp
-    file type that is compatible with ESRI mapping software.
+                #Create feature            
+                feature = ogr.Feature(layer.GetLayerDefn())
+                feature.SetGeometry(line)
+                feature.SetField('id', lcount)
+                feature.SetField('length', line.Length())
+                layer.CreateFeature(feature)
+                feature.Destroy() 
+                lcount=lcount+1
+            
+            imgcount=imgcount+1
+            ds.Destroy()
+
+
+def importMeasureData(trxclass, fileDirectory):
+    '''Get xyz and px data from text files and import into a specified 
+    Measure.Area or Measure.Line class object.
     
     Inputs
-    a:                          Line class object containing line detection
-                                results.
-    fileDirectory:              Destination that shapefiles will be written to           
-                                e.g. ../python_workspace/Results/
-    projection:                 Coordinate projection that the shapefile will 
-                                exist in. This can either be an ESPG number 
-                                (expressed as an integer) or a well-known 
-                                geographical coordinate system (expressed as a 
-                                string). Well-known geographical coordinate 
-                                systems are: 'WGS84', 'WGS72', NAD83' or 
-                                'EPSG:n'
-    '''        
-    #Get driver and create shapeData in shp file directory        
-    typ = 'ESRI Shapefile'        
-    driver = ogr.GetDriverByName(typ)
-    if driver is None:
-        raise IOError('%s Driver not available:\n' % typ)
+    trxclass:           Area/Line class object that data will be imported to.
+    fileDirectory:      Path to the folder where the text files containing data
+                        are. Specific files are needed for importing Area and 
+                        Line data:
+                        (1) Area: 4 text files needed. Two contain the pixel 
+                        and real world polygon coordinates and must be named 
+                        'px_coords.txt' and 'area_coords.txt'. The text files 
+                        containing the pixel and real world polygon areas must 
+                        be named 'px_sum.txt' and 'area_all.txt'. 
+                        (2) Line: 2 text files needed. These files contain 
+                        the pixel and real-world line coordinates and  must be
+                        named 'line_realcoords.txt' and 'line_pxcoords.txt'.
+            
+    Outputs:
+    rpoly/rline:        Real xyz coordinates of detected areas/lines.
+    rarea/rlength:      Real-world surface areas/distances.
+    pxpoly/pxline:      XY pixel coordinates of detected areas/lines.
+    pxarea/pxlength:    Pixel areas/distances.
+
+    Files from which data is imported will not be recognised if they are not 
+    named correctly. If files are located in multiple directories or file names 
+    cannot be changed then use the importAreaXYZ, importAreaPX, importLineXYZ
+    and importLinePX functions.  
+    
+    All imported data is held in the Area/Line class object specified as an 
+    input variable. This can be easily retrieved from the Area/Line class 
+    object itself.
+    '''
+    if isinstance(trxclass, Measure.Area) is True:
+        target1 = fileDirectory + 'area_coords.txt'
+        target2 = fileDirectory + 'area_all.txt'    
+        rpoly, rarea = importAreaXYZ(trxclass, target1, target2)
+        
+        target3 = fileDirectory + 'px_coords.txt'
+        target4 = fileDirectory + 'px_sum.txt'
+        pxpoly, pxarea = importAreaPX(trxclass, target3, target4)
+       
+        return rpoly, rarea, pxpoly, pxarea
+
+    elif isinstance(trxclass, Measure.Line) is True:
+        #Get real-world coordinates and distances
+        target1 = fileDirectory + 'line_realcoords.txt'
+        rline, rlength = importLineXYZ(trxclass, target1)
+        
+        #Get pixel coordinates and distances
+        target2 = fileDirectory + 'line_pxcoords.txt'
+        pxline, pxlength = importLinePX(trxclass, target2)
+        
+        #Return all line data
+        return rline, rlength, pxline, pxlength
+    
+    else:
+        print 'Unrecognised Area/Line class object.'''
         sys.exit(1)
 
-    xyz = l._realline
-    imgcount=1
-    
-    for line in xyz:
-        #Create datasource in shapefile
-        shp = fileDirectory + 'line' + str(imgcount) + '.shp'
-        if os.path.exists(shp):
-            print 'Deleting pre-existing datasource'
-            driver.DeleteDataSource(shp)
-        ds = driver.CreateDataSource(shp)
-        if ds is None:
-            print 'Could not create file %s' %shp
-        
-        #Set projection and initialise layer depending on projection input            
-        if type(projection) is int:
-            print 'ESPG projection detected'
-            proj = osr.SpatialReference()
-            proj.ImportFromEPSG(projection)
-            layer = ds.CreateLayer(' ', proj, ogr.wkbLineString)
-        elif type(projection) is str:
-            print 'Coordinate system detected'
-            proj = osr.SpatialReference()
-            proj.SetWellKnownGeogCS(projection)
-            layer = ds.CreateLayer(' ', proj, ogr.wkbLineString)
-        else:
-            print 'Projection for shapefiles not recognised'
-            print 'Proceeding shapefile generation without projection'
-            layer = ds.CreateLayer(' ', None, ogr.wkbLineString)
-        
-        #Add attributes
-        layer.CreateField(ogr.FieldDefn('id', ogr.OFTInteger))
-        layer.CreateField(ogr.FieldDefn('length', ogr.OFTReal))
-        
-        #Get ogr polygons from xyz areal data at given image 
-        lcount=1
-
-        #Create feature            
-        feature = ogr.Feature(layer.GetLayerDefn())
-        feature.SetGeometry(line)
-        feature.SetField('id', lcount)
-        feature.SetField('length', line.Length())
-        layer.CreateFeature(feature)
-        feature.Destroy()                
-        lcount=lcount+1
-        
-        imgcount=imgcount+1
-        ds.Destroy()
-
-
-def importAreaData(a, fileDirectory):
-    '''Get xyz and px data from text files and import into Areas class.
-    
-    Inputs
-    a:                  Area class object that data will be imported to.
-    fileDirectory:      Path to the folder where the four text files are. The
-                        text file containing the pixel and real world polygon 
-                        coordinates must be named 'px_coords.txt' and 
-                        'area_coords.txt'. The text file containing the pixel 
-                        and real world polygon areas must be named 'px_sum.txt' 
-                        and 'area_all.txt'. Files will not be recognised if 
-                        they are not named correctly. If files are located in 
-                        multiple directories or file names cannot be changed 
-                        then use the importAreaXYZ and importAreaPX functions.
-    Outputs
-    rpoly:              Real xyz polygon coordinates of detected areas.
-    rarea:              Real-world surface areas of detected areas.
-    pxpoly:             XY pixel coordinates of detected areas.
-    pxarea:             Pixel areas of detected areas.
-    
-    All imported data is held in the Area class object specified as an input
-    variable. This can be easily retrieved from the Area class object 
-    itself.
-    '''
-    target1 = fileDirectory + 'area_coords.txt'
-    target2 = fileDirectory + 'area_all.txt'    
-    rpoly, rarea = importAreaXYZ(a, target1, target2)
-    
-    target3 = fileDirectory + 'px_coords.txt'
-    target4 = fileDirectory + 'px_sum.txt'
-    pxpoly, pxarea = importAreaPX(a, target3, target4)
-   
-    a.setMethod('auto')
-    return rpoly, rarea, pxpoly, pxarea
      
-     
-def importAreaXYZ(a, target1, target2):
+def importAreaXYZ(areaclass, target1, target2):
     '''Get xyz polygon and area data from text files and import into Areas 
     class.
     Inputs
@@ -1205,7 +1198,7 @@ def importAreaXYZ(a, target1, target2):
     for line in f.readlines():
         if len(line) >= 6:
             alllines.append(line)  #Read lines in file             
-    print 'Detected xyz coordinates from ' + str(len(alllines)) + ' images'
+    print '\nDetected xyz coordinates from ' + str(len(alllines)) + ' images'
     f.close()
     #Set up xyz object
     xyz=[] 
@@ -1265,17 +1258,14 @@ def importAreaXYZ(a, target1, target2):
         areas.append(myimgs) 
         
     #Import data into Area class
-    a._realpoly = xyz
-    a._area = areas
-    
-    #Reset method
-    a.setMethod('auto')
+    areaclass._realpoly = xyz
+    areaclass._area = areas
     
     #Return polygon and area data
-    return a._realpoly, a._area
+    return areaclass._realpoly, areaclass._area
    
 
-def importAreaPX(a, target1, target2):
+def importAreaPX(areaclass, target1, target2):
     '''Get px polygon and extent data from multiple text files and import
     into Areas class.
     Inputs
@@ -1290,7 +1280,7 @@ def importAreaPX(a, target1, target2):
     for line in f.readlines():
         if len(line) >=6:
             alllines.append(line)
-    print 'Detected px coordinates from ' + str(len(alllines)) + ' images'
+    print '\nDetected px coordinates from ' + str(len(alllines)) + ' images'
     f.close()
     
     #Set up xyz object
@@ -1347,54 +1337,15 @@ def importAreaPX(a, target1, target2):
         #Compile areas from all images into a list of lists                                           
         a.append(poly) 
         areas = [ext[0] for ext in a]            
-    return areas
     
     #Import data into Area class
-    a._pxpoly = xy
-    a._pxextent = areas
+    areaclass._pxpoly = xy
+    areaclass._pxextent = areas
     
-    a.setMethod('auto')
-    return a._pxpoly, a._pxextent
-
-
-def importLineData(l, fileDirectory):
-    '''Get xyz and px data from text files and import into Length class.
-    
-    Inputs
-    l:                  Line class object that data will be imported to.
-    fileDirectory:      Path to the folder where the four text files are. The
-                        text file containing the pixel coordinates must be 
-                        named 'line_pxcoords.txt' and 'line_pxlength.txt'. The 
-                        text file containing real world polygon areas must be 
-                        named 'line_realcoords.txt' and 'line_reallength.txt'. 
-                        Files will not be recognised if they are not named 
-                        correctly. If files are located in different 
-                        directories or cannot be renamed, then use the 
-                        importLineXYZ and importLinePX functions.
-    
-    Outputs
-    rline:              XYZ line coordinates.
-    rlength:            Real-world distances along lines.
-    pxline:             XY line coordinates.
-    pxlength:           Pixel distances along lines.
-
-    All imported data is held in the Line class object specified as an input
-    variable. This can be easily retrieved from the Line class object 
-    itself.
-    '''
-    #Get real-world coordinates and distances
-    target1 = fileDirectory + 'line_realcoords.txt'
-    rline, rlength = importLineXYZ(l, target1)
-    
-    #Get pixel coordinates and distances
-    target2 = fileDirectory + 'line_pxcoords.txt'
-    pxline, pxlength = importLinePX(l, target2)
-    
-    #Return all line data
-    return rline, rlength, pxline, pxlength
+    return areaclass._pxpoly, areaclass._pxextent
      
      
-def importLineXYZ(l, filename):
+def importLineXYZ(lineclass, filename):
     '''Get xyz line and length data from text files and import into a Line 
     class object.
     Inputs
@@ -1414,13 +1365,13 @@ def importLineXYZ(l, filename):
         ogrline.append(length)
     
     #Import data into Area class
-    l._realpts = xyz
-    l._realline = ogrline
+    lineclass._realpts = xyz
+    lineclass._realline = ogrline
     
-    return l._realpts, l._realline
+    return lineclass._realpts, lineclass._realline
    
 
-def importLinePX(l, filename):
+def importLinePX(lineclass, filename):
     '''Get px line and length data from multiple text files and import
     into a Line class object.
     Inputs
@@ -1440,13 +1391,13 @@ def importLinePX(l, filename):
         ogrline.append(length)
     
     #Import data into Area class
-    l._pxpts = xy
-    l._pxline = ogrline
+    lineclass._pxpts = xy
+    lineclass._pxline = ogrline
     
-    return l._pxpts, l._pxline
+    return lineclass._pxpts, lineclass._pxline
 
      
-def _coordFromTXT(filename, xyz=True):
+def _coordFromTXT(filename, xyz):
     '''Import XYZ pts data from text file. Return list of arrays with 
     xyz pts.'''
     #Read file and detect number of images based on number of lines
