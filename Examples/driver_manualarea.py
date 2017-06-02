@@ -24,7 +24,7 @@ import time
 sys.path.append('../')
 from Measure import Area
 from CamEnv import CamEnv
-from FileHandler import writeAreaFile, writeAreaSHP
+from FileHandler import writeAreaFile, writeSHPFile, importMeasureData
 from Utilities import plotPX, plotXYZ
 
 
@@ -45,31 +45,30 @@ cameraenvironment = CamEnv(camdata)
 
 
 #Define Area class initialisation variables
-method = 'manual'           #Method for detection ('auto' or 'manual')
 calibFlag = True            #Detect with corrected or uncorrected images
 maxim = 0                   #Image number of maximum areal extent 
-imband = 'L'                #Desired image band
+imband = 'R'                #Desired image band
 loadall = False             #Load all images?
 timem = 'EXIF'              #Method to derive image times
 quiet = 2                   #Level of commentary
 
 #Set up Area object, from which areal extent will be measured
-plumes = Area(camimgs, cameraenvironment, method, calibFlag, None, maxim, 
-             imband, quiet, loadall, time)
+plumes = Area(camimgs, cameraenvironment, calibFlag, None, maxim, imband, 
+              quiet, loadall, time)
 
 
 #-------------------------   Calculate areas   --------------------------------
 
 #Calculate real areas
-rpolys, rareas = plumes.calcAreas(color=False, verify=False)
+rpolys, rareas = plumes.calcManualAreas()
 
 ##Calculate pixel extents. Use this function if pixel extents are only needed, 
 ##or a DEM is not available. Pixel extents are automatically calculated if 
 ##calcAreas is called.
-#polys, areas = lakes.calcExtents()
+#polys, areas = plumes.calcExtents()
 
-##Import data from file
-#rpolys, rareas, pxpolys, pxareas = lakes.importData(destination)
+#Import data from file
+rpolys, rareas, pxpolys, pxareas = importMeasureData(plumes, destination)
 
 
 #----------------------------   Export data   ---------------------------------
@@ -81,16 +80,16 @@ writeAreaFile(plumes, destination)
 #Create shapefiles
 target1 = destination + 'shpfiles/'
 proj = 32633
-writeAreaSHP(plumes, target1, proj) 
+writeSHPFile(plumes, target1, proj) 
 
 
 #Write all image extents and dems 
 target2 = destination + 'outputimgs/'
 for i in range(len(rpolys)):
     plotPX(plumes, i, destination, crop=False)
-    plotXYZ(plumes, i, destination, dem=False, show=True)
+    plotXYZ(plumes, i, destination, dem=True, show=True)
 
 
 #------------------------------------------------------------------------------                                                                                                                                                                                                                                                                                                      
 
-print 'Finished'
+print '\n\nFINISHED'

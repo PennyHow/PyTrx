@@ -1,4 +1,0 @@
-Img1_polyareas	331916.776505	
-Img2_polyareas	176234.766198	
-Img3_polyareas	121928.688506	
-Img4_polyareas	195618.140904	
