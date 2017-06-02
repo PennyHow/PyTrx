@@ -92,42 +92,42 @@ class Velocity(ImageSequence):
     default
     
     Inputs:
-        imageList:      List of images, for the ImageSet object.
-        camEnv:         The Camera Environment corresponding to the images, 
+    imageList:          List of images, for the ImageSet object.
+    camEnv:             The Camera Environment corresponding to the images, 
                         for the ImageSequence object.
-        maskPath:       The file path for the mask indicating the target area
+    maskPath:           The file path for the mask indicating the target area
                         for deriving velocities from. If this file exists, the 
                         mask will be loaded. If this file does not exist, then 
                         the mask generation process will load, and the result 
                         will be saved with this path.
-        invmaskPath:    As above, but the mask for the stationary feature 
+    invmaskPath:        As above, but the mask for the stationary feature 
                         tracking (for camera registration/determining
                         camera homography).
-        image0:         The image number in the ImageSet from which the 
+    image0:             The image number in the ImageSet from which the 
                         analysis will commence. This is set to the first image 
                         in the ImageSet by default.
-        band:           String denoting the desired image band.
-        quiet:          Level of commentary during processing. This can be a 
+    band:               String denoting the desired image band.
+    quiet:              Level of commentary during processing. This can be a 
                         integer value between 0 and 2.
                         0: No commentary.
                         1: Minimal commentary.
                         2: Detailed commentary.                          
-        loadall:        Flag which, if true, will force all images in the sequence
-                        to be loaded as images (array) initially and thus not 
-                        re-loaded in subsequent processing. This is only advised
-                        for small image sequences. 
-        timingMethod:   Method for deriving timings from imagery. By default, 
+    loadall:            Flag which, if true, will force all images in the 
+                        sequence to be loaded as images (array) initially and 
+                        thus not re-loaded in subsequent processing. This is 
+                        only advised for small image sequences. 
+    timingMethod:       Method for deriving timings from imagery. By default, 
                         timings are extracted from the image EXIF data.
     
     Class properties:
-        self._camEnv:   The camera environment object (CamEnv).
-        self._image0:   Integer denoting the image number in the ImageSet from
+    self._camEnv:       The camera environment object (CamEnv).
+    self._image0:       Integer denoting the image number in the ImageSet from
                         which the analysis will commence.
-        self._imageN:   Length of the ImageSet.
-        self._mask:     Mark array.
-        self._invmask:  Inverse mask array.
-        self._timings:  Timing between images.
-        self._quiet:    Integer value between denoting amount of commentary 
+    self._imageN:       Length of the ImageSet.
+    self._mask:         Mask array.
+    self._invmask:      Inverse mask array.
+    self._timings:      Timing between images.
+    self._quiet:        Integer value between denoting amount of commentary 
                         whilst processing.
     '''   
         
@@ -156,7 +156,7 @@ class Velocity(ImageSequence):
         #self.set_Timings(timingMethod)
 
     
-    def set_Timings(self,method='EXIF'):
+    def set_Timings(self, method='EXIF'):
         '''Method to explictly set the image timings that can be used for
         any offset time calculations (e.g. velocity) and also used for any
         output and plots.
@@ -713,11 +713,10 @@ class Area(Velocity):
     (px) and real areal change via georectification.
     
     Inputs:
-    imageList:          List of images, for the ImageSet object        
+    imageList:          List of images, for the ImageSet object.        
     cameraenv:          Camera environment parameters which can be read into 
                         the CamEnv class as a text file (see CamEnv 
-                        documentation for exact information needed)
-    method:
+                        documentation for exact information needed).
     calibFlag:          An indicator of whether images are calibrated, for the 
                         ImageSet object.     
     maxMaskPath:        The file path for the mask indicating the region where 
@@ -731,14 +730,58 @@ class Area(Velocity):
                         saved.
     maxim:              Image with maximum areal extent to be detected (for 
                         mask generation).     
-    band:
-    quiet:
-    loadall:
-    timingMethod:
+    band:               String denoting the desired image band.
+    quiet:              Level of commentary during processing. This can be a 
+                        integer value between 0 and 2.
+                        0: No commentary.
+                        1: Minimal commentary.
+                        2: Detailed commentary.                          
+    loadall:            Flag which, if true, will force all images in the 
+                        sequence to be loaded as images (array) initially and 
+                        thus not re-loaded in subsequent processing. This is 
+                        only advised for small image sequences. 
+    timingMethod:       Method for deriving timings from imagery. By default, 
+                        timings are extracted from the image EXIF data.
+
+    Class properties:
+    self._maximg:       Reference number for image with maximum areal extent.
+    self._pxplot:       Pixel plotting extent for easier colourrange definition 
+                        and area verification [xmin, xmax, ymin, ymax]
+    self._colourrange:  Colour range for automated area detection.
+    self._threshold:    Maximum number of polygons retained after initial 
+                        detection (based on size of polygons)
+    self._enhance:      Image enhancement parameters for changing brightness 
+                        and contrast. This is defined by three variables, 
+                        held as a list: [diff, phi, theta].
+                        (1) diff: Inputted as either 'light or 'dark', 
+                        signifying the intensity of the image pixels. 'light' 
+                        increases the intensity such that dark pixels become 
+                        much brighter and bright pixels become slightly 
+                        brighter. 'dark' decreases the intensity such that dark 
+                        pixels become much darker and bright pixels become 
+                        slightly darker.
+                        (2) phi: Defines the intensity of all pixel values.
+                        (3) theta: Defines the number of "colours" in the image, 
+                        e.g. 3 signifies that all the pixels will be grouped 
+                        into one of three pixel values.
+                        The default enhancement parameters are ['light', 50, 
+                        20].
+    self._calibFlag:    Boolean flag denoting whether measurements should be 
+                        made on images corrected/uncorrected for distortion.
+    self._quiet:        Integer value between denoting amount of commentary 
+                        whilst processing.
+    self._pxpoly:       Output pixel coordinates (uv) for detected areas in an 
+                        image sequence.
+    self._pxextent:     Output pixel extents for detected areas in an image 
+                        sequence.
+    self._realpoly:     Output real-world coordinates (xyz) for detected areas 
+                        in an image sequence.
+    self._area:         Output real-world surface areas for detected areas in 
+                        an image sequence.
     '''
     
     #Initialisation of Area class object          
-    def __init__(self, imageList, cameraenv, method='auto', calibFlag=True, 
+    def __init__(self, imageList, cameraenv, calibFlag=True, 
                  maxMaskPath=None, maxim=0, band='L', quiet=2, loadall=False, 
                  timingMethod='EXIF'):
                      
@@ -748,13 +791,12 @@ class Area(Velocity):
 
         #Optional commentary        
         if self._quiet>0:
-            print '\n\nAREA DETECTION COMMENCING'
+            print '\n\nCOMMENCING AREA DETECTION'
             
         self._maximg = maxim
         self._pxplot = None
         self._colourrange = None
         self._threshold = None
-        self._method = method
         self._enhance = None
         self._calibFlag = calibFlag
         self._quiet = quiet
@@ -771,90 +813,109 @@ class Area(Velocity):
             self._setMaxMask()
 
 
-    def calcAreas(self, color=False, verify=False):
+    def calcAutoAreas(self, color=False, verify=False):
         '''Get real world areas from an image set. Calculates the polygon 
-        extents for each image and the area of each given polygon.'''                
-        #Get pixel polygons
-        if self._method is 'auto':
-            if self._pxpoly is None:
-                self.calcExtents(color, verify)
-        
-        elif self._method is 'manual':
-            if self._pxpoly is None:
-                self.manualExtents()
+        extents for each image and the area of each given polygon.'''               
+        #Optional commentary
+        if self._quiet>0:
+            '\n\nCOMMENCING AUTOMATED AREA DETECTION'
+            
+        #Get pixel polygons using automated extent detection method
+        if self._pxpoly is None:
+            self.calcAutoExtents(color, verify)
         
         #Optional commentary
         if self._quiet>0:
             print '\n\nCOMMENCING GEORECTIFICATION OF AREAS'
-            
+        
+        #Create empty output lists
         xyz = []
         area = []
         
+        #Calculate real-world areas with inverse projection        
         for p in self._pxpoly:
-            pts, a = self.calcArea(p)
+            pts, a = self._getRealArea(p)
             xyz.append(pts)
             area.append(a)
-        
+
+        #Assign real-world areas to Area object        
         self._realpoly = xyz
-        self._area = area
-        
+        self._area = area        
         return self._realpoly, self._area
 
 
-    def calcArea(self, pxpoly):
-        '''Get real world areas from px polygons defined in one image.'''                    
-        #Create outputs
-        xyz = []   
-        area = []                               
-
-        #Project image coordinates
-        for p in pxpoly:                        
-            allxyz = self._camEnv.invproject(p)
-            xyz.append(allxyz)                  
+    def calcManualAreas(self):
+        '''Get real world areas from an image set. Calculates the polygon 
+        extents for each image and the area of each given polygon.'''               
+        #Optional commentary        
+        if self._quiet>0:
+            '\n\nCOMMENCING MANUAL AREA DETECTION'
+            
+        #Get pixel polygons using manual extent detection method
+        if self._pxpoly is None:
+            pxpoly, pxextent = self.calcManualExtents()
         
-        #Create polygons
-        rpoly = self._ogrPoly(xyz)              
+        #Optional commentary
+        if self._quiet>0:
+            print '\n\nCOMMENCING GEORECTIFICATION OF AREAS'
         
-        #Determine area of each polygon
-        for r in rpoly:
-            area.append(r.Area())               
-           
-        return xyz, area  
+        #Create empty output lists
+        xyz = []
+        area = []
+        
+        #Calculate real-world areas with inverse projection
+        for p in self._pxpoly:
+            pts, a = self._getRealArea(p)
+            xyz.append(pts)
+            area.append(a)
+        
+        #Assign real-world areas to Area object
+        self._realpoly = xyz
+        self._area = area        
+        return self._realpoly, self._area
           
 
-    def calcExtents(self, color=False, verify=False):
+    def calcAutoExtents(self, colour=False, verify=False):
         '''Get pixel extent from a series of images. Return the extent polygons
         and cumulative extent values (px).'''       
-        #Only define color range once
-        if color is False:        
-            #Get image with maximum extent
-            if self._calibFlag is True:
-                cameraMatrix=self._camEnv.getCamMatrixCV2()
-                distortP=self._camEnv.getDistortCoeffsCv2()
-                maximg=self._imageSet[self._maximg].getImageCorr(cameraMatrix, 
-                                                                 distortP)        
-            else:
-                maximg = self._imageSet[self._maximg].getImageArray() 
-
-            #Get image name
-            maximn=self._imageSet[self._maximg].getImagePath().split('\\')[1]
-              
-            #Get mask and mask image if present
-            if self._mask is not None:
-                maximg = self._maskImg(maximg)        
-                   
-            #get colour range for extent detection
+        
+        #If user is only defining the color range once
+        if colour is False: 
+            
+            #Define colour range if none is given
             if self._colourrange is None:
+
+                #Get image with maximum extent (either corrected or distorted)
+                if self._calibFlag is True:
+                    cameraMatrix=self._camEnv.getCamMatrixCV2()
+                    distortP=self._camEnv.getDistortCoeffsCv2()
+                    maximg=self._imageSet[self._maximg].getImageCorr(cameraMatrix, 
+                                                                     distortP)        
+                else:
+                    maximg = self._imageSet[self._maximg].getImageArray() 
+    
+                #Get image name
+                maximn=self._imageSet[self._maximg].getImagePath().split('\\')[1]
+                  
+                #Get mask and mask image if present
+                if self._mask is not None:
+                    maximg = self._maskImg(maximg)        
+                       
+                #Enhance image if enhancement parameters given
                 if self._enhance is not None:
-                    maximg = self.enhanceImg(maximg)
+                    maximg = self._enhanceImg(maximg)
+                
+                #Define colour range
                 self.defineColourrange(maximg, maximn)    
             
         #Set up output datasets
         areas=[]        
         px=[]
                        
-        #Cycle through image pairs (numbered from 0)
+        #Cycle through image sequence (numbered from 0)
         for i in range(self.getLength()):
+            
+            #Get corrected/distorted image
             if self._calibFlag is True:
                 cameraMatrix=self._camEnv.getCamMatrixCV2()
                 distortP=self._camEnv.getDistortCoeffsCv2()
@@ -866,19 +927,31 @@ class Area(Velocity):
             #Get image name
             imn=self._imageSet[i].getImagePath().split('\\')[1]
                
+            #Make a copy of the image array
             img2 = np.copy(img1)
+            
+            #Mask image if mask is present
             if self._mask is not None:
                 img2 = self._maskImg(img2)
+            
+            #Enhance image if enhancement parameters are present
             if self._enhance is not None:
                 img2 = self._enhanceImg(img2)
-            if color is True:
+            
+            #Define colour range if required
+            if colour is True:
                 self.defineColourrange(img2, imn)
+            
+            #Optional commentary
             if self._quiet>0:
                 print '\nCalculating extent for ' + imn
-            polys,extent = self.calcExtent(img2)        
+            
+            #Calculate extent
+            polys,extent = self._calcAutoExtent(img2)        
             areas.append(polys)
             px.append(extent)
 
+            #Clear memory
             self._imageSet[i].clearImage()
             self._imageSet[i].clearImageArray()
             
@@ -918,7 +991,7 @@ class Area(Velocity):
             
             if 1:             
                 if self._quiet>0:                
-                    print '\n\nVERIFYING DETECTED AREAS'
+                    print '\n\nVERIFYING DETECTED AREAS FOR ' + imn
                 verf = []
                 
                 def onpick(event):
@@ -979,15 +1052,12 @@ class Area(Velocity):
             self._imageSet[i].clearImage()
             self._imageSet[i].clearImageArray()
         
-        #Reset method (which indicates how the data is structured)
-        self._method='manual'
-        
         #Rewrite pixel polygon and extent data
         self._pxpoly = verified
         self._pxextent = update_ext
     
         
-    def manualExtents(self):
+    def calcManualExtents(self):
         '''Get manual pixel extent from a series of images. Return the 
         extent polygons and cumulative extent values (px).'''                 
         #Set up output dataset
@@ -1006,7 +1076,7 @@ class Area(Velocity):
             #Get image name
             imn=self._imageSet[i].getImagePath().split('\\')[1]
             
-            polys,extent = self.manualExtent(img, imn)        
+            polys,extent = self._calcManualExtent(img, imn)        
             areas.append(polys)
             px.append(extent)
             
@@ -1021,138 +1091,8 @@ class Area(Velocity):
         return self._pxpoly, self._pxextent
 
 
-    def calcExtent(self, img):
-        '''Get extent from a given image using a predefined RBG colour range. 
-        The colour range is then used to extract pixels within that range 
-        using the OpenCV function inRange. If a threshold has been set (using
-        the setThreshold function) then only nth polygons will be retained.'''         
-        #Get upper and lower RBG boundaries from colour range
-        upper_boundary = self._colourrange[0]
-        lower_boundary = self._colourrange[1]
-    
-        #Transform RBG range to array    
-        upper_boundary = np.array(upper_boundary, dtype='uint8')
-        lower_boundary = np.array(lower_boundary, dtype='uint8')
-    
-        #Extract extent based on rbg range
-        mask = cv2.inRange(img, lower_boundary, upper_boundary)
-        
-        #Speckle filter to remove noise
-        cv2.filterSpeckles(mask, 1, 30, 2)
-        
-        #Polygonize extents        
-        polyimg, line, hier = cv2.findContours(mask, cv2.RETR_EXTERNAL, 
-                                               cv2.CHAIN_APPROX_NONE)
-        
-        #Optional commentary
-        if self._quiet>1:
-            print 'Detected %d regions' % (len(line))
-        
-        #Append all polygons from the polys list that have more than 
-        #a given number of points     
-        pxpoly = []
-        for c in line:
-            if len(c) >= 40:
-                pxpoly.append(c)
-        
-        #If threshold has been set, only keep the nth longest polygons
-        if self._threshold is not None:
-            if len(pxpoly) >= self._threshold:
-                pxpoly.sort(key=len)
-                pxpoly = pxpoly[-(self._threshold):]        
-
-        #Optional commentary
-        if self._quiet>1:        
-            print 'Kept %d regions' % (len(pxpoly))
-        
-        #Get image dimensions
-        h = img.shape[0]
-        w = img.shape[1]
-        
-        #THIS DOESN'T SEEM TO WORK PROPERLY YET. DOES NOT FILL POLYGONS 
-        #CORRECTLY
-        px_im = Img.new('L', (w,h), 'black')
-        px_im = np.array(px_im) 
-        cv2.drawContours(px_im, pxpoly, -1, (255,255,255), 4)
-        for p in pxpoly:
-            cv2.fillConvexPoly(px_im, p, color=(255,255,255))           
-        output = Img.fromarray(px_im)
-        pixels = output.getdata()
-        values = []    
-        for px in pixels:
-            if px > 0:
-                values.append(px)
-        pxextent = len(values) #total lake extent
-        pxcount = len(pixels) #total img area
-        
-        #Optional commentary
-        if self._quiet>1:
-            print 'Extent: ', pxextent, 'px (out of ', pxcount, 'px)'
-        
-        return pxpoly, pxextent
-        
-
-    def manualExtent(self, img, imn):
-        '''Manually define extent by clicking around region in target image.'''
-         #Manual interaction to select lightest and darkest part of the region
-#        pts=[]        
-#        while len(pts) < 3:
-        fig=plt.gcf()
-        fig.canvas.set_window_title(imn + ': Click around region. Press enter '
-                                    'to record points.')
-        plt.imshow(img, origin='upper', cmap='gray')
-        if self._pxplot is not None:
-            plt.axis([self._pxplot[0],self._pxplot[1],
-                      self._pxplot[2],self._pxplot[3]])                   
-        pts = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, 
-                        mouse_pop=3, mouse_stop=2)
-        
-        #Optional commentary
-        if self._quiet>1:
-            print '\n' + imn + ': you clicked ' + str(len(pts)) + ' points'
-        
-        plt.show()
-        plt.close()
-        
-#            #Reboot window if =<2 points are recorded
-#            if len(pts) > 3:
-#                pts = []
-            
-        #Create polygon if area has been recorded   
-        try:
-            #Complete the polygon             
-            pts.append(pts[0])        
-            ring = ogr.Geometry(ogr.wkbLinearRing)   
-            for p in pts:
-                ring.AddPoint(p[0],p[1])
-            p=pts[0]
-            ring.AddPoint(p[0],p[1])
-            pxpoly = ogr.Geometry(ogr.wkbPolygon)
-            
-            #Create polygon ring with calculated area           
-            pxpoly.AddGeometry(ring) 
-            pxextent = pxpoly.Area()
-        except:
-            pxextent = 0
-                   
-        #Get image dimensions
-        h = img.shape[0]
-        w = img.shape[1]
-        pxcount = h*w
-        
-        #Optional commentary
-        if self._quiet>1:
-            print 'Extent: ', pxextent, 'px (out of ', pxcount, 'px)'    
-        
-        #Convert pts list to array
-        pts = np.array(pts)           
-        pts=[pts]
-        
-        return pts, pxextent
-
-
     def setEnhance(self, diff, phi, theta):
-        '''Set image enhancement parameters. See enhanceImg function for 
+        '''Set image enhancement parameters. See _enhanceImg function for 
         detailed explanation of the parameters.
         -diff: 'light' or 'dark'
         -phi: a value between 0 and 1000
@@ -1258,7 +1198,7 @@ class Area(Velocity):
         #Manual interaction to select lightest and darkest part of the region
         fig=plt.gcf()
         fig.canvas.set_window_title(imn + ': Click lightest colour and darkest' 
-                                    'colour')
+                                    ' colour')
         
         plt.imshow(img, origin='upper')
 
@@ -1308,11 +1248,168 @@ class Area(Velocity):
 
         #Store RBG range
         self._colourrange = [upper_boundary, lower_boundary]
+
+
+    def _calcAutoExtent(self, img):
+        '''Get extent from a given image using a predefined RBG colour range. 
+        The colour range is then used to extract pixels within that range 
+        using the OpenCV function inRange. If a threshold has been set (using
+        the setThreshold function) then only nth polygons will be retained.'''         
+        #Get upper and lower RBG boundaries from colour range
+        upper_boundary = self._colourrange[0]
+        lower_boundary = self._colourrange[1]
+    
+        #Transform RBG range to array    
+        upper_boundary = np.array(upper_boundary, dtype='uint8')
+        lower_boundary = np.array(lower_boundary, dtype='uint8')
+    
+        #Extract extent based on rbg range
+        mask = cv2.inRange(img, lower_boundary, upper_boundary)
         
+        #Speckle filter to remove noise
+        cv2.filterSpeckles(mask, 1, 30, 2)
+        
+        #Polygonize extents        
+        polyimg, line, hier = cv2.findContours(mask, cv2.RETR_EXTERNAL, 
+                                               cv2.CHAIN_APPROX_NONE)
+        
+        #Optional commentary
+        if self._quiet>1:
+            print 'Detected %d regions' % (len(line))
+        
+        #Append all polygons from the polys list that have more than 
+        #a given number of points     
+        pxpoly = []
+        for c in line:
+            if len(c) >= 40:
+                pxpoly.append(c)
+        
+        #If threshold has been set, only keep the nth longest polygons
+        if self._threshold is not None:
+            if len(pxpoly) >= self._threshold:
+                pxpoly.sort(key=len)
+                pxpoly = pxpoly[-(self._threshold):]        
+
+        #Optional commentary
+        if self._quiet>1:        
+            print 'Kept %d regions' % (len(pxpoly))
+        
+        #Get image dimensions
+        h = img.shape[0]
+        w = img.shape[1]
+        
+        #THIS DOESN'T SEEM TO WORK PROPERLY YET. DOES NOT FILL POLYGONS 
+        #CORRECTLY
+        px_im = Img.new('L', (w,h), 'black')
+        px_im = np.array(px_im) 
+        cv2.drawContours(px_im, pxpoly, -1, (255,255,255), 4)
+        for p in pxpoly:
+            cv2.fillConvexPoly(px_im, p, color=(255,255,255))           
+        output = Img.fromarray(px_im)
+        pixels = output.getdata()
+        values = []    
+        for px in pixels:
+            if px > 0:
+                values.append(px)
+        pxextent = len(values) #total lake extent
+        pxcount = len(pixels) #total img area
+        
+        #Optional commentary
+        if self._quiet>1:
+            print 'Extent: ', pxextent, 'px (out of ', pxcount, 'px)'
+        
+        return pxpoly, pxextent
+        
+
+    def _calcManualExtent(self, img, imn):
+        '''Manually define extent by clicking around region in target image.'''
+         #Manual interaction to select lightest and darkest part of the region
+#        pts=[]        
+#        while len(pts) < 3:
+        fig=plt.gcf()
+        fig.canvas.set_window_title(imn + ': Click around region. Press enter '
+                                    'to record points.')
+        plt.imshow(img, origin='upper', cmap='gray')
+        if self._pxplot is not None:
+            plt.axis([self._pxplot[0],self._pxplot[1],
+                      self._pxplot[2],self._pxplot[3]])                   
+        pts = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, 
+                        mouse_pop=3, mouse_stop=2)
+        
+        #Optional commentary
+        if self._quiet>1:
+            print '\n' + imn + ': you clicked ' + str(len(pts)) + ' points'
+        
+        plt.show()
+        plt.close()
+        
+#            #Reboot window if =<2 points are recorded
+#            if len(pts) > 3:
+#                pts = []
+            
+        #Create polygon if area has been recorded   
+        try:
+            #Complete the polygon             
+            pts.append(pts[0])        
+            ring = ogr.Geometry(ogr.wkbLinearRing)   
+            for p in pts:
+                ring.AddPoint(p[0],p[1])
+            p=pts[0]
+            ring.AddPoint(p[0],p[1])
+            pxpoly = ogr.Geometry(ogr.wkbPolygon)
+            
+            #Create polygon ring with calculated area           
+            pxpoly.AddGeometry(ring) 
+            pxextent = pxpoly.Area()
+        except:
+            pxextent = 0
+                   
+        #Get image dimensions
+        h = img.shape[0]
+        w = img.shape[1]
+        pxcount = h*w
+        
+        #Optional commentary
+        if self._quiet>1:
+            print 'Extent: ', pxextent, 'px (out of ', pxcount, 'px)'    
+        
+        #Convert pts list to array
+        pts = np.array(pts)           
+        pts=[pts]
+        
+        return pts, pxextent
+
+
+    def _getRealArea(self, pxpoly):
+        '''Get real world areas from px polygons defined in one image.'''                    
+        #Create outputs
+        xyz = []   
+        area = []                               
+
+        #Project image coordinates
+        for p in pxpoly:                        
+            allxyz = self._camEnv.invproject(p)
+            xyz.append(allxyz)                  
+        
+        #Create polygons
+        rpoly = self._ogrPoly(xyz)              
+        
+        #Determine area of each polygon
+        for r in rpoly:
+            area.append(r.Area())               
+           
+        return xyz, area         
+
         
     def _getRBG(self, img, x, y):
         '''Return the RBG value for a given point (x,y) in an image (img).'''
-        RBG = img[x,y]    
+        #Get pixel intensity value        
+        RBG = img[x,y]
+        
+        #Change pixel intensity value to 1 if 0 has been initially assigned
+        if RBG == 0:
+            RBG == 1
+            
         return RBG
 
 
@@ -1416,23 +1513,71 @@ class Area(Velocity):
 
 
 class Line(Area):
-    '''Class for point and line measurements.'''             
-    def __init__(self, imageList, cameraenv, method='manual', calibFlag=True,
+    '''Class for point and line measurements.
+    Class properties:    
+    self._calibFlag:    Boolean flag denoting whether measurements should be 
+                        made on images corrected/uncorrected for distortion.
+    self._quiet:        Integer value between denoting amount of commentary 
+                        whilst processing.
+    self._pxpoly:       Output pixel coordinates (uv) for detected areas in an 
+                        image sequence.
+    self._pxextent:     Output pixel extents for detected areas in an image 
+                        sequence.
+    self._realpoly:     Output real-world coordinates (xyz) for detected areas 
+                        in an image sequence.
+    self._area:         Output real-world surface areas for detected areas in 
+                        an image sequence.
+    '''
+             
+    def __init__(self, imageList, cameraenv, calibFlag=True,
                  band='L', quiet=2, loadall=False, timingMethod='EXIF'):
 
-        Area.__init__(self, imageList, cameraenv, method, calibFlag, None, 0, 
+        Area.__init__(self, imageList, cameraenv, calibFlag, None, 0, 
                       band, quiet, loadall, timingMethod)
                      
-        self._method = method
         self._enhance = None
         
         self._pxpts = None
         self._pxline = None
         self._realpts = None
         self._realline = None
-      
 
-    def manualLinesPX(self):
+
+    def calcManualLinesXYZ(self):
+        '''Get real world lines from an image set. Calculates the line 
+        coordinates and length of each given set of pixel points.'''
+        #Get pixel points if not already defined
+        if self._pxpts is None:
+            self.manualLinesPX()
+        
+        #Set output variables and counter
+        rpts = []
+        rline = []        
+        count=1
+        
+        #Project pixel coordinates to obtain real world coordinates and lines
+        for p in self._pxpts:
+            rp=[]
+            
+            #Project image coordinates
+            xyz = self._CamEnv.invproject(p)
+            rp.append(xyz)
+            rp = np.squeeze(rpts)
+            
+            #Create polygons
+            rl = self._ogrLine(rpts)
+            print 'Img ' + str(count) + ' line length: ' + str(rl.Length())
+            rpts.append(rp)
+            rline.append(rl)
+            count=count+1
+
+        #Return real line coordinates and line length objects                
+        self._realpts = rpts
+        self._realline = rline        
+        return self._realpts, self._realline
+     
+
+    def calcManualLinesPX(self):
         '''Get manual pixel line from a series of images. Return the 
         line pixel coordinates and pixel length.'''                 
         #Set up output dataset
@@ -1454,7 +1599,7 @@ class Line(Area):
             imn=self._imageSet[i].getImagePath().split('\\')[1]
             
             #Define line
-            pt,length = self.manualLinePX(img1, imn)
+            pt,length = self._calcManualLinePX(img1, imn)
             if self._quiet>1:            
                 print '\nLine defined in ' + imn                
                 print 'Img%i line length: %d px' % (count, length.Length())
@@ -1471,7 +1616,7 @@ class Line(Area):
         return self._pxpts, self._pxline
         
 
-    def manualLinePX(self, img, imn):
+    def _calcManualLinePX(self, img, imn):
         '''Manually define a line by clicking in the target image.'''
          #Manual interaction to define line
         fig=plt.gcf()
@@ -1504,49 +1649,7 @@ class Line(Area):
         for p in pts:
             line.AddPoint(p[0],p[1])
         
-        return line
-
-   
-    def calcLinesXYZ(self):
-        '''Get real world lines from an image set. Calculates the line 
-        coordinates and length of each given set of pixel points.'''
-        #Get pixel points if not already defined
-        if self._pxpts is None:
-            self.manualLinesPX()
-        
-        #Set output variables and counter
-        rpts = []
-        rline = []        
-        count=1
-        
-        #Project pixel coordinates to obtain real world coordinates and lines
-        for p in self._pxpts:
-            pts, line = self.calcLength(p)
-            print 'Img ' + str(count) + ' line length: ' + str(line.Length())
-            rpts.append(pts)
-            rline.append(line)
-            count=count+1
-
-        #Return real line coordinates and line objects                
-        self._realpts = rpts
-        self._realline = rline        
-        return self._realpts, self._realline
-
-
-    def calcLineXYZ(self, px):
-        '''Get real world line from px points defined in one image.'''                    
-        #Create outputs        
-        rpts = []  
-
-        #Project image coordinates           
-        xyz = self._CamEnv.invproject(px)
-        rpts.append(xyz)              
-        rpts = np.squeeze(rpts)
-
-        #Create polygons        
-        rline = self._ogrLine(rpts)    
-           
-        return rpts, rline  
+        return line 
         
 
 #------------------------------------------------------------------------------
