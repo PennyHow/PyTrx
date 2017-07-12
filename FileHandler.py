@@ -362,15 +362,31 @@ def readGCPs(fileName):
 
     #Iterate through lines and append to lists
     gcps= []
-    for line in myFile.readlines():
+    count=2
+    for line in myFile.readlines():       
         items=line.split('\t')
         gcp = []
+        
+        #Append values if they are valid
         for i in items:
-            gcp.append(float(i))               
-        gcps.append(gcp)
-    
-    # Split the list into world and image coordinates
-    gcparray = np.array(gcps) 
+            try:
+                gcp.append(float(i)) 
+            except ValueError:
+                pass
+        
+        #Append points if there are 5 corresponding values
+        if len(gcp)==5:    
+            gcps.append(gcp)
+        else:
+            print ('\nGCP ERROR: ' + str(len(gcp)) + 
+                   '/5 values found in line ' + str(count))
+            print 'Values not passed forward. Check GCP file'
+        
+        #Update counter        
+        count=count+1
+                  
+    #Split the list into world and image coordinates
+    gcparray = np.array(gcps)
     world, image = np.hsplit(gcparray,np.array([3]))
            
     return world, image
