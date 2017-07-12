@@ -30,12 +30,12 @@ from Utilities import plotPX, plotXYZ
 #-----------------------------   Map data files   -----------------------------
 
 #Define data inputs
-camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_cam5_2014.txt'
+camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_KR5_2014.txt'
 cammask = '../Examples/camenv_data/masks/c5_2014_amask.JPG'
 camimgs = '../Examples/images/KR5_2014_subset/*.JPG'
 
 #Define data output directory
-destination = '../Examples/results/KR5_autoarea/'
+destination = '../Examples/results/KR5_autoarea_sens_plusvertical/'
 
 
 #--------------------   Create camera and area objects   ----------------------

@@ -427,6 +427,7 @@ class CamEnv(CamCalib):
         
         #Set commentary level
         self._quiet = quiet
+        
         #Read parameters from the environment file             
         params = self.dataFromFile(envFile)
 
@@ -438,7 +439,7 @@ class CamEnv(CamCalib):
             if self._quiet>0:
                 print '\nINITIALISING CAMERA ENVIRONMENT'
             name, GCPpath, DEMpath, imagePath, calibPath, coords, ypr, DEMdensify = params           
-        
+
         #Set up object parameters
         self._name = name
         self._camloc = np.array(coords)
@@ -446,8 +447,7 @@ class CamEnv(CamCalib):
         self._DEMdensify=DEMdensify
         self._GCPpath = GCPpath
         self._imagePath = imagePath
-        self._refImage=CamImage(imagePath)
-        
+        self._refImage=CamImage(imagePath)      
 
         #Set yaw, pitch and roll to 0 if no information is given        
         if ypr == None:
@@ -502,14 +502,14 @@ class CamEnv(CamCalib):
         f=open(filename)
         lines=f.readlines()
         f.close()
- 
+        
         #Search for keywords and identify which line they are in       
         for i in range(len(lines)):
             stripped=lines[i].split("#")[0].strip().lower().replace(" ","")
             for key in self.key_labels:
                 if self.key_labels[key]==stripped:
                     key_lines.update({key:i})
-
+        
         #Define CamEnv name if information is present in .txt file
         lineNo=key_lines["name"]
         if lineNo!=None:

@@ -1419,7 +1419,7 @@ class Area(Velocity):
                               within the image.
         pxextent:             Pixel extents for all detected polygons within 
                               the image.
-        '''         
+        '''                       
         #Get upper and lower RBG boundaries from colour range
         upper_boundary = self._colourrange[0]
         lower_boundary = self._colourrange[1]
@@ -1433,6 +1433,9 @@ class Area(Velocity):
         
         #Speckle filter to remove noise
         mask = cv2.filterSpeckles(mask, 1, 30, 2)
+        
+        plt.imshow(mask)
+        plt.show()
         
         #Polygonize extents using OpenCV findContours function        
         polyimg, line, hier = cv2.findContours(mask, cv2.RETR_EXTERNAL, 
