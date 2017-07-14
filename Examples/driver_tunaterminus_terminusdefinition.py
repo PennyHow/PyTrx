@@ -19,6 +19,8 @@ import os
 sys.path.append('../')
 from Measure import Line
 from CamEnv import CamEnv
+from FileHandler import writeSHPFile
+from Utilities import plotPX, plotXYZ
 
 
 #---------------------------   Initialisation   -------------------------------
@@ -29,7 +31,7 @@ cammask = '../Examples/camenv_data/masks/TU2_2015_lmask.JPG'
 camimgs = '../Examples/images/TU2_2015_subset/*.JPG'
 
 #Define data output directory
-destination = '../Examples/results/TU2_manuallines/'
+destination = '../Examples/results/TU2_manualline/'
 if not os.path.exists(destination):
     os.makedirs(destination)
 
@@ -57,16 +59,16 @@ if not os.path.exists(geodata):
     os.makedirs(geodata)
 
 proj = 32633
-terminus.exportSHP(geodata, hours, proj)
+writeSHPFile(terminus, destination, proj)
 
 
 #----------------------------   Show results   --------------------------------
 
 ##Plot and save all extent and area images
 length=len(pxline)
-for i in range(length):
-    terminus.plotPX(i, hours,destination)
-#   terminus.plotXYZ(i)
+for i in range(len(pxline)):
+    plotPX(terminus, i, destination, crop=False)
+    plotXYZ(terminus, i, destination, dem=True, show=True)
 
 
 print 'Finished'

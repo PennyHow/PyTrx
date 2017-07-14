@@ -788,7 +788,7 @@ class CamEnv(CamCalib):
         zi=interpolate.griddata(uv0, Z, uv, method='linear')
         
         #Return xyz grids                
-        xyz=np.column_stack([xi,yi,zi])
+        xyz=np.column_stack([xi,yi,zi])       
         return xyz
 
 

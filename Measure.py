@@ -1842,36 +1842,33 @@ class Line(Area):
         '''
         #Get pixel points if not already defined
         if self._pxpts is None:
-            self.manualLinesPX()
+            self.calcManualLinesPX()
         
         #Set output variables and counter
         rpts = []
         rline = []        
         count=1
         
+        #Optional commentary
+        if self._quiet>0:
+            print '\n\nCOMMENCING GEORECTIFICATION OF LINES'
+        
         #Project pixel coordinates to obtain real world coordinates and lines
-        for p in self._pxpts:
-            #Optional commentary
-            if self._quiet>0:
-                print '\n\nCOMMENCING GEORECTIFICATION OF LINES'
-            
-            #Create empty output list
-            rp=[]
+        for p in self._pxpts:              
             
             #Project image coordinates
-            xyz = self._CamEnv.invproject(p)
-            rp.append(xyz)
-            rp = np.squeeze(rpts)
+            xyz = self._camEnv.invproject(p)
+#            rp = np.squeeze(rpts)
             
-            #Create polygons
-            rl = self._ogrLine(rpts)
+            #Create ogr line object
+            rl = self._ogrLine(xyz)
             
             #Optional commentary
             if self._quiet>1:
-                print 'Img ' + str(count) + ' line length: ' + str(rl.Length())
+                print '\nImg ' + str(count) + ' line length: ' + str(rl.Length())
             
             #Append coordinates and distances            
-            rpts.append(rp)
+            rpts.append(xyz)
             rline.append(rl)
             
             #Update counter
@@ -1923,9 +1920,9 @@ class Line(Area):
             
             #Optional commentary
             if self._quiet>1:            
-                print '\nLine defined in ' + imn                
+                print '\n\nLine defined in ' + imn                
                 print 'Img%i line length: %d px' % (count, length.Length())
-                print 'Line contains %i points\n' % (length.GetPointCount())
+                print 'Line contains %i points' % (length.GetPointCount())
             
             #Append line
             pts.append(pt)
@@ -1995,8 +1992,12 @@ class Line(Area):
         
         #Append points to geometry object
         for p in pts:
-            line.AddPoint(p[0],p[1])
-        
+            if len(p)==2:
+                line.AddPoint(p[0],p[1])
+            elif len(p)==3:
+                line.AddPoint(p[0],p[1],p[2])
+            else:
+                print 'LINE ERROR: Point not recognised.' 
         #Return geometry line
         return line 
         

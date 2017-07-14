@@ -1034,7 +1034,12 @@ def writeSHPFile(a, fileDirectory, projection=None):
         raise IOError('%s Driver not available:\n' % typ)
         sys.exit(1)
 
-    xyz = a._realpoly
+    #Get areas/lines from the given class
+    if isinstance(a, Measure.Area) is True:
+        xyz = a._realpoly
+    if isinstance(a, Measure.Line) is True:
+        xyz = a._realline
+    
     imgcount=1
     
     for polys in xyz:
