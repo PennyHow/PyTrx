@@ -1430,12 +1430,9 @@ class Area(Velocity):
     
         #Extract extent based on RBG range
         mask = cv2.inRange(img, lower_boundary, upper_boundary)
-        
-        #Speckle filter to remove noise
-        mask = cv2.filterSpeckles(mask, 1, 30, 2)
-        
-        plt.imshow(mask)
-        plt.show()
+
+#        #Speckle filter to remove noise - needs fixing
+#        mask = cv2.filterSpeckles(mask, 1, 30, 2)
         
         #Polygonize extents using OpenCV findContours function        
         polyimg, line, hier = cv2.findContours(mask, cv2.RETR_EXTERNAL, 
