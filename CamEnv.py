@@ -657,6 +657,10 @@ class CamEnv(CamCalib):
         #Set inverse projection variables
         self._invProjVars=[X,Y,Z,uv0]
 
+        #Optional commentary        
+        if self._quiet>1:        
+            print '\nInverse projection coefficients defined'
+            
 
     def project(self,xyz):
         '''Project the xyz world coordinates into the corresponding image 
