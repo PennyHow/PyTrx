@@ -861,7 +861,10 @@ def writeAreaFile(a, dest):
      
     All these file types are compatible with the importing tools 
     (importPX, importXYZ).
-    '''        
+    '''  
+    if not os.path.exists(dest):
+        os.makedirs(dest)
+        
     pxextent = a._pxextent
     pxpoly = a._pxpoly
     rarea = a._area
@@ -961,7 +964,11 @@ def writeLineFile(l, dest):
                                         images.
      
     All these file types are compatible with the importing tools 
-    (importAreaPX, importAreaXYZ)''' 
+    (importAreaPX, importAreaXYZ)'''
+    
+    if not os.path.exists(dest):
+        os.makedirs(dest)
+        
     #Pixel line coordinates file generation             
     if l._pxpts is not None:            
         target = dest + 'line_pxcoords.txt'
@@ -1026,7 +1033,10 @@ def writeSHPFile(a, fileDirectory, projection=None):
                                 systems are: 'WGS84', 'WGS72', NAD83' or 
                                 'EPSG:n'
     ''' 
-    
+
+    if not os.path.exists(fileDirectory):
+        os.makedirs(fileDirectory)
+        
     #Get driver and create shapeData in shp file directory        
     typ = 'ESRI Shapefile'        
     driver = ogr.GetDriverByName(typ)

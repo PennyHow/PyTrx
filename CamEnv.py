@@ -63,6 +63,8 @@ from DEM import ExplicitRaster,load_DEM,voxelviewshed
 from Images import CamImage
 from scipy import interpolate
 import sys
+import matplotlib.pyplot as plt
+import math
 
 #------------------------------------------------------------------------------
 
@@ -451,30 +453,18 @@ class CamEnv(CamCalib):
 
         #Set yaw, pitch and roll to 0 if no information is given        
         if ypr == None:
-            self._direction = [0,0,0]
-        else:
-            self._direction = ypr  
-
-        #Initialise CamCalib object for calibration information        
-        self._calibPath=calibPath
-        CamCalib.__init__(self,calibPath)                
-        
-        if ypr == None:
             self._camDirection = np.array([0,0,0])
         else:
             self._camDirection =  np.array(ypr)
 
+        #Initialise CamCalib object for calibration information        
+        self._calibPath=calibPath
+        CamCalib.__init__(self,calibPath)                
+                
         #Leave DEM and inverse projection variables empty to begin with
-        self._DEM=None
-        self._invProjVars=None
-            
-        ###Load the dem 
-        ###Again this a a fudge for now since we're only permitting .Mat files
-        #self._DEM=DEM_FromMat(self._DEMpath)
-        #print 'DEM Loaded'
-        #if self._DEMdensify!=1:
-            #self._DEM=self._DEM.densify(self._DEMdensify)
-        
+        self._DEM = None
+        self._invProjVars = None
+      
         #Initialise GCPs object for GCP and DEM information
         if (self._GCPpath!=None and self._imagePath!=None):
             if self._quiet>1:
@@ -812,6 +802,7 @@ class CamEnv(CamCalib):
 
         return value
 
+
     def report(self):
         '''Reporter for testing that the relevant data has been successfully 
         imported. Testing for:
@@ -869,6 +860,94 @@ class CamEnv(CamCalib):
         self.reportCalibData()
 
 
+    def showGCPs(self, extent=None):
+        '''Function to show the ground control points, on the image and DEM.'''
+        
+        #Get GCPs      
+        worldgcp, imgcp = self._gcp.getGCPs()
+        
+        #Get DEM and DEM extent (if specified)
+        dem = self.getDEM()
+        demex=dem.getExtent()
+        xscale=dem.getCols()/(demex[1]-demex[0])
+        yscale=dem.getRows()/(demex[3]-demex[2])
+        
+        if extent is not None:
+            xmin=extent[0]
+            xmax=extent[1]
+            ymin=extent[2]
+            ymax=extent[3]
+                
+            xdmin=(xmin-demex[0])*xscale
+            xdmax=((xmax-demex[0])*xscale)+1
+            ydmin=(ymin-demex[2])*yscale
+            ydmax=((ymax-demex[2])*yscale)+1
+            demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
+            lims = demred.getExtent()
+            
+        else:
+            xdmin=(demex[0]-demex[0])*xscale
+            xdmax=((demex[1]-demex[0])*xscale)+1
+            ydmin=(demex[2]-demex[2])*yscale
+            ydmax=((demex[3]-demex[2])*yscale)+1
+            demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
+            lims = demred.getExtent() 
+        
+        #Get DEM z values for plotting
+        demred=demred.getZ()
+        
+        #Plot image points    
+        plt.figure()
+        plt.tick_params(axis='both', which='major', labelsize=10)
+        plt.xlim([0, self._refImage.getImageSize()[1]])
+        plt.ylim([0, self._refImage.getImageSize()[0]])
+        imgplot = plt.imshow(self._refImage.getImageArray(), origin='lower')
+        imgplot.set_cmap('gray')
+        plt.gca().invert_yaxis()
+        plt.scatter(imgcp[:,0], imgcp[:,1], color='yellow')
+        plt.suptitle('Image showing location of ' + str(self._name) + ' GCPs', 
+                    fontsize=14, y=0.9)
+        
+        #Plot world points
+        plt.figure()
+        plt.locator_params(axis = 'x', nbins=8)
+        plt.tick_params(axis='both', which='major', labelsize=10)
+        plt.xlim([lims[0],lims[1]])
+        plt.ylim([lims[2],lims[3]])
+        imgplot = plt.imshow(demred, origin='lower', 
+                             extent=[lims[0],lims[1],lims[2],lims[3]])
+        imgplot.set_cmap('gray')
+        plt.scatter(worldgcp[:,0], worldgcp[:,1], color='yellow')
+        plt.scatter(self._camloc[0], self._camloc[1], color='blue')
+        plt.suptitle('DEM showing location of ' + str(self._name) + 
+                     ' GCPs', fontsize=14)
+        plt.show()
+
+        
+    def showPrincipalPoint(self):
+        '''Function to show the principal point on the image, along with the 
+        GCPs.'''
+ 
+        #Get the camera centre from the intrinsic matrix 
+        ppx = self._camCen[0] 
+        ppy = self._camCen[1]       
+        
+        #Plot image points    
+        plt.figure()
+        plt.tick_params(axis='both', which='major', labelsize=10)
+        plt.xlim([0, self._refImage.getImageSize()[1]])
+        plt.ylim([0, self._refImage.getImageSize()[0]])
+        imgplot = plt.imshow(self._refImage.getImageArray(), origin='lower')
+        imgplot.set_cmap('gray')
+        plt.gca().invert_yaxis()
+        plt.scatter(ppx, ppy, color='yellow', s=100)
+        plt.axhline(y=ppy)
+        plt.axvline(x=ppx)
+        plt.suptitle('Image showing principal point and GCPs of ' + 
+                     str(self._name), fontsize=14, y=0.9)
+        plt.show() 
+        
+        
 #------------------------------------------------------------------------------
 
 #if __name__ == "__main__":   

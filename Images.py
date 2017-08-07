@@ -224,7 +224,8 @@ class CamImage(object):
         if self._imageArray is None:
             self._readImageData()   
         return self._imageArray
-        
+ 
+       
     def getImageSize(self):
         '''Return the size of the image (which is obtained from the image Exif 
         information).'''        
