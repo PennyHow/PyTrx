@@ -1,0 +1,24 @@
+Img1_polyareas	6827.12401922	
+Img2_polyareas	5553.81520363	
+Img3_polyareas	7013.42420512	
+Img4_polyareas	5617.35799943	
+Img5_polyareas	8367.16798842	
+Img6_polyareas	12120.6257267	
+Img7_polyareas	
+Img8_polyareas	
+Img9_polyareas	
+Img10_polyareas	16794.9041659	
+Img11_polyareas	6436.6644341	
+Img12_polyareas	4461.04526946	
+Img13_polyareas	3446.11556775	
+Img14_polyareas	3541.13728311	
+Img15_polyareas	3062.57657802	
+Img16_polyareas	3296.76795265	
+Img17_polyareas	3784.15831786	
+Img18_polyareas	3144.22723634	
+Img19_polyareas	3504.17493123	
+Img20_polyareas	2335.94953348	
+Img21_polyareas	1240.27405685	
+Img22_polyareas	2576.06729357	
+Img23_polyareas	2489.93559214	
+Img24_polyareas	1745.35897633	
