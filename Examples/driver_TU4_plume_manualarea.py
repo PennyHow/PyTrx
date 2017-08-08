@@ -33,15 +33,18 @@ from Utilities import plotPX, plotXYZ
 
 #Define plume detection specifications
 camera = 'TU4'
-date = '150810'
+date = '150815'
 plume = 'plume1'
 
 
 #Define data inputs
 camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_TU4_2015.txt'
-camimgs = ('F:/imagery/tunabreen/pytrx/' + camera + 
-           '_hourly_2015/' + date + '/*.JPG')
 
+#camimgs = ('F:/imagery/tunabreen/pytrx/' + camera + 
+#           '_hourly_2015/' + date + '/*.JPG')
+
+camimgs = ('C:/Users/s0824923/Desktop/' + camera + 
+           '_hourly_2015/' + date + '/*.JPG')
 
 #Define data output directory
 destination = ('../Examples/results/tuna_plume/' + camera + '/' + 
