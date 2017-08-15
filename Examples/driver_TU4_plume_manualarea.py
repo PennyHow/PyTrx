@@ -32,13 +32,14 @@ from Utilities import plotPX, plotXYZ
 #-----------------------------   Map data files   -----------------------------
 
 #Define plume detection specifications
-camera = 'TU4'
-date = '150815'
+camera = 'TU2'
+date = '150819'
 plume = 'plume1'
 
 
 #Define data inputs
-camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_TU4_2015.txt'
+camdata = ('../Examples/camenv_data/camenvs/CameraEnvironmentData_' + camera +
+          '_2015.txt')
 
 #camimgs = ('F:/imagery/tunabreen/pytrx/' + camera + 
 #           '_hourly_2015/' + date + '/*.JPG')
@@ -56,12 +57,12 @@ destination = ('../Examples/results/tuna_plume/' + camera + '/' +
 #Define camera environment
 cameraenvironment = CamEnv(camdata)
 
-##Show GCPs
-#extent=[550000,565000,8706000,8716000]
-#cameraenvironment.showGCPs(extent)
-#
-##Show Principal Point
-#cameraenvironment.showPrincipalPoint()
+#Show GCPs
+extent=[550000,565000,8706000,8716000]
+cameraenvironment.showGCPs(extent)
+
+#Show Principal Point
+cameraenvironment.showPrincipalPoint()
 
 
 #Define Area class initialisation variables

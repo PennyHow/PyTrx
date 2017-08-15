@@ -20,13 +20,14 @@ homography.
 #Import packages
 import sys
 
-
 #Import PyTrx packages
 sys.path.append('../')
+
 from CamEnv import CamEnv
 from Measure import Velocity
-from FileHandler import writeHomographyFile, writeVelocityFile
 from Utilities import plotVelocity, interpolateHelper, plotInterpolate
+from FileHandler import writeHomographyFile, writeVelocityFile
+
 
 
 #-------------------------   Map data sources   -------------------------------
@@ -35,7 +36,8 @@ from Utilities import plotVelocity, interpolateHelper, plotInterpolate
 camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_TU3_2015.txt'
 camvmask = '../Examples/camenv_data/masks/TU3_2015_vmask.JPG'
 caminvmask = '../Examples/camenv_data/invmasks/TU3_2015_inv.JPG'
-camimgs = '../Examples/images/?????????/*.JPG'
+
+camimgs = 'F:/imagery/tunabreen/pytrx/TU3_bestdaily_2015/*.JPG'
 
 
 #Define data output directory
@@ -47,12 +49,16 @@ destination = '../Examples/results/TU3_velocity/'
 #Define camera environment
 cameraenvironment = CamEnv(camdata, quiet=2)
 
+##Show GCPs
+#extent=[551000,557000,8706000,8716000]
+#cameraenvironment.showGCPs(extent)
+
 
 #----------------------   Calculate velocities   ------------------------------
 
 #Set up TimeLapse object
 vels=Velocity(camimgs, cameraenvironment, camvmask, caminvmask, image0=0, 
-            band='L', quiet=2) 
+              band='L', quiet=2) 
 
 #Calculate homography and velocities    
 hg, outputV = vels.calcVelocities()
@@ -61,10 +67,10 @@ hg, outputV = vels.calcVelocities()
 #----------------------------   Plot Results   --------------------------------
 
 print '\nData plotting...'
-plotcams = False
-plotcombined = False
-plotspeed = False
-plotmaps = False
+plotcams = True
+plotcombined = True
+plotspeed = True
+plotmaps = True
 save = False
 
 
@@ -72,10 +78,10 @@ save = False
 dem=cameraenvironment.getDEM()
 
 #Set extent
-xmin=446000
-xmax=451000
-ymin=8754000
-ymax=8760000
+xmin=551000
+xmax=557000
+ymin=8706000
+ymax=8716000
 
 demex=dem.getExtent()
 xscale=dem.getCols()/(demex[1]-demex[0])
