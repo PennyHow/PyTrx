@@ -156,14 +156,22 @@ class Velocity(ImageSequence):
         if maskPath is None:
             self._mask = None
         else:
+            if self._quiet > 0:
+                print '\nSETTING VELOCITY MASK'
             self._mask = readMask(self.getImageArrNo(0), maskPath)
+            if self._quiet > 1:
+                print 'Velocity mask set'
          
         #Set inverse mask
         if invmaskPath is None:
             self._invmask = None
         else:
+            if self._quiet > 0:
+                print '\nSETTING HOMOGRAPHY MASK'
             self._invmask = readMask(self.getImageArrNo(0), invmaskPath)
-
+            if self._quiet > 1:
+                print 'Homography mask set'
+                
     
     def setTimings(self, method='EXIF'):
         '''Method to explictly set the image timings that can be used for
@@ -275,8 +283,7 @@ class Velocity(ImageSequence):
                 
                 #Error commentary
                 if self._quiet>0:
-                    print ('\nNot enough features successfully tracked.' 
-                           ' Tracked: ',len(p0))
+                    print '\nNot enough features successfully tracked.' 
                 return None
         
        #Optional commentary
@@ -569,6 +576,7 @@ class Velocity(ImageSequence):
                      calcErrors=True, maxpoints=50000, quality=0.1, 
                      mindist=5.0, min_features=4):
         '''Function to measure the velocity between a pair of images.'''       
+
         #Set threshold difference for point tracks
         displacement_tolerance_rel=2.0
         
@@ -658,17 +666,23 @@ class Velocity(ImageSequence):
 
         else:
             dst_pts_homog=None
-        
-        #Project good points (original and tracked) to obtain XYZ coordinates
-        uvs=src_pts_corr[:,0,:]
-        uvd=dst_pts_homog[:,0,:]
 
         #Optional commentary
         if self._quiet>1:
             print '\nUndertaking inverse projection'
             
-        xyzs=self._camEnv.invproject(uvs)
-        xyzd=self._camEnv.invproject(uvd)
+        #Project good points (original and tracked) to obtain XYZ coordinates
+        if src_pts_corr is not None:
+            uvs=src_pts_corr[:,0,:]
+            xyzs=self._camEnv.invproject(uvs)
+        else:
+            xyzs=None
+        
+        if dst_pts_homog is not None:
+            uvd=dst_pts_homog[:,0,:]
+            xyzd=self._camEnv.invproject(uvd)
+        else:
+            xyzd=None
 
         #Return real-world point positions (original and tracked points),
         #and xy pixel positions (original, tracked, and homography)
@@ -824,18 +838,8 @@ class Area(Velocity):
         
         #Set up class properties
         self._maximg = maxim
-        self._pxplot = None
-        self._colourrange = None
-        self._threshold = None
-        self._enhance = None
         self._calibFlag = calibFlag
         self._quiet = quiet
-        
-        #Class property outputs
-        self._pxpoly = None
-        self._pxextent = None
-        self._realpoly = None
-        self._area = None
         
         #Create mask if required
         if maxMaskPath is None:
@@ -1818,12 +1822,6 @@ class Line(Area):
         if self._quiet>0:
             '\n\nCOMMENCING LINE DETECTION.'
             
-        #Set up object outputs                     
-        self._pxpts = None
-        self._pxline = None
-        self._realpts = None
-        self._realline = None
-
 
     def calcManualLinesXYZ(self):
         '''Method for calculating real world lines from an image sequence. 

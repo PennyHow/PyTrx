@@ -89,7 +89,7 @@ import sys
 
 #Import PyTrx modules
 from Utilities import filterSparse
-import Measure
+#import Measure
 
 
 #------------------------------------------------------------------------------
@@ -116,7 +116,7 @@ def readMask(img, writeMask=None):
     #Plot mask manually on the selected image
     fig=plt.gcf()
     fig.canvas.set_window_title('Click to create mask. Press enter to record' 
-                                'points.')
+                                ' points.')
     imgplot = plt.imshow(img, origin='upper')
     imgplot.set_cmap('gray')
     x1 = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, 
@@ -1045,18 +1045,20 @@ def writeSHPFile(a, fileDirectory, projection=None):
         sys.exit(1)
 
     #Get areas/lines from the given class
-    if isinstance(a, Measure.Area) is True:
+    if hasattr(a, '_realpoly'):
         xyz = a._realpoly
-    if isinstance(a, Measure.Line) is True:
+    elif hasattr(a, '_realline'):
         xyz = a._realline
-    
+    else:
+        print '\nUnrecognised Area/Line class object'
+        
     imgcount=1
     
     for polys in xyz:
         #Create datasource in shapefile
-        if isinstance(a, Measure.Area) is True:
+        if hasattr(a, '_realpoly'):
             shp = fileDirectory + 'area' + str(imgcount) + '.shp'
-        if isinstance(a, Measure.Line) is True:
+        if hasattr(a, '_realline'):
             shp = fileDirectory + 'line' + str(imgcount) + '.shp'
         
         if os.path.exists(shp):
@@ -1067,7 +1069,7 @@ def writeSHPFile(a, fileDirectory, projection=None):
             print 'Could not create file %s' %shp
         
         #Set projection and initialise layer depending on projection input            
-        if isinstance(a, Measure.Area) is True:
+        if hasattr(a, '_realpoly'):
             if type(projection) is int:
                 print '\nESPG projection detected'
                 proj = osr.SpatialReference()
@@ -1114,7 +1116,7 @@ def writeSHPFile(a, fileDirectory, projection=None):
             ds.Destroy()
             
         #Set projection and initialise layer depending on projection input            
-        elif isinstance(a, Measure.Line) is True: 
+        elif hasattr(a, '_realline'): 
             if type(projection) is int:
                 print '\nESPG projection detected'
                 proj = osr.SpatialReference()
@@ -1154,67 +1156,86 @@ def writeSHPFile(a, fileDirectory, projection=None):
             ds.Destroy()
 
 
-def importMeasureData(trxclass, fileDirectory):
+def importAreaData(trxclass, fileDirectory):
     '''Get xyz and px data from text files and import into a specified 
-    Measure.Area or Measure.Line class object.
+    Measure.Area class object.
     
     Inputs
     trxclass:           Area/Line class object that data will be imported to.
     fileDirectory:      Path to the folder where the text files containing data
-                        are. Specific files are needed for importing Area and 
-                        Line data:
-                        (1) Area: 4 text files needed. Two contain the pixel 
+                        are. Specific files are needed for importing Area data:
+                        4 text files needed. Two contain the pixel 
                         and real world polygon coordinates and must be named 
                         'px_coords.txt' and 'area_coords.txt'. The text files 
                         containing the pixel and real world polygon areas must 
                         be named 'px_sum.txt' and 'area_all.txt'. 
-                        (2) Line: 2 text files needed. These files contain 
+            
+    Outputs:
+    rpoly:              Real xyz coordinates of detected areas.
+    rarea:              Real-world surface areas.
+    pxpoly:             XY pixel coordinates of detected areas.
+    pxarea:             Pixel areas.
+
+    Files from which data is imported will not be recognised if they are not 
+    named correctly. If files are located in multiple directories or file names 
+    cannot be changed then use the importAreaXYZ and importAreaPX functions.  
+    
+    All imported data is held in the Area class object specified as an 
+    input variable. This can be easily retrieved from the Area class 
+    object itself.
+    '''
+    #Get real-world coordinates and areas    
+    target1 = fileDirectory + 'area_coords.txt'
+    target2 = fileDirectory + 'area_all.txt'    
+    rpoly, rarea = importAreaXYZ(trxclass, target1, target2)
+
+    #Get pixel coordinates and areas    
+    target3 = fileDirectory + 'px_coords.txt'
+    target4 = fileDirectory + 'px_sum.txt'
+    pxpoly, pxarea = importAreaPX(trxclass, target3, target4)
+
+    #Return all area data   
+    return rpoly, rarea, pxpoly, pxarea
+
+
+def importLineData(trxclass, fileDirectory):
+    '''Get xyz and px data from text files and import into a specified 
+    Measure.Line class object.
+    
+    Inputs
+    trxclass:           Line class object that data will be imported to.
+    fileDirectory:      Path to the folder where the text files containing data
+                        are. Specific files are needed for importing Line data:
+                        2 text files needed. These files contain 
                         the pixel and real-world line coordinates and  must be
                         named 'line_realcoords.txt' and 'line_pxcoords.txt'.
             
     Outputs:
-    rpoly/rline:        Real xyz coordinates of detected areas/lines.
-    rarea/rlength:      Real-world surface areas/distances.
-    pxpoly/pxline:      XY pixel coordinates of detected areas/lines.
-    pxarea/pxlength:    Pixel areas/distances.
+    rline:        Real xyz coordinates of detected lines.
+    rlength:      Real-world surface distances.
+    pxline:       XY pixel coordinates of detected lines.
+    pxlength:     Pixel distances.
 
     Files from which data is imported will not be recognised if they are not 
     named correctly. If files are located in multiple directories or file names 
-    cannot be changed then use the importAreaXYZ, importAreaPX, importLineXYZ
-    and importLinePX functions.  
+    cannot be changed then use the importLineXYZ and importLinePX functions.  
     
-    All imported data is held in the Area/Line class object specified as an 
-    input variable. This can be easily retrieved from the Area/Line class 
+    All imported data is held in the Line class object specified as an 
+    input variable. This can be easily retrieved from the Line class 
     object itself.
     '''
-    if isinstance(trxclass, Measure.Area) is True:
-        target1 = fileDirectory + 'area_coords.txt'
-        target2 = fileDirectory + 'area_all.txt'    
-        rpoly, rarea = importAreaXYZ(trxclass, target1, target2)
-        
-        target3 = fileDirectory + 'px_coords.txt'
-        target4 = fileDirectory + 'px_sum.txt'
-        pxpoly, pxarea = importAreaPX(trxclass, target3, target4)
-       
-        return rpoly, rarea, pxpoly, pxarea
-
-    elif isinstance(trxclass, Measure.Line) is True:
-        #Get real-world coordinates and distances
-        target1 = fileDirectory + 'line_realcoords.txt'
-        rline, rlength = importLineXYZ(trxclass, target1)
-        
-        #Get pixel coordinates and distances
-        target2 = fileDirectory + 'line_pxcoords.txt'
-        pxline, pxlength = importLinePX(trxclass, target2)
-        
-        #Return all line data
-        return rline, rlength, pxline, pxlength
+    #Get real-world coordinates and distances
+    target1 = fileDirectory + 'line_realcoords.txt'
+    rline, rlength = importLineXYZ(trxclass, target1)
     
-    else:
-        print 'Unrecognised Area/Line class object.'''
-        sys.exit(1)
-
-     
+    #Get pixel coordinates and distances
+    target2 = fileDirectory + 'line_pxcoords.txt'
+    pxline, pxlength = importLinePX(trxclass, target2)
+    
+    #Return all line data
+    return rline, rlength, pxline, pxlength
+        
+        
 def importAreaXYZ(areaclass, target1, target2):
     '''Get xyz polygon and area data from text files and import into Areas 
     class.

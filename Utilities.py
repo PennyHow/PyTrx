@@ -56,9 +56,6 @@ import math
 from scipy import spatial
 from scipy.interpolate import griddata
 
-#Import PyTrx packages
-import Measure
-
 #------------------------------------------------------------------------------
 
 def plotTrackRose(pts0, pts1, xcen=None,ycen=None):
@@ -282,11 +279,12 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=T
     plotspeed:          Plot filtered speed and direction from dem view. 
     plotmaps:           Plot speed and direction onto dem view.
     '''
+   
     #Get point sets from image       
     start=outputV[1][0]
     end=outputV[1][1]
     back=outputV[1][2]
-    
+
     #Get x positions from image0, image1 and back-track
     xs=start[:,0,0]
     xe=end[:,0,0]
@@ -575,7 +573,7 @@ def plotInterpolate(dem, lims, grid, pointextent, save=None):
     plt.show()
 
 
-def plotPX(a, number, dest=None, show=True, crop=False):
+def plotAreaPX(a, number, dest=None, show=True, crop=False):
     '''Return image overlayed with pixel extent polygons for a given image 
     number.'''
     
@@ -600,8 +598,8 @@ def plotPX(a, number, dest=None, show=True, crop=False):
         if a._pxplot is not None:
             plt.axis([a._pxplot[0],a._pxplot[1],a._pxplot[2],
                      a._pxplot[3]])
-    
-    if isinstance(a, Measure.Area) is True:
+
+    if hasattr(a, '_pxpoly'):
         polys = a._pxpoly[number]
         for p in polys:
             x=[]
@@ -614,14 +612,8 @@ def plotPX(a, number, dest=None, show=True, crop=False):
                     x.append(xy[0])
                     y.append(xy[1])
             plt.plot(x,y,'w-')
-    
-        if dest != None:
-            plt.savefig(dest + 'extentimg_' + imn) 
             
-        if show is True:
-            plt.show()    
-            
-    elif isinstance(a, Measure.Line) is True:               
+    elif hasattr(a, '_pxpts'):
         line = a._pxpts[number]        
         x=[]
         y=[]
@@ -629,16 +621,16 @@ def plotPX(a, number, dest=None, show=True, crop=False):
             x.append(xy[0])
             y.append(xy[1])            
         plt.plot(x,y,'w-')
-        if dest != None:
-            plt.savefig(dest + 'pxline_' + imn) 
-            
-        if show is True:
-            plt.show() 
-
+    
     else:
         print '\nUnrecognised Area/Line class object'
-        pass
-                
+        
+    if dest != None:
+        plt.savefig(dest + 'extentimg_' + imn) 
+        
+    if show is True:
+        plt.show()    
+                            
     plt.close()
     
     
@@ -666,7 +658,7 @@ def plotXYZ(a, number, dest=None, dem=True, show=True):
         plt.ylim(demextent[2], demextent[3])
         plt.scatter(post[0], post[1], c='g')
    
-    if isinstance(a, Measure.Area) is True:
+    if hasattr(a, '_realpoly'):
         #Get xyz points for polygons in a given image
         xyz = a._realpoly[number]
         
@@ -691,7 +683,7 @@ def plotXYZ(a, number, dest=None, dem=True, show=True):
         if show is True:
             plt.show() 
             
-    elif isinstance(a, Measure.Line) is True:
+    elif hasattr(a, '_realpts'):
         #Get xyz points for lines in a given image
         line = a._realpts[number]
         
