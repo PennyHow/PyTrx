@@ -269,8 +269,9 @@ def arrowplot(xst,yst,xend,yend,scale=1.0,headangle=15,headscale=0.2):
     return xs,ys   
 
     
-def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=True, 
-                 plotcombined=True, plotspeed=True, plotmaps=True): 
+def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save=None, 
+                 plotcams=True, plotcombined=True, plotspeed=True, 
+                 plotmaps=True): 
     '''Produce assorted velocity plots from a set of velocity outputs.
     Plotting:
     plot cams:          Plot points (original, tracked and back-tracked) from 
@@ -391,6 +392,10 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=T
         
         mng = plt.get_current_fig_manager()
         mng.window.showMaximized()
+
+        if save != None:
+            plt.savefig(save)
+            
         plt.show()
   
   
@@ -428,6 +433,10 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=T
         
         mng = plt.get_current_fig_manager()
         mng.window.showMaximized()
+
+        if save != None:
+            plt.savefig(save)
+            
         plt.show()
     
     #Plot speed and direction onto dem view
@@ -447,6 +456,10 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save, plotcams=T
         
         mng = plt.get_current_fig_manager()
         mng.window.showMaximized()
+
+        if save != None:
+            plt.savefig(save)
+            
         plt.show()
   
     
@@ -534,7 +547,7 @@ def interpolateHelper(xyz1, xyz2, method='linear', filt=True):
     return grid, pointsextent          
     
 
-def plotInterpolate(dem, lims, grid, pointextent, save=None):
+def plotInterpolate(dem, lims, grid, pointextent, show=True, save=None):
     '''Function to plot the results of the interpolation process for 
     a particular timestep.
 
@@ -570,10 +583,13 @@ def plotInterpolate(dem, lims, grid, pointextent, save=None):
         plt.savefig(save, bbox_inches='tight')
         
     #Show plot
-    plt.show()
+    if show is True:
+        plt.show()
+    
+    plt.close()
 
 
-def plotAreaPX(a, number, dest=None, show=True, crop=False):
+def plotPX(a, number, dest=None, show=True, crop=False):
     '''Return image overlayed with pixel extent polygons for a given image 
     number.'''
     

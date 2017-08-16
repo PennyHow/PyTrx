@@ -19,30 +19,32 @@ homography.
 
 #Import packages
 import sys
+import os
 
 #Import PyTrx packages
 sys.path.append('../')
-
 from CamEnv import CamEnv
 from Measure import Velocity
 from Utilities import plotVelocity, interpolateHelper, plotInterpolate
 from FileHandler import writeHomographyFile, writeVelocityFile
 
 
-
 #-------------------------   Map data sources   -------------------------------
+time = '0000'
+
 
 #Get data needed for processing
-camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_TU3_2015.txt'
-camvmask = '../Examples/camenv_data/masks/TU3_2015_vmask.JPG'
-caminvmask = '../Examples/camenv_data/invmasks/TU3_2015_inv.JPG'
+camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_TU4_2015.txt'
+camvmask = '../Examples/camenv_data/masks/TU4_2015_vmask.JPG'
+caminvmask = '../Examples/camenv_data/invmasks/TU4_2015_inv.JPG'
 
-camimgs = 'F:/imagery/tunabreen/pytrx/TU3_bestdaily_2015/*.JPG'
+camimgs = 'F:/imagery/tunabreen/pytrx/TU4_daily_2015/' + time + '/*.JPG'
 
 
 #Define data output directory
-destination = '../Examples/results/TU3_velocity/'
-
+destination = '../Examples/results/TU4_velocity/daily_' + time
+if not os.path.exists(destination):
+    os.makedirs(destination)
 
 #-----------------------   Create camera object   -----------------------------
 
@@ -62,15 +64,28 @@ vels=Velocity(camimgs, cameraenvironment, camvmask, caminvmask, image0=0,
 
 #Calculate homography and velocities    
 hg, outputV = vels.calcVelocities()
-   
+
+
+#---------------------------  Export data   -----------------------------------
+
+print '\nBeginning file exporting...'
+
+#Write homography data to .csv file
+target1 = destination + 'homography.csv'
+writeHomographyFile(hg,vels,target1)
+
+#Write out velocity data to .csv file
+target2 = destination + 'velo_output.csv'
+writeVelocityFile(outputV, vels, target2) 
+  
    
 #----------------------------   Plot Results   --------------------------------
 
 print '\nData plotting...'
-plotcams = True
-plotcombined = True
-plotspeed = True
-plotmaps = True
+plotcams = False
+plotcombined = False
+plotspeed = False
+plotmaps = False
 save = False
 
 
@@ -97,16 +112,17 @@ lims=demred.getExtent()
 demred=demred.getZ()
 
 
-span=[0,-1]
-im1=vels.getImageObj(0)
+#span=[0,-1]
+#im1=vels.getImageObj(0)
+#
+#for i in range(vels.getLength()-1)[span[0]:span[1]]:
+#    for vel in outputV:
+#        im0=im1
+#        im1=vels.getImageObj(i+1)
+#        plotVelocity(vel,im0,im1,cameraenvironment,demred,lims,None,
+#                     plotcams,plotcombined,plotspeed,plotmaps)
 
-for i in range(vels.getLength()-1)[span[0]:span[1]]:
-    for vel in outputV:
-        im0=im1
-        im1=vels.getImageObj(i+1)
-        plotVelocity(vel,im0,im1,cameraenvironment,demred,lims,None,
-                     plotcams,plotcombined,plotspeed,plotmaps)
-
+count=1
 for vel in outputV:
     xy1 = vel[0][0]
     xy2 = vel[0][1]
@@ -116,25 +132,14 @@ for vel in outputV:
     fgrid, fpointsextent = interpolateHelper(xy1,xy2,method,filt=True)
     
     print 'Plotting unfiltered velocity map...'
-    plotInterpolate(demred, lims, grid, pointsextent, 
-                    save=destination+'interp1.jpg')
+    plotInterpolate(demred, lims, grid, pointsextent, show=False, 
+                    save=destination + str(count) + '_interp1.jpg')
                     
     print 'Plotting filtered velocity map...'
-    plotInterpolate(demred, lims, fgrid, fpointsextent, 
-                    save=destination+'interp2.jpg')    
+    plotInterpolate(demred, lims, fgrid, fpointsextent, show=False, 
+                    save=destination + str(count) + '_interp2.jpg') 
 
-
-#---------------------------  Export data   -----------------------------------
-
-print '\nBeginning file exporting...'
-
-#Write homography data to .csv file
-target1 = destination + 'homography.csv'
-writeHomographyFile(hg,vels,target1)
-
-#Write out velocity data to .csv file
-target2 = destination + 'velo_output.csv'
-writeVelocityFile(outputV, vels, target2) 
+    count=count+1
 
 
 #------------------------------------------------------------------------------

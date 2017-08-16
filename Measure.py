@@ -840,6 +840,7 @@ class Area(Velocity):
         self._maximg = maxim
         self._calibFlag = calibFlag
         self._quiet = quiet
+        self._pxplot = None
         
         #Create mask if required
         if maxMaskPath is None:
@@ -849,7 +850,7 @@ class Area(Velocity):
             self._setMaxMask()
 
 
-    def calcAutoAreas(self, colour=False, verify=False):
+    def calcAutoAreas(self, px=None, colour=False, verify=False):
         '''Get real world areas from an image set. Calculates the polygon 
         extents for each image and the area of each given polygon using 
         automated detection.
@@ -868,7 +869,7 @@ class Area(Velocity):
                                     polygons in all images.
         '''                           
         #Get pixel polygons using automated extent detection method
-        if self._pxpoly is None:
+        if px is None:
             self.calcAutoExtents(colour, verify)
         
         #Optional commentary
@@ -891,7 +892,7 @@ class Area(Velocity):
         return self._realpoly, self._area
 
 
-    def calcManualAreas(self):
+    def calcManualAreas(self, px=None):
         '''Get real world areas from an image set. Calculates the polygon 
         extents for each image and the area of each given polygon using manual
         detection.
@@ -903,7 +904,7 @@ class Area(Velocity):
                                     polygons in all images.
         '''                          
         #Get pixel polygons using manual extent detection method
-        if self._pxpoly is None:
+        if px is None:
             pxpoly, pxextent = self.calcManualExtents()
         
         #Optional commentary
@@ -1823,7 +1824,7 @@ class Line(Area):
             '\n\nCOMMENCING LINE DETECTION.'
             
 
-    def calcManualLinesXYZ(self):
+    def calcManualLinesXYZ(self, px=None):
         '''Method for calculating real world lines from an image sequence. 
         Lines are manually defined by the user in the image plane. These are 
         subsequently georectified to obtain real-world coordinates and 
@@ -1836,7 +1837,7 @@ class Line(Area):
                                   lines in an image sequence.
         '''
         #Get pixel points if not already defined
-        if self._pxpts is None:
+        if px is None:
             self.calcManualLinesPX()
         
         #Set output variables and counter

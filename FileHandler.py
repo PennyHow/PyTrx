@@ -89,7 +89,6 @@ import sys
 
 #Import PyTrx modules
 from Utilities import filterSparse
-#import Measure
 
 
 #------------------------------------------------------------------------------
@@ -625,9 +624,9 @@ def writeVelocityFile(veloset, timeLapse, fname='velocity.csv',span=[0,-1]):
     
     #Define column headers
     header=('Image 0, Image 1, Average velocity (unfiltered),'
-            'Features tracked (unfiltered),Average velocity (filtered),'
-            'Features Tracked,Error, SNR')    
-    f.write(header+'\n')
+            'Features tracked (unfiltered), Average velocity (filtered),'
+            'Features Tracked (filtered), Error, SNR')    
+    f.write(header + '\n')
 
     #Iterate through timeLapse object
     for i in range(timeLapse.getLength()-1)[span[0]:span[1]]:
@@ -650,55 +649,66 @@ def writeVelocityFile(veloset, timeLapse, fname='velocity.csv',span=[0,-1]):
             #Get xyz coordinates from points in image pair
             xyz1 = xyz[0]               #Pts from image pair 1
             xyz2 = xyz[1]               #Pts from image pair 2
-                        
-            #Get point positions and differences   
-            x1=[]
-            y1=[]
-            x2=[]
-            y2=[]
-            xdif=[]
-            ydif=[]
-            for i,j in zip(xyz1,xyz2):
-                if math.isnan(i[0]):
-                    pass
-                else:
-                    x1.append(i[0])
-                    y1.append(i[1])
-                    x2.append(j[0])
-                    y2.append(j[1])
-                    xdif.append(i[0]-j[0])
-                    ydif.append(i[1]-j[1])
-        
-            #Calculate velocity with Pythagoras' theorem
-            speed=[]
-            for i,j in zip(xdif, ydif):
-                sp = np.sqrt(i*i+j*j)
-                speed.append(sp)
             
-            #Calculate average unfiltered velocity
-            velav = sum(speed)/len(speed)
+            if len(xyz2)>0:            
+                #Get point positions and differences   
+                x1=[]
+                y1=[]
+                x2=[]
+                y2=[]
+                xdif=[]
+                ydif=[]
+                for i,j in zip(xyz1,xyz2):
+                    if math.isnan(i[0]):
+                        pass
+                    else:
+                        x1.append(i[0])
+                        y1.append(i[1])
+                        x2.append(j[0])
+                        y2.append(j[1])
+                        xdif.append(i[0]-j[0])
+                        ydif.append(i[1]-j[1])
             
-            #Determine number of features (unfiltered) tracked
-            numtrack = len(speed)
-
-            #Filter outlier points 
-            v_all=np.vstack((x1,y1,x2,y2,speed))
-            v_all=v_all.transpose()
-            filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)           
-            fspeed=filtered[:,4]
+                #Calculate velocity with Pythagoras' theorem
+                speed=[]
+                for i,j in zip(xdif, ydif):
+                    sp = np.sqrt(i*i+j*j)
+                    speed.append(sp)
+                
+                #Calculate average unfiltered velocity
+                velav = sum(speed)/len(speed)
+                
+                #Determine number of features (unfiltered) tracked
+                numtrack = len(speed)
+    
+                #Write unfiltered velocity information
+                f.write(out + ',' +str(velav) + ',' +str(numtrack) + ',')
+    
+                #Filter outlier points 
+                v_all=np.vstack((x1,y1,x2,y2,speed))
+                v_all=v_all.transpose()
+                filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)
+                
+                #Write filtered velocity information           
+                if len(filtered) > 1:
+                    fspeed=filtered[:,4]
+                
+                    #Calculate average filtered velocity
+                    velfav = sum(fspeed)/len(fspeed)
+                
+                    #Determine number of features (filtered) tracked
+                    numtrackf = len(fspeed)
+                
+                    #Compile all data for output file
+                    f.write(str(velfav) + ',' + str(numtrackf))
             
-            #Calculate average unfiltered velocity
-            velfav = sum(fspeed)/len(fspeed)
+                #Break line in output file
+                f.write('\n')
+                
+            else:
+                f.write(out + ', nan , nan , nan , nan \n')
             
-            #Determine number of features (unfiltered) tracked
-            numtrackf = len(fspeed)
-            
-            #Compile all data for output file
-            out=out+','+str(velav)+','+str(velfav)+','+str(numtrack)+','+str(numtrackf)
-        
-        #Write to output file
-        f.write(out+'\n')
-        print '\nVelocity file written:' + fname        
+    print '\nVelocity file written:' + fname        
  
    
 def writeHomographyFile(homogset,timeLapse,fname='homography.csv',span=[0,-1]):

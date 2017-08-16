@@ -415,7 +415,8 @@ class ImageSequence(object):
                 print ('\nImage directory path assumed. Searching for images.' 
                        ' Attempting to add all to sequence')
                 print imageList
-            self._imageList = glob.glob(imageList)
+            self._imageList = sorted(glob.glob(imageList), 
+                                     key=os.path.getmtime)
             self._loadImageStringSequence(self._imageList,loadall)
             
             

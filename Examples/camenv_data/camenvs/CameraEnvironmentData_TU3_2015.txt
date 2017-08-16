@@ -30,7 +30,7 @@ Camera_location #Location of camera in xyz coordinates
 
 
 Yaw_pitch_roll #Yaw, pitch, roll of camera (set to [0 0 0] if unknown) 
-[4.4960	0.0154	-0.0199] 
+[-0.6878 0.2298 -0.0405] 
 
 
 Dem_densification #Amount to densify the DEM to permit better mapping of image
