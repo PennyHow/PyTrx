@@ -30,7 +30,7 @@ from FileHandler import writeHomographyFile, writeVelocityFile
 
 
 #-------------------------   Map data sources   -------------------------------
-time = '0000'
+time = '2300'
 
 
 #Get data needed for processing
@@ -42,7 +42,7 @@ camimgs = 'F:/imagery/tunabreen/pytrx/TU4_daily_2015/' + time + '/*.JPG'
 
 
 #Define data output directory
-destination = '../Examples/results/TU4_velocity/daily_' + time
+destination = '../Examples/results/TU4_velocity/daily_' + time + '/'
 if not os.path.exists(destination):
     os.makedirs(destination)
 
@@ -81,37 +81,37 @@ writeVelocityFile(outputV, vels, target2)
    
 #----------------------------   Plot Results   --------------------------------
 
-print '\nData plotting...'
-plotcams = False
-plotcombined = False
-plotspeed = False
-plotmaps = False
-save = False
-
-
-#Get DEM from camera environment object
-dem=cameraenvironment.getDEM()
-
-#Set extent
-xmin=551000
-xmax=557000
-ymin=8706000
-ymax=8716000
-
-demex=dem.getExtent()
-xscale=dem.getCols()/(demex[1]-demex[0])
-yscale=dem.getRows()/(demex[3]-demex[2])
-
-xdmin=(xmin-demex[0])*xscale
-xdmax=((xmax-demex[0])*xscale)+1
-ydmin=(ymin-demex[2])*yscale
-ydmax=((ymax-demex[2])*yscale)+1
-    
-demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
-lims=demred.getExtent()
-demred=demred.getZ()
-
-
+#print '\nData plotting...'
+#plotcams = False
+#plotcombined = False
+#plotspeed = False
+#plotmaps = False
+#save = False
+#
+#
+##Get DEM from camera environment object
+#dem=cameraenvironment.getDEM()
+#
+##Set extent
+#xmin=551000
+#xmax=557000
+#ymin=8706000
+#ymax=8716000
+#
+#demex=dem.getExtent()
+#xscale=dem.getCols()/(demex[1]-demex[0])
+#yscale=dem.getRows()/(demex[3]-demex[2])
+#
+#xdmin=(xmin-demex[0])*xscale
+#xdmax=((xmax-demex[0])*xscale)+1
+#ydmin=(ymin-demex[2])*yscale
+#ydmax=((ymax-demex[2])*yscale)+1
+#    
+#demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
+#lims=demred.getExtent()
+#demred=demred.getZ()
+#
+#
 #span=[0,-1]
 #im1=vels.getImageObj(0)
 #
@@ -121,25 +121,25 @@ demred=demred.getZ()
 #        im1=vels.getImageObj(i+1)
 #        plotVelocity(vel,im0,im1,cameraenvironment,demred,lims,None,
 #                     plotcams,plotcombined,plotspeed,plotmaps)
-
-count=1
-for vel in outputV:
-    xy1 = vel[0][0]
-    xy2 = vel[0][1]
-    method='linear'
-
-    grid, pointsextent = interpolateHelper(xy1,xy2,method,filt=False)
-    fgrid, fpointsextent = interpolateHelper(xy1,xy2,method,filt=True)
-    
-    print 'Plotting unfiltered velocity map...'
-    plotInterpolate(demred, lims, grid, pointsextent, show=False, 
-                    save=destination + str(count) + '_interp1.jpg')
-                    
-    print 'Plotting filtered velocity map...'
-    plotInterpolate(demred, lims, fgrid, fpointsextent, show=False, 
-                    save=destination + str(count) + '_interp2.jpg') 
-
-    count=count+1
+#
+#count=1
+#for vel in outputV:
+#    xy1 = vel[0][0]
+#    xy2 = vel[0][1]
+#    method='linear'
+#
+#    grid, pointsextent = interpolateHelper(xy1,xy2,method,filt=False)
+#    fgrid, fpointsextent = interpolateHelper(xy1,xy2,method,filt=True)
+#    
+#    print 'Plotting unfiltered velocity map...'
+#    plotInterpolate(demred, lims, grid, pointsextent, show=False, 
+#                    save=destination + str(count) + '_interp1.jpg')
+#                    
+#    print 'Plotting filtered velocity map...'
+#    plotInterpolate(demred, lims, fgrid, fpointsextent, show=False, 
+#                    save=destination + str(count) + '_interp2.jpg') 
+#
+#    count=count+1
 
 
 #------------------------------------------------------------------------------

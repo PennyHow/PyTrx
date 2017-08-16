@@ -650,7 +650,11 @@ def writeVelocityFile(veloset, timeLapse, fname='velocity.csv',span=[0,-1]):
             xyz1 = xyz[0]               #Pts from image pair 1
             xyz2 = xyz[1]               #Pts from image pair 2
             
-            if len(xyz2)>0:            
+            print xyz1
+            print xyz2
+            if xyz2 is None:
+                f.write(out + ', nan , nan , nan , nan \n')
+            else:
                 #Get point positions and differences   
                 x1=[]
                 y1=[]
@@ -704,9 +708,8 @@ def writeVelocityFile(veloset, timeLapse, fname='velocity.csv',span=[0,-1]):
             
                 #Break line in output file
                 f.write('\n')
-                
-            else:
-                f.write(out + ', nan , nan , nan , nan \n')
+
+
             
     print '\nVelocity file written:' + fname        
  
