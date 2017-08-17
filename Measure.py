@@ -171,7 +171,12 @@ class Velocity(ImageSequence):
             self._invmask = readMask(self.getImageArrNo(0), invmaskPath)
             if self._quiet > 1:
                 print 'Homography mask set'
-                
+
+        #Set class outputs as empty properties
+        self._velxyz = []
+        self._velpx = []   
+        self._homography = []  
+           
     
     def setTimings(self, method='EXIF'):
         '''Method to explictly set the image timings that can be used for
@@ -212,8 +217,250 @@ class Velocity(ImageSequence):
         '''Return camera environment object (CamEnv).'''
         return self._camEnv
 
+
+    def calcVelocities(self, span=[0,-1], homography=True, method=cv2.RANSAC, 
+                       ransacReprojThreshold=5.0, back_thresh=1.0, 
+                       calcErrors=True, maxpoints=50000, quality=0.1, 
+                       mindist=5.0, min_features=4):
+        '''Function to calculate velocities between succesive image pairs.'''
+
+        #Calculate homography if flag is true        
+        if homography is True:
+            pairwiseHomogs = self.calcHomographyPairs()
+            
+        #Optional commentary
+        if self._quiet>0:
+            print '\n\nCALCULATING VELOCITIES'
+        
+        #Create empty lists for velocities and homography
+        pairwiseVelocities=[]
+        
+        #Get first image (image0) file path and array data for intial tracking
+        imn1=self._imageSet[span[0]].getImagePath().split('\\')[1]
+        im1=self._imageSet[span[0]].getImageArray()
+        
+        #Cycle through image pairs (numbered from 0)
+        for i in range(self.getLength()-1)[span[0]:span[1]]:
+
+            #Re-assign first image in image pair
+            im0=im1
+            imn0=imn1
+                            
+            #Get second image in image pair (and subsequently clear memory)
+            im1=self._imageSet[i+1].getImageArray()
+            imn1=self._imageSet[i+1].getImagePath().split('\\')[1]       
+            self._imageSet[i].clearAll()
+           
+            #Optional commentary
+            if self._quiet>0:
+                print '\nFeature-tracking for images: ',imn0,' and ',imn1
+
+            #Determine homography between image pair if required
+            #Set calcErrors true otherwise we can't calculate/ plot homography
+            #points
+            if homography is True:        
+                 
+                #Calculate velocities between image pair
+                vel=self.calcVelocity(im0, im1, pairwiseHomogs[i], 
+                                      back_thresh=2.0,maxpoints=2000,
+                                      quality=0.1,mindist=5.0)
+            else:
+                vel=self.calcVelocity(im0, im1, None, back_thresh=2.0,
+                                      maxpoints=2000, quality=0.1,mindist=5.0)    
+
+            #Append homography and velocity data to output lists                       
+            pairwiseVelocities.append(vel)
+        
+        self._velxyz=[]
+        self._velpx=[]
+        
+        for i in pairwiseVelocities:
+            self._velxyz = i[0]
+            self._velpx = i[1]         
+
+        return pairwiseHomogs, pairwiseVelocities
+        
+
+    def calcVelocity(self, img1, img2, homography=None, method=cv2.RANSAC, 
+                     ransacReprojThreshold=5.0, back_thresh=1.0, 
+                     calcErrors=True, maxpoints=50000, quality=0.1, 
+                     mindist=5.0, min_features=4):
+        '''Function to measure the velocity between a pair of images.'''       
+
+        #Set threshold difference for point tracks
+        displacement_tolerance_rel=2.0
+        
+        #Track points between the image pair
+        points, ptserrors = self._featureTrack(img1, img2, self.getMask(),
+                                               back_thresh=1.0, 
+                                               calcErrors=calcErrors,
+                                               maxpoints=maxpoints, 
+                                               quality=quality,
+                                               mindist=mindist, 
+                                               min_features=min_features) 
+        
+        #Pass empty object if tracking was insufficient
+        if points==None:
+            if self._quiet>0:
+                print '\nNo features to undertake velocity measurements'
+            return None        
+            
+
+        #Get camera matrix and distortion parameters from CamEnv object
+        cameraMatrix=self._camEnv.getCamMatrixCV2()
+        distortP=self._camEnv.getDistortCoeffsCv2()
+        
+        #Calculate optimal camera matrix 
+        size=img1.shape
+        h = size[0]
+        w = size[1]
+        newMat, roi = cv2.getOptimalNewCameraMatrix(cameraMatrix, 
+                                                    distortP, 
+                                                    (w,h), 1, (w,h))
+        
+        #Correct tracked points for image distortion. The displacement here is 
+        #defined forwards (i.e. the points in image 1 are first corrected, 
+        #followed by those in image 2)        
+        #Correct points in first image 
+        src_pts_corr=cv2.undistortPoints(points[0], 
+                                         cameraMatrix, 
+                                         distortP,P=newMat)
+        
+        #Correct points in second image                                         
+        dst_pts_corr=cv2.undistortPoints(points[1], 
+                                         cameraMatrix, 
+                                         distortP,P=newMat) 
+
+        #Calculate homography if desired
+        if homography!=None:
+            
+            #Optional commentary
+            if self._quiet>1:
+                print '\nCorrecting for homography.'
+            
+            #Get homography matrix
+            homogMatrix=homography[0]
+            
+            #Apply perspective homography matrix to tracked points
+            tracked=dst_pts_corr.shape[0]
+            dst_pts_homog = self.apply_persp_homographyPts(dst_pts_corr,
+                                                           homogMatrix,
+                                                           'array',
+                                                           inverse=True)
+            
+            #Calculate difference between points corrected for homography and
+            #those uncorrected for homography
+            dispx=dst_pts_homog[:,0,0]-src_pts_corr[:,0,0]
+            dispy=dst_pts_homog[:,0,1]-src_pts_corr[:,0,1]
+            
+            #Use pythagoras' theorem to obtain distance
+            disp_dist=np.sqrt(dispx*dispx+dispy*dispy)
+            
+            #Determine threshold for good points using a given displacement 
+            #tolerance (defined earlier)
+            xsd=homography[3][0][2]
+            ysd=homography[3][0][3]
+            sderr=math.sqrt(xsd*xsd+ysd*ysd)
+            good=disp_dist > sderr * displacement_tolerance_rel
+            
+            #Keep good points
+            src_pts_corr=src_pts_corr[good]
+            dst_pts_corr=dst_pts_corr[good]
+            dst_pts_homog=dst_pts_homog[good]
+            
+            #Determine number of points kept
+            retained=dst_pts_corr.shape[0]
+            
+            #Optional commentary
+            if self._quiet>1:
+                print 'Points removed because of homography uncertainty:'
+                print 'Before: ', tracked, ' After: ', retained
+
+        else:
+            #Optional commentary
+            if self._quiet>1:
+                print ('\nHomography matrix not supplied. Original tracked '
+                       'points kept')
+                       
+            #Original tracked points assigned if homography not given
+            dst_pts_homog=dst_pts_corr
+
+        #Optional commentary
+        if self._quiet>1:
+            print '\nUndertaking inverse projection'
+            
+        #Project good points (original and tracked) to obtain XYZ coordinates
+        if src_pts_corr is not None:
+            uvs=src_pts_corr[:,0,:]
+            xyzs=self._camEnv.invproject(uvs)
+        else:
+            xyzs=None
+        
+        if dst_pts_homog is not None:
+            uvd=dst_pts_homog[:,0,:]
+            xyzd=self._camEnv.invproject(uvd)
+        else:
+            xyzd=None
+
+        #Return real-world point positions (original and tracked points),
+        #and xy pixel positions (original, tracked, and homography-corrected)
+        if homography!=None:
+            return [[xyzs,xyzd],[src_pts_corr,dst_pts_corr,dst_pts_homog]]
+        
+        else:
+            return [[xyzs,xyzd], [src_pts_corr, dst_pts_corr, None]]
+        
+        
+    def calcHomographyPairs(self, back_thresh=1.0, calcErrors=True, 
+                            maxpoints=50000, quality=0.1, mindist=5.0,
+                            calcHomogError=True, min_features=4, span=[0,-1]):
+        '''Method to calculate homography between succesive image pairs in an 
+        image sequence.''' 
+        #Optional commentary
+        if self._quiet>0:
+            print '\n\nCALCULATING HOMOGRAPHY'
+        
+        #Create empty list for output
+        pairwiseHomography=[]
+        
+        #Get first image (image0) path and array data
+        imn1=self._imageSet[0].getImagePath()
+        im1=self._imageSet[0].getImageArray()
+        
+        #Cycle through image pairs (numbered from 0)
+        for i in range(self.getLength()-1)[span[0]:span[1]]:
+            
+            #Re-assign first image in image pair
+            im0=im1
+            imn0=imn1
+            
+            #Get second image in image pair (clear memory subsequently)
+            im1=self._imageSet[i+1].getImageArray()
+            imn1=self._imageSet[i+1].getImagePath()
+            self._imageSet[i].clearImage()
+            self._imageSet[i].clearImageArray()
+            
+            #Optional commentary
+            if self._quiet>1:
+                print '\nProcessing homograpy for images: ',imn0,' and ',imn1
+                
+            #Calculate homography and errors from image pair
+            hg=self._calcHomography(im0, im1, back_thresh=back_thresh, 
+                                    calcErrors=calcErrors, maxpoints=maxpoints,
+                                    quality=quality, mindist=mindist, 
+                                    calcHomogError=calcHomogError, 
+                                    min_features=min_features)
+
+            #Assemble all homography information for every image pair set            
+            pairwiseHomography.append(hg)
+            self._homography = pairwiseHomography
+        
+        #Returns homography matrix, associated points, point error and 
+        #homography error
+        return pairwiseHomography
+        
        
-    def featureTrack(self, i0, iN, Mask, back_thresh=1.0, calcErrors=True,
+    def _featureTrack(self, i0, iN, Mask, back_thresh=1.0, calcErrors=True,
                      maxpoints=50000, quality=0.1, mindist=5.0, 
                      min_features=1):
         '''Function to feature track between two masked images. The
@@ -309,22 +556,8 @@ class Velocity(ImageSequence):
             
         return [p0,p1,p0r], error
 
-        
-    def _calcTrackErrors(self,p0,p1,dist):
-        '''Function to calculate signal-to-noise ratio with forward-backward 
-        tracking data. The distance between the backtrack and original points
-        (dist) is assumed to be pre-calcuated.'''               
-        #Determine length between the two sets of points
-        length=(p0-p1)*(p0-p1)
-        length=np.sqrt(length[:,0,0]+length[:,0,1])
-        
-        #Calculate signal-to-noise ratio
-        snr = dist/length
-        
-        return length,snr
 
-        
-    def homography(self, img1, img2, method=cv2.RANSAC,
+    def _calcHomography(self, img1, img2, method=cv2.RANSAC,
                    ransacReprojThreshold=5.0, back_thresh=1.0, calcErrors=True,
                    maxpoints=50000, quality=0.1, mindist=5.0,
                    calcHomogError=True, min_features=4):
@@ -345,7 +578,7 @@ class Velocity(ImageSequence):
                               matrix and the equivalent tracked points
         '''        
         # Feature track between images
-        trackdata = self.featureTrack(img1, img2, 
+        trackdata = self._featureTrack(img1, img2, 
                                       self.getInverseMask(),
                                       back_thresh=1.0, 
                                       calcErrors=calcErrors,
@@ -404,9 +637,8 @@ class Velocity(ImageSequence):
                 print '\nCalculating Homography errors'
 
             #Apply global homography to source points
-            homog_pts=self.apply_persp_homographyPts_array(src_pts_corr,
-                                                           homogMatrix,
-                                                           False)          
+            homog_pts=self.apply_persp_homographyPts(src_pts_corr, homogMatrix,
+                                                     'array', False)          
         
             #Calculate offsets between tracked points and the modelled points 
             #using the global homography
@@ -429,116 +661,60 @@ class Velocity(ImageSequence):
             
         return homogMatrix, [src_pts_corr,dst_pts_corr,homog_pts], ptserrors, homogerrors
 
-
-    def apply_persp_homographyPts_array(self, pts, homog, inverse=False):    
-       '''Funtion to apply a perspective homography to a sequence of 2D 
-       values held in X and Y. The perspective homography is represented as a 
-       3 X 3 matrix (homog). The source points are inputted as an array. The 
-       homography perspective matrix is modelled in the same manner as done so 
-       in OpenCV.'''
-       #Get empty array that is the same size as the number of points given
-       n=pts.shape[0]
-       hpts=np.zeros(pts.shape)
-       
-       if inverse:
-           val,homog=cv2.invert(homog)       
-
-       for i in range(n):
-           div=1./(homog[2][0]*pts[i][0][0] + homog[2][1]*pts[i][0][1] + 
-                   homog[2][2])
-           hpts[i][0][0]=(homog[0][0]*pts[i][0][0] + homog[0][1]*pts[i][0][1] +
-                          homog[0][2])*div
-           hpts[i][0][1]=(homog[1][0]*pts[i][0][0] + homog[1][1]*pts[i][0][1] +
-                          homog[1][2])*div
-                          
-       return hpts 
-
+        
+    def apply_persp_homographyPts(self, pts, homog, typ, inverse=False):        
+        '''Funtion to apply a perspective homography to a sequence of 2D 
+        values held in X and Y. The perspective homography is represented as a 
+        3 X 3 matrix (homog). The source points are inputted as an array. The 
+        homography perspective matrix is modelled in the same manner as done so 
+        in OpenCV.'''  
+        
+        if typ is 'array':
+            #Get empty array that is the same size as pts
+            n=pts.shape[0]
+            hpts=np.zeros(pts.shape)
            
-    def apply_persp_homographyPts_list(self, pts, homog, inverse=False):    
-       '''Funtion to apply a perspective homography to a sequence of 2D 
-       values held in X and Y. The perspective homography is represented as a
-       3 X 3 matrix (homog). The source points are inputted as a list. The 
-       homography perspective matrix is modelled in the same manner as done so 
-       in OpenCV. The output points are returned as a list.'''
-       #Create empty output list
-       hpts=[]
-       
-       if inverse:
-           val,homog=cv2.invert(homog) 
-            
-       for p in pts:
-           div=1./(homog[2][0]*p[0]+homog[2][1]*p[1]+homog[2][2])
-           xh=(homog[0][0]*p[0]+homog[0][1]*p[1]+homog[0][2])*div
-           yh=(homog[1][0]*p[0]+homog[1][1]*p[1]+homog[1][2])*div
-           hpts.append([xh,yh])
-              
-       return hpts
-       
-       ###MERGE apply_persp_homographyPts_list with apply_persp_homographyPts_array
+            if inverse:
+               val,homog=cv2.invert(homog)       
+    
+            for i in range(n):
+                div=1./(homog[2][0]*pts[i][0][0] + homog[2][1]*pts[i][0][1] + 
+                        homog[2][2])
+                hpts[i][0][0]=((homog[0][0]*pts[i][0][0] + 
+                               homog[0][1]*pts[i][0][1] + homog[0][2])*div)
+                hpts[i][0][1]=((homog[1][0]*pts[i][0][0] + 
+                                homog[1][1]*pts[i][0][1] + homog[1][2])*div)
+                              
+            return hpts 
+           
+        elif typ is 'list':
+            #Create empty output list
+            hpts=[]
+                   
+            if inverse:
+                val,homog=cv2.invert(homog) 
+                
+            for p in pts:
+                div=1./(homog[2][0]*p[0]+homog[2][1]*p[1]+homog[2][2])
+                xh=(homog[0][0]*p[0]+homog[0][1]*p[1]+homog[0][2])*div
+                yh=(homog[1][0]*p[0]+homog[1][1]*p[1]+homog[1][2])*div
+                hpts.append([xh,yh])
+                  
+            return hpts
 
 
 #def homographyCheck(timelapse):
 #    ''' Perform homogprahy check for a given timelapse sequence'''
 
           
-    def apply_cam_correction_points(self, points):
-        '''Method to apply camera correction to point locations in the XY pixel 
-        space.'''
-        
-        print 'Correcting point locations for ', len(points), ' points'
-        
-        intrMat,tanCorr,radCorr=self._camEnv.getCalibdata()
-        
-        ###INCOMPLETE    
+#    def apply_cam_correction_points(self, points):
+#        '''Method to apply camera correction to point locations in the XY pixel 
+#        space.'''
+#        
+#        print 'Correcting point locations for ', len(points), ' points'
+#        
+#        intrMat,tanCorr,radCorr=self._camEnv.getCalibdata() 
     
-       
-    def calcHomographyPairs(self, back_thresh=1.0, calcErrors=True, 
-                            maxpoints=50000, quality=0.1, mindist=5.0,
-                            calcHomogError=True, min_features=4, span=[0,-1]):
-        '''Method to calculate homography between succesive image pairs in an 
-        image sequence.''' 
-        #Optional commentary
-        if self._quiet>0:
-            print '\n\nCALCULATING HOMOGRAPHY'
-        
-        #Create empty list for output
-        pairwiseHomography=[]
-        
-        #Get first image (image0) path and array data
-        imn1=self._imageSet[0].getImagePath()
-        im1=self._imageSet[0].getImageArray()
-        
-        #Cycle through image pairs (numbered from 0)
-        for i in range(self.getLength()-1)[span[0]:span[1]]:
-            
-            #Re-assign first image in image pair
-            im0=im1
-            imn0=imn1
-            
-            #Get second image in image pair (clear memory subsequently)
-            im1=self._imageSet[i+1].getImageArray()
-            imn1=self._imageSet[i+1].getImagePath()
-            self._imageSet[i].clearImage()
-            self._imageSet[i].clearImageArray()
-            
-            #Optional commentary
-            if self._quiet>1:
-                print '\nProcessing homograpy for images: ',imn0,' and ',imn1
-                
-            #Calculate homography and errors from image pair
-            hg=self.homography(im0, im1, back_thresh=back_thresh, 
-                               calcErrors=calcErrors, maxpoints=maxpoints,
-                               quality=quality, mindist=mindist, 
-                               calcHomogError=calcHomogError, 
-                               min_features=min_features)
-
-            #Assemble all homography information for every image pair set            
-            pairwiseHomography.append(hg)
-        
-        #Returns homography matrix, associated points, point error and 
-        #homography error
-        return pairwiseHomography
-
         
     def report(self):
         '''Reporter for TimeLapse object. Returns information concerning:
@@ -569,177 +745,20 @@ class Velocity(ImageSequence):
                    'background area for homography) set to: ', self._invmask)
 
         ###ADD MORE CHECKS
-
-
-    def calcVelocity(self, img1, img2, homography=None, method=cv2.RANSAC, 
-                     ransacReprojThreshold=5.0, back_thresh=1.0, 
-                     calcErrors=True, maxpoints=50000, quality=0.1, 
-                     mindist=5.0, min_features=4):
-        '''Function to measure the velocity between a pair of images.'''       
-
-        #Set threshold difference for point tracks
-        displacement_tolerance_rel=2.0
-        
-        #Track points between the image pair
-        trackdata = self.featureTrack(img1, img2, self.getMask(),
-                                      back_thresh=1.0, calcErrors=calcErrors,
-                                      maxpoints=maxpoints, quality=quality,
-                                      mindist=mindist, 
-                                      min_features=min_features) 
-        
-        #Pass empty object if tracking was insufficient
-        if trackdata==None:
-            if self._quiet>0:
-                print '\nNo features to undertake velocity measurements'
-            return None        
-            
-        #Separate raw tracked points and errors            
-        points, ptserrors=trackdata
-
-        #Get camera matrix and distortion parameters from CamEnv object
-        cameraMatrix=self._camEnv.getCamMatrixCV2()
-        distortP=self._camEnv.getDistortCoeffsCv2()
-        
-        #Calculate optimal camera matrix 
-        size=img1.shape
-        h = size[0]
-        w = size[1]
-        newMat, roi = cv2.getOptimalNewCameraMatrix(cameraMatrix, 
-                                                    distortP, 
-                                                    (w,h), 1, (w,h))
-        
-        #Correct tracked points for image distortion. The displacement here is 
-        #defined forwards (i.e. the points in image 1 are first corrected, 
-        #followed by those in image 2)        
-        #Correct points in first image 
-        src_pts_corr=cv2.undistortPoints(points[0], 
-                                         cameraMatrix, 
-                                         distortP,P=newMat)
-        
-        #Correct points in second image                                         
-        dst_pts_corr=cv2.undistortPoints(points[1], 
-                                         cameraMatrix, 
-                                         distortP,P=newMat) 
-
-        #Calculate homography if desired
-        if homography!=None:
-            
-            #Optional commentary
-            if self._quiet>1:
-                print '\nHomography not found. Calculating homography.'
-            
-            #Get homography matrix
-            homogMatrix=homography[0]
-            
-            #Apply perspective homography matrix to tracked points
-            tracked=dst_pts_corr.shape[0]
-            dst_pts_homog=self.apply_persp_homographyPts_array(dst_pts_corr,
-                                                               homogMatrix,
-                                                               inverse=True)
-            
-            #Calculate difference between original and tracked points
-            dispx=dst_pts_homog[:,0,0]-src_pts_corr[:,0,0]
-            dispy=dst_pts_homog[:,0,1]-src_pts_corr[:,0,1]
-            
-            #Use pythagoras' theorem to obtain distance
-            disp_dist=np.sqrt(dispx*dispx+dispy*dispy)
-            
-            #Determine threshold for good points using a given displacement 
-            #tolerance (defined earlier)
-            xsd=homography[3][0][2]
-            ysd=homography[3][0][3]
-            sderr=math.sqrt(xsd*xsd+ysd*ysd)
-            good=disp_dist > sderr * displacement_tolerance_rel
-            
-            #Keep good points
-            src_pts_corr=src_pts_corr[good]
-            dst_pts_corr=dst_pts_corr[good]
-            dst_pts_homog=dst_pts_homog[good]
-            
-            #Determine number of points kept
-            retained=dst_pts_corr.shape[0]
-            
-            #Optional commentary
-            if self._quiet>1:
-                print 'Points removed because of homography uncertainty:'
-                print 'Before: ', tracked, ' After: ', retained
-
-        else:
-            dst_pts_homog=None
-
-        #Optional commentary
-        if self._quiet>1:
-            print '\nUndertaking inverse projection'
-            
-        #Project good points (original and tracked) to obtain XYZ coordinates
-        if src_pts_corr is not None:
-            uvs=src_pts_corr[:,0,:]
-            xyzs=self._camEnv.invproject(uvs)
-        else:
-            xyzs=None
-        
-        if dst_pts_homog is not None:
-            uvd=dst_pts_homog[:,0,:]
-            xyzd=self._camEnv.invproject(uvd)
-        else:
-            xyzd=None
-
-        #Return real-world point positions (original and tracked points),
-        #and xy pixel positions (original, tracked, and homography)
-        return [[xyzs,xyzd],[src_pts_corr,dst_pts_corr,dst_pts_homog]]
         
         
-    def calcVelocities(self, span=[0,-1], homography=True, method=cv2.RANSAC, 
-                       ransacReprojThreshold=5.0, back_thresh=1.0, 
-                       calcErrors=True, maxpoints=50000, quality=0.1, 
-                       mindist=5.0, min_features=4):
-        '''Function to calculate velocities between succesive image pairs.'''
-        #Optional commentary
-        if self._quiet>0:
-            print '\n\nCALCULATING VELOCITIES'
+    def _calcTrackErrors(self,p0,p1,dist):
+        '''Function to calculate signal-to-noise ratio with forward-backward 
+        tracking data. The distance between the backtrack and original points
+        (dist) is assumed to be pre-calcuated.'''               
+        #Determine length between the two sets of points
+        length=(p0-p1)*(p0-p1)
+        length=np.sqrt(length[:,0,0]+length[:,0,1])
         
-        #Create empty lists for velocities and homography
-        pairwiseVelocities=[]
-        pairwiseHomogs=[]
+        #Calculate signal-to-noise ratio
+        snr = dist/length
         
-        #Get first image (image0) file path and array data for intial tracking
-        imn1=self._imageSet[span[0]].getImagePath().split('\\')[1]
-        im1=self._imageSet[span[0]].getImageArray()
-        
-        #Cycle through image pairs (numbered from 0)
-        for i in range(self.getLength()-1)[span[0]:span[1]]:
-
-            #Re-assign first image in image pair
-            im0=im1
-            imn0=imn1
-                            
-            #Get second image in image pair (and subsequently clear memory)
-            im1=self._imageSet[i+1].getImageArray()
-            imn1=self._imageSet[i+1].getImagePath().split('\\')[1]       
-            self._imageSet[i].clearAll()
-           
-            #Optional commentary
-            if self._quiet>0:
-                print '\nFeature-tracking for images: ',imn0,' and ',imn1
-
-            #Determine homography between image pairif required
-            #Set calcErrors true otherwise we can't calculate/ plot homography
-            #points
-            if homography is True:        
-                hg=self.homography(im0,im1,back_thresh=1.0,calcErrors=True,
-                                   maxpoints=2000,quality=0.1,mindist=5.0,
-                                   calcHomogError=True,min_features=4)
-                 
-            #Calculate velocities between image pair
-            vel=self.calcVelocity(im0,im1,hg,back_thresh=2.0,maxpoints=2000,
-                                  quality=0.1,mindist=5.0)            
-
-            #Append homography and velocity data to output lists            
-            pairwiseHomogs.append(hg)            
-            pairwiseVelocities.append(vel)
-        
-        return pairwiseHomogs, pairwiseVelocities
-        
+        return length,snr
         
 #------------------------------------------------------------------------------
 

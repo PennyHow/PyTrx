@@ -592,16 +592,19 @@ def writeTIFF(outFileName, OutArray, affineT, EPSGcode=32633,
     print '\nOutput tiff file: ',outFileName
 
 
-def writeVelocityFile(veloset, timeLapse, fname='velocity.csv',span=[0,-1]):
+def writeVelocityXYZ(veloset, timeLapse, fname='velocity_xyz.csv',span=[0,-1]):
     '''Function to write all velocity data from a given timeLapse sequence to 
     .csv file. Data is formatted as sequential columns containing the following
     information:
-    Image pair 1 name
-    Image pair 2 name
-    Average velocity
-    Number of features tracked
-    Error
-    Signal-to-noise ratio
+        Image pair 1 name
+        Image pair 2 name
+        Average xyz velocity (unfiltered)
+        Number of features tracked (unfiltered)
+        Average xyz velocity (filtered)
+        Number of features tracks (filtered)
+        Average pixel velocity
+        Homography residual mean error (RMS)
+        Signal-to-noise ratio
     
     Input variables:
     veloset:            List of xyz and uv points over multiple images 
@@ -623,9 +626,10 @@ def writeVelocityFile(veloset, timeLapse, fname='velocity.csv',span=[0,-1]):
     f.write(dirnam+'\n')
     
     #Define column headers
-    header=('Image 0, Image 1, Average velocity (unfiltered),'
-            'Features tracked (unfiltered), Average velocity (filtered),'
-            'Features Tracked (filtered), Error, SNR')    
+    header=('Image 0, Image 1, Average xyz velocity (unfiltered),'
+            'Features tracked (unfiltered), Average xyz velocity (filtered),'
+            'Features Tracked (filtered), Average px velocity,'
+            'Homography RMS Error, SNR')    
     f.write(header + '\n')
 
     #Iterate through timeLapse object
@@ -650,10 +654,8 @@ def writeVelocityFile(veloset, timeLapse, fname='velocity.csv',span=[0,-1]):
             xyz1 = xyz[0]               #Pts from image pair 1
             xyz2 = xyz[1]               #Pts from image pair 2
             
-            print xyz1
-            print xyz2
             if xyz2 is None:
-                f.write(out + ', nan , nan , nan , nan \n')
+                f.write(out + ', nan , nan , nan , nan')
             else:
                 #Get point positions and differences   
                 x1=[]
@@ -706,10 +708,11 @@ def writeVelocityFile(veloset, timeLapse, fname='velocity.csv',span=[0,-1]):
                     #Compile all data for output file
                     f.write(str(velfav) + ',' + str(numtrackf))
             
-                #Break line in output file
-                f.write('\n')
-
-
+            #Calculate pixel velocities
+            srcpts, dstpts, hpts = uv
+            
+            #Break line in output file
+            f.write('\n')
             
     print '\nVelocity file written:' + fname        
  

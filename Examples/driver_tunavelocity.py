@@ -30,19 +30,17 @@ from FileHandler import writeHomographyFile, writeVelocityFile
 
 
 #-------------------------   Map data sources   -------------------------------
-time = '2300'
-
 
 #Get data needed for processing
 camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_TU4_2015.txt'
 camvmask = '../Examples/camenv_data/masks/TU4_2015_vmask.JPG'
 caminvmask = '../Examples/camenv_data/invmasks/TU4_2015_inv.JPG'
 
-camimgs = 'F:/imagery/tunabreen/pytrx/TU4_daily_2015/' + time + '/*.JPG'
+camimgs = 'F:/imagery/tunabreen/pytrx/TU4_threeday_2015/*.JPG'
 
 
 #Define data output directory
-destination = '../Examples/results/TU4_velocity/daily_' + time + '/'
+destination = '../Examples/results/TU4_velocity/threedaily/'
 if not os.path.exists(destination):
     os.makedirs(destination)
 
