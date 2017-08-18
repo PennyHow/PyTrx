@@ -592,7 +592,8 @@ def writeTIFF(outFileName, OutArray, affineT, EPSGcode=32633,
     print '\nOutput tiff file: ',outFileName
 
 
-def writeVelocityXYZ(veloset, timeLapse, fname='velocity_xyz.csv',span=[0,-1]):
+def writeVelocityFile(veloset, homogset, timeLapse, fname='velocity_xyz.csv',
+                      span=[0,-1]):
     '''Function to write all velocity data from a given timeLapse sequence to 
     .csv file. Data is formatted as sequential columns containing the following
     information:
@@ -649,13 +650,19 @@ def writeVelocityXYZ(veloset, timeLapse, fname='velocity_xyz.csv',span=[0,-1]):
 
             #Get velocity data          
             xyz, uv = veloset[i]
-                
+            
+            #Get pixel point positions
+            srcpts, dstpts, hpts = uv
+            
             #Get xyz coordinates from points in image pair
             xyz1 = xyz[0]               #Pts from image pair 1
             xyz2 = xyz[1]               #Pts from image pair 2
             
             if xyz2 is None:
-                f.write(out + ', nan , nan , nan , nan')
+                f.write(out + ', nan , nan , nan , nan,')
+            if hpts is None:
+                hpts = dstpts
+                
             else:
                 #Get point positions and differences   
                 x1=[]
@@ -664,34 +671,40 @@ def writeVelocityXYZ(veloset, timeLapse, fname='velocity_xyz.csv',span=[0,-1]):
                 y2=[]
                 xdif=[]
                 ydif=[]
-                for i,j in zip(xyz1,xyz2):
-                    if math.isnan(i[0]):
+                pxdif=[]
+                pydif=[]
+                for a,b,c,d in zip(xyz1,xyz2,srcpts,hpts):
+                    if math.isnan(a[0]):
                         pass
                     else:
-                        x1.append(i[0])
-                        y1.append(i[1])
-                        x2.append(j[0])
-                        y2.append(j[1])
-                        xdif.append(i[0]-j[0])
-                        ydif.append(i[1]-j[1])
-            
+                        x1.append(a[0])
+                        y1.append(a[1])
+                        x2.append(b[0])
+                        y2.append(b[1])
+                        xdif.append(a[0]-b[0])
+                        ydif.append(a[1]-b[1])
+                        pxdif.append(c[0][0]-d[0][0])
+                        pydif.append(c[0][1]-d[0][1])
+                        
                 #Calculate velocity with Pythagoras' theorem
-                speed=[]
-                for i,j in zip(xdif, ydif):
-                    sp = np.sqrt(i*i+j*j)
-                    speed.append(sp)
+                xyzvel=[]
+                pxvel=[]
+                for a,b,c,d in zip(xdif, ydif, pxdif, pydif):
+                    xyzvel.append(np.sqrt(a*a+b*b))
+                    pxvel.append(np.sqrt(c*c+d*d))
                 
                 #Calculate average unfiltered velocity
-                velav = sum(speed)/len(speed)
+                xyzvelav = sum(xyzvel)/len(xyzvel)
+                pxvelav= sum(pxvel)/len(pxvel)
                 
                 #Determine number of features (unfiltered) tracked
-                numtrack = len(speed)
+                numtrack = len(xyzvel)
     
                 #Write unfiltered velocity information
-                f.write(out + ',' +str(velav) + ',' +str(numtrack) + ',')
+                f.write(out + ',' +str(xyzvelav) + ',' +str(numtrack) + ',')
     
                 #Filter outlier points 
-                v_all=np.vstack((x1,y1,x2,y2,speed))
+                v_all=np.vstack((x1,y1,x2,y2,xyzvel))
                 v_all=v_all.transpose()
                 filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)
                 
@@ -706,13 +719,47 @@ def writeVelocityXYZ(veloset, timeLapse, fname='velocity_xyz.csv',span=[0,-1]):
                     numtrackf = len(fspeed)
                 
                     #Compile all data for output file
-                    f.write(str(velfav) + ',' + str(numtrackf))
+                    f.write((str(velfav) + ',' + str(numtrackf) + ','))
             
-            #Calculate pixel velocities
-            srcpts, dstpts, hpts = uv
+                    
+        #Get homography information if desired
+        if homogset[i]!=None:
+
+            #Get homography data for image pair            
+            hgm, points, ptserrors, homogerrs=homogset[i]
+
+            #Get xyz homography errors                      
+            xd=homogerrs[1][0]
+            yd=homogerrs[1][1]
             
-            #Break line in output file
-            f.write('\n')
+            #Get uv point positions
+            ps=points[0]
+            pf=points[1]
+            psx=ps[:,0,0]
+            psy=ps[:,0,1]
+            pfx=pf[:,0,0]
+            pfy=pf[:,0,1]
+            
+            #Determine uv point position difference
+            pdx=pfx-psx
+            pdy=pfy-psy
+            
+            #Calculate homography and homography error            
+            homogdist=np.sqrt(pdx*pdx+pdy*pdy)
+            errdist=np.sqrt(xd*xd+yd*yd)
+            
+            #Calculate mean homography and mean error 
+            meanerrdist=np.mean(errdist)
+            
+            #Calculate SNR between pixel velocities and error
+            snr=meanerrdist/pxvelav          
+            
+            #Write pixel velocity and homography information
+            f.write((str(pxvelav) + ',' + str(meanerrdist) + ','  +
+                     str(snr)))
+         
+        #Break line in output file
+        f.write('\n')
             
     print '\nVelocity file written:' + fname        
  
@@ -756,8 +803,7 @@ def writeHomographyFile(homogset,timeLapse,fname='homography.csv',span=[0,-1]):
     header=('Image 0, Image 1,"Homography Matrix[0,0]","[0,1]","[0,2]",'
             '"[1,0]","[1,1]","[1,2]","[2,0]","[2,1]","[2,2]",Features Tracked,'
             'xmean,ymean,xsd,ysd,"Mean Error Magnitude",'
-            '"Mean Homographic displacement","magnitude",'
-            '"Homography S-N ratio"')    
+            '"Mean Homographic displacement","Homography SNR"')    
     f.write(header+'\n')
 
     #Iterate through timeLapse object
@@ -817,14 +863,16 @@ def writeHomographyFile(homogset,timeLapse,fname='homography.csv',span=[0,-1]):
             
             #Define output homography matrix errors
             for val in homogerrors:
-                    out=out+','+str(val)
+                out=out+','+str(val)
             
             #Compile all data for output file
-            out=out+','+str(meanerrdist)+','+str(meanhomogdist)+','+str(meansn)
+            out = (out+','+str(meanerrdist)+','+str(meanhomogdist)+','
+                   +str(meansn))
         
         #Write to output file
-        f.write(out+'\n')        
-        print '\nHomography file written' + fname
+        f.write(out+'\n') 
+        
+    print '\nHomography file written' + fname
  
 
 def createThumbs(directory='.'):

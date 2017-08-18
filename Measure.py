@@ -157,7 +157,7 @@ class Velocity(ImageSequence):
             self._mask = None
         else:
             if self._quiet > 0:
-                print '\nSETTING VELOCITY MASK'
+                print '\n\nSETTING VELOCITY MASK'
             self._mask = readMask(self.getImageArrNo(0), maskPath)
             if self._quiet > 1:
                 print 'Velocity mask set'
@@ -167,7 +167,7 @@ class Velocity(ImageSequence):
             self._invmask = None
         else:
             if self._quiet > 0:
-                print '\nSETTING HOMOGRAPHY MASK'
+                print '\n\nSETTING HOMOGRAPHY MASK'
             self._invmask = readMask(self.getImageArrNo(0), invmaskPath)
             if self._quiet > 1:
                 print 'Homography mask set'
