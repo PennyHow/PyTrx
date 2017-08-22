@@ -1880,7 +1880,8 @@ class Line(Area):
             
             #Optional commentary
             if self._quiet>1:
-                print '\nImg ' + str(count) + ' line length: ' + str(rl.Length())
+                print ('\nImg ' + str(count) + ' line length: ' 
+                       + str(rl.Length()) + ' m')
             
             #Append coordinates and distances            
             rpts.append(xyz)

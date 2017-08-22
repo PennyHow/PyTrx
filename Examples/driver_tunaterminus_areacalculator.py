@@ -7,41 +7,30 @@ Routines to calculate ice front areas
 @author: nrjh
 """
 
-
-steps=51   
-#steps=[0.0,0.3,0.7,0.8,1.0]
-perpendicular_length=2000
-resultsDir='/Volumes/Maxtor/Tunabreen/camera2/results/AAccuracy-set2'
-#/*/*line_realcoords*.csv
-
-#resultsDir='/Volumes/Maxtor/Tunabreen/camera2/results/'
-#plotting=False
-plotting=True
-#csvAreasOut='/Volumes/Maxtor/Tunabreen/camera2/results/allAreaData.csv'
-csvAreasOut=None
-#csvDistancesOut='/Volumes/Maxtor/Tunabreen/camera2/results/allDistData.csv'
-csvDistancesOut='/Volumes/Maxtor/Tunabreen/camera2/results/set2accuracyDistData.csv'
- 
-
-#baseline co-ordinates '1' and '2' can be any way around
-x1=553250
-y1=8711000
-x2=554750
-y2=8709250
-
+#Import packages
 import sys
+import os
 import itertools
 import matplotlib
 import matplotlib.pyplot as mp
 import numpy as np
-from PointPlotter import PointPlotter
-from Points import Point2D
-from Polylines import Polyline,Segment
 from osgeo import ogr
 from matplotlib.patches import Polygon
 from matplotlib.collections import PatchCollection
 import glob
 
+#Import PyTrx packages
+sys.path.append('../')
+from Measure import Line
+from CamEnv import CamEnv
+from FileHandler import writeLineFile, writeSHPFile, importLineData
+from Utilities import plotPX, plotXYZ
+
+#Import Area change functions
+sys.path.append('../Other/')
+from PointPlotter import PointPlotter
+from Points import Point2D
+from Polylines import Polyline,Segment
 
 def polyline_reader(fname):
     file=open(fname,'r')
@@ -85,6 +74,11 @@ def extendPolylineToMeet(polyline,segs):
     for i in range(polyline.size()-1):
         segpoly=polyline.getSegment(i)
         p0=seg0.intersectPoint(segpoly)
+#        print seg0.getStart().getCoords()
+#        print seg0.getEnd().getCoords()
+#        print segpoly.getStart().getCoords()
+#        print segpoly.getEnd().getCoords()
+        
         if p0==None:
             print 'p0 none case',i,polyline.size()
             print seg0.getStart().getCoords()
@@ -223,37 +217,9 @@ def calcAreas(polys):
     areas.append(pxextent)
     
     return areas
+
     
-
-xr=(x2-x1)*.1
-yr=(y2-y1)*.1
-
-xlo=min(x1,x2)
-xhi=max(x1,x2)
-ylo=min(y1,y2)
-yhi=max(y1,y2)
-
-xlo=xlo-xr
-ylo=ylo-yr
-xhi=xhi+xr
-yhi=yhi+yr
-
-xlo=552000
-xhi=555000
-ylo=8708000
-yhi=8711000
-
-
-
-baseline=Segment(x1,y1,x2,y2)  
-#allrecs=polyline_reader('./Results/cam1/2014terminus/line_realcoords_150819.csv')
-#sortGeometry(allrecs[0],baseline)
-#segs=baseline.getPerpendicularSegs(steps,1.,length=perpendicular_length)
-   
-
-#print ('\n')
-    
-def doPlots(baseline,line,polys):
+def doPlots(baseline,line,polys,show=False):
     pp=PointPlotter()
     fig, ax = mp.subplots() 
     ax.set_xlim(xlo,xhi)
@@ -287,7 +253,10 @@ def doPlots(baseline,line,polys):
    
     ax.add_collection(p)
     
-    mp.show()
+    if show is True:
+        mp.show()
+    mp.close()
+    
     
 def dataToCsv(fname,header,allVals):
     print 'Writing csv file\n'
@@ -308,6 +277,56 @@ def dataToCsv(fname,header,allVals):
         linesOut.append(line)
     f.writelines(linesOut)
     f.close()
+
+    
+#------------------------------------------------------------------------------
+
+fileDirectory = '../Examples/results/TU2_manualline/'
+
+
+resultsDir= 'F:/harold_dissertation/HW-Tunabreen_results'
+csvAreasOut = fileDirectory + 'allAreaData2.csv'
+csvDistancesOut = fileDirectory + 'allDistData2.csv'
+
+plotting=True 
+ 
+#steps=51   
+steps=[0.0,0.15,0.5,0.85,0.97,1.0]
+
+perpendicular_length=2000
+
+#baseline co-ordinates '1' and '2' can be any way around
+x1=553250
+y1=8711000
+x2=554750
+y2=8709250
+    
+xr=(x2-x1)*.1
+yr=(y2-y1)*.1
+
+xlo=min(x1,x2)
+xhi=max(x1,x2)
+ylo=min(y1,y2)
+yhi=max(y1,y2)
+
+xlo=xlo-xr
+ylo=ylo-yr
+xhi=xhi+xr
+yhi=yhi+yr
+
+xlo=552000
+xhi=555000
+ylo=8708000
+yhi=8711000
+
+
+baseline=Segment(x1,y1,x2,y2)  
+#allrecs=polyline_reader('./Results/cam1/2014terminus/line_realcoords_150819.csv')
+#sortGeometry(allrecs[0],baseline)
+#segs=baseline.getPerpendicularSegs(steps,1.,length=perpendicular_length)
+   
+
+#print ('\n')
 
 resultSpec=resultsDir+'/*/*line_realcoords*.csv'
 print resultSpec
@@ -349,11 +368,10 @@ for fname in filelist:
             polys,areas=extractPolys(line,segs,p0,pn)        
         #areas=calcAreas(polys)          
         
-            if plotting:
-                doPlots(baseline,line,polys)
             
-                allareas.append(areas)
-                dateheader.append(line.getID())
+            doPlots(baseline,line,polys,show=plotting)            
+            allareas.append(areas)
+            dateheader.append(line.getID())
        
 if csvAreasOut!=None:
     print '\nWriting area csv file'

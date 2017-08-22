@@ -13,7 +13,7 @@ GCP_path #Path name where Ground Control Point data can be found
 ..\Examples\camenv_data\gcps\TU4_2015.txt
 
 DEM_path #Path name where DEM data can be found
-..\Examples\camenv_data\dem\TunaFront.tif
+..\Examples\camenv_data\dem\TunaZero.tif
 
 
 

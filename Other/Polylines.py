@@ -477,8 +477,7 @@ class Segment(object):
          return self.intersectPoint(other)!=None
          
 #calculate intersection wiht another segment   
-    def intersectPoint(self, other):
-        
+    def intersectPoint(self, other):        
         x1=self._segPoints[0].get_x()
         x2=self._segPoints[1].get_x()
         x3=other.getStart().get_x()
@@ -487,8 +486,9 @@ class Segment(object):
         y2=self._segPoints[1].get_y()
         y3=other.getStart().get_y()
         y4=other.getEnd().get_y()
-    	
+        
         d=((x2-x1)*(y4-y3))-((y2-y1)*(x4-x3));
+        
         if (d==0): 
             print 'found d==0'
             return None
