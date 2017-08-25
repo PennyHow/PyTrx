@@ -32,6 +32,7 @@ from PointPlotter import PointPlotter
 from Points import Point2D
 from Polylines import Polyline,Segment
 
+
 #-------------------   Functions for volume calculations   --------------------
 
 def polyline_reader(rline, idchar=None, dateTime=None):
@@ -206,12 +207,13 @@ def calcAreas(polys):
     return areas
 
     
-def doPlots(baseline,line,polys,show=False):
+def doPlots(baseline, line, polys, p0, pn, segs, show=False, lims=None):
     pp=PointPlotter()
-    fig, ax = mp.subplots() 
-    ax.set_xlim(xlo,xhi)
-    ax.set_ylim(ylo,yhi)
-    #pp.set_axis(xlo,xhi,ylo,yhi)        
+    fig, ax = mp.subplots()
+    if lims!=None:
+        xlo,xhi,ylo,yhi=lims
+        ax.set_xlim(xlo,xhi)
+        ax.set_ylim(ylo,yhi)      
     pp.plotPoint(p0,'blue')
     pp.plotPoint(pn,'magenta')        
     pp.plotPolylines(line)    
@@ -220,9 +222,7 @@ def doPlots(baseline,line,polys,show=False):
     
     for seg in segs:
         pp.plotSegment(seg,'red')
-        pp.plotPoint(seg.getStart(),'black')
-    
-    #pp.show()      
+        pp.plotPoint(seg.getStart(),'black') 
    
     patches =[]
     
@@ -249,7 +249,7 @@ def dataToCsv(fname,header,allVals):
     f=open(fname,'w')
     
     line1='File ID,FileName'
-    for i in range(len(allareas[0])):
+    for i in range(len(allVals[0])):
         line1=line1+',Area '+str(i+1)
     linesOut=[line1]
     for head,vals in itertools.izip(header,allVals):
@@ -292,13 +292,12 @@ rline, rlength, pxline, pxlength = importLineData(terminus, destination)
 ##Write area data to txt file
 #writeLineFile(terminus, destination)
 #
-##geodata = './Results/cam1/'+day+'/shpterm/'
-#geodata = destination +'shapefiles/'
-#if not os.path.exists(geodata):
-#    os.makedirs(geodata)
-#
-#proj = 32633
-#writeSHPFile(terminus, destination, proj)
+geodata = destination + 'shapefiles/'
+if not os.path.exists(geodata):
+    os.makedirs(geodata)
+
+proj = 32633
+writeSHPFile(terminus, destination, proj)
 
 
 #----------------------------   Show results   --------------------------------
@@ -312,116 +311,117 @@ rline, rlength, pxline, pxlength = importLineData(terminus, destination)
 
 #------------------------   Calculate area loss  ------------------------------
 
-plotting=False
- 
-#steps=51   
-steps=[0.0,0.3,0.55,0.9,0.96,1.0]
-
-perpendicular_length=2000
-
-#baseline co-ordinates '1' and '2' can be any way around
-x1=552920
-y1=8710720
-x2=554620
-y2=8708720
-
-#x1=553181
-#y1=8710240
-#x2=554650
-#y2=8708650
-    
-xr=(x2-x1)*.1
-yr=(y2-y1)*.1
-
-xlo=min(x1,x2)
-xhi=max(x1,x2)
-ylo=min(y1,y2)
-yhi=max(y1,y2)
-
-xlo=xlo-xr
-ylo=ylo-yr
-xhi=xhi+xr
-yhi=yhi+yr
-
-xlo=552500
-xhi=555500
-ylo=8707000
-yhi=8712000
-
-baseline=Segment(x1,y1,x2,y2)    
-
-allareas=[]
-dateheader=[]
-
-datetime=[]
-for im in terminus._imageSet:
-    imn = im.getImagePath().split('\\')[1]
-    datetime.append(imn)
-
-idline = np.arange(1,len(rline),1)  
-          
-#Get the polylines from line object  
-allrecs=polyline_reader(rline, idchar=idline, dateTime=datetime)
-print 'allrecs',len(allrecs)
-print allrecs
-    
-if len(allrecs)>0:
-
-    #Swap the direction of the baseline if necssary to make sure the 
-    #perpendiculars come the right way
-    sortGeometry(allrecs[0],baseline)
-    
-    #Define a set of perpendicular from the baseline to intersect with the 
-    #polylines this has to be redone on the offchance front lines are 
-    #digitised in different directions
-    segs=baseline.getPerpendicularSegs(steps,1.,length=perpendicular_length)
- 
-    print 'segs',segs
-
-    #Now for every line you have
-    count=1
-    for line in allrecs:
-    
-        print '\nProcessing line ' +str(count)+  ' with ', line.size(),' points'
-        
-        #Get around the situation where the polyline is 'short' in this 
-        #case
-        p0,pn=extendPolylineToMeet(line,segs)
-        polys,areas=extractPolys(line,segs,p0,pn)        
-        
-        #areas=calcAreas(polys)          
-    
-        doPlots(baseline,line,polys,show=plotting)
-        
-        allareas.append(areas)
-        dateheader.append(line.getID())
-        
-        count=count+1
-
-csvAreasOut = destination + 'volumeloss/allAreaData_subsets.csv'
-csvDistancesOut = destination + 'volumeloss/allDistData_subsets.csv'
-       
-if csvAreasOut!=None:
-    print '\nWriting area csv file'
-    dataToCsv(csvAreasOut,dateheader,allareas) 
-
-if csvDistancesOut!=None:
-    print '\nWriting length csv file'
-    baselinedists=[]
-    alldistances=[]
-    p0=segs[0].getStart()
-    for seg in segs[1:]:
-        p1 = seg.getStart()
-        baselinedists.append(p0.distance(p1))
-        p0=p1
-    #print baselinedists
-    for areas in allareas:
-        distances=[]
-        for basedist,area in itertools.izip(baselinedists,areas):
-            dist=area/basedist
-            distances.append(dist)
-        alldistances.append(distances)
-    dataToCsv(csvDistancesOut,dateheader,alldistances)
+#plotting=False
+# 
+##steps=51   
+#steps=[0.0,0.3,0.55,0.9,0.96,1.0]
+#
+#perpendicular_length=2000
+#
+##baseline co-ordinates '1' and '2' can be any way around
+#x1=552920
+#y1=8710720
+#x2=554620
+#y2=8708720
+#
+##x1=553181
+##y1=8710240
+##x2=554650
+##y2=8708650
+#    
+#xr=(x2-x1)*.1
+#yr=(y2-y1)*.1
+#
+#xlo=min(x1,x2)
+#xhi=max(x1,x2)
+#ylo=min(y1,y2)
+#yhi=max(y1,y2)
+#
+#xlo=xlo-xr
+#ylo=ylo-yr
+#xhi=xhi+xr
+#yhi=yhi+yr
+#
+#xlo=552500
+#xhi=555500
+#ylo=8707000
+#yhi=8712000
+#
+#baseline=Segment(x1,y1,x2,y2)    
+#
+#allareas=[]
+#dateheader=[]
+#
+#datetime=[]
+#for im in terminus._imageSet:
+#    imn = im.getImagePath().split('\\')[1]
+#    datetime.append(imn)
+#
+#idline = np.arange(1,len(rline),1)  
+#          
+##Get the polylines from line object  
+#allrecs=polyline_reader(rline, idchar=idline, dateTime=datetime)
+#print 'allrecs',len(allrecs)
+#print allrecs
+#    
+#if len(allrecs)>0:
+#
+#    #Swap the direction of the baseline if necssary to make sure the 
+#    #perpendiculars come the right way
+#    sortGeometry(allrecs[0],baseline)
+#    
+#    #Define a set of perpendicular from the baseline to intersect with the 
+#    #polylines this has to be redone on the offchance front lines are 
+#    #digitised in different directions
+#    segs=baseline.getPerpendicularSegs(steps,1.,length=perpendicular_length)
+# 
+#    print 'segs',segs
+#
+#    #Now for every line you have
+#    count=1
+#    for line in allrecs:
+#    
+#        print '\nProcessing line ' +str(count)+  ' with ', line.size(),' points'
+#        
+#        #Get around the situation where the polyline is 'short' in this 
+#        #case
+#        p0,pn=extendPolylineToMeet(line,segs)
+#        polys,areas=extractPolys(line,segs,p0,pn)        
+#        
+#        #areas=calcAreas(polys)          
+#    
+#        doPlots(baseline, line, polys, p0, pn, segs, 
+#                show=plotting,lims=[xlo,xhi,ylo,yhi])
+#        
+#        allareas.append(areas)
+#        dateheader.append(line.getID())
+#        
+#        count=count+1
+#
+#csvAreasOut = destination + 'volumeloss/allAreaData_subsets.csv'
+#csvDistancesOut = destination + 'volumeloss/allDistData_subsets.csv'
+#       
+#if csvAreasOut!=None:
+#    print '\nWriting area csv file'
+#    dataToCsv(csvAreasOut,dateheader,allareas) 
+#
+#if csvDistancesOut!=None:
+#    print '\nWriting length csv file'
+#    baselinedists=[]
+#    alldistances=[]
+#    p0=segs[0].getStart()
+#    for seg in segs[1:]:
+#        p1 = seg.getStart()
+#        baselinedists.append(p0.distance(p1))
+#        p0=p1
+#    #print baselinedists
+#    for areas in allareas:
+#        distances=[]
+#        for basedist,area in itertools.izip(baselinedists,areas):
+#            dist=area/basedist
+#            distances.append(dist)
+#        alldistances.append(distances)
+#    dataToCsv(csvDistancesOut,dateheader,alldistances)
 
 
 print 'Finished'

@@ -24,14 +24,14 @@ import time
 sys.path.append('../')
 from Measure import Area
 from CamEnv import CamEnv
-from FileHandler import writeAreaFile, writeSHPFile, importMeasureData
+from FileHandler import writeAreaFile, writeSHPFile, importAreaData
 from Utilities import plotPX, plotXYZ
 
 
 #-----------------------------   Map data files   -----------------------------
 
 #Define data inputs
-camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_cam1_2014.txt'
+camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_KR1_2014.txt'
 camimgs = '../Examples/images/KR1_2014_subset/*.JPG'
 
 #Define data output directory
@@ -59,8 +59,8 @@ plumes = Area(camimgs, cameraenvironment, calibFlag, None, maxim, imband,
 
 #-------------------------   Calculate areas   --------------------------------
 
-#Calculate real areas
-rpolys, rareas = plumes.calcManualAreas()
+##Calculate real areas
+#rpolys, rareas = plumes.calcManualAreas()
 
 ##Calculate pixel extents. Use this function if pixel extents are only needed, 
 ##or a DEM is not available. Pixel extents are automatically calculated if 
@@ -68,7 +68,7 @@ rpolys, rareas = plumes.calcManualAreas()
 #polys, areas = plumes.calcExtents()
 
 #Import data from file
-rpolys, rareas, pxpolys, pxareas = importMeasureData(plumes, destination)
+rpolys, rareas, pxpolys, pxareas = importAreaData(plumes, destination)
 
 
 #----------------------------   Export data   ---------------------------------

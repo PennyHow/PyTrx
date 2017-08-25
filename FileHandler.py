@@ -1110,8 +1110,10 @@ def writeSHPFile(a, fileDirectory, projection=None):
 
     #Get areas/lines from the given class
     if hasattr(a, '_realpoly'):
+        print '\nDetected polygons to write as shapefiles'
         xyz = a._realpoly
     elif hasattr(a, '_realline'):
+        print '\nDetected lines to write as shapefiles'
         xyz = a._realline
     else:
         print '\nUnrecognised Area/Line class object'
@@ -1202,19 +1204,19 @@ def writeSHPFile(a, fileDirectory, projection=None):
 
             lcount=1
             
-            for shape in polys:
-                line = ogr.Geometry(ogr.wkbLineString)   
-                for p in shape:
-                    line.AddPoint(p[0],p[1])
+#            for shape in polys:
+#                line = ogr.Geometry(ogr.wkbLineString)   
+#                for p in shape:
+#                    line.AddPoint(p[0],p[1])
             
-                #Create feature            
-                feature = ogr.Feature(layer.GetLayerDefn())
-                feature.SetGeometry(line)
-                feature.SetField('id', lcount)
-                feature.SetField('length', line.Length())
-                layer.CreateFeature(feature)
-                feature.Destroy() 
-                lcount=lcount+1
+            #Create feature            
+            feature = ogr.Feature(layer.GetLayerDefn())
+            feature.SetGeometry(polys)
+            feature.SetField('id', lcount)
+            feature.SetField('length', polys.Length())
+            layer.CreateFeature(feature)
+            feature.Destroy() 
+            lcount=lcount+1
             
             imgcount=imgcount+1
             ds.Destroy()
