@@ -383,9 +383,7 @@ def doPlots(baseline, line, polys, p0, pn, segs, show=False, lims=None):
 
 #Write data to .csv file    
 def dataToCsv(fname,header,allVals):
-    print 'Writing csv file\n'
-    f=open(fname,'w')
-    
+    f=open(fname,'w')    
     line1='File ID,FileName'
     for i in range(len(allVals[0])):
         line1=line1+',Area '+str(i+1)
@@ -406,7 +404,7 @@ def dataToCsv(fname,header,allVals):
 #terminus from the baseline at a given step point. These step points can be
 #defined at certain positions, or by a given number of equally-spaced step 
 #points
-print '\n\nCommencing area loss calculation'
+print '\n\nCommencing area/distance change calculation'
 
 
 #See plots?
