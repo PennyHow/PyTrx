@@ -11,13 +11,18 @@ this script performs automated detection of supraglacial lakes through
 sequential images of the glacier to derive surface areas which have been 
 corrected for image distortion.
 
+Previously defined areas can also be imported from file (this can be changed 
+by commenting and uncommenting commands in the "Calculate areas" section of 
+this script).
+
+
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton (nick.hulton@ed.ac.uk)
-
 '''
 
 #Import packages
 import sys
+import os
 
 #Import PyTrx packages
 sys.path.append('../')
@@ -31,11 +36,13 @@ from Utilities import plotPX, plotXYZ
 
 #Define data inputs
 camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_KR5_2014.txt'
-cammask = '../Examples/camenv_data/masks/c5_2014_amask.JPG'
+cammask = '../Examples/camenv_data/masks/KR5_2014_amask.JPG'
 camimgs = '../Examples/images/KR5_2014_subset/*.JPG'
 
 #Define data output directory
-destination = '../Examples/results/KR5_autoarea_sens_plusvertical/'
+destination = '../Examples/results/autoarea/'
+if not os.path.exists(destination):
+    os.makedirs(destination)
 
 
 #--------------------   Create camera and area objects   ----------------------
@@ -50,19 +57,19 @@ maxim = 0                   #Image number of maximum areal extent
 imband = 'R'                #Desired image band
 quiet = 2                   #Level of commentary
 loadall = False             #Load all images?
-timem = 'EXIF'              #Method to derive image times
+time = 'EXIF'              #Method to derive image times
 
 
 #Set up Area object, from which areal extent will be measured
 lakes = Area(camimgs, cameraenvironment, calibFlag, cammask, maxim, imband, 
-             quiet, loadall, timem)
-
+             quiet, loadall, time)
+             
 
 #---------------------   Set area detection parameters   ----------------------             
 
-##Set image enhancement parameters. If these are undefined then they will be 
-##set to a default enhancement of ('light', 50, 20)
-#lakes.setEnhance('light', 50, 20)
+#Set image enhancement parameters. If these are undefined then they will be 
+#set to a default enhancement of ('light', 50, 20)
+lakes.setEnhance('light', 50, 20)
 
 
 #Set colour range, from which extents will be distinguished. If colour range 
@@ -78,13 +85,15 @@ lakes.setPXExt(0,1200,2000,1500)
 lakes.setThreshold(5)
 
 #Set automated area detection input arguments
+px=None                 #Pre-defined pixel extents?
 colour=False            #Define colour range for every image?
 verify=False            #Manually verify detected areas?
+
 
 #-------------------------   Calculate areas   --------------------------------
 
 #Calculate real areas
-rpolys, rareas = lakes.calcAutoAreas(colour, verify)
+rpolys, rareas = lakes.calcAutoAreas(px, colour, verify)
 
 ##Calculate pixel extents. Use this function if pixel extents are only needed, 
 ##or a DEM is not available. Pixel extents are automatically calculated if 
@@ -103,15 +112,21 @@ writeAreaFile(lakes, destination)
 
 #Create shapefiles
 target1 = destination + 'shpfiles/'
+if not os.path.exists(target1):
+    os.makedirs(target1)
+    
 proj = 32633
 writeSHPFile(lakes, target1, proj) 
 
 
 #Write all image extents and dems 
 target2 = destination + 'outputimgs/'
+if not os.path.exists(target2):
+    os.makedirs(target2)
+    
 for i in range(len(rpolys)):
-    plotPX(lakes, i, destination, crop=False)
-    plotXYZ(lakes, i, destination, dem=False, show=True)
+    plotPX(lakes, i, target2, crop=False, show=True)
+    plotXYZ(lakes, i, target2, dem=False, show=True)
 
 
 #------------------------------------------------------------------------------                                                                                                                                                                                                                                                                                                      

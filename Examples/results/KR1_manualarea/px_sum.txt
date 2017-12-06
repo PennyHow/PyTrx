@@ -1,4 +1,0 @@
-Img1_polysum(px)	1417727.78271
-Img2_polysum(px)	679173.229516
-Img3_polysum(px)	449638.370038
-Img4_polysum(px)	135489.767677

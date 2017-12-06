@@ -1,4 +1,0 @@
-Img1_totalpolyarea	5124.17292148
-Img2_totalpolyarea	6009.11965192
-Img3_totalpolyarea	8450.25656445
-Img4_totalpolyarea	1423.59384333

@@ -589,7 +589,7 @@ def plotInterpolate(dem, lims, grid, pointextent, show=True, save=None):
     plt.close()
 
 
-def plotPX(a, number, dest=None, show=True, crop=False):
+def plotPX(a, number, dest=None, crop=False, show=True):
     '''Return image overlayed with pixel extent polygons for a given image 
     number.'''
     
