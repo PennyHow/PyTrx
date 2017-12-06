@@ -1,4 +1,4 @@
-Img1_length(m)	1884.96748058
-Img2_length(m)	1888.27361834
-Img3_length(m)	1869.50701472
-Img4_length(m)	1896.21137548
+Img1_length(m)	1829.34520538
+Img2_length(m)	1839.24861932
+Img3_length(m)	1816.64338985
+Img4_length(m)	1814.03963173

@@ -1,11 +1,25 @@
-# -*- coding: utf-8 -*-
 '''
-Created on Fri Jun 24 10:07:59 2016
+PYTRX EXAMPLE MANUAL LINE DRIVER
 
-@author:  Penny How (p.how@ed.ac.uk)
-          Nick Hulton (nick.hulton@ed.ac.uk)
-    
-Driver for length calculator of Tunabreen terminus from camera 2 (2015)
+This script is part of PyTrx, an object-oriented programme created for the 
+purpose of calculating real-world measurements from oblique images and 
+time-lapse image series.
+
+This driver calculates terminus profiles (as line features) at Tunabreen, 
+Svalbard, for a small subset of the 2015 melt season using modules in PyTrx. 
+Specifically this script performs manual detection of terminus position through 
+sequential images of the glacier to derive line profiles which have been 
+corrected for image distortion. Change between terminus profiles (as an area or
+a distance) are calculated using functions which have been written outside of
+PyTrx.
+
+Previously defined lines can also be imported from text or shape file (this 
+can be changed by commenting and uncommenting commands in the "Calculate lines" 
+section of this script).
+
+
+@author: Penny How (p.how@ed.ac.uk)
+         Nick Hulton (nick.hulton@ed.ac.uk)
 '''
 
 #Import packages
@@ -51,12 +65,12 @@ cam = CamEnv(camdata)
 #Set up line object
 terminus = Line(camimgs, cam)
 
-#-----------------------   Calculate/import areas   ---------------------------
+#-----------------------   Calculate/import lines   ---------------------------
 
 #Choose action "plot", "importtxt" or "importshp". Plot proceeds with the 
 #manual  definition of terminus lines, importtxt imports line data from text 
 #files, and  importshp imports line data from shape file (.shp)
-action='importtxt'      
+action = 'importtxt'      
 
 
 #Manually define lines from imagery
@@ -130,8 +144,8 @@ else:
 #----------------------------   Export data   ---------------------------------
 
 #Change flags to write text and shape files
-write=True
-shp=True
+write = True
+shp = True
 
 #Write line data to txt file
 if write is True:   
@@ -385,7 +399,8 @@ def dataToCsv(fname,header,allVals):
     f.close()
 
 
-#------------------------   Calculate area loss  ------------------------------
+#-------------------   Calculate area/distance change  ------------------------
+
 #This section is for calculating area loss by plotting the terminus positions 
 #to a baseline. Area loss is defined as changes in the distance of the
 #terminus from the baseline at a given step point. These step points can be
@@ -410,31 +425,19 @@ perpendicular_length=2000
 
 
 #Start (x1,y1) and end (x2,y2) of baseline co-ordinates
-x1=553181
-y1=8710240
-x2=554400
-y2=8708650
+x1=553250
+y1=8711500
+x2=554900
+y2=8708000
 
 
-##Plotting limits. These can either be pre-defined or calculated based on the
-##given baseline start and end points  
-xlo=552500
-xhi=555500
-ylo=8707000
-yhi=8712000
-  
-#xr=(x2-x1)*.1
-#yr=(y2-y1)*.1
-#
-#xlo=min(x1,x2)
-#xhi=max(x1,x2)
-#ylo=min(y1,y2)
-#yhi=max(y1,y2)
-#
-#xlo=xlo-xr
-#ylo=ylo-yr
-#xhi=xhi+xr
-#yhi=yhi+yr
+#Plotting limits. These can either be pre-defined or calculated based on the
+#given baseline start and end points. Pass 'None' for each if limits are 
+#undesired 
+xlo=551000
+xhi=556000
+ylo=8706000
+yhi=8712000  
 
 
 #Create baseline
@@ -453,11 +456,7 @@ idline = np.arange(1,(len(rline)+1),1)
          
 #Create polylines from the line objects
 allrecs=polyline_reader(rline, idchar=idline, dateTime=datetime)
-    
-print 'allrecs',len(allrecs)
-print allrecs
-
-    
+       
 if len(allrecs)>0:
 
     #Swap the direction of the baseline if necssary to make sure the 
@@ -468,20 +467,15 @@ if len(allrecs)>0:
     #intersect with the polylines
     segs=baseline.getPerpendicularSegs(steps,1.,length=perpendicular_length)
  
-    print 'segs',segs
-
 
     count=1
     for line in allrecs:
-    
-        print '\nProcessing line ' +str(count)+  ' with ', line.size(),' points'
+        print ('\nProcessing line ' + str(count) +  ' with ' + str(line.size())
+               + ' points')
         
-        #Get around the situation where the polyline is 'short' in this 
-        #case
+        #Get around the situation where the polyline is 'short' in this case
         p0,pn=extendPolylineToMeet(line,segs)
-        polys,areas=extractPolys(line,segs,p0,pn)        
-        
-        #areas=calcAreas(polys)          
+        polys,areas=extractPolys(line,segs,p0,pn)                
         
         #Calculate distance between polylines and baseline at the given steps
         doPlots(baseline, line, polys, p0, pn, segs, 
@@ -489,21 +483,24 @@ if len(allrecs)>0:
         
         #Append data to list
         allareas.append(areas)
-        dateheader.append(line.getID())
-        
+        dateheader.append(line.getID())        
         count=count+1
 
-#------------------------   Write area data out   -----------------------------
-  
+
+#-------------------   Write area/distance change data   ----------------------
+
+#Define output file locations  
 csvAreasOut = destination + 'area_change.csv'
 csvDistancesOut = destination + 'distance_change.csv'
-       
+
+#Write area file if defined       
 if csvAreasOut!=None:
-    print '\nWriting area csv file'
+    print '\nWriting area change data to file'
     dataToCsv(csvAreasOut,dateheader,allareas) 
 
+#Write distance file if defined
 if csvDistancesOut!=None:
-    print '\nWriting length csv file'
+    print '\nWriting distance change data to file'
     baselinedists=[]
     alldistances=[]
     p0=segs[0].getStart()
@@ -511,7 +508,6 @@ if csvDistancesOut!=None:
         p1 = seg.getStart()
         baselinedists.append(p0.distance(p1))
         p0=p1
-    #print baselinedists
     for areas in allareas:
         distances=[]
         for basedist,area in itertools.izip(baselinedists,areas):
@@ -523,4 +519,4 @@ if csvDistancesOut!=None:
 
 #------------------------------------------------------------------------------
 
-print 'Finished'
+print '\n\nFinished'
