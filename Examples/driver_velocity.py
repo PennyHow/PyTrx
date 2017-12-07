@@ -5,12 +5,12 @@ This script is part of PyTrx, an object-oriented programme created for the
 purpose of calculating real-world measurements from oblique images and 
 time-lapse image series.
 
-This driver calculates surface velocities at Kronebreen, Svalbard, for the 2014 
-melt season using modules in PyTrx. Specifically this script performs feature
-tracking through sequential daily images of the glacier to derive surface
-velocities (spatial average, individual point displacements and interpolated
-velocity maps) which have been corrected for image distortion and camera 
-homography.
+This driver calculates surface velocities using modules in PyTrx at Kronebreen,
+Svalbard, for a subset of the images collected during the 2014 melt season. 
+Specifically this script performs feature-tracking through sequential daily 
+images of the glacier to derive surface velocities (spatial average, 
+individual point displacements and interpolated velocity maps) which have been 
+corrected for image distortion and camera homography.
 
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton (nick.hulton@ed.ac.uk)
@@ -19,6 +19,7 @@ homography.
 
 #Import packages
 import sys
+import os
 
 
 #Import PyTrx packages
@@ -32,14 +33,16 @@ from Utilities import plotVelocity, interpolateHelper, plotInterpolate
 #-------------------------   Map data sources   -------------------------------
 
 #Get data needed for processing
-camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_cam2_2014.txt'
-camvmask = '../Examples/camenv_data/masks/c2_2014_vmask.JPG'
-caminvmask = '../Examples/camenv_data/invmasks/c2_2014_inv.JPG'
+camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_KR2_2014.txt'
+camvmask = '../Examples/camenv_data/masks/KR2_2014_vmask.JPG'
+caminvmask = '../Examples/camenv_data/invmasks/KR2_2014_inv.JPG'
 camimgs = '../Examples/images/KR2_2014_subset/*.JPG'
 
 
 #Define data output directory
-destination = '../Examples/results/KR2_velocity/'
+destination = '../Examples/results/velocity/'
+if not os.path.exists(destination):
+    os.makedirs(destination)
 
 
 #-----------------------   Create camera object   -----------------------------
@@ -54,6 +57,7 @@ cameraenvironment = CamEnv(camdata, quiet=2)
 vels=Velocity(camimgs, cameraenvironment, camvmask, caminvmask, image0=0, 
             band='L', quiet=2) 
 
+
 #Calculate homography and velocities    
 hg, outputV = vels.calcVelocities()
    
@@ -65,7 +69,7 @@ plotcams = False
 plotcombined = False
 plotspeed = False
 plotmaps = False
-save = False
+save = True
 
 
 #Get DEM from camera environment object
