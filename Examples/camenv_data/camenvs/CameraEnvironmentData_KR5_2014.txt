@@ -13,7 +13,7 @@ GCP_path #Path name where Ground Control Point data can be found
 
 
 DEM_path #Path name where DEM data can be found
-..\Examples\camenv_data\dem\dem.mat
+..\Examples\camenv_data\dem\KR_demsmooth.tif
 
 
 image_path #Path name where master image can be found (i.e. calibration image where GCPs have been plotted

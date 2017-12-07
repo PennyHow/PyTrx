@@ -110,7 +110,7 @@ rpolys, rareas = lakes.calcAutoAreas(px, colour, verify)
 writeAreaFile(lakes, destination)
 
 
-#Create shapefiles
+#Create shapefiles (only applicable for xyz areas)
 target1 = destination + 'shpfiles/'
 if not os.path.exists(target1):
     os.makedirs(target1)
@@ -123,10 +123,12 @@ writeSHPFile(lakes, target1, proj)
 target2 = destination + 'outputimgs/'
 if not os.path.exists(target2):
     os.makedirs(target2)
-    
+
+
+#Plot areas in image plane and as XYZ polygons   
 for i in range(len(rpolys)):
-    plotPX(lakes, i, target2, crop=False, show=True)
-    plotXYZ(lakes, i, target2, dem=False, show=True)
+    plotPX(lakes, i, target2, crop=False, show=True)    #Image plane
+    plotXYZ(lakes, i, target2, dem=False, show=True)   #Only for xyz areas
 
 
 #------------------------------------------------------------------------------                                                                                                                                                                                                                                                                                                      
