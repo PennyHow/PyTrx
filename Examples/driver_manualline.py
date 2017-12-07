@@ -51,7 +51,7 @@ from Polylines import Polyline,Segment
 #---------------------------   Initialisation   -------------------------------
 
 #Define data input directories
-camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_TU4_2015.txt'   
+camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_TU2_2015.txt'   
 camimgs = '../Examples/images/TU2_2015_subset/*.JPG'
 
 #Define data output directory
@@ -175,7 +175,7 @@ for i in range(len(pxline)):
 
 
 #-------------------   Functions for volume calculations   --------------------
-#This section contrains functions for calculating areal change. The driver for
+#This section contains functions for calculating areal change. The driver for
 #this is in the subsequent section
 
 #Polyline constructor to represent terminus lines

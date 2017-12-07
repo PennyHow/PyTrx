@@ -171,11 +171,11 @@ for i in range(len(xr)):
 
 
 print '\nUnclassified events: ' + str(len(nanx))
-print '\nWaterline events: ' + str(len(waterx))
-print '\nIce fall events: ' + str(len(icex))
-print '\nStack collapses: ' + str(len(stackx))
-print '\nSheet collapses: ' + str(len(sheetx)) 
-print '\nSubaqueous events: ' + str(len(subx))
+print 'Waterline events: ' + str(len(waterx))
+print 'Ice fall events: ' + str(len(icex))
+print 'Stack collapses: ' + str(len(stackx))
+print 'Sheet collapses: ' + str(len(sheetx)) 
+print 'Subaqueous events: ' + str(len(subx))
 
 
 #Plot calving event locations by calving style (denoted by colour)
