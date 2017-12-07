@@ -290,6 +290,7 @@ for a,b,c,d in zip(tu2_xyz, time, region, style):
     feature.Destroy()                       
     count=count+1
 
+
 #Free up data space    
 ds.Destroy()
 
