@@ -1,7 +1,0 @@
-Images out of sequence
-IMG_0002 ***
-IMG_9971
-IMG_9977
-IMG_9983
-IMG_9989
-IMG_9995
