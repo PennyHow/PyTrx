@@ -10,7 +10,8 @@ Svalbard, for a subset of the images collected during the 2014 melt season.
 Specifically this script performs feature-tracking through sequential daily 
 images of the glacier to derive surface velocities (spatial average, 
 individual point displacements and interpolated velocity maps) which have been 
-corrected for image distortion and camera homography.
+corrected for image distortion and motion in the camera platform (i.e. image
+registration).
 
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton (nick.hulton@ed.ac.uk)
@@ -36,7 +37,7 @@ from Utilities import plotVelocity, interpolateHelper, plotInterpolate
 camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_KR2_2014.txt'
 camvmask = '../Examples/camenv_data/masks/KR2_2014_vmask.JPG'
 caminvmask = '../Examples/camenv_data/invmasks/KR2_2014_inv.JPG'
-camimgs = '../Examples/images/KR2_2014_subset/*.JPG'
+camimgs = '../Examples/images/KR2_2014_subset/demo/*.JPG'
 
 
 #Define data output directory
@@ -53,78 +54,52 @@ cameraenvironment = CamEnv(camdata, quiet=2)
 
 #----------------------   Calculate velocities   ------------------------------
 
-#Set up TimeLapse object
-vels=Velocity(camimgs, cameraenvironment, camvmask, caminvmask, image0=0, 
+#Set up Velocity object
+velo=Velocity(camimgs, cameraenvironment, camvmask, caminvmask, image0=0, 
             band='L', quiet=2) 
 
 
 #Calculate homography and velocities    
-hg, outputV = vels.calcVelocities()
-   
-   
+xyz, uv = velo.calcVelocities()
+
+print 'Velocities calculated for ' + str(len(xyz[0])) + ' image pairs'  
+ 
+  
 #----------------------------   Plot Results   --------------------------------
 
-print '\nData plotting...'
-plotcams = False
-plotcombined = False
-plotspeed = False
-plotmaps = False
+print '\n\nPLOTTING DATA'
+plotcams = True
+plotcombined = True
+plotspeed = True
+plotmaps = True
 save = True
 
 
-#Get DEM from camera environment object
-dem=cameraenvironment.getDEM()
+for i in range(velo.getLength()-1):
+    plotVelocity(velo, i, save=None, px=True, xyz=True)
 
-#Set extent
-xmin=446000
-xmax=451000
-ymin=8754000
-ymax=8760000
-
-demex=dem.getExtent()
-xscale=dem.getCols()/(demex[1]-demex[0])
-yscale=dem.getRows()/(demex[3]-demex[2])
-
-xdmin=(xmin-demex[0])*xscale
-xdmax=((xmax-demex[0])*xscale)+1
-ydmin=(ymin-demex[2])*yscale
-ydmax=((ymax-demex[2])*yscale)+1
-    
-demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
-lims=demred.getExtent()
-demred=demred.getZ()
-
-
-span=[0,-1]
-im1=vels.getImageObj(0)
-
-for i in range(vels.getLength()-1)[span[0]:span[1]]:
-    for vel in outputV:
-        im0=im1
-        im1=vels.getImageObj(i+1)
-        plotVelocity(vel,im0,im1,cameraenvironment,demred,lims,None,
-                     plotcams,plotcombined,plotspeed,plotmaps)
-
-for vel in outputV:
-    xy1 = vel[0][0]
-    xy2 = vel[0][1]
+for vel in xyz:
+    xy1 = vel[0]
+    xy2 = vel[1]
     method='linear'
 
     grid, pointsextent = interpolateHelper(xy1,xy2,method,filt=False)
     fgrid, fpointsextent = interpolateHelper(xy1,xy2,method,filt=True)
     
+    colrange=[0,4]
+    
     print 'Plotting unfiltered velocity map...'
-    plotInterpolate(demred, lims, grid, pointsextent, 
-                    save=destination+'interp1.jpg')
+    plotInterpolate(demred, lims, grid, pointsextent, show=True, 
+                    save=destination+'interp.jpg')
                     
     print 'Plotting filtered velocity map...'
-    plotInterpolate(demred, lims, fgrid, fpointsextent, 
-                    save=destination+'interp2.jpg')    
+    plotInterpolate(demred, lims, fgrid, fpointsextent, show=True, 
+                    save=destination+'interpfiltered.jpg')    
 
 
 #---------------------------  Export data   -----------------------------------
 
-print '\nBeginning file exporting...'
+print '\n\nWRITING DATA TO FILE'
 
 #Write homography data to .csv file
 target1 = destination + 'homography.csv'
@@ -132,8 +107,9 @@ writeHomographyFile(hg,vels,target1)
 
 #Write out velocity data to .csv file
 target2 = destination + 'velo_output.csv'
-writeVelocityFile(outputV, vels, target2) 
+writeVelocityFile(outputV, hg, vels, target2) 
 
 
 #------------------------------------------------------------------------------
+
 print '\nFinished'

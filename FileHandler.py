@@ -592,8 +592,7 @@ def writeTIFF(outFileName, OutArray, affineT, EPSGcode=32633,
     print '\nOutput tiff file: ',outFileName
 
 
-def writeVelocityFile(veloset, homogset, timeLapse, fname='velocity_xyz.csv',
-                      span=[0,-1]):
+def writeVelocityFile(veloset, homogset, timeLapse, fname='velocity_xyz.csv'):
     '''Function to write all velocity data from a given timeLapse sequence to 
     .csv file. Data is formatted as sequential columns containing the following
     information:
@@ -634,7 +633,7 @@ def writeVelocityFile(veloset, homogset, timeLapse, fname='velocity_xyz.csv',
     f.write(header + '\n')
 
     #Iterate through timeLapse object
-    for i in range(timeLapse.getLength()-1)[span[0]:span[1]]:
+    for i in range(timeLapse.getLength()-1):
         
         #Re-define image0 for each iteration
         fn0=fn1
@@ -764,7 +763,7 @@ def writeVelocityFile(veloset, homogset, timeLapse, fname='velocity_xyz.csv',
     print '\nVelocity file written:' + fname        
  
    
-def writeHomographyFile(homogset,timeLapse,fname='homography.csv',span=[0,-1]):
+def writeHomographyFile(homogset,timeLapse,fname='homography.csv'):
     '''Function to write all homography data from a given timeLapse sequence to 
     .csv file. Data is formatted as sequential columns containing the following 
     information:
@@ -807,7 +806,7 @@ def writeHomographyFile(homogset,timeLapse,fname='homography.csv',span=[0,-1]):
     f.write(header+'\n')
 
     #Iterate through timeLapse object
-    for i in range(timeLapse.getLength()-1)[span[0]:span[1]]:
+    for i in range(timeLapse.getLength()-1):
         
         #Re-define image0 for each iteration
         fn0=fn1
@@ -852,7 +851,7 @@ def writeHomographyFile(homogset,timeLapse,fname='homography.csv',span=[0,-1]):
             meansn=np.mean(sn)
             
             #Define output homography matrix
-            if hgm!=None:
+            if hgm is not None:
                 hgm.shape=(9)
                 for val in hgm:
                     out=out+','+str(val)

@@ -269,9 +269,7 @@ def arrowplot(xst,yst,xend,yend,scale=1.0,headangle=15,headscale=0.2):
     return xs,ys   
 
     
-def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save=None, 
-                 plotcams=True, plotcombined=True, plotspeed=True, 
-                 plotmaps=True): 
+def plotVelocity(velocity, i, save=None, px=True, xyz=True): 
     '''Produce assorted velocity plots from a set of velocity outputs.
     Plotting:
     plot cams:          Plot points (original, tracked and back-tracked) from 
@@ -280,188 +278,161 @@ def plotVelocity(outputV, camim0, camim1, camenv, demred, lims, save=None,
     plotspeed:          Plot filtered speed and direction from dem view. 
     plotmaps:           Plot speed and direction onto dem view.
     '''
+    
+    #Get uv points and velocities
+    uvvelo = velocity._uvvel[i]                 #uv velocity
+    uvstart = velocity._uv0[i]                  #uv pt0 position
+    if velocity._uv1corr == None:
+        uvend = velocity._uv1[i]                #uv pt1 position (no homog)
+    else:
+        uvend = velocity._uv1corr[i]            #uv pt1 position (corrected)
+        
+
+    #Get uv positions from image0 and image1
+    uv_xs = uvstart[:,0,0]                      #pt0 x values
+    uv_xe = uvend[:,0,0]                        #pt1 x values
+    uv_ys = uvstart[:,0,1]                      #pt0 y values
+    uv_ye = uvend[:,0,1]                        #pt1 y values
+
+
+    #Get xyz points and velocities 
+    xyzvelo = velocity._xyzvel[i]               #xyz velocity
+    xyzstart = velocity._xyz0[i]                #xyz pt0 position
+    xyzend = velocity._xyz1[i]                  #xyz pt1 position
+ 
    
-    #Get point sets from image       
-    start=outputV[1][0]
-    end=outputV[1][1]
-    back=outputV[1][2]
+    #Get xyz positions from image0 and image1
+    xyz_xs = xyzstart[:,0]                      #pt0 x values
+    xyz_xe = xyzend[:,0]                        #pt1 x values
+    xyz_ys = xyzstart[:,1]                      #pt0 y values
+    xyz_ye = xyzend[:,1]                        #pt1 y values
 
-    #Get x positions from image0, image1 and back-track
-    xs=start[:,0,0]
-    xe=end[:,0,0]
-    xb=back[:,0,0]
-    
-    #Get y positions from image0, image1 and back-track
-    ys=start[:,0,1]
-    ye=end[:,0,1]
-    yb=back[:,0,1]
 
-    #Get xyz velocity direction
-    Xs=outputV[0][0][:,0]
-    Ys=outputV[0][0][:,1]
-    Xd=outputV[0][1][:,0]
-    Yd=outputV[0][1][:,1]
-
-    #Get XYZ positions and speeds
-    XYZs=outputV[0][0]
-    XYZd=outputV[0][1]    
-    xd=XYZs[:,0]-XYZd[:,0]
-    yd=XYZs[:,1]-XYZd[:,1]
-
-    #Get image arrays 
-    im0=camim0.getImageArray()
-    im1=camim1.getImageArray()
-    
-    #Get image names from CamImage object
-    imn0=camim0.getImagePath().split('\\')[1]
-    imn1=camim1.getImagePath().split('\\')[1]
-    
-    #Get image size from CamImage object  
-    ilims=camim0.getImageSize()    
-    ilims=[0,ilims[1],ilims[0],0]
+    #Get image information
+    im0=velocity._imageSet[i].getImageArray()
+    ilims=velocity._imageSet[i].getImageSize()
+    imn0=velocity._imageSet[i].getImagePath().split('\\')[1]       
+    imn1=velocity._imageSet[i+1].getImagePath().split('\\')[1] 
     
     #Get corrected images
-    cameraMatrix=camenv.getCamMatrixCV2()
-    distortP=camenv.getDistortCoeffsCv2() 
-    im0_dist=camim0.getImageCorr(cameraMatrix, distortP)
-#    im1_dist=camim1.getImageCorr(cameraMatrix, distortP)
+    cameraMatrix = velocity._camEnv.getCamMatrixCV2()
+    distortP = velocity._camEnv.getDistortCoeffsCv2() 
+    im0 = velocity._imageSet[i].getImageCorr(cameraMatrix, distortP)
     
+
+    #Get DEM from camera environment object
+    dem = velocity._camEnv.getDEM()
+    
+    #Set extent
+    xmin=446000
+    xmax=451000
+    ymin=8754000
+    ymax=8760000
+    
+    demex=dem.getExtent()
+    xscale=dem.getCols()/(demex[1]-demex[0])
+    yscale=dem.getRows()/(demex[3]-demex[2])
+    
+    xdmin=(xmin-demex[0])*xscale
+    xdmax=((xmax-demex[0])*xscale)+1
+    ydmin=(ymin-demex[2])*yscale
+    ydmax=((ymax-demex[2])*yscale)+1
+        
+    demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
+    lims=demred.getExtent()
+    print lims
+    demred=demred.getZ()
+
     
     #Plot points (original, tracked and back-tracked) from cameras        
-    if plotcams is True:        
+    if px is True:        
         #Plot image0 and image1
-        f, (ax1, ax2) = plt.subplots(1, 2, sharey=True, sharex=True)
+        fig, (ax1) = plt.subplots(1, figsize=(20,10))
         imgplot1 = ax1.matshow(im0)
-        ax1.set_title(str(imn0))
-        imgplot2 = ax2.matshow(im1)
-        ax2.set_title(str(imn1))
+        ax1.set_title('UV feature-tracking between ' + str(imn0) + 
+                      ' and ' + str(imn1))
+        ax1.axis([0,ilims[1],ilims[0],0])
+        ax1.set_xticks([])
+        ax1.set_yticks([])
         
         #Set colour maps
         imgplot1.set_cmap('gray')
-        imgplot2.set_cmap('gray')
         
         #Plot xy positions onto images
-        ax1.scatter(xs,ys,color='red')
-        ax1.scatter(xe,ye,color='green')
-        ax1.scatter(xb,yb,color='magenta')
-        ax2.scatter(xs,ys,color='red')
-        ax2.scatter(xe,ye,color='green')
-        ax2.scatter(xb,yb,color='magenta')
-        
-#        #For arrow plotting
-#        xar,yar=arrowplot(xen,yen,xst,yst,scale=5.0,headangle=15)
-#        ax1.plot(xar,yar,color='orange')
-#        ax2.plot(xar,yar,color='orange')
-#        xar,yar=arrowplot(xen,yen,xhom,yhom,scale=5.0,headangle=15)
-#        ax1.plot(xar,yar,color='black')
-#        ax2.plot(xar,yar,color='black')
-        
+        uvplt = ax1.scatter(uv_xs, uv_ys, c=xyzvelo, s=50, vmin=0,vmax=5.,
+                            cmap=plt.get_cmap("gist_ncar"))
+        plt.colorbar(uvplt, ax=ax1)
+
+        #Plot arrows
+        xar,yar=arrowplot(uv_xs,uv_ys,uv_xe,uv_ye,scale=5.0,headangle=15)
+        ax1.plot(xar,yar,color='black')
+                
         #Make figure full-screen
         mng = plt.get_current_fig_manager()
         mng.window.showMaximized()
         
         if save != None:
             plt.savefig(save)
-        plt.show()
 
     
     #Plot points from camera view and from dem view
-    if plotcombined is True:        
-        #f, (ax1, ax2) = plt.subplots(1, 2, sharey=True, sharex=True)
-        f, (ax1, ax2) = plt.subplots(1, 2)
-        
-        imgplot1 = ax2.imshow(demred, origin='lower', extent=lims)
-        #imgplot1 = ax2.imshow(demred, origin='lower', extent=lims)           
+    if xyz is True:        
+        fig, (ax1,ax2) = plt.subplots(2, sharex=True, sharey=True, figsize=(20,10))
+        ax1.set_title('XYZ feature-tracking between ' + str(imn0) + 
+                      ' and ' + str(imn1))
+                      
+        ax1.imshow(demred, origin='lower', extent=lims, cmap='gray') 
+        ax1.axis([lims[0],lims[1],lims[2],lims[3]])
+        ax1.set_xticks([])
+        ax1.set_yticks([])                 
                   
-        #Scatter plot speed and direction                    
-        ax2.scatter(Xs,Ys)        
-        xar,yar=arrowplot(Xs,Ys,Xd,Yd,scale=5.0,headangle=15)
-    
-        ax2.plot(xar,yar,color='orange')     
-        
-        imgplot1 = ax1.imshow(im0_dist,extent=ilims)
-        ax1.set_title(imn0)
-                   
-        imgplot1.set_cmap('gray')
-    
-        ax1.scatter(xs,ys,color='red')
-        ax1.scatter(xe,ye,color='green')
-        ax1.scatter(xb,yb,color='magenta')
-        xar,yar=arrowplot(xs,ys,xb,yb,scale=5.0,headangle=15)
-        ax1.plot(xar,yar,color='black')
-        
-        mng = plt.get_current_fig_manager()
-        mng.window.showMaximized()
+        #Scatter plot speed and direction                 
+        xyzplt = ax1.scatter(xyz_xs, xyz_ys, c=xyzvelo, s=50, 
+                             cmap=plt.get_cmap('gist_ncar'), 
+                             vmin=0, vmax=max(xyzvelo))        
+        xar,yar=arrowplot(xyz_xs,xyz_ys,xyz_xe,xyz_ye,scale=5.0,headangle=15)
 
-        if save != None:
-            plt.savefig(save)
-            
-        plt.show()
-  
-  
-    #Plot speed and direction from dem view   
-    if plotspeed is True:
-        
-        f, (ax1, ax2) = plt.subplots(1, 2)
-        
-        imgplot1 = ax1.imshow(demred, origin='lower', extent=lims)
-        imgplot1 = ax2.imshow(demred, origin='lower', extent=lims)           
-        
-        XYZs=outputV[0][0]
-        XYZd=outputV[0][1]
-        
-        xd=XYZs[:,0]-XYZd[:,0]
-        yd=XYZs[:,1]-XYZd[:,1]
-        speed=np.sqrt(xd*xd+yd*yd)
-        v_all=np.vstack((XYZs[:,0],XYZs[:,1],XYZd[:,0],XYZd[:,1],speed))       
+
+        ax1.plot(xar,yar,color='black')
+
+        plt.colorbar(xyzplt, ax=ax1)
+                
+        #Filtered points
+        ax2.imshow(demred, origin='lower', extent=lims, cmap='gray') 
+        ax2.axis([lims[0],lims[1],lims[2],lims[3]]) 
+        ax2.set_xticks([])
+        ax2.set_yticks([])              
+    
+        v_all=np.vstack((xyz_xs, xyz_ys, xyz_xe, xyz_ye, xyzvelo))       
         v_all=v_all.transpose()
         
         filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)
+        xyz_xs=filtered[:,0]
+        xyz_ys=filtered[:,1] 
+        xyz_xe=filtered[:,2] 
+        xyz_ye=filtered[:,3] 
+        xyzvelo=filtered[:,4]
         
-        ax1.scatter(filtered[:,0],filtered[:,1])
+        print xyz_xs
+        print xyz_ys
+        filtplt = ax1.scatter(xyz_xs,xyz_ys, s=50)
         
-        Xs=filtered[:,0]
-        Ys=filtered[:,1]
-        Xd=filtered[:,2]
-        Yd=filtered[:,3]
-        
-        ax2.scatter(Xs,Ys)
-        
-        xar,yar=arrowplot(Xs,Ys,Xd,Yd,scale=5.0,headangle=15)
+        xar,yar=arrowplot(xyz_xs,xyz_ys,xyz_xe,xyz_ye,scale=5.0,headangle=15)
     
-        ax2.plot(xar,yar,color='orange')
-        
+        ax2.plot(xar,yar,color='black')
+#        plt.colorbar(filtplt, ax=ax1)
         mng = plt.get_current_fig_manager()
         mng.window.showMaximized()
 
         if save != None:
             plt.savefig(save)
-            
-        plt.show()
     
-    #Plot speed and direction onto dem view
-    if plotmaps is True:
-        
-        f, (ax1, ax2) = plt.subplots(1, 2)
-        
-        imgplot1 = ax1.imshow(demred, origin='lower', extent=lims)
-        imgplot1 = ax2.imshow(demred, origin='lower', extent=lims)           
-        
-        XYZs=outputV[0][0]
-        XYZd=outputV[0][1]
-        
-                
-        ax1.scatter(XYZs[:,0],XYZs[:,1])
-        ax2.scatter(XYZd[:,0],XYZd[:,1])
-        
-        mng = plt.get_current_fig_manager()
-        mng.window.showMaximized()
-
-        if save != None:
-            plt.savefig(save)
-            
-        plt.show()
-  
+    plt.show()
+    
+    #Clear memory
+    velocity._imageSet[i].clearAll()
+    
+    
     
 def interpolateHelper(xyz1, xyz2, method='linear', filt=True):
     '''Function to interpolate a point dataset. This uses functions of 
@@ -548,7 +519,7 @@ def interpolateHelper(xyz1, xyz2, method='linear', filt=True):
     
 
 def plotInterpolate(dem, lims, grid, pointextent, show=True, save=None):
-    '''Function to plot the results of the interpolation process for 
+    '''Function to plot the results of the velocity interpolation process for 
     a particular timestep.
 
     Inputs:
@@ -575,8 +546,7 @@ def plotInterpolate(dem, lims, grid, pointextent, show=True, save=None):
                extent=pointextent, 
                alpha=0.5) #alpha=1
                
-    col=plt.colorbar()
-#    col.set_clim(0,4)
+    plt.colorbar()
     
     #Save if flag is true
     if save != None:
