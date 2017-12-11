@@ -15,7 +15,6 @@ registration).
 
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton (nick.hulton@ed.ac.uk)
-
 '''
 
 #Import packages
@@ -28,7 +27,7 @@ sys.path.append('../')
 from CamEnv import CamEnv
 from Measure import Velocity
 from FileHandler import writeHomographyFile, writeVelocityFile
-from Utilities import plotVelocity, interpolateHelper, plotInterpolate
+from Utilities import plotPX, plotXYZ, interpolateHelper, plotInterpolate
 
 
 #-------------------------   Map data sources   -------------------------------
@@ -62,39 +61,39 @@ velo=Velocity(camimgs, cameraenvironment, camvmask, caminvmask, image0=0,
 #Calculate homography and velocities    
 xyz, uv = velo.calcVelocities()
 
-print 'Velocities calculated for ' + str(len(xyz[0])) + ' image pairs'  
+
+print '\n\nVelocities calculated for ' + str(len(xyz[0])) + ' image pairs'  
  
   
 #----------------------------   Plot Results   --------------------------------
 
 print '\n\nPLOTTING DATA'
-plotcams = True
-plotcombined = True
-plotspeed = True
-plotmaps = True
-save = True
+
+
+method='linear'
+cr1 = [446000, 451000, 8754000, 8760000]
 
 
 for i in range(velo.getLength()-1):
-    plotVelocity(velo, i, save=None, px=True, xyz=True)
-
-for vel in xyz:
-    xy1 = vel[0]
-    xy2 = vel[1]
-    method='linear'
-
-    grid, pointsextent = interpolateHelper(xy1,xy2,method,filt=False)
-    fgrid, fpointsextent = interpolateHelper(xy1,xy2,method,filt=True)
+    imn=velo._imageSet[i].getImagePath().split('\\')[1]  
     
-    colrange=[0,4]
+    print '\nPlotting image plane output'
+    plotPX(velo, i, (destination + 'imgoutput_' + imn), crop=None, show=True)
     
-    print 'Plotting unfiltered velocity map...'
-    plotInterpolate(demred, lims, grid, pointsextent, show=True, 
-                    save=destination+'interp.jpg')
-                    
-    print 'Plotting filtered velocity map...'
-    plotInterpolate(demred, lims, fgrid, fpointsextent, show=True, 
-                    save=destination+'interpfiltered.jpg')    
+    print 'Plotting XYZ output'
+    plotXYZ(velo, i, (destination + 'xyzoutput_' + imn), crop=cr1, 
+            show=True, dem=True)
+
+    grid, pointsextent = interpolateHelper(velo,i,method,filt=False)
+    fgrid, fpointsextent = interpolateHelper(velo,i,method,filt=True)
+        
+    print 'Plotting interpolation map (unfiltered)'
+    plotInterpolate(velo, i, grid, pointsextent, show=True, 
+                    save=destination+'interpunfilter_'+imn, crop=cr1)                      
+                        
+    print 'Plotting interpolation map (filtered)'
+    plotInterpolate(velo, i, fgrid, fpointsextent, show=True, 
+                    save=destination+'interpfilter_'+imn, crop=cr1)    
 
 
 #---------------------------  Export data   -----------------------------------
@@ -103,11 +102,11 @@ print '\n\nWRITING DATA TO FILE'
 
 #Write homography data to .csv file
 target1 = destination + 'homography.csv'
-writeHomographyFile(hg,vels,target1)
+writeHomographyFile(velo, target1)
 
 #Write out velocity data to .csv file
 target2 = destination + 'velo_output.csv'
-writeVelocityFile(outputV, hg, vels, target2) 
+writeVelocityFile(velo, target2) 
 
 
 #------------------------------------------------------------------------------

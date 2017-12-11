@@ -592,7 +592,7 @@ def writeTIFF(outFileName, OutArray, affineT, EPSGcode=32633,
     print '\nOutput tiff file: ',outFileName
 
 
-def writeVelocityFile(veloset, homogset, timeLapse, fname='velocity_xyz.csv'):
+def writeVelocityFile(velocity, fname='velocity_xyz.csv'):
     '''Function to write all velocity data from a given timeLapse sequence to 
     .csv file. Data is formatted as sequential columns containing the following
     information:
@@ -619,7 +619,7 @@ def writeVelocityFile(veloset, homogset, timeLapse, fname='velocity_xyz.csv'):
     f=open(fname,'w')
 
     #Write active directory to file
-    im1=timeLapse.getImageObj(0)
+    im1=velocity.getImageObj(0)
     pathnam=im1.getImagePath().split('\\')
     dirnam=pathnam[0]
     fn1=pathnam[-1]
@@ -633,112 +633,81 @@ def writeVelocityFile(veloset, homogset, timeLapse, fname='velocity_xyz.csv'):
     f.write(header + '\n')
 
     #Iterate through timeLapse object
-    for i in range(timeLapse.getLength()-1):
+    for i in range(velocity.getLength()-1):
         
         #Re-define image0 for each iteration
         fn0=fn1
         
         #Get image1
-        im1=timeLapse.getImageObj(i+1)
+        im1=velocity.getImageObj(i+1)
         
         #Write image file names to file        
         fn1=im1.getImagePath().split('\\')[-1]
         out=fn0+','+fn1
         
-        if veloset[i]!=None:
+        
+        #Get velocity data                     
+        xyz = velocity._xyzvel[i]
+        uv = velocity._uvvel[i]
 
-            #Get velocity data          
-            xyz, uv = veloset[i]
+        #Calculate average unfiltered velocity
+        xyzvelav = sum(xyz)/len(xyz)
+        pxvelav= sum(uv)/len(uv)
+                       
+        #Determine number of features (unfiltered) tracked
+        numtrack = len(xyz)
+
+        #Write unfiltered velocity information
+        f.write(out + ',' +str(xyzvelav) + ',' +str(numtrack) + ',')
+
+        pt0 = velocity._xyz0[i]
+        pt1 = velocity._xyz1[i]
+        x1 = pt0[:,0]
+        y1 = pt0[:,1]
+        x2 = pt1[:,0]
+        y2 = pt1[:,1]        
+        
+        #Filter outlier points 
+        v_all=np.vstack((x1,y1,x2,y2,xyz))
+        v_all=v_all.transpose()
+        filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)
             
-            #Get pixel point positions
-            srcpts, dstpts, hpts = uv
-            
-            #Get xyz coordinates from points in image pair
-            xyz1 = xyz[0]               #Pts from image pair 1
-            xyz2 = xyz[1]               #Pts from image pair 2
-            
-            if xyz2 is None:
-                f.write(out + ', nan , nan , nan , nan,')
-            if hpts is None:
-                hpts = dstpts
-                
-            else:
-                #Get point positions and differences   
-                x1=[]
-                y1=[]
-                x2=[]
-                y2=[]
-                xdif=[]
-                ydif=[]
-                pxdif=[]
-                pydif=[]
-                for a,b,c,d in zip(xyz1,xyz2,srcpts,hpts):
-                    if math.isnan(a[0]):
-                        pass
-                    else:
-                        x1.append(a[0])
-                        y1.append(a[1])
-                        x2.append(b[0])
-                        y2.append(b[1])
-                        xdif.append(a[0]-b[0])
-                        ydif.append(a[1]-b[1])
-                        pxdif.append(c[0][0]-d[0][0])
-                        pydif.append(c[0][1]-d[0][1])
-                        
-                #Calculate velocity with Pythagoras' theorem
-                xyzvel=[]
-                pxvel=[]
-                for a,b,c,d in zip(xdif, ydif, pxdif, pydif):
-                    xyzvel.append(np.sqrt(a*a+b*b))
-                    pxvel.append(np.sqrt(c*c+d*d))
-                
-                #Calculate average unfiltered velocity
-                xyzvelav = sum(xyzvel)/len(xyzvel)
-                pxvelav= sum(pxvel)/len(pxvel)
-                
-                #Determine number of features (unfiltered) tracked
-                numtrack = len(xyzvel)
-    
-                #Write unfiltered velocity information
-                f.write(out + ',' +str(xyzvelav) + ',' +str(numtrack) + ',')
-    
-                #Filter outlier points 
-                v_all=np.vstack((x1,y1,x2,y2,xyzvel))
-                v_all=v_all.transpose()
-                filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)
-                
-                #Write filtered velocity information           
-                if len(filtered) > 1:
-                    fspeed=filtered[:,4]
-                
-                    #Calculate average filtered velocity
-                    velfav = sum(fspeed)/len(fspeed)
-                
-                    #Determine number of features (filtered) tracked
-                    numtrackf = len(fspeed)
-                
-                    #Compile all data for output file
-                    f.write((str(velfav) + ',' + str(numtrackf) + ','))
+        #Write filtered velocity information           
+        if len(filtered) > 1:
+            fspeed=filtered[:,4]
+        
+            #Calculate average filtered velocity
+            velfav = sum(fspeed)/len(fspeed)
+        
+            #Determine number of features (filtered) tracked
+            numtrackf = len(fspeed)
+        
+            #Compile all data for output file
+            f.write((str(velfav) + ',' + str(numtrackf) + ','))
             
                     
         #Get homography information if desired
-        if homogset[i]!=None:
-
-            #Get homography data for image pair            
-            hgm, points, ptserrors, homogerrs=homogset[i]
-
+        if hasattr(velocity, '_homogmatrix'):
+            hpt0 = velocity._homogpts0[i]
+            hpt1 = velocity._homogpts1[i]
+            hpt1corr = velocity._homogpts1corr[i]
+            herr = velocity._homogerr[i]
+    
             #Get xyz homography errors                      
-            xd=homogerrs[1][0]
-            yd=homogerrs[1][1]
+            xd=herr[1][0]
+            yd=herr[1][1]
             
-            #Get uv point positions
-            ps=points[0]
-            pf=points[1]
-            psx=ps[:,0,0]
-            psy=ps[:,0,1]
-            pfx=pf[:,0,0]
-            pfy=pf[:,0,1]
+            #Get uv point positions                
+            psx=hpt0[:,0,0]
+            psy=hpt0[:,0,1]
             
+            if hpt1corr != None:
+                pfx=hpt1corr[:,0,0]
+                pfy=hpt1corr[:,0,1] 
+            else:                   
+                pfx=hpt1[:,0,0]
+                pfy=hpt1[:,0,1]    
+                
             #Determine uv point position difference
             pdx=pfx-psx
             pdy=pfy-psy
@@ -756,14 +725,14 @@ def writeVelocityFile(veloset, homogset, timeLapse, fname='velocity_xyz.csv'):
             #Write pixel velocity and homography information
             f.write((str(pxvelav) + ',' + str(meanerrdist) + ','  +
                      str(snr)))
-         
-        #Break line in output file
-        f.write('\n')
+             
+            #Break line in output file
+            f.write('\n')
             
     print '\nVelocity file written:' + fname        
  
    
-def writeHomographyFile(homogset,timeLapse,fname='homography.csv'):
+def writeHomographyFile(velocity,fname='homography.csv'):
     '''Function to write all homography data from a given timeLapse sequence to 
     .csv file. Data is formatted as sequential columns containing the following 
     information:
@@ -792,7 +761,7 @@ def writeHomographyFile(homogset,timeLapse,fname='homography.csv'):
     f=open(fname,'w')
     
     #Write active directory to file
-    im1=timeLapse.getImageObj(0)
+    im1=velocity.getImageObj(0)
     pathnam=im1.getImagePath().split('\\')
     dirnam=pathnam[0]
     fn1=pathnam[-1]
@@ -806,35 +775,43 @@ def writeHomographyFile(homogset,timeLapse,fname='homography.csv'):
     f.write(header+'\n')
 
     #Iterate through timeLapse object
-    for i in range(timeLapse.getLength()-1):
+    for i in range(velocity.getLength()-1):
         
         #Re-define image0 for each iteration
         fn0=fn1
         
         #Get image1
-        im1=timeLapse.getImageObj(i+1)
+        im1=velocity.getImageObj(i+1)
 
         #Write image file names to file        
         fn1=im1.getImagePath().split('\\')[-1]
         out=fn0+','+fn1
         
-        if homogset[i]!=None:
+        if hasattr(velocity, '_homogmatrix'):
+            hmatrix = velocity._homogmatrix[i]          #Homography matrix
+            hpt0 = velocity._homogpts0[i]               #Seeded pts in im0
+            hpt1 = velocity._homogpts1[i]                #Tracked pts in im1
+            hpt1corr = velocity._homogpts1corr[i]        #Corrected pts im1
+            herr = velocity._homogerr[i]                #Homography error
+            
+            #Get xyz homography errors 
+#            homogerrs=herr[0]             
+#            xd=herr[1][0]
+#            yd=herr[1][1]
 
-            #Get homography data for image pair            
-            hgm, points, ptserrors, homogerrs=homogset[i]
-
-            #Get xyz homography errors            
-            homogerrors=homogerrs[0]            
-            xd=homogerrs[1][0]
-            yd=homogerrs[1][1]
+            xd=herr[1][0]
+            yd=herr[1][1] 
             
             #Get uv point positions
-            ps=points[0]
-            pf=points[1]
-            psx=ps[:,0,0]
-            psy=ps[:,0,1]
-            pfx=pf[:,0,0]
-            pfy=pf[:,0,1]
+            psx = hpt0[:,0,0]
+            psy = hpt0[:,0,1]
+            
+            if hpt1corr is None:
+                pfx = hpt1[:,0,0]
+                pfy = hpt1[:,0,1]
+            else:
+                pfx = hpt1corr[:,0,0]
+                pfy = hpt1corr[:,0,1]
             
             #Determine uv point position difference
             pdx=pfx-psx
@@ -851,17 +828,17 @@ def writeHomographyFile(homogset,timeLapse,fname='homography.csv'):
             meansn=np.mean(sn)
             
             #Define output homography matrix
-            if hgm is not None:
-                hgm.shape=(9)
-                for val in hgm:
+            if hmatrix is not None:
+                hmatrix.shape=(9)
+                for val in hmatrix:
                     out=out+','+str(val)
             
             #Determine number of points tracked in homography calculations
-            tracked=len(points[0])
+            tracked=len(hpt0[0])
             out=out+','+str(tracked)
             
             #Define output homography matrix errors
-            for val in homogerrors:
+            for val in herr:
                 out=out+','+str(val)
             
             #Compile all data for output file

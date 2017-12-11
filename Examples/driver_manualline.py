@@ -170,10 +170,10 @@ if not os.path.exists(target2):
 #Plot and save all extent and area images
 length=len(pxline)
 for i in range(len(pxline)):
-    plotPX(terminus, i, target2, crop=False, show=False)
-    plotXYZ(terminus, i, target2, dem=True, show=False)
-
-
+    plotPX(terminus, i, target2, crop=None, show=False)
+    plotXYZ(terminus, i, target2, crop=None, show=False, dem=True)
+    
+    
 #-------------------   Functions for volume calculations   --------------------
 #This section contains functions for calculating areal change. The driver for
 #this is in the subsequent section

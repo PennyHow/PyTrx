@@ -125,10 +125,10 @@ if not os.path.exists(target2):
     os.makedirs(target2)
 
 
-#Plot areas in image plane and as XYZ polygons   
+#Plot areas in image plane and as XYZ polygons (only if xyz areas calculated)   
 for i in range(len(rpolys)):
-    plotPX(lakes, i, target2, crop=False, show=True)    #Image plane
-    plotXYZ(lakes, i, target2, dem=False, show=True)   #Only for xyz areas
+    plotPX(lakes, i, target2, crop=None, show=True)  
+    plotXYZ(lakes, i, target2, crop=None, show=True, dem=False)
 
 
 #------------------------------------------------------------------------------                                                                                                                                                                                                                                                                                                      

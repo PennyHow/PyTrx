@@ -140,8 +140,8 @@ class Velocity(ImageSequence):
                         whilst processing.
     '''   
         
-    def __init__(self, imageList, camEnv, maskPath=None, invmaskPath=None, 
-                 image0=0, band='L', quiet=2, loadall=False, 
+    def __init__(self, imageList, camEnv, maskPath=None, invmaskPath=None,
+                 calibFlag=True, image0=0, band='L', quiet=2, loadall=False, 
                  timingMethod='EXIF'):
         
         ImageSequence.__init__(self, imageList, band, loadall, quiet)
@@ -151,6 +151,7 @@ class Velocity(ImageSequence):
         self._image0 = image0
         self._imageN = self.getLength()-1
         self._timings = None
+        self._calibFlag = True
         
         #Set mask 
         if maskPath is None:
@@ -313,31 +314,34 @@ class Velocity(ImageSequence):
                 print '\nNo features to undertake velocity measurements'
             return None        
             
-
-        #Get camera matrix and distortion parameters from CamEnv object
-        cameraMatrix=self._camEnv.getCamMatrixCV2()
-        distortP=self._camEnv.getDistortCoeffsCv2()
-        
-        #Calculate optimal camera matrix 
-        size=img1.shape
-        h = size[0]
-        w = size[1]
-        newMat, roi = cv2.getOptimalNewCameraMatrix(cameraMatrix, 
-                                                    distortP, 
-                                                    (w,h), 1, (w,h))
-        
-        #Correct tracked points for image distortion. The displacement here is 
-        #defined forwards (i.e. the points in image 1 are first corrected, 
-        #followed by those in image 2)        
-        #Correct points in first image 
-        src_pts_corr=cv2.undistortPoints(points[0], 
-                                         cameraMatrix, 
-                                         distortP,P=newMat)
-        
-        #Correct points in second image                                         
-        dst_pts_corr=cv2.undistortPoints(points[1], 
-                                         cameraMatrix, 
-                                         distortP,P=newMat) 
+        if self._calibFlag is True:
+            #Get camera matrix and distortion parameters from CamEnv object
+            cameraMatrix=self._camEnv.getCamMatrixCV2()
+            distortP=self._camEnv.getDistortCoeffsCv2()
+            
+            #Calculate optimal camera matrix 
+            size=img1.shape
+            h = size[0]
+            w = size[1]
+            newMat, roi = cv2.getOptimalNewCameraMatrix(cameraMatrix, 
+                                                        distortP, 
+                                                        (w,h), 1, (w,h))
+            
+            #Correct tracked points for image distortion. The displacement here is 
+            #defined forwards (i.e. the points in image 1 are first corrected, 
+            #followed by those in image 2)        
+            #Correct points in first image 
+            src_pts_corr=cv2.undistortPoints(points[0], 
+                                             cameraMatrix, 
+                                             distortP,P=newMat)
+            
+            #Correct points in second image                                         
+            dst_pts_corr=cv2.undistortPoints(points[1], 
+                                             cameraMatrix, 
+                                             distortP,P=newMat) 
+        else:
+            src_pts_corr = points[0]
+            dst_pts_corr = points[1]
 
         #Calculate homography if desired
         if hmatrix is not None:
@@ -437,9 +441,9 @@ class Velocity(ImageSequence):
         #Create empty list for outputs
         self._homogmatrix = []       
         self._homogpts0 = []      
-        self._homopts1 = []        
-        self._homopts1corr = [] 
-        self._homoptserr = []
+        self._homogpts1 = []        
+        self._homogpts1corr = [] 
+        self._homogptserr = []
         self._homogerr = []             
         
         #Get first image (image0) path and array data
@@ -473,9 +477,9 @@ class Velocity(ImageSequence):
             #Assign homography information as object attributes
             self._homogmatrix.append(hg[0])           #Homography matrix
             self._homogpts0.append(hg[1][0])          #Seeded pts in im0
-            self._homopts1.append(hg[1][1])           #Tracked pts in im1
-            self._homopts1corr.append(hg[1][2])       #Corrected pts im1
-            self._homoptserr.append(hg[2])            #Tracked pts error
+            self._homogpts1.append(hg[1][1])           #Tracked pts in im1
+            self._homogpts1corr.append(hg[1][2])       #Corrected pts im1
+            self._homogptserr.append(hg[2])            #Tracked pts error
             self._homogerr.append(hg[3])              #Homography error
         
        
@@ -615,30 +619,34 @@ class Velocity(ImageSequence):
         #Separate raw tracked points and errors            
         points, ptserrors=trackdata
         
-        #Call camera matrix and distortion coefficients from camera environment
-        cameraMatrix=self._camEnv.getCamMatrixCV2()
-        distortP=self._camEnv.getDistortCoeffsCv2()
-        
-        #Calculate optimal camera matrix 
-        size=img1.shape
-        h = size[0]
-        w = size[1]
-        newMat, roi = cv2.getOptimalNewCameraMatrix(cameraMatrix, 
-                                                    distortP, 
-                                                    (w,h), 1, (w,h))
-               
-        #Correct tracked points for image distortion. The homgraphy here is 
-        #defined forwards (i.e. the points in image 1 are first corrected, 
-        #followed by those in image 2)        
-        #Correct points in first image  
-        src_pts_corr=cv2.undistortPoints(points[0], 
-                                         cameraMatrix, 
-                                         distortP,P=newMat)
-        
-        #Correct tracked points in second image
-        dst_pts_corr=cv2.undistortPoints(points[1], 
-                                         cameraMatrix, 
-                                         distortP,P=newMat) 
+        if self._calibFlag is True:
+            #Call camera matrix and distortion coefficients from camera environment
+            cameraMatrix=self._camEnv.getCamMatrixCV2()
+            distortP=self._camEnv.getDistortCoeffsCv2()
+            
+            #Calculate optimal camera matrix 
+            size=img1.shape
+            h = size[0]
+            w = size[1]
+            newMat, roi = cv2.getOptimalNewCameraMatrix(cameraMatrix, 
+                                                        distortP, 
+                                                        (w,h), 1, (w,h))
+                   
+            #Correct tracked points for image distortion. The homgraphy here is 
+            #defined forwards (i.e. the points in image 1 are first corrected, 
+            #followed by those in image 2)        
+            #Correct points in first image  
+            src_pts_corr=cv2.undistortPoints(points[0], 
+                                             cameraMatrix, 
+                                             distortP,P=newMat)
+            
+            #Correct tracked points in second image
+            dst_pts_corr=cv2.undistortPoints(points[1], 
+                                             cameraMatrix, 
+                                             distortP,P=newMat) 
+        else:
+            src_pts_corr = points[0]
+            dst_pts_corr = points[1]
         
         #Find the homography between the two sets of corrected points
         homogMatrix, mask = cv2.findHomography(src_pts_corr, 
@@ -823,9 +831,9 @@ class Area(Velocity):
                  timingMethod='EXIF'):
                      
         #Initialise and inherit from the TimeLapse class object
-        Velocity.__init__(self, imageList, cameraenv, None, None, 0, band,
-                           quiet, loadall, timingMethod)
-
+        Velocity.__init__(self, imageList, cameraenv, None, None, calibFlag, 
+                          0, band, quiet, loadall, timingMethod)
+                 
         #Optional commentary        
         if self._quiet>0:
             print '\n\nCOMMENCING AREA DETECTION'

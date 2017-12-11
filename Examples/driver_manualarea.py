@@ -100,8 +100,8 @@ if not os.path.exists(target2):
     os.makedirs(target2)
     
 for i in range(len(rpolys)):
-    plotPX(plumes, i, target2, crop=False, show=False)   #Pixel areas
-    plotXYZ(plumes, i, target2, dem=True, show=False)    #Real areas
+    plotPX(plumes, i, target2, crop=None, show=False)              #Pixel areas
+    plotXYZ(plumes, i, target2, crop=None, show=False, dem=True)   #Real areas
 
 
 #---Alternative method for plotting image extents using original RGB images----                                                                                                                                                                                                                                                                                                      
