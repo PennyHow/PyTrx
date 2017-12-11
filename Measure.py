@@ -46,13 +46,16 @@ calcVelocities():               Method to calculate velocities between
       
                           
 Key functions in Area:
-calcAreas():                    Method to obtain real world areas from an image 
+calcAutoAreas():                Method to obtain real world areas from an image 
                                 set. Calculates the polygon extents for each 
-                                image and the area of each given polygon. 
-calcExtents():                  Method to obtain pixel extent from a series of 
+                                image and the area of each given polygon.
+calcManualAreas():              Method to obtain real world areas from an image 
+                                set by manually detecting them in a point-and-
+                                click manner.        
+calcAutoExtents():              Method to obtain pixel extent from a series of 
                                 images. Return the extent polygons and 
                                 cumulative extent values (px).
-manualExtents():                Method to manually select pixel extents from a 
+calcManualExtents():            Method to manually select pixel extents from a 
                                 series of images. Return the extent polygons 
                                 and cumulative extent values (px).
 verifyExtents():                Method to manuall verify all detected polygons 
@@ -60,11 +63,11 @@ verifyExtents():                Method to manuall verify all detected polygons
                              
                                 
 Key functions in Line:
-calcLinesXYZ():                 Method to obtain real world lines/distances 
+calcManualLinesXYZ():           Method to obtain real world lines/distances 
                                 from an image set. Calculates the line 
                                 coordinates and length of each given set of 
                                 pixel points.
-manualLinesPX():                Method to manually define a pixel line through
+calcManualLinesPX():            Method to manually define a pixel line through
                                 a series of images. Returns the line pixel 
                                 coordinates and pixel length.
                                 
@@ -74,6 +77,7 @@ manualLinesPX():                Method to manually define a pixel line through
          Lynne Addison
 '''
 
+#Import packages
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 from matplotlib.widgets import Slider, Button
@@ -85,9 +89,9 @@ from pylab import array, uint8
 import math
 import ogr
 
+#Import PyTrx functions and classes
 from FileHandler import readMask
 from Images import ImageSequence
-
 
 #------------------------------------------------------------------------------
 
@@ -327,9 +331,9 @@ class Velocity(ImageSequence):
                                                         distortP, 
                                                         (w,h), 1, (w,h))
             
-            #Correct tracked points for image distortion. The displacement here is 
-            #defined forwards (i.e. the points in image 1 are first corrected, 
-            #followed by those in image 2)        
+            #Correct tracked points for image distortion. The displacement here 
+            #is defined forwards (i.e. the points in image 1 are first 
+            #corrected, followed by those in image 2)      
             #Correct points in first image 
             src_pts_corr=cv2.undistortPoints(points[0], 
                                              cameraMatrix, 
@@ -620,7 +624,7 @@ class Velocity(ImageSequence):
         points, ptserrors=trackdata
         
         if self._calibFlag is True:
-            #Call camera matrix and distortion coefficients from camera environment
+            #Call camera matrix and distortion coefficients from camenv
             cameraMatrix=self._camEnv.getCamMatrixCV2()
             distortP=self._camEnv.getDistortCoeffsCv2()
             
@@ -686,7 +690,8 @@ class Velocity(ImageSequence):
             homogerrors=None
             homog_pts=None
             
-        return homogMatrix, [src_pts_corr,dst_pts_corr,homog_pts], ptserrors, homogerrors
+        return (homogMatrix, [src_pts_corr,dst_pts_corr,homog_pts], ptserrors, 
+                homogerrors)
 
         
     def apply_persp_homographyPts(self, pts, homog, typ, inverse=False):        
@@ -1689,8 +1694,8 @@ class Area(Velocity):
         
        
     def _enhanceImg(self, img):
-        '''Change brightness and contrast of image using phi and theta variables.
-        Change phi and theta values accordingly.
+        '''Change brightness and contrast of image using phi and theta 
+        variables. Change phi and theta values accordingly.
         
         Args
         img (arr):                    Input image array for enhancement.

@@ -26,7 +26,7 @@ import os
 sys.path.append('../')
 from CamEnv import CamEnv
 from Measure import Velocity
-from FileHandler import writeHomographyFile, writeVelocityFile
+from FileHandler import writeHomographyFile, writeVelocityFile, writeSHPFile
 from Utilities import plotPX, plotXYZ, interpolateHelper, plotInterpolate
 
 
@@ -36,7 +36,7 @@ from Utilities import plotPX, plotXYZ, interpolateHelper, plotInterpolate
 camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_KR2_2014.txt'
 camvmask = '../Examples/camenv_data/masks/KR2_2014_vmask.JPG'
 caminvmask = '../Examples/camenv_data/invmasks/KR2_2014_inv.JPG'
-camimgs = '../Examples/images/KR2_2014_subset/demo/*.JPG'
+camimgs = '../Examples/images/KR2_2014_subset/*.JPG'
 
 
 #Define data output directory
@@ -60,55 +60,69 @@ velo=Velocity(camimgs, cameraenvironment, camvmask, caminvmask, image0=0,
 
 #Calculate homography and velocities    
 xyz, uv = velo.calcVelocities()
-
-
-print '\n\nVelocities calculated for ' + str(len(xyz[0])) + ' image pairs'  
  
-  
+
+#---------------------------  Export data   -----------------------------------
+
+print '\n\nWRITING DATA TO FILE'
+
+#Write out velocity data to .csv file
+target1 = destination + 'velo_output.csv'
+writeVelocityFile(velo, target1) 
+
+#Write homography data to .csv file
+target2 = destination + 'homography.csv'
+writeHomographyFile(velo, target2)
+
+#Write points to shp file
+target3 = destination + 'shpfiles/'
+if not os.path.exists(target3):
+    os.makedirs(target3)   
+writeSHPFile(velo, target3, projection=32633)
+
+
 #----------------------------   Plot Results   --------------------------------
 
 print '\n\nPLOTTING DATA'
 
 
 method='linear'
-cr1 = [446000, 451000, 8754000, 8760000]
+cr1 = [445000, 452000, 8754000, 8760000]
 
 
 for i in range(velo.getLength()-1):
-    imn=velo._imageSet[i].getImagePath().split('\\')[1]  
-    
-    print '\nPlotting image plane output'
+    imn=velo._imageSet[i].getImagePath().split('\\')[1]
+    print '\nVisualising data for ' + str(imn)
+
+
+    #Plot uv velocity points on image plane (unfiltered)    
+    print 'Plotting image plane output (unfiltered)'
     plotPX(velo, i, (destination + 'imgoutput_' + imn), crop=None, show=True)
-    
-    print 'Plotting XYZ output'
+
+
+    #Plot xyz velocity points on dem (filtered)    
+    print 'Plotting XYZ output (filtered)'
     plotXYZ(velo, i, (destination + 'xyzoutput_' + imn), crop=cr1, 
             show=True, dem=True)
 
+            
+    #Interpolate velocity points
     grid, pointsextent = interpolateHelper(velo,i,method,filt=False)
     fgrid, fpointsextent = interpolateHelper(velo,i,method,filt=True)
-        
+ 
+    
+    #Plot interpolation map (unfiltered velocity points)
     print 'Plotting interpolation map (unfiltered)'
     plotInterpolate(velo, i, grid, pointsextent, show=True, 
                     save=destination+'interpunfilter_'+imn, crop=cr1)                      
-                        
+
+
+    #Plot interpolation map (filtered velocity points)                        
     print 'Plotting interpolation map (filtered)'
     plotInterpolate(velo, i, fgrid, fpointsextent, show=True, 
-                    save=destination+'interpfilter_'+imn, crop=cr1)    
+                    save=destination+'interpfilter_'+imn, crop=cr1)  
 
-
-#---------------------------  Export data   -----------------------------------
-
-print '\n\nWRITING DATA TO FILE'
-
-#Write homography data to .csv file
-target1 = destination + 'homography.csv'
-writeHomographyFile(velo, target1)
-
-#Write out velocity data to .csv file
-target2 = destination + 'velo_output.csv'
-writeVelocityFile(velo, target2) 
-
-
+                   
 #------------------------------------------------------------------------------
 
 print '\nFinished'

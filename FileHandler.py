@@ -8,7 +8,7 @@ time-lapse image series.
 This module, FileHandler, contains all the functions called by an object to 
 load and export data.
 
-Functions available in FileHandler:
+Core functions available in FileHandler:
 readMask:               Function to create a mask for point seeding using PIL 
                         to rasterize polygon. The mask is manually defined by 
                         the user using the pyplot ginput function. This 
@@ -58,17 +58,37 @@ writeHomography:        Function to write all homography data from a given
 createThumbs:           Function to create thumbnail images from a given image 
                         file directory using the PIL (Python Imaging Library) 
                         toolbox.
-writeAreaFile:
-WriteLineFile:
-writeAreaSHP:
-writeLineSHP:
-importAreaData:
-importAreaXYZ:
-importAreaPX:
-importLineData:
-importLineXYZ:
-importLinePX:
-
+writeAreaFile:          Function to write all area data (if it has been 
+                        calculated) to separate .txt files containing the pixel
+                        extents, polygon pixel coordinates, xyz polygon areas,
+                        cumulative areas of all polygons, and polygon xyz 
+                        coordinates. All these output files are compatible with 
+                        the importing tools, namely importAreaData.
+WriteLineFile:          Function to write all line data (if it has been 
+                        calculated) to separate .txt files containing the pixel
+                        coordinates of the lines, the pixel line length, the
+                        xyz coordinates of the lines, and the real (xyz) line 
+                        lengths. All these output files are compatible with the 
+                        importing tools, namely importLineData.
+writeSHPFile:           Function to write OGR real polygon areas (from ALL 
+                        images) to file in a .shp file type that is compatible 
+                        with mapping sofrware such as ArcMap and QGIS.
+importAreaData:         Function to get xyz and px area data from text files 
+                        and import it into a specified Measure.Area class 
+                        object. This uses the importAreaXYZ and 
+                        importAreaPX functions, which are also contained within
+                        this FileHandler script. All imported data is held in 
+                        the Area class object specified as an input variable. 
+                        This can be easily retrieved from the Area class object 
+                        itself.
+importLineData:         Function to get xyz and px line data from text files 
+                        and import into a specified Measure.Line class object.
+                        This uses the importLineXYZ and importLinePX functions,
+                        which are also contained within this FileHandler 
+                        script. All imported data is held in the Line class 
+                        object specified as an input variable. This can be 
+                        easily retrieved from the Line class object itself.
+                        
 @authors: Lynne Addison 
           Nick Hulton (nick.hulton@ed.ac.uk) 
           Penny How (p.how@ed.ac.uk)
@@ -84,7 +104,6 @@ from osgeo import ogr,osr
 import gdal
 import glob
 import os
-import math
 import sys
 
 #Import PyTrx modules
@@ -241,7 +260,8 @@ def lineSearch(lineList, search):
 def returnData(lines, data):
     '''Function to supplement the importCalibration function. Given the line 
     numbers of the parameter data (the ouput of the lineSearch function), this 
-    will return the data.'''    
+    will return the data.
+    '''    
     #Create empty list for output data
     D=[]
     
@@ -264,7 +284,8 @@ def returnData(lines, data):
 def readMatrixDistortion(path):
     '''Function to support the calibrate function. Returns the 
     intrinsic matrix and distortion parameters required for calibration from a
-    given file.'''   
+    given file.
+    '''   
     #Find the calibration parameters from the list
     ls = ['IntrinsicMatrix', 'RadialDistortion', 'TangentialDistortion']
     calibDict = readCalib(path, ls)
@@ -283,7 +304,8 @@ def readMatrixDistortion(path):
 
 def checkMatrix(matrix):
     '''Function to support the calibrate function. Checks and converts the 
-    intrinsic matrix to the correct format for calibration with OpenCV.'''  
+    intrinsic matrix to the correct format for calibration with OpenCV.
+    '''  
     # Transpose if zeros in matrix are not in correct places
     if matrix[2,0]!=0 and matrix[2,1]!=0 and matrix[0,2]==0 and matrix[1,2]==0:
         mat = matrix.transpose()
@@ -354,7 +376,8 @@ def readImage(path, band='L'):
 def readGCPs(fileName):
     '''Function to read ground control points from a .txt file. The data in the
     file is referenced to under a header line. Data is appended by skipping the
-    header line and finding the world and image coordinates from each line.'''    
+    header line and finding the world and image coordinates from each line.
+    '''    
     # Open the file and read the first line (i.e. the header line)
     myFile=open(fileName,'r')  
     myFile.readline()
@@ -394,7 +417,8 @@ def readGCPs(fileName):
 def readDEM(fileName):
     '''Function to read a DEM from an ASCII file by parsing the header and data 
     lines to return the data as a NumPy array, the origin and the cell size. 
-    The xyz DEM data is compiled together in the returned item.'''    
+    The xyz DEM data is compiled together in the returned item.
+    '''    
     # Open the fileName argument with read permissions
     myFile=open(fileName,'r')
     end_header=False
@@ -456,7 +480,8 @@ def readDEM(fileName):
 def readDEMxyz(fileName):
     '''Function to read xyz DEM data from an ASCII file by parsing the header 
     and data lines to return the data as a NumPy array, the origin and the cell 
-    size. The xyz DEM data is returned as separate objects.'''    
+    size. The xyz DEM data is returned as separate objects.
+    '''    
     #Open the fileName argument with read permissions
     myFile=open(fileName,'r')
     end_header=False
@@ -530,7 +555,8 @@ def readDEMxyz(fileName):
    
 def readDEMmat(matfile):
     '''Function to read xyz DEM data from a .mat file and return the xyz data 
-    as separate arrays.'''
+    as separate arrays.
+    '''
     #Load data from .mat file
     mat = sio.loadmat(matfile)
     
@@ -559,7 +585,6 @@ def writeTIFF(outFileName, OutArray, affineT, EPSGcode=32633,
         4: Rotation (zero for North up)
         5: Pixel Height.
     '''
-    
     gdal.AllRegister()
     
     #Set up projection and linear units
@@ -607,13 +632,10 @@ def writeVelocityFile(velocity, fname='velocity_xyz.csv'):
         Signal-to-noise ratio
     
     Input variables:
-    veloset:            List of xyz and uv points over multiple images 
-                        ([xyz,uv], [xyz,uv]...).
-    timeLapse:          A TimeLapse object.
+    velocity:           Measure.Velocity class object which contains xyz and 
+                        uv velocities.
     fname:              Filename for output file. File destination can also 
                         specified.
-    span:               The range of images within the image sequence to 
-                        iterate over. Default set to all images.
     '''
     #Initialise file writing
     f=open(fname,'w')
@@ -701,7 +723,7 @@ def writeVelocityFile(velocity, fname='velocity_xyz.csv'):
             psx=hpt0[:,0,0]
             psy=hpt0[:,0,1]
             
-            if hpt1corr != None:
+            if hpt1corr is not None:
                 pfx=hpt1corr[:,0,0]
                 pfy=hpt1corr[:,0,1] 
             else:                   
@@ -736,26 +758,12 @@ def writeHomographyFile(velocity,fname='homography.csv'):
     '''Function to write all homography data from a given timeLapse sequence to 
     .csv file. Data is formatted as sequential columns containing the following 
     information:
-    Image pair 1 name
-    Image pair 2 name
-    Homography matrix [0,0]
-    Homography matrix [0,1]
-    Homography matrix [0,2]
-    Homography matrix [1,0]
-    Homography matrix [1,1]
-    Homography matrix [1,2]
-    Homography matrix [2,0]
-    Homography matrix [2,1]
-    Homography matrix [2,2]
-    Number of features tracked
-    X mean displacement
-    Y mean displacement
-    X standard deviation
-    Y standard deviation
-    Mean error magnitude
-    Mean homographic displacement
-    Magnitude
-    Homography signal-to-noise ratio
+    
+    Image pair 1 name; image pair 2 name; homography matrix (i.e. all values
+    in the 3x3 matrix starting from top left; number of features tracked;
+    X mean displacement; Y mean displacement; X standard deviation; Y standard 
+    deviation; mean error magnitude; mean homographic displacement; homography 
+    signal-to-noise ratio.
     '''
     #Initialise file writing
     f=open(fname,'w')
@@ -787,63 +795,59 @@ def writeHomographyFile(velocity,fname='homography.csv'):
         fn1=im1.getImagePath().split('\\')[-1]
         out=fn0+','+fn1
         
-        if hasattr(velocity, '_homogmatrix'):
-            hmatrix = velocity._homogmatrix[i]          #Homography matrix
-            hpt0 = velocity._homogpts0[i]               #Seeded pts in im0
-            hpt1 = velocity._homogpts1[i]                #Tracked pts in im1
-            hpt1corr = velocity._homogpts1corr[i]        #Corrected pts im1
-            herr = velocity._homogerr[i]                #Homography error
-            
-            #Get xyz homography errors 
-#            homogerrs=herr[0]             
-#            xd=herr[1][0]
-#            yd=herr[1][1]
-
-            xd=herr[1][0]
-            yd=herr[1][1] 
-            
-            #Get uv point positions
-            psx = hpt0[:,0,0]
-            psy = hpt0[:,0,1]
-            
-            if hpt1corr is None:
-                pfx = hpt1[:,0,0]
-                pfy = hpt1[:,0,1]
-            else:
-                pfx = hpt1corr[:,0,0]
-                pfy = hpt1corr[:,0,1]
-            
-            #Determine uv point position difference
-            pdx=pfx-psx
-            pdy=pfy-psy
-            
-            #Calculate signal-to-noise ratio            
-            errdist=np.sqrt(xd*xd+yd*yd)
-            homogdist=np.sqrt(pdx*pdx+pdy*pdy)
-            sn=errdist/homogdist
-            
-            #Calculate mean homography, mean error and mean SNR 
-            meanerrdist=np.mean(errdist)
-            meanhomogdist=np.mean(homogdist)
-            meansn=np.mean(sn)
-            
-            #Define output homography matrix
-            if hmatrix is not None:
-                hmatrix.shape=(9)
-                for val in hmatrix:
-                    out=out+','+str(val)
-            
-            #Determine number of points tracked in homography calculations
-            tracked=len(hpt0[0])
-            out=out+','+str(tracked)
-            
-            #Define output homography matrix errors
-            for val in herr:
+        #Get homography information from velocity object
+        hmatrix = velocity._homogmatrix[i]                  #Homography matrix
+        hpt0 = velocity._homogpts0[i]                       #Seeded pts in im0
+        hpt1 = velocity._homogpts1[i]                       #Tracked pts in im1
+        hpt1corr = velocity._homogpts1corr[i]               #Corrected pts im1
+        herr = velocity._homogerr[i]                        #Homography error
+        
+        #Get xyz homography errors
+        xd = herr[1][0]
+        yd = herr[1][1] 
+        
+        #Get uv point positions
+        psx = hpt0[:,0,0]
+        psy = hpt0[:,0,1]
+        
+        if hpt1corr is None:
+            pfx = hpt1[:,0,0]
+            pfy = hpt1[:,0,1]
+        else:
+            pfx = hpt1corr[:,0,0]
+            pfy = hpt1corr[:,0,1]
+        
+        #Determine uv point position difference
+        pdx=pfx-psx
+        pdy=pfy-psy
+        
+        #Calculate signal-to-noise ratio            
+        errdist=np.sqrt(xd*xd+yd*yd)
+        homogdist=np.sqrt(pdx*pdx+pdy*pdy)
+        sn=errdist/homogdist
+        
+        #Calculate mean homography, mean error and mean SNR 
+        meanerrdist=np.mean(errdist)
+        meanhomogdist=np.mean(homogdist)
+        meansn=np.mean(sn)
+        
+        #Define output homography matrix
+        if hmatrix is not None:
+            hmatrix.shape=(9)
+            for val in hmatrix:
                 out=out+','+str(val)
-            
-            #Compile all data for output file
-            out = (out+','+str(meanerrdist)+','+str(meanhomogdist)+','
-                   +str(meansn))
+        
+        #Determine number of points tracked in homography calculations
+        tracked=len(hpt0)
+        out=out+','+str(tracked)
+        
+        #Define output homography matrix errors
+        for val in herr[0]:
+            out=out+','+str(val)
+        
+        #Compile all data for output file
+        out = (out+','+str(meanerrdist)+','+str(meanhomogdist)+','
+               +str(meansn))
         
         #Write to output file
         f.write(out+'\n') 
@@ -983,7 +987,7 @@ def writeAreaFile(a, dest):
                     
 
 def writeLineFile(l, dest):
-    '''Write all area data (if it has been calculated) to separate files.
+    '''Write all line data (if it has been calculated) to separate files.
     
     Inputs
     l:                                  Length class object containing detected
@@ -1061,8 +1065,8 @@ def writeSHPFile(a, fileDirectory, projection=None):
     file type that is compatible with ESRI mapping software.
     
     Inputs
-    a:                          Area class object containing area detection
-                                results.
+    a:                          Velocity/Area/Line class object containing 
+                                velocity/area/line measurements.
     fileDirectory:              Destination that shapefiles will be written to           
                                 e.g. C:/python_workspace/Results/
     projection:                 Coordinate projection that the shapefile will 
@@ -1085,7 +1089,10 @@ def writeSHPFile(a, fileDirectory, projection=None):
         sys.exit(1)
 
     #Get areas/lines from the given class
-    if hasattr(a, '_realpoly'):
+    if hasattr(a, '_xyzvel'):
+        print '\nDetected velocity points to write as shapefiles'
+        xyz = a._xyzvel
+    elif hasattr(a, '_realpoly'):
         print '\nDetected polygons to write as shapefiles'
         xyz = a._realpoly
     elif hasattr(a, '_realline'):
@@ -1095,23 +1102,82 @@ def writeSHPFile(a, fileDirectory, projection=None):
         print '\nUnrecognised Area/Line class object'
         
     imgcount=1
-    
-    for polys in xyz:
-        #Create datasource in shapefile
-        if hasattr(a, '_realpoly'):
+
+    #Set projection and initialise velocity layer
+    if hasattr(a, '_xyzvel'):     
+        for vel, pt0 in zip(a._xyzvel, a._xyz0):
+            
+            #Create file space            
+            shp = fileDirectory + 'vel' + str(imgcount) + '.shp'
+            if os.path.exists(shp):
+                print '\nDeleting pre-existing datasource'
+                driver.DeleteDataSource(shp)
+            ds = driver.CreateDataSource(shp)
+            if ds is None:
+                print 'Could not create file %s' %shp
+            
+            #Set projection
+            if type(projection) is int:
+                print '\nESPG projection detected'
+                proj = osr.SpatialReference()
+                proj.ImportFromEPSG(projection)
+                layer = ds.CreateLayer(' ', proj, ogr.wkbPoint)
+            elif type(projection) is str:
+                print '\nCoordinate system detected'
+                proj = osr.SpatialReference()
+                proj.SetWellKnownGeogCS(projection)
+                layer = ds.CreateLayer(' ', proj, ogr.wkbPoint)
+            else:
+                print '\nProjection for shapefiles not recognised'
+                print 'Proceeding shapefile generation without projection'
+                layer = ds.CreateLayer(' ', None, ogr.wkbPoint)
+       
+            #Add attributes to layer
+            layer.CreateField(ogr.FieldDefn('id', ogr.OFTInteger))     #ID    
+            layer.CreateField(ogr.FieldDefn('velocity', ogr.OFTReal))  #Velo
+            
+            #Get xy coordinates
+            x0 = pt0[:,0]
+            y0 = pt0[:,1]
+            
+            #Create point features with data attributes in layer           
+            for a,b,c in zip(vel, x0, y0):
+                count=1
+            
+                #Create feature    
+                feature = ogr.Feature(layer.GetLayerDefn())
+            
+                #Create feature attributes    
+                feature.SetField('id', count)
+                feature.SetField('velocity', a)
+            
+                #Create feature location
+                wkt = "POINT(%f %f)" %  (float(b) , float(c))
+                point = ogr.CreateGeometryFromWkt(wkt)
+                feature.SetGeometry(point)
+                layer.CreateFeature(feature)
+            
+                #Free up data space
+                feature.Destroy()                       
+                count=count+1
+
+            #Free up data space             
+            imgcount=imgcount+1               
+            ds.Destroy()
+                
+    #Set projection and initialise area layer            
+    elif hasattr(a, '_realpoly'):
+        for polys in xyz:                
+            #Create datasource in shapefile
             shp = fileDirectory + 'area' + str(imgcount) + '.shp'
-        if hasattr(a, '_realline'):
-            shp = fileDirectory + 'line' + str(imgcount) + '.shp'
+            
+            if os.path.exists(shp):
+                print '\nDeleting pre-existing datasource'
+                driver.DeleteDataSource(shp)
+            ds = driver.CreateDataSource(shp)
+            if ds is None:
+                print 'Could not create file %s' %shp
         
-        if os.path.exists(shp):
-            print '\nDeleting pre-existing datasource'
-            driver.DeleteDataSource(shp)
-        ds = driver.CreateDataSource(shp)
-        if ds is None:
-            print 'Could not create file %s' %shp
-        
-        #Set projection and initialise layer depending on projection input            
-        if hasattr(a, '_realpoly'):
             if type(projection) is int:
                 print '\nESPG projection detected'
                 proj = osr.SpatialReference()
@@ -1156,9 +1222,21 @@ def writeSHPFile(a, fileDirectory, projection=None):
             
             imgcount=imgcount+1
             ds.Destroy()
+        
+        
+    #Set projection and initialise line layer            
+    elif hasattr(a, '_realline'):
+        for polys in xyz:                
+            #Create datasource in shapefile
+            shp = fileDirectory + 'line' + str(imgcount) + '.shp'
             
-        #Set projection and initialise layer depending on projection input            
-        elif hasattr(a, '_realline'): 
+            if os.path.exists(shp):
+                print '\nDeleting pre-existing datasource'
+                driver.DeleteDataSource(shp)
+            ds = driver.CreateDataSource(shp)
+            if ds is None:
+                print 'Could not create file %s' %shp
+        
             if type(projection) is int:
                 print '\nESPG projection detected'
                 proj = osr.SpatialReference()
