@@ -8,7 +8,7 @@ time-lapse image series.
 This module, FileHandler, contains all the functions called by an object to 
 load and export data.
 
-Core functions available in FileHandler:
+Core functions available in FileHandler
 readMask:               Function to create a mask for point seeding using PIL 
                         to rasterize polygon. The mask is manually defined by 
                         the user using the pyplot ginput function. This 
@@ -70,9 +70,10 @@ WriteLineFile:          Function to write all line data (if it has been
                         xyz coordinates of the lines, and the real (xyz) line 
                         lengths. All these output files are compatible with the 
                         importing tools, namely importLineData.
-writeSHPFile:           Function to write OGR real polygon areas (from ALL 
-                        images) to file in a .shp file type that is compatible 
-                        with mapping sofrware such as ArcMap and QGIS.
+writeSHPFile:           Function to write OGR real velocities/areas/lines (from 
+                        ALL images) to file in a .shp file type that is 
+                        compatible with mapping sofrware such as ArcMap and 
+                        QGIS.
 importAreaData:         Function to get xyz and px area data from text files 
                         and import it into a specified Measure.Area class 
                         object. This uses the importAreaXYZ and 
@@ -89,9 +90,9 @@ importLineData:         Function to get xyz and px line data from text files
                         object specified as an input variable. This can be 
                         easily retrieved from the Line class object itself.
                         
-@authors: Lynne Addison 
-          Nick Hulton (nick.hulton@ed.ac.uk) 
-          Penny How (p.how@ed.ac.uk)
+@author: Penny How (p.how@ed.ac.uk)
+         Nick Hulton 
+         Lynne Addison
 '''
 
 #Import packages
@@ -1060,7 +1061,7 @@ def writeLineFile(l, dest):
             imgcount=imgcount+1
 
 
-def writeSHPFile(a, fileDirectory, projection=None):
+def writeSHPFile(measure, fileDirectory, projection=None):
     '''Write OGR real polygon areas (from ALL images) to file in a .shp
     file type that is compatible with ESRI mapping software.
     
@@ -1087,28 +1088,20 @@ def writeSHPFile(a, fileDirectory, projection=None):
     if driver is None:
         raise IOError('%s Driver not available:\n' % typ)
         sys.exit(1)
-
-    #Get areas/lines from the given class
-    if hasattr(a, '_xyzvel'):
-        print '\nDetected velocity points to write as shapefiles'
-        xyz = a._xyzvel
-    elif hasattr(a, '_realpoly'):
-        print '\nDetected polygons to write as shapefiles'
-        xyz = a._realpoly
-    elif hasattr(a, '_realline'):
-        print '\nDetected lines to write as shapefiles'
-        xyz = a._realline
-    else:
-        print '\nUnrecognised Area/Line class object'
         
-    imgcount=1
 
     #Set projection and initialise velocity layer
-    if hasattr(a, '_xyzvel'):     
-        for vel, pt0 in zip(a._xyzvel, a._xyz0):
+    if hasattr(measure, '_xyzvel'): 
+        print '\nDetected velocity points to write as shapefiles'
+        for i in range(measure.getLength()-1): 
+            
+            #Get velocity, pt and image name for time step
+            vel = measure._xyzvel[i]
+            pt0 = measure._xyz0[i]            
+            imn = measure._imageSet[i].getImagePath().split('\\')[1] 
             
             #Create file space            
-            shp = fileDirectory + 'vel' + str(imgcount) + '.shp'
+            shp = fileDirectory + str(imn) + '_vel.shp'
             if os.path.exists(shp):
                 print '\nDeleting pre-existing datasource'
                 driver.DeleteDataSource(shp)
@@ -1141,7 +1134,7 @@ def writeSHPFile(a, fileDirectory, projection=None):
             y0 = pt0[:,1]
             
             #Create point features with data attributes in layer           
-            for a,b,c in zip(vel, x0, y0):
+            for v,x,y in zip(vel, x0, y0):
                 count=1
             
                 #Create feature    
@@ -1149,10 +1142,10 @@ def writeSHPFile(a, fileDirectory, projection=None):
             
                 #Create feature attributes    
                 feature.SetField('id', count)
-                feature.SetField('velocity', a)
+                feature.SetField('velocity', v)
             
                 #Create feature location
-                wkt = "POINT(%f %f)" %  (float(b) , float(c))
+                wkt = "POINT(%f %f)" %  (float(x) , float(y))
                 point = ogr.CreateGeometryFromWkt(wkt)
                 feature.SetGeometry(point)
                 layer.CreateFeature(feature)
@@ -1161,15 +1154,20 @@ def writeSHPFile(a, fileDirectory, projection=None):
                 feature.Destroy()                       
                 count=count+1
 
-            #Free up data space             
-            imgcount=imgcount+1               
+            #Free up data space                          
             ds.Destroy()
                 
     #Set projection and initialise area layer            
-    elif hasattr(a, '_realpoly'):
-        for polys in xyz:                
+    elif hasattr(measure, '_realpoly'):
+        print '\nDetected polygons to write as shapefiles'
+        for i in range(measure.getLength()-1): 
+            
+            #Get polygon coordinates and image name for each time step
+            polys = measure._realpoly[i]          
+            imn = measure._imageSet[i].getImagePath().split('\\')[1] 
+                          
             #Create datasource in shapefile
-            shp = fileDirectory + 'area' + str(imgcount) + '.shp'
+            shp = fileDirectory + str(imn) + '_area.shp'
             
             if os.path.exists(shp):
                 print '\nDeleting pre-existing datasource'
@@ -1220,15 +1218,20 @@ def writeSHPFile(a, fileDirectory, projection=None):
                 feature.Destroy()                
                 polycount=polycount+1
             
-            imgcount=imgcount+1
             ds.Destroy()
         
         
     #Set projection and initialise line layer            
-    elif hasattr(a, '_realline'):
-        for polys in xyz:                
+    elif hasattr(measure, '_realline'):
+        print '\nDetected lines to write as shapefiles'        
+        for i in range(measure.getLength()-1):
+            
+            #Get polygon coordinates and image name for each time step
+            line = measure._realpts[i]          
+            imn = measure._imageSet[i].getImagePath().split('\\')[1] 
+
             #Create datasource in shapefile
-            shp = fileDirectory + 'line' + str(imgcount) + '.shp'
+            shp = fileDirectory + str(imn) + '_line.shp'
             
             if os.path.exists(shp):
                 print '\nDeleting pre-existing datasource'
@@ -1265,15 +1268,16 @@ def writeSHPFile(a, fileDirectory, projection=None):
             
             #Create feature            
             feature = ogr.Feature(layer.GetLayerDefn())
-            feature.SetGeometry(polys)
+            feature.SetGeometry(line)
             feature.SetField('id', lcount)
-            feature.SetField('length', polys.Length())
+            feature.SetField('length', line.Length())
             layer.CreateFeature(feature)
             feature.Destroy() 
             lcount=lcount+1
             
-            imgcount=imgcount+1
             ds.Destroy()
+    else:
+        print '\nUnrecognised Velocity/Area/Line class object'
 
 
 def importAreaData(trxclass, fileDirectory):

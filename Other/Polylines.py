@@ -2,7 +2,7 @@
 """
 Created on Sat Nov 17 17:04:48 2012
 
-@author: nrjh
+@author: Nick Hulton
 """
 from Points import Point2D
 from Points import Dpoint

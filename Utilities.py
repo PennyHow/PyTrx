@@ -9,7 +9,7 @@ This module, Utilities, contains functions needed for simple plotting,
 filtering and interpolation. These merely serve as examples and it is highly 
 encouraged to adapt these functions for visualising datasets.
 
-Functions available in Utilities:
+Functions available in Utilities
 plotInterpolate:                Function to plot the results of the 
                                 interpolation process for a particular 
                                 timestep.
@@ -48,8 +48,9 @@ arrowplot:                      Function to plot arrows to denote the direction
                                 magnitude is indicated by the length of the 
                                 arrow.
              
-@authors: Nick Hulton (nick.hulton@ed.ac.uk)
-          Penny How (p.how@ed.ac.uk)
+@author: Penny How (p.how@ed.ac.uk)
+         Nick Hulton 
+         Lynne Addison
 '''
 
 #Import packages
@@ -66,7 +67,7 @@ def plotInterpolate(a, number, grid, pointextent, show=True, save=None,
     '''Function to plot the results of the velocity interpolation process for 
     a particular timestep.
 
-    Inputs:
+    Inputs
     a:              A Velocity object.
     number:         Sequence number.
     grid:           Numpy grid. It is recommended that this is constructed 
@@ -75,10 +76,6 @@ def plotInterpolate(a, number, grid, pointextent, show=True, save=None,
     show:           Flag to denote whether the figure is shown.
     save:           Destination file to save figure to.
     crop:           Crop output if desired ([x1,x2,y1,y2]).
-    
-    Output:
-    Plot of interpolated points overlaid on the DEM that is held in the 
-    camera environment (called from the velocity object).
     ''' 
     #Get image name
     imn=a._imageSet[number].getImagePath().split('\\')[1]   
@@ -136,16 +133,12 @@ def plotPX(a, number, dest=None, crop=None, show=True):
     image number. Measurement is distinguished automatically from the given
     Measure class object (i.e. Velocity, Area, or Line).
     
-    Inputs:
+    Inputs
     a:              An Area/Line/Velocity object.
     number:         Sequence number.
     dest:           Destination to save plot to.
     crop:           Crop output if desired ([x1,x2,y1,y2]).
     show:           Flag to denote whether the figure is shown.
-    
-    Output:
-    Plot of a given image plane overlain with Measure points (either areas, 
-    lines, or velocity points).
     '''
     
     #Call corrected/uncorrected image
@@ -251,16 +244,13 @@ def plotXYZ(a, number, dest=None, crop=None, show=True, dem=True):
     Measurement is distinguished automatically from the given Measure class 
     object (i.e. Velocity, Area, or Line).
     
-    Inputs:
+    Inputs
     a:              An Area/Line/Velocity object.
     number:         Sequence number.
     dest:           Destination to save plot to.
     crop:           Crop output if desired ([x1,x2,y1,y2]).
     show:           Flag to denote whether the figure is shown.
     dem:            Flag to denote whether DEM is shown or not.
-    
-    Output:
-    Plot of XYZ measurements (either areas, lines, or velocity points). 
     '''                           
 
     #Get image name
@@ -415,13 +405,13 @@ def interpolateHelper(a, number, method='linear', filt=True):
     Methods are those compatible with SciPy's interpolate.griddata function: 
     "nearest", "cubic" and "linear"
     
-    Inputs:
+    Inputs
     a:              A Velocity object.
     number:         Sequence number.
     method:         Interpolation method ("nearest"/"cubic"/"linear").
     filt:           Flag to denote if points should be filtered or not.
     
-    Output:
+    Output
     grid:           Interpolated grid. 
     pointsextent:   Grid extent. 
     '''   
@@ -464,17 +454,7 @@ def interpolateHelper(a, number, method='linear', filt=True):
     maxx=(divmod(max(x2),gridsize)[0]+1)*gridsize
     maxy=(divmod(max(y2),gridsize)[0]+1)*gridsize
     pointsextent=[minx,maxx,miny,maxy]   
-     
-     ###NEED TO SORT OUT THIS PART OF THE CODE. Doesn't work currently, but 
-     ###seems like an important step   
-#    #Find the new point, with the adjusted origin
-#    newx = [(x-pointsextent[0]) for x in xs]
-#    newy = [(y-pointsextent[2]) for y in ys]
-#    newmaxx = math.floor(max(newx))+1
-#    newmaxy = math.floor(max(newy))+1
-#    #newpts = np.array([newx, newy]).T    
-#    newpts=data[:,0:2]
-    
+         
     #Generate buffer around grid
     incrsx=((maxx-minx)/gridsize)+1
     incrsy=((maxy-miny)/gridsize)+1
@@ -483,10 +463,11 @@ def interpolateHelper(a, number, method='linear', filt=True):
     grid_y,grid_x = np.mgrid[miny:maxy:complex(incrsy),
                              minx:maxx:complex(incrsx)]
     
-    #Interpolate the velocity and error points to the grid
-    ###WORK OUT HOW TO INCORPORATE SNR GRID
+    #Interpolate the velocity points to the grid
     grid = griddata(newpts, np.float64(xyzvelo), (grid_x, grid_y), 
                     method=method)
+     
+#    DEVELOPMENT TO BE COMPLETED: snr grid
 #    error = griddata(newpts, np.float64(snrs), (grid_x, grid_y), 
 #                     method=method)      
                 
@@ -503,16 +484,16 @@ def filterSparse(data,numNearest=12,threshold=2,item=2):
     This function works best if called iteratively, as more than one point 
     may be anomolous compared to neighbouring ranges.
     
-    Inputs:
+    Inputs
     data:              Input data to filter.
     numNearest:     Sample window to assess filtering.
     threshold:      Threshold range of neighbouring values.
     item:           Number of neighbouring values to retrieve for assessment.
     
-    Output:
+    Output
     goodset:        Array of filtered data. 
-
     ''' 
+    
     #Get XY point data
     XY=data[:,0:2]
 
@@ -548,13 +529,13 @@ def filterDensity(self,data,numNearest=5,threshold=10.,absthres=float("inf")):
     This function works best if called iteratively, as more than one point 
     may be anomolous compared to neighbouring ranges.
     
-    Inputs:
+    Inputs
     data:           Input data to filter.
     numNearest:     Sample window to assess filtering.
     threshold:      Threshold range of neighbouring values.
     absthres:       Absolute threshold.
     
-    Output:
+    Output
     goodset:        Array of filtered data.
     ''' 
     
@@ -595,7 +576,7 @@ def arrowplot(xst,yst,xend,yend,scale=1.0,headangle=15,headscale=0.2):
     displacement. Direction is indicated by the bearing of the arrow, and the
     magnitude is indicated by the length of the arrow.
     
-    Inputs:
+    Inputs
     xst:            x coordinates for pt0.
     yst:            y coordinates for pt0.
     xend:           x coordinates for pt1.
@@ -604,7 +585,7 @@ def arrowplot(xst,yst,xend,yend,scale=1.0,headangle=15,headscale=0.2):
     headangle:      Plotting angle.
     headscale:      Arrow head scale.
     
-    Output:
+    Outputs
     xs              x coordinates for arrowplot.
     ys:             y coordinates for arrowplot.
     '''
@@ -677,8 +658,7 @@ def arrowplot(xst,yst,xend,yend,scale=1.0,headangle=15,headscale=0.2):
     
     #Return xy arrow plotting information
     return xs,ys   
-    
-    
+       
 #------------------------------------------------------------------------------
 
 #if __name__ == "__main__":   

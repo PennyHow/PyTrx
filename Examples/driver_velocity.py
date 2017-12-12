@@ -14,7 +14,7 @@ corrected for image distortion and motion in the camera platform (i.e. image
 registration).
 
 @author: Penny How (p.how@ed.ac.uk)
-         Nick Hulton (nick.hulton@ed.ac.uk)
+         Nick Hulton 
 '''
 
 #Import packages
@@ -58,9 +58,21 @@ velo=Velocity(camimgs, cameraenvironment, camvmask, caminvmask, image0=0,
             band='L', quiet=2) 
 
 
-#Calculate homography and velocities    
-xyz, uv = velo.calcVelocities()
- 
+#Set velocity parameters
+hmg = True                      #Calculate homography?
+err = True                      #Calculate errors?
+bk = 1.0                        #Back-tracking threshold  
+mpt = 10000                     #Maximum number of points to seed
+ql = 0.1                        #Corner quality for seeding
+mdis = 5.0                      #Minimum distance between seeded points
+mfeat = 4                       #Minimum number of seeded points to track
+
+
+#Calculate velocities and homography    
+xyz, uv = velo.calcVelocities(homography=hmg, calcErrors=err, back_thresh=bk,
+                              maxpoints=mpt, quality=ql, mindist=mdis, 
+                              min_features=mfeat)
+                              
 
 #---------------------------  Export data   -----------------------------------
 
@@ -77,19 +89,27 @@ writeHomographyFile(velo, target2)
 #Write points to shp file
 target3 = destination + 'shpfiles/'
 if not os.path.exists(target3):
-    os.makedirs(target3)   
-writeSHPFile(velo, target3, projection=32633)
+    os.makedirs(target3)
+proj = 32633                            #ESPG:32633 is projection WGS84
+writeSHPFile(velo, target3, proj)
 
 
 #----------------------------   Plot Results   --------------------------------
 
 print '\n\nPLOTTING DATA'
 
+#Set interpolation method ("nearest"/"cubic"/"linear")
+method='linear' 
 
-method='linear'
-cr1 = [445000, 452000, 8754000, 8760000]
+#Set DEM extent         
+cr1 = [445000, 452000, 8754000, 8760000]            
 
-
+#Set destination for file outputs
+target4 = destination + 'imgfiles/'
+if not os.path.exists(target4):
+    os.makedirs(target4)
+ 
+   
 for i in range(velo.getLength()-1):
     imn=velo._imageSet[i].getImagePath().split('\\')[1]
     print '\nVisualising data for ' + str(imn)
@@ -97,12 +117,12 @@ for i in range(velo.getLength()-1):
 
     #Plot uv velocity points on image plane (unfiltered)    
     print 'Plotting image plane output (unfiltered)'
-    plotPX(velo, i, (destination + 'imgoutput_' + imn), crop=None, show=True)
+    plotPX(velo, i, (target4 + 'imgoutput_' + imn), crop=None, show=True)
 
 
     #Plot xyz velocity points on dem (filtered)    
     print 'Plotting XYZ output (filtered)'
-    plotXYZ(velo, i, (destination + 'xyzoutput_' + imn), crop=cr1, 
+    plotXYZ(velo, i, (target4 + 'xyzoutput_' + imn), crop=cr1, 
             show=True, dem=True)
 
             
@@ -114,13 +134,13 @@ for i in range(velo.getLength()-1):
     #Plot interpolation map (unfiltered velocity points)
     print 'Plotting interpolation map (unfiltered)'
     plotInterpolate(velo, i, grid, pointsextent, show=True, 
-                    save=destination+'interpunfilter_'+imn, crop=cr1)                      
+                    save=target4 + 'interpunfilter_' + imn, crop=cr1)                      
 
 
     #Plot interpolation map (filtered velocity points)                        
     print 'Plotting interpolation map (filtered)'
     plotInterpolate(velo, i, fgrid, fpointsextent, show=True, 
-                    save=destination+'interpfilter_'+imn, crop=cr1)  
+                    save=target4 + 'interpfilter_' + imn, crop=cr1)  
 
                    
 #------------------------------------------------------------------------------

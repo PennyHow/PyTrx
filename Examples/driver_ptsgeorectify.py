@@ -13,7 +13,7 @@ instance. The xyz locations are exported subsequently as a text file (.txt)
 and as a shape file (.shp).
 
 @author: Penny How (p.how@ed.ac.uk)
-         Nick Hulton (nick.hulton@ed.ac.uk)
+         Nick Hulton
 '''
 
 #Import packages

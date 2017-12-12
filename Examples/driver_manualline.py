@@ -17,9 +17,8 @@ Previously defined lines can also be imported from text or shape file (this
 can be changed by commenting and uncommenting commands in the "Calculate lines" 
 section of this script).
 
-
 @author: Penny How (p.how@ed.ac.uk)
-         Nick Hulton (nick.hulton@ed.ac.uk)
+         Nick Hulton
 '''
 
 #Import packages

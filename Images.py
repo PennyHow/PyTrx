@@ -11,16 +11,14 @@ constructors and functions for:
     and grayscale images 
 (2) Handling image sequences (i.e. a set of multiple images)
 
-
-Classes:
+Classes
 CamImage:                       A class to represent raw images and holds 
                                 information on image properties (image size, 
                                 exif data, bands for subsequent processing).
 ImageSequence:                  A class to model a raw collection of CamImage 
                                 objects.
 
-
-Key functions in CamImage:
+Key functions in CamImage
 getImagePath():                 Return the file path of the image.
 getImageCorr():                 Return the image array that is corrected for 
                                 the specified camera matrix and distortion 
@@ -30,9 +28,8 @@ getExif():                      Return the exif image size and time stamp data
                                 from an image. Image size is returned as a 
                                 string (height, width). The time stamp is 
                                 returned as a Python datetime object.
- 
-                       
-Key functions in ImageSequence:
+                        
+Key functions in ImageSequence
 getImageArrNo(i):               Get image array i from image sequence.
 getImageObj(i):                 Get CamImage object i from image sequence.
 getImages():                    Return image set (i.e. a sequence of CamImage 
@@ -40,10 +37,9 @@ getImages():                    Return image set (i.e. a sequence of CamImage
 getFileList():                  Return list of image file paths.
 getLength():                    Return length of image set.
 
-
-@author: Nick Hulton (Nick.Hulton@ed.ac.uk), 
+@author: Penny How (p.how@ed.ac.uk)
+         Nick Hulton 
          Lynne Addison
-         Penny How (p.how@ed.ac.uk)
 '''
 
 #Import packages

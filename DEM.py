@@ -8,13 +8,12 @@ time-lapse image series.
 This module, DEM, contains functionality for handling DEM data and implementing
 this data into the camera environment (CamEnv) object class.
 
-
-Classes:
+Classes
 ExplicitRaster:      A class to represent a numeric Raster with explicit XY 
                      cell referencing in each grid cell.
 
 
-Key functions:
+Key functions
 loadDEM:            Function for loading DEM data from different file types, 
                     which is automatically detected. Recognised file types: 
                     .mat and .tif.
@@ -26,10 +25,10 @@ DEM_FromTiff:       Function for loading a DEM array from a .tiff file
 voxelviewshed:      Calculate a viewshed over a DEM from a given viewpoint in 
                     the DEM scene. This function is based on the viewshed 
                     function (voxelviewshed.m) available in ImGRAFT. 
-
-       
-@authors: Nick Hulton (nick.hulton@ed.ac.uk)
-          Penny How (p.how@ed.ac.uk)
+      
+@author: Penny How (p.how@ed.ac.uk)
+         Nick Hulton 
+         Lynne Addison
 '''
 
 #Import packages
@@ -46,7 +45,9 @@ from scipy.interpolate import RectBivariateSpline
 
 class ExplicitRaster(object):   
     '''A class to represent a numeric Raster with explicit XY cell referencing
-    in each grid cell.'''
+    in each grid cell.
+    '''
+    
     #Basic constuctor method
     def __init__(self, X, Y, Z, nodata=float('nan')): 
         #Check XYZ data is all the same size
@@ -67,7 +68,9 @@ class ExplicitRaster(object):
     
     def getData(self,dim=None):
         '''Return DEM data. XYZ dimensions can be individually called with the
-        dim input variable (integer: 0, 1, or 2).'''
+        dim input variable (integer: 0, 1, or 2).
+        '''
+        
         #Return all DEM data if no dimension is specified
         if dim==None:
             return self._data
@@ -112,7 +115,9 @@ class ExplicitRaster(object):
  
        
     def subset(self,cmin,cmax,rmin,rmax):
-        '''Return a specified subset of the DEM array.'''
+        '''Return a specified subset of the DEM array.
+        '''
+        
         #Find minimum extent value
         cmin=int(max(0,cmin))
         rmin=int(max(0,rmin))
@@ -135,7 +140,9 @@ class ExplicitRaster(object):
         The array is multiplied by the given densification factor and then
         subsequently values are interpolated using the SciPy function 
         RectBivariateSpline. The densification factor is set to 2 by default,
-        meaning that the size of the DEM array is doubled.'''
+        meaning that the size of the DEM array is doubled.
+        '''
+        
         #Get XYZ dem data
         x=self._data[0,0,:]
         y=self._data[1,:,0]        
@@ -180,7 +187,9 @@ class ExplicitRaster(object):
     def reportDEM(self):
         '''Self reporter for DEM class object. Returns the number of rows and
         columns in the array, how NaN values in the array are filled, and the
-        data extent coordinates.'''
+        data extent coordinates.
+        '''
+        
         print '\nDEM object reporting:\n'
         print 'Data has ',self.getRows(),' rows by ',self.getCols(),' columns'
         print 'No data item is: ',self.getNoData()
@@ -190,7 +199,9 @@ class ExplicitRaster(object):
         
 def load_DEM(demfile):
     '''Function for loading DEM data from different file types, which is 
-    automatically detected. Recognised file types: .mat and .tif.'''
+    automatically detected. Recognised file types: .mat and .tif.
+    '''
+    
     #Determine file type based on filename suffix
     suffix=demfile.split('.')[-1].upper()
     
@@ -211,7 +222,9 @@ def load_DEM(demfile):
     
 def DEM_FromMat(matfile):
     '''Function for loading a DEM array from a Matlab (.mat) file containing
-    separate X, Y, Z matrices.'''
+    separate X, Y, Z matrices.
+    '''
+    
     #Load Matlab file and XYZ matrices as arrays
     mat = sio.loadmat(matfile)
     X=np.ascontiguousarray(mat['X'])
@@ -232,7 +245,9 @@ def DEM_FromMat(matfile):
 
 def DEM_FromTiff(tiffFile):
     '''Function for loading a DEM array from a .tiff file containing
-    raster-formatted data. The tiff data importing is handled by GDAL.'''
+    raster-formatted data. The tiff data importing is handled by GDAL.
+    '''
+    
     #Open tiff file with GDAL
     dataset = gdal.Open(tiffFile, GA_ReadOnly)
     
@@ -285,12 +300,13 @@ def voxelviewshed(dem,viewpoint):
     The ImGRAFT voxelviewshed.m script is available at:
     http://github.com/grinsted/ImGRAFT/blob/master/voxelviewshed.m
     
-    Inputs:
-    X,Y,Z: input DEM (regular grid).
-    viewpoint: 3-element vector specifying the viewpoint.
+    Inputs
+    X,Y,Z:                      Input DEM (regular grid).
+    viewpoint:                  3-element vector specifying the viewpoint.
     
-    OUTPUT:
-    vis: boolean visibility matrix (which is the same size as dem)
+    Output
+    vis:                        Boolean visibility matrix (which is the same 
+                                size as dem)
     '''
     #Get XYZ arrays    
     X=dem.getData(0)
@@ -325,7 +341,7 @@ def voxelviewshed(dem,viewpoint):
             d[i]=np.sqrt(X[i]*X[i]+Y[i]*Y[i]+Z[i]*Z[i])
             
     #Pythagoras' theorem
-    #ImGRAFT/Matlab equiv: x=atan2(Y,X)+math.pi)/(math.pi*2);
+    #ImGRAFT/Matlab equiv: x=atan2(Y,X)+math.pi)/(math.pi*2);             (MAT)
     dint=np.round(np.sqrt(X*X+Y*Y))
     
     #Create empty array 
@@ -337,15 +353,15 @@ def voxelviewshed(dem,viewpoint):
     y=Z/d
     
     #Round values and sort array
-    #ImGRAFT/Matlab equiv: [~,ix]=sortrows([round(sqrt(X.^2+Y.^2)) x]); 
+    #ImGRAFT/Matlab equiv: [~,ix]=sortrows([round(sqrt(X.^2+Y.^2)) x]);   (MAT) 
     ix=np.lexsort((x,dint)).tolist()
 
     #Return a boolean of all array values that are not zero       
-    #ImGRAFT/Matlab equiv: loopix=find(diff(x(ix))<0);        
+    #ImGRAFT/Matlab equiv: loopix=find(diff(x(ix))<0);                    (MAT)
     loopix=np.nonzero(np.diff(x[ix])<0)[0]
 
     #Create boolean array of 1's
-    #ImGRAFT/Matlab equiv: vis=true(size(X,1),1);
+    #ImGRAFT/Matlab equiv: vis=true(size(X,1),1);                         (MAT)
     vis=np.ones(x.shape, dtype=bool)        
 
     #Return maximum value (ignoring nans)
@@ -355,14 +371,14 @@ def voxelviewshed(dem,viewpoint):
     N=np.ceil(2.*math.pi/(dx/maxd))
 
     #Populate viewshed x array
-    #ImGRAFT/Matlab equiv: voxx=(0:N)'/N;
+    #ImGRAFT/Matlab equiv: voxx=(0:N)'/N;                                 (MAT)
     voxx=np.zeros(int(N)+1)
     n=voxx.shape[0]
     for i in range(n):
         voxx[i]=i*1./(n-1)
     
     #Define viewshed y array
-    #ImGRAFT/Matlab equiv: voxy=zeros(size(voxx))-inf;
+    #ImGRAFT/Matlab equiv: voxy=zeros(size(voxx))-inf;                    (MAT)
     voxy=np.zeros(n)-1.e+308
 
     #Define visibility of each point in the array

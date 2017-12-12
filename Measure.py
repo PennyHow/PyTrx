@@ -17,8 +17,7 @@ distances. Specifically, this module contains functions for:
 (4) Performing manual detection of lines in oblique imagery.
 (5) Determining real-world surface areas and distances from oblique imagery.
 
-
-Classes:
+Classes
 Velocity:                       A class for the processing of an ImageSet to 
                                 determine pixel displacements and real-world 
                                 velocities from a sparse set of points, with 
@@ -37,15 +36,13 @@ Line:                           A class for handling lines/distances (e.g.
                                 The Line class object primarily inherits from 
                                 the Area class.
 
-
-Key functions in Velocity:
+Key functions in Velocity
 calcHomographyPairs():          Method to calculate homography between 
                                 succesive image pairs in an image sequence.
 calcVelocities():               Method to calculate velocities between 
                                 succesive image pairs in an image sequence.
-      
-                          
-Key functions in Area:
+                               
+Key functions in Area
 calcAutoAreas():                Method to obtain real world areas from an image 
                                 set. Calculates the polygon extents for each 
                                 image and the area of each given polygon.
@@ -60,9 +57,8 @@ calcManualExtents():            Method to manually select pixel extents from a
                                 and cumulative extent values (px).
 verifyExtents():                Method to manuall verify all detected polygons 
                                 in an image sequence.
-                             
-                                
-Key functions in Line:
+                                                           
+Key functions in Line
 calcManualLinesXYZ():           Method to obtain real world lines/distances 
                                 from an image set. Calculates the line 
                                 coordinates and length of each given set of 
@@ -70,10 +66,9 @@ calcManualLinesXYZ():           Method to obtain real world lines/distances
 calcManualLinesPX():            Method to manually define a pixel line through
                                 a series of images. Returns the line pixel 
                                 coordinates and pixel length.
-                                
-                                
-@author: Nick Hulton, nick.hulton@ed.ac.uk
-         Penny How, p.how@ed.ac.uk
+                                                               
+@author: Penny How (p.how@ed.ac.uk)
+         Nick Hulton 
          Lynne Addison
 '''
 
@@ -133,6 +128,24 @@ class Velocity(ImageSequence):
                         timings are extracted from the image EXIF data.
     
     Class properties
+    self._xyzvel:       XYZ velocities. 
+    self._xyz0:         XYZ positions of points in the first of each image 
+                        pair.
+    self._xyz1:         XYZ positions of points in the second of each image
+                        pair.
+    self._uvvel:        UV velocities (px).
+    self._uv0:          UV positions of points in the first of each image pair.
+    self._uv1:          UV positions of points in the second of each image 
+                        pair.
+    self._uv1corr:      UV positions of corrected points in the second of each 
+                        image pair that have been (i.e. corrected using image
+                        registration).               
+    self._homogmatrix:  Homography matrix.
+    self._homogpts0:    Seeded points (UV) in the first of each image pair.
+    self._homogpts1:    Tracked points (UV) in the second of each image pair.
+    self._homogpts1corr:Corrected points (UV) in the second of each image pair.
+    self._homogptserr:  Error associated with the tracked points.
+    self._homogerr:     Error associated with the homography models.    
     self._camEnv:       The camera environment object (CamEnv).
     self._image0:       Integer denoting the image number in the ImageSet from
                         which the analysis will commence.
@@ -186,10 +199,10 @@ class Velocity(ImageSequence):
         For now, only one method exists (EXIF derived) but this is here to 
         permit other ways to define image timings.
         
-        Args
+        Input
         method (str):           Method for setting timings (default set to 
-                                derive timings from image EXIF information)
-        '''
+                                derive timings from image EXIF information).
+        '''       
         #Initialise list        
         self._timings=[]
         
@@ -218,12 +231,62 @@ class Velocity(ImageSequence):
         return self._camEnv
 
 
-    def calcVelocities(self, homography=True, method=cv2.RANSAC, 
-                       ransacReprojThreshold=5.0, back_thresh=1.0, 
-                       calcErrors=True, maxpoints=50000, quality=0.1, 
-                       mindist=5.0, min_features=4):
-        '''Function to calculate velocities between succesive image pairs.'''
-
+    def calcVelocities(self, homography=True, calcErrors=True, back_thresh=1.0,  
+                       maxpoints=50000, quality=0.1, mindist=5.0, 
+                       min_features=4):
+        '''Function to calculate velocities between succesive image pairs. 
+        Image pairs are called from the ImageSequence object. Points are seeded
+        in the first of these pairs using the Shi-Tomasi algorithm with 
+        OpenCV's goodFeaturesToTrack function. 
+        
+        The Lucas Kanade optical flow algorithm is applied using the OpenCV 
+        function calcOpticalFlowPyrLK to find these tracked points in the 
+        second image of each image pair. A backward tracking method then tracks 
+        back from these to the first image in the pair, checking if this is 
+        within a certain distance as a validation measure.
+        
+        Tracked points are corrected for image distortion and camera platform
+        motion (if needed). The points in each image pair are georectified 
+        subsequently to obtain xyz points. The georectification functions are 
+        called from the Camera Environment object, and are based on those in
+        ImGRAFT (Messerli and Grinsted, 2015). Velocities are finally derived 
+        from these using a simple Pythagoras' theorem method.
+        
+        This function returns the xyz velocities and points from each image 
+        pair, and their corresponding uv velocities and points in the image 
+        plane.
+        
+        Inputs
+        homography:                 Flag to denote whether homography should
+                                    be calculated and images should be 
+                                    corrected for image registration.
+        calcErrors:                 Flag to denote whether tracked point errors 
+                                    should be calculated.
+        back_thesh:                 Threshold for back-tracking distance (i.e.
+                                    the difference between the original seeded
+                                    point and the back-tracked point in im0).
+        maxpoints:                  Maximum number of points to seed in im0
+        quality:                    Corner feature quality.
+        mindist:                    Minimum distance between seeded points.                 
+        min_features:               Minimum number of seeded points to track.
+        
+        Outputs
+        xyz:                        List containing the xyz velocities for each 
+                                    point (xyz[0]), the xyz positions for the 
+                                    points in the first image (xyz[1]), and the 
+                                    xyz positions for the points in the second 
+                                    image(xyz[2]). 
+        uv:                         List containing the uv velocities for each
+                                    point (uv[0], the uv positions for the 
+                                    points in the first image (uv[1]), the
+                                    uv positions for the points in the second
+                                    image (uv[2]), and the corrected uv points 
+                                    in the second image if they have been 
+                                    calculated using the homography model for
+                                    image registration (uv[3]). If the 
+                                    corrected points have not been calculated 
+                                    then an empty list is merely returned.                                 
+        '''
         #Calculate homography if flag is true        
         if homography is True:
             self.calcHomographyPairs()
@@ -264,16 +327,26 @@ class Velocity(ImageSequence):
             #Determine homography between image pair if required
             #Set calcErrors true otherwise we can't calculate/ plot homography
             #points
-            if homography is True:
-                
+            if homography is True:                
                 #Calculate velocities between image pair
                 vel=self.calcVelocity(im0, im1, self._homogmatrix[i], 
-                                      self._homogerr[i], back_thresh=2.0, 
-                                      maxpoints=2000, quality=0.1, mindist=5.0)
-            else:
-                vel=self.calcVelocity(im0, im1, None, None, back_thresh=2.0,
-                                      maxpoints=2000, quality=0.1,mindist=5.0)    
-  
+                                      self._homogerr[i],
+                                      back_thresh=back_thresh, 
+                                      calcErrors=calcErrors, 
+                                      maxpoints=maxpoints, 
+                                      quality=quality, 
+                                      mindist=mindist, 
+                                      min_features=min_features)                       
+                       
+            else:               
+                #Calculate velocities between image pair without homography
+                vel=self.calcVelocity(im0, im1, None, None, 
+                                      back_thresh=back_thresh, 
+                                      calcErrors=calcErrors, 
+                                      maxpoints=maxpoints, 
+                                      quality=quality, 
+                                      mindist=mindist, 
+                                      min_features=min_features)                                      
                     
             #Assign important info as object attributes
             self._xyzvel.append(vel[0][0])         #xyz velocities
@@ -284,6 +357,7 @@ class Velocity(ImageSequence):
             self._uv0.append(vel[1][1])            #uv locations in im0
             self._uv1.append(vel[1][2])            #uv locations in im1
             
+            #Append corrected uv1 points if homography info was present
             if homography is True:
                 self._uv1corr.append(vel[1][3])    #corrected uv1 locations
             else:
@@ -294,18 +368,67 @@ class Velocity(ImageSequence):
 
         
 
-    def calcVelocity(self, img1, img2, hmatrix=None, hpts=None, 
-                     method=cv2.RANSAC, ransacReprojThreshold=5.0, 
+    def calcVelocity(self, img1, img2, hmatrix=None, hpts=None,  
                      back_thresh=1.0, calcErrors=True, maxpoints=50000, 
                      quality=0.1, mindist=5.0, min_features=4):
-        '''Function to measure the velocity between a pair of images.'''       
-
+        '''Function to calculate the velocity between a pair of images. Points 
+        are seeded in the first of these using the Shi-Tomasi algorithm with 
+        OpenCV's goodFeaturesToTrack function. 
+        
+        The Lucas Kanade optical flow algorithm is applied using the OpenCV 
+        function calcOpticalFlowPyrLK to find these tracked points in the 
+        second image. A backward tracking method then tracks back from these to 
+        the original points, checking if this is within a certain distance as a 
+        validation measure.
+        
+        Tracked points are corrected for image distortion and camera platform
+        motion (if needed). The points in the image pair are georectified 
+        subsequently to obtain xyz points.  The georectification functions are 
+        called from the Camera Environment object, and are based on those in
+        ImGRAFT (Messerli and Grinsted, 2015). Velocities are finally derived
+        from these using a simple Pythagoras' theorem method.
+        
+        This function returns the xyz velocities and points, and their 
+        corresponding uv velocities and points in the image plane.
+        
+        Inputs
+        img1:                       Image 1 in the image pair.
+        img2:                       Image 2 in the image pair.
+        hmatrix:                    Homography matrix.
+        hpts:                       Homography points.
+        back_thesh:                 Threshold for back-tracking distance (i.e.
+                                    the difference between the original seeded
+                                    point and the back-tracked point in im0).
+        calcErrors:                 Flag to denote whether tracked point errors 
+                                    should be calculated.
+        maxpoints:                  Maximum number of points to seed in im0
+        quality:                    Corner feature quality.
+        mindist:                    Minimum distance between seeded points.                 
+        min_features:               Minimum number of seeded points to track.
+        
+        Outputs
+        xyz:                        List containing the xyz velocities for each 
+                                    point (xyz[0]), the xyz positions for the 
+                                    points in the first image (xyz[1]), and the 
+                                    xyz positions for the points in the second 
+                                    image(xyz[2]). 
+        uv:                         List containing the uv velocities for each
+                                    point (uv[0], the uv positions for the 
+                                    points in the first image (uv[1]), the
+                                    uv positions for the points in the second
+                                    image (uv[2]), and the corrected uv points 
+                                    in the second image if they have been 
+                                    calculated using the homography model for
+                                    image registration (uv[3]). If the 
+                                    corrected points have not been calculated 
+                                    then an empty list is merely returned.                                 
+        '''       
         #Set threshold difference for point tracks
         displacement_tolerance_rel=2.0
         
         #Track points between the image pair
         points, ptserrors = self._featureTrack(img1, img2, self.getMask(),
-                                               back_thresh=1.0, 
+                                               back_thresh=back_thresh, 
                                                calcErrors=calcErrors,
                                                maxpoints=maxpoints, 
                                                quality=quality,
@@ -435,9 +558,28 @@ class Velocity(ImageSequence):
         
     def calcHomographyPairs(self, back_thresh=1.0, calcErrors=True, 
                             maxpoints=50000, quality=0.1, mindist=5.0,
-                            calcHomogError=True, min_features=4, span=[0,-1]):
-        '''Method to calculate homography between succesive image pairs in an 
-        image sequence.''' 
+                            calcHomogError=True, min_features=4):
+        '''Function to generate a homography model through a sequence of 
+        images, and perform for image registration. Points that are assumed 
+        to be static in the image plane are tracked between image pairs, and 
+        movement in these points are used to generate sequential homography 
+        models.
+        
+        The homography models are held in the Velocity object and can be called
+        in subsequent velocity functions, such as calcVelocities and
+        calcVelocity.
+        
+        Inputs
+        back_thesh:                 Threshold for back-tracking distance (i.e.
+                                    the difference between the original seeded
+                                    point and the back-tracked point in im0).
+        calcErrors:                 Flag to denote whether tracked point errors 
+                                    should be calculated.
+        maxpoints:                  Maximum number of points to seed in im0
+        quality:                    Corner feature quality.
+        mindist:                    Minimum distance between seeded points.                 
+        min_features:               Minimum number of seeded points to track.
+        ''' 
         #Optional commentary
         if self._quiet>0:
             print '\n\nCALCULATING HOMOGRAPHY'
@@ -506,6 +648,33 @@ class Velocity(ImageSequence):
         
         This class returns the points in both images as a list, along with the 
         corresponding list of SNR measures.
+
+        Inputs
+        i0:                         Image 1 in the image pair.
+        iN:                         Image 2 in the image pair.
+        Mask:                       Image mask to seed points in.
+        back_thesh:                 Threshold for back-tracking distance (i.e.
+                                    the difference between the original seeded
+                                    point and the back-tracked point in im0).
+        calcErrors:                 Flag to denote whether tracked point errors 
+                                    should be calculated.
+        maxpoints:                  Maximum number of points to seed in im0
+        quality:                    Corner feature quality.
+        mindist:                    Minimum distance between seeded points.                 
+        min_features:               Minimum number of seeded points to track.
+        
+        Outputs
+        p0:                         Point coordinates for points seeded in 
+                                    image 1.
+        p1:                         Point coordinates for points tracked to
+                                    image 2.
+        p0r:                        Point coordinates for points back-tracked
+                                    from image 2 to image 1.
+        error:                      SNR measurements for the corresponding 
+                                    tracked point. The signal is the magnitude
+                                    of the displacement from p0 to p1, and the 
+                                    noise is the magnitude of the displacement
+                                    from p0r to p0.
         '''
         #Feature tracking set-up parameters
         lk_params = dict( winSize  = (25,25),
@@ -592,22 +761,46 @@ class Velocity(ImageSequence):
         platform given an image pair (i.e. image registration). Returns the 
         homography representing tracked image movement, and the tracked 
         features from each image.
-        Returns: 
-            homogMatrix:      The calculated homographic shift for the image 
-                                pair (homogMatrix).
-            src_pts_corr,
-            dst_pts_corr,
-            homog_pts:        The original, tracked and back-tracked homography 
-                              points.  
-            ptserror:         Difference between the original homography points
-                              and the back-tracked points.
-            homogerror:       Difference between the interpolated homography
-                              matrix and the equivalent tracked points
-        '''        
+        
+        Inputs
+        img1:                       Image 1 in the image pair.
+        img2:                       Image 2 in the image pair.
+        method:                     Method used to calculate homography model,
+                                    which plugs into the OpenCV function
+                                    cv2.findHomography: 
+                                    cv2.RANSAC: RANSAC-based robust method.
+                                    cv2.LEAST_MEDIAN: Least-Median robust 
+                                    0: a regular method using all the points.                                   
+        ransacReprjThreshold:       Maximum allowed reprojection error.
+        back_thesh:                 Threshold for back-tracking distance (i.e.
+                                    the difference between the original seeded
+                                    point and the back-tracked point in im0).
+        calcErrors:                 Flag to denote whether tracked point errors 
+                                    should be calculated.
+        maxpoints:                  Maximum number of points to seed in im0
+        quality:                    Corner feature quality.
+        mindist:                    Minimum distance between seeded points.
+        calcHomogError:             Flag to denote whether homography errors
+                                    should be calculated.                 
+        min_features:               Minimum number of seeded points to track.
+        
+        Outputs
+        homogMatrix:                The calculated homographic shift for the 
+                                    image pair (homogMatrix).
+        src_pts_corr,
+        dst_pts_corr,
+        homog_pts:                  The original, tracked and back-tracked 
+                                    homography points.  
+        ptserror:                   Difference between the original homography 
+                                    points and the back-tracked points.
+        homogerror:                 Difference between the interpolated 
+                                    homography matrix and the equivalent 
+                                    tracked points
+        '''         
         # Feature track between images
         trackdata = self._featureTrack(img1, img2, 
                                       self.getInverseMask(),
-                                      back_thresh=1.0, 
+                                      back_thresh=back_thresh, 
                                       calcErrors=calcErrors,
                                       maxpoints=maxpoints, 
                                       quality=quality,
@@ -655,8 +848,8 @@ class Velocity(ImageSequence):
         #Find the homography between the two sets of corrected points
         homogMatrix, mask = cv2.findHomography(src_pts_corr, 
                                                dst_pts_corr, 
-                                               method=cv2.RANSAC,
-                                               ransacReprojThreshold=5.0)
+                                               method=method,
+                                               ransacReprojThreshold=ransacReprojThreshold)
         
         #Optional: calculate homography error
         #Homography error calculated from equivalent set of homography points
@@ -699,8 +892,19 @@ class Velocity(ImageSequence):
         values held in X and Y. The perspective homography is represented as a 
         3 X 3 matrix (homog). The source points are inputted as an array. The 
         homography perspective matrix is modelled in the same manner as done so 
-        in OpenCV.'''  
+        in OpenCV.
         
+        Inputs
+        pts:                  Input point positions to correct.
+        homog:                Perspective homography matrix.
+        typ:                  Format of input points (either can be an 'array 
+                              or 'list'.                                   
+        inverse:              Flag to denote if perspective homography matrix 
+                              needs inversing.
+        
+        Output
+        hpts:                 Corrected point positions.
+        '''         
         if typ is 'array':
             #Get empty array that is the same size as pts
             n=pts.shape[0]
@@ -738,7 +942,23 @@ class Velocity(ImageSequence):
     def _calcTrackErrors(self,p0,p1,dist):
         '''Function to calculate signal-to-noise ratio with forward-backward 
         tracking data. The distance between the backtrack and original points
-        (dist) is assumed to be pre-calcuated.'''               
+        (dist) is assumed to be pre-calcuated.
+        
+        Inputs
+        p0:                         Point coordinates for points seeded in 
+                                    image 1.
+        p1:                         Point coordinates for points tracked to
+                                    image 2.
+        dist:                       Distance between p0 and p0r (i.e. points
+                                    back-tracked from image 2 to image 1).
+                                                        
+        Outputs:
+        length:                     Displacement between p0 and p1 (i.e. a
+                                    velocity, or signal).
+        snr:                        Signal-to-noise ratio, the signal being
+                                    the variable 'length' and the noise being
+                                    the variable 'dist'.
+        '''               
         #Determine length between the two sets of points
         length=(p0-p1)*(p0-p1)
         length=np.sqrt(length[:,0,0]+length[:,0,1])
@@ -747,7 +967,8 @@ class Velocity(ImageSequence):
         snr = dist/length
         
         return length,snr
-        
+ 
+       
 #------------------------------------------------------------------------------
 
 class Area(Velocity):
@@ -1683,9 +1904,6 @@ class Area(Velocity):
         booleanMask = np.array(self._mask, dtype=bool)
         booleanMask = np.invert(booleanMask)
         
-        #Copy properties of img
-#        img2 = np.copy(img)
-        
         #Mask extent image with boolean array
         np.where(booleanMask, 0, img) #fit arrays to each other
         img[booleanMask] = 0 #mask image with boolean mask object
@@ -1778,6 +1996,7 @@ class Area(Velocity):
         return polygons
 
 
+#------------------------------------------------------------------------------
 
 class Line(Area):
     '''A class for handling lines/distances (e.g. glacier terminus position)

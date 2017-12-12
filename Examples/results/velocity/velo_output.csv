@@ -1,3 +1,3 @@
-../Examples/images/KR2_2014_subset/demo
+../Examples/images/KR2_2014_subset
 Image 0, Image 1, Average xyz velocity (unfiltered),Features tracked (unfiltered), Average xyz velocity (filtered),Features Tracked (filtered), Average px velocity,Homography RMS Error, SNR
-KR2_140508_120000.JPG,KR2_140509_120000.JPG,2.3535772607,1910,2.29590963594,1773,6.29007922815,0.376121656358,0.0597960125326
+KR2_140508_120000.JPG,KR2_140509_120000.JPG,nan,9605,

@@ -17,7 +17,7 @@ this script).
 
 
 @author: Penny How (p.how@ed.ac.uk)
-         Nick Hulton (nick.hulton@ed.ac.uk)
+         Nick Hulton
 '''
 
 #Import packages
