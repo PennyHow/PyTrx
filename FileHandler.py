@@ -48,9 +48,6 @@ readDEMxyz:             Similar function to above but returns xyz DEM data as
                         separate X, Y and Z numpy arrays.
 readDEMmat:             Function to read xyz DEM data from a .mat file and 
                         return the xyz data as separate arrays.
-writeTIFF:              Write data to .tif file. A reference to the file's 
-                        spatial coordinate system is assigned using GDAL 
-                        (compatible with ArcGIS and QGIS). 
 writeVelocityFile:      Function to write all velocity data from a given 
                         timeLapse sequence to .csv file.
 writeHomography:        Function to write all homography data from a given 
@@ -568,53 +565,8 @@ def readDEMmat(matfile):
     Z = np.flipud(Z)
     return X,Y,Z  
     
-    
-def writeTIFF(outFileName, OutArray, affineT, EPSGcode=32633, 
-              units="SRS_UL_METER",unitconvert=1.0):
-    '''Write data to .tif file. A reference to the file's spatial coordinate 
-    system is assigned using GDAL (compatible with ArcGIS and QGIS). 
-    The input variable affineT should contain the following parameters for 
-    affine tranformation: 
-        0: X coordinate of the top left corner of the top left pixel
-        1: Pixel Width
-        2: Rotation (zero for North up)
-        3: Y coordinate of the top left corner of the top left pixel
-        4: Rotation (zero for North up)
-        5: Pixel Height.
-    '''
-    gdal.AllRegister()
-    
-    #Set up projection and linear units
-    srs = osr.SpatialReference()
-    srs.ImportFromEPSG(32633)  
-    srs.SetLinearUnits(units,unitconvert)
-    
-    #Assign columns and rows in file
-    cols=OutArray.shape[0]
-    rows=OutArray.shape[1]
-    
-    #Get GDAL driver
-    driver = gdal.GetDriverByName("GTiff")
-    outdata = driver.Create(outFileName, rows, cols, 1, gdal.GDT_UInt16)
-    
-    #Set up affine projection information between raw raster array and real 
-    #world coordinates. Data in array organised from top down
-    outdata.SetGeoTransform(affineT)
-    
-    #Define projection for output
-    outdata.SetProjection(srs.ExportToWkt())
-    
-    #Output single band
-    outband = outdata.GetRasterBand(1)
-    outband.WriteArray(OutArray)
-    
-    #Clear memory   
-    outdata = None 
 
-    print '\nOutput tiff file: ',outFileName
-
-
-def writeVelocityFile(velocity, fname='velocity_xyz.csv'):
+def writeVelocityFile(velocity, fname):
     '''Function to write all velocity data from a given timeLapse sequence to 
     .csv file. Data is formatted as sequential columns containing the following
     information:
@@ -723,7 +675,7 @@ def writeVelocityFile(velocity, fname='velocity_xyz.csv'):
         f.write('\n')
             
     print '\nVelocity file written:' + fname        
- 
+        
    
 def writeHomographyFile(velocity,fname='homography.csv'):
     '''Function to write all homography data from a given timeLapse sequence to 

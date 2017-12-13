@@ -20,6 +20,7 @@ registration).
 #Import packages
 import sys
 import os
+import numpy as np
 
 
 #Import PyTrx packages
@@ -72,8 +73,8 @@ mfeat = 4                       #Minimum number of seeded points to track
 xyz, uv = velo.calcVelocities(homography=hmg, calcErrors=err, back_thresh=bk,
                               maxpoints=mpt, quality=ql, mindist=mdis, 
                               min_features=mfeat)
-                              
-
+                                 
+    
 #---------------------------  Export data   -----------------------------------
 
 print '\n\nWRITING DATA TO FILE'
@@ -87,11 +88,11 @@ target2 = destination + 'homography.csv'
 writeHomographyFile(velo, target2)
 
 #Write points to shp file
-target3 = destination + 'shpfiles/'
+target3 = destination + 'shpfiles/'     #Define file destination
 if not os.path.exists(target3):
-    os.makedirs(target3)
+    os.makedirs(target3)                #Create file destination
 proj = 32633                            #ESPG:32633 is projection WGS84
-writeSHPFile(velo, target3, proj)
+writeSHPFile(velo, target3, proj)       #Write shapefile
 
 
 #----------------------------   Plot Results   --------------------------------
@@ -109,30 +110,86 @@ target4 = destination + 'imgfiles/'
 if not os.path.exists(target4):
     os.makedirs(target4)
  
-   
+#Cycle through data from image pairs   
 for i in range(velo.getLength()-1):
+    
+    #Get image0 name and print
     imn=velo._imageSet[i].getImagePath().split('\\')[1]
     print '\nVisualising data for ' + str(imn)
 
 
-    #Plot uv velocity points on image plane (unfiltered)    
-    print 'Plotting image plane output (unfiltered)'
-    plotPX(velo, i, (target4 + 'imgoutput_' + imn), crop=None, show=True)
+    #Plot uv velocity points on image plane   
+    print 'Plotting image plane output'
+    plotPX(velo, i, target4, crop=None, show=True)
 
 
-    #Plot xyz velocity points on dem (filtered)    
-    print 'Plotting XYZ output (filtered)'
-    plotXYZ(velo, i, (target4 + 'xyzoutput_' + imn), crop=cr1, 
-            show=True, dem=True)
+    #Plot xyz velocity points on dem  
+    print 'Plotting XYZ output'
+    plotXYZ(velo, i, target4, crop=cr1, show=True, dem=True)
 
                 
     #Plot interpolation map
-    print 'Plotting interpolation map (unfiltered)'
-    grid, pointsextent = interpolateHelper(velo,i,method)
-    plotInterpolate(velo, i, grid, pointsextent, show=True, 
-                    save=target4 + 'interp_' + imn, crop=cr1)                      
-                    
-                   
-#------------------------------------------------------------------------------
+    print 'Plotting interpolation map'
+    grid, pointsextent = interpolateHelper(velo, i, method)
+    plotInterpolate(velo, i, grid, pointsextent, show=True, save=target4, 
+                    crop=cr1)                        
 
+
+#--------   Example exporting raster grid of velocities as ASCII file   -------
+
+#The text files generated here are ascii-formatted. These are recognised by
+#many mapping software, such as ArcGIS and QGIS, and imported to create raster
+#surfaces
+
+print '\n\nWRITING ASCII FILES'
+
+#Set destination for file outputs
+target5 = destination + 'asciifiles/'
+if not os.path.exists(target5):
+    os.makedirs(target5)
+
+#Cycle through velocity data from image pairs   
+for i in range(velo.getLength()-1): 
+    
+    #Interpolate velocity points to grid
+    grid, pointsextent = interpolateHelper(velo, i, method)
+    
+    #Change all the nans to -999.999 and flip the y axis
+    grid[np.isnan(grid)] = -999.999     
+    grid = np.flipud(grid)  
+
+    
+    #Open the fileName file with write permissions
+    imn=velo._imageSet[i].getImagePath().split('\\')[1]
+    afile = open(target5 + imn + '_interpmap.txt','w')
+    print '\nWriting file: ' + target5 + imn + '_interpmap.txt'
+    
+    #Make a list for each raster header variable, with the label and value
+    col = ["ncols", str(grid.shape[1])]
+    row = ["nrows", str(grid.shape[0])]
+    x = ["xllcorner", str(pointsextent[0])]
+    y = ["yllcorner", str(pointsextent[2])]
+    cell = ["cellsize", str(10.)]
+    nd = ["NODATA_value", str(-999.999)]
+    
+    #Write each header line on a new line of the file
+    header = [col,row,x,y,cell,nd]       
+    for i in header:
+        afile.write(" ".join(i) + "\n")
+    
+    #Iterate through each row and column value
+    for i in range(grid.shape[0]): 
+        for j in range(grid.shape[1]):
+            
+            #Write each data value to the row, separated by spaces
+            afile.write(str(grid[i,j]) + " ")
+            
+        #New line at end of row
+        afile.write("\n")
+    
+    #Close file
+    afile.close() 
+
+
+#------------------------------------------------------------------------------
 print '\nFinished'

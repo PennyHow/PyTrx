@@ -102,7 +102,7 @@ def plotInterpolate(a, number, grid, pointextent, show=True, save=None,
     
     #Save if flag is true
     if save != None:
-        plt.savefig(save, dpi=300)
+        plt.savefig(save + 'interp_' + imn, dpi=300)
         
     #Show plot
     if show is True:
@@ -367,30 +367,33 @@ def interpolateHelper(a, number, method='linear'):
     pointsextent:   Grid extent. 
     '''   
     
-    #Get xyz points and velocities 
-    xyzvelo = a._xyzvel[number]                          #xyz velocity
-    xyzstart = a._xyz0[number]                           #xyz pt0 position
-    xyzend = a._xyz1[number]                             #xyz pt1 position
-       
     #Get xyz positions from image0 and image1
-    x1 = xyzstart[:,0]                                   #pt0 x values
-    x2 = xyzend[:,0]                                     #pt1 x values
-    y1 = xyzstart[:,1]                                   #pt0 y values
-    y2 = xyzend[:,1]                                     #pt1 y values 
-
-    for v,w,x,y,z in zip(xyzvelo,x1,x2,y1,y2):
-        if np.isnan(v) is True:
-            print v,w,x,y,z
-        elif np.isnan(w) is True:
-            print v,w,x,y,z
-        elif np.isnan(x) is True:
-            print v,w,x,y,z
-        elif np.isnan(y) is True:
-            print v,w,x,y,z
-        elif np.isnan(z) is True:
-            print v,w,x,y,z
-
-            
+    xyzstart = a._xyz0[number]                             #pt0                                   
+    xyzend = a._xyz1[number]                               #pt1 
+    
+    startx = xyzstart[:,0]                                 #pt0 x values
+    endx = xyzend[:,0]                                     #pt1 x values
+    starty = xyzstart[:,1]                                 #pt0 y values
+    endy = xyzend[:,1]                                     #pt1 y values                                         
+    
+    #Create empty lists for xyz information without NaNs
+    xyzvelo=[]  
+    x1=[]
+    x2=[]
+    y1=[]
+    y2=[] 
+                                     
+    #Remove NaN values from velocities and points                   
+    for v,sx,ex,sy,ey in zip(a._xyzvel[number],startx, endx, starty, endy):                          
+        if np.isnan(v)==False:
+            xyzvelo.append(v)                            #xyz velocities
+            x1.append(sx)                                #pt0 x values
+            x2.append(ex)                                #pt1 x values
+            y1.append(sy)                                #pt0 y values
+            y2.append(ey)                                #pt1 y values
+        elif np.isnan(v)==True:
+            print '\nNaN value removed for interpolation'
+                              
     #Bound point positions in array for grid construction
     newpts=np.array([x1,y1]).T  
        
