@@ -107,10 +107,6 @@ import glob
 import os
 import sys
 
-#Import PyTrx modules
-from Utilities import filterSparse
-
-
 #------------------------------------------------------------------------------
 
 def readMask(img, writeMask=None):
@@ -624,10 +620,8 @@ def writeVelocityFile(velocity, fname='velocity_xyz.csv'):
     information:
         Image pair 1 name
         Image pair 2 name
-        Average xyz velocity (unfiltered)
-        Number of features tracked (unfiltered)
-        Average xyz velocity (filtered)
-        Number of features tracks (filtered)
+        Average xyz velocity
+        Number of features tracked 
         Average pixel velocity
         Homography residual mean error (RMS)
         Signal-to-noise ratio
@@ -649,10 +643,8 @@ def writeVelocityFile(velocity, fname='velocity_xyz.csv'):
     f.write(dirnam+'\n')
     
     #Define column headers
-    header=('Image 0, Image 1, Average xyz velocity (unfiltered),'
-            'Features tracked (unfiltered), Average xyz velocity (filtered),'
-            'Features Tracked (filtered), Average px velocity,'
-            'Homography RMS Error, SNR')    
+    header=('Image 0, Image 1, Average xyz velocity, Features tracked , '
+            'Average px velocity, Homography RMS Error, SNR')    
     f.write(header + '\n')
 
     #Iterate through timeLapse object
@@ -682,33 +674,7 @@ def writeVelocityFile(velocity, fname='velocity_xyz.csv'):
 
         #Write unfiltered velocity information
         f.write(out + ',' +str(xyzvelav) + ',' +str(numtrack) + ',')
-
-        pt0 = velocity._xyz0[i]
-        pt1 = velocity._xyz1[i]
-        x1 = pt0[:,0]
-        y1 = pt0[:,1]
-        x2 = pt1[:,0]
-        y2 = pt1[:,1]        
-        
-        #Filter outlier points 
-        v_all=np.vstack((x1,y1,x2,y2,xyz))
-        v_all=v_all.transpose()
-        filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)
-            
-        #Write filtered velocity information           
-        if len(filtered) > 1:
-            fspeed=filtered[:,4]
-        
-            #Calculate average filtered velocity
-            velfav = sum(fspeed)/len(fspeed)
-        
-            #Determine number of features (filtered) tracked
-            numtrackf = len(fspeed)
-        
-            #Compile all data for output file
-            f.write((str(velfav) + ',' + str(numtrackf) + ','))
-            
-                    
+                              
         #Get homography information if desired
         if hasattr(velocity, '_homogmatrix'):
             hpt0 = velocity._homogpts0[i]
@@ -743,14 +709,18 @@ def writeVelocityFile(velocity, fname='velocity_xyz.csv'):
             meanerrdist=np.mean(errdist)
             
             #Calculate SNR between pixel velocities and error
-            snr=meanerrdist/pxvelav          
+            snr=meanerrdist/pxvelav
             
             #Write pixel velocity and homography information
             f.write((str(pxvelav) + ',' + str(meanerrdist) + ','  +
-                     str(snr)))
-             
-            #Break line in output file
-            f.write('\n')
+                str(snr)))
+
+        else:
+            #Write pixel velocity and NaN homography information
+            f.write(str(pxvelav) + ', NaN, NaN')
+                         
+        #Break line in output file
+        f.write('\n')
             
     print '\nVelocity file written:' + fname        
  
@@ -1227,7 +1197,7 @@ def writeSHPFile(measure, fileDirectory, projection=None):
         for i in range(measure.getLength()-1):
             
             #Get polygon coordinates and image name for each time step
-            line = measure._realpts[i]          
+            rline = measure._realline[i]  
             imn = measure._imageSet[i].getImagePath().split('\\')[1] 
 
             #Create datasource in shapefile
@@ -1261,16 +1231,15 @@ def writeSHPFile(measure, fileDirectory, projection=None):
 
             lcount=1
             
-#            for shape in polys:
-#                line = ogr.Geometry(ogr.wkbLineString)   
+#            line = ogr.Geometry(ogr.wkbLineString)   
 #                for p in shape:
 #                    line.AddPoint(p[0],p[1])
             
             #Create feature            
             feature = ogr.Feature(layer.GetLayerDefn())
-            feature.SetGeometry(line)
+            feature.SetGeometry(rline)
             feature.SetField('id', lcount)
-            feature.SetField('length', line.Length())
+            feature.SetField('length', rline.Length())
             layer.CreateFeature(feature)
             feature.Destroy() 
             lcount=lcount+1
@@ -1582,7 +1551,7 @@ def _coordFromTXT(filename, xyz):
     for line in f.readlines():
         if len(line) >= 6:
             alllines.append(line)  #Read lines in file             
-    print 'Detected coordinates from ' + str(len(alllines)) + ' images'
+    print '\nDetected coordinates from ' + str(len(alllines)) + ' images'
     f.close()
     
     allcoords=[]  

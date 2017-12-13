@@ -64,6 +64,7 @@ cam = CamEnv(camdata)
 #Set up line object
 terminus = Line(camimgs, cam)
 
+
 #-----------------------   Calculate/import lines   ---------------------------
 
 #Choose action "plot", "importtxt" or "importshp". Plot proceeds with the 
@@ -83,7 +84,6 @@ if action == 'plot':
 elif action == 'importtxt':
     #Import lines to terminus object
     rline, rlength, pxline, pxlength = importLineData(terminus, destination)
-    print '\nNumber of lines imported: ' + str(len(rline))
 
 
 #Import line data from shape files (only imports real line data, not pixel)
@@ -110,26 +110,7 @@ elif action == 'importshp':
             pt3 = pt2[1].split(')')
             pt3 = pt3[0].split(' ')
             xyz_corr.append(pt3)
-    
-    #Save line data to file        
-    target_corr = destination + 'test_coord_export.txt'
-    f = open(target_corr, 'w')
-    f.write('image' + '\t' + 'x' + '\t' + 'y' + '\n')
-    count=01
-    for i in xyz_corr:
-        f.write(str(count) + '\t' + str(i[0]) + '\t' + str(i[1]) + '\n')
-        count=count+01                                  
-    f.close()
-    
-    target_len = destination + 'test_length_export.txt'
-    f = open(target_len, 'w')
-    f.write('image' + '\t' + 'length (m)' + '\n')
-    count=01
-    for i in xyz_len:
-        f.write(str(count) + '\t' + str(i) + '\n')
-        count=count+01                                  
-    f.close()
-    
+        
     #Append data to Line object
     terminus._realpts = xyz_corr
     terminus._realline = xyz_line
@@ -189,7 +170,7 @@ def polyline_reader(lines, idchar=None, dateTime=None):
             for pt in l:
                 linecoords.append(Point2D(float(pt[0]),float(pt[1])))
             ply=Polyline(linecoords)            
-            if idchar!=None:
+            if idchar is not None:
                 idply=idchar[count]
             else:
                 idply=None            

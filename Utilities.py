@@ -5,9 +5,9 @@ This script is part of PyTrx, an object-oriented programme created for the
 purpose of calculating real-world measurements from oblique images and 
 time-lapse image series.
 
-This module, Utilities, contains functions needed for simple plotting, 
-filtering and interpolation. These merely serve as examples and it is highly 
-encouraged to adapt these functions for visualising datasets.
+This module, Utilities, contains functions needed for simple plotting and 
+interpolation. These merely serve as examples and it is highly encouraged to 
+adapt these functions for visualising datasets.
 
 Functions available in Utilities
 plotInterpolate:                Function to plot the results of the 
@@ -27,21 +27,6 @@ interpolateHelper:              Function to interpolate a point dataset. This
                                 uses functions of the SciPy package to set up a 
                                 grid (grid) and then interpolate using a linear 
                                 interpolation method (griddata).
-filterSparse:                   A function to remove noise from a sparse 
-                                dataset using a filtering method. This removes 
-                                points if they are within a specified value 
-                                (threshold) from the mean of a specified number 
-                                of nearest neighbour points (numNearest). The 
-                                item field identifies which column of the array 
-                                holds the field to be filtered on.
-filterDensity:                  A function to remove noise from a sparse 
-                                dataset using a filtering method. This removes 
-                                points if they are within a specified value 
-                                (threshold) and an absolute threshold 
-                                (absthres) from the mean of a specified number 
-                                of nearest neighbour points (numNearest). The 
-                                item field identifies which column of the array 
-                                holds the field to be filtered on.
 arrowplot:                      Function to plot arrows to denote the direction 
                                 and magnitude of the displacement. Direction is 
                                 indicated by the bearing of the arrow, and the
@@ -57,8 +42,8 @@ arrowplot:                      Function to plot arrows to denote the direction
 import matplotlib.pyplot as plt
 import numpy as np
 import math
-from scipy import spatial
 from scipy.interpolate import griddata
+import sys
 
 #------------------------------------------------------------------------------  
     
@@ -205,10 +190,10 @@ def plotPX(a, number, dest=None, crop=None, show=True):
         else:
             pt1 = a._uv1corr[number]        #Get point positions from im1
                 
-        pt0x=pt0[:,0,0]             #pt0 x values
-        pt0y=pt0[:,0,1]             #pt0 y values
-        pt1x=pt1[:,0,0]             #pt1 x values
-        pt1y=pt1[:,0,1]             #pt1 y values
+        pt0x=pt0[:,0,0]                     #pt0 x values
+        pt0y=pt0[:,0,1]                     #pt0 y values
+        pt1x=pt1[:,0,0]                     #pt1 x values
+        pt1y=pt1[:,0,1]                     #pt1 y values
         
         #Plot xy positions onto images
         uvplt = ax1.scatter(pt0x, pt0y, c=velocity, s=50, vmin=0,
@@ -221,10 +206,11 @@ def plotPX(a, number, dest=None, crop=None, show=True):
   
     else:
         print '\nUnrecognised Area/Line class object'
+        sys.exit(1)
      
     #Save figure
     if dest != None:
-        plt.savefig(dest, dpi=300) 
+        plt.savefig(dest + 'uv_' + imn, dpi=300) 
     
     #Show figure    
     if show is True:
@@ -282,8 +268,7 @@ def plotXYZ(a, number, dest=None, crop=None, show=True, dem=True):
     #Crop extent
     if crop != None:
         ax1.axis([crop[0], crop[1], crop[2], crop[3]])
-    
-             
+                
     #If object has area attributes
     if hasattr(a, '_realpoly'):
 
@@ -303,19 +288,7 @@ def plotXYZ(a, number, dest=None, crop=None, show=True, dem=True):
             count=count+1
         
         ax1.legend()
-        ax1.suptitle('Projected extents', fontsize=14)
-
-        #Save figure        
-        if dest != None:
-            plt.savefig(dest, dpi=300) 
-
-        #Show figure
-        if show is True:
-            mng = plt.get_current_fig_manager()
-            mng.window.showMaximized()
-            plt.show()
-
-            
+           
     #If object has line attributes            
     elif hasattr(a, '_realpts'):
         
@@ -331,19 +304,7 @@ def plotXYZ(a, number, dest=None, crop=None, show=True, dem=True):
         
         #Plot line points and camera position on to DEM image        
         ax1.plot(xl, yl, 'y-')
-        ax1.suptitle('Projected line', fontsize=14)
         
-        #Save figure
-        if dest != None:
-            plt.savefig(dest, dpi=300) 
-
-        #Show figure
-        if show is True:
-            mng = plt.get_current_fig_manager()
-            mng.window.showMaximized()
-            plt.show()
-
-
     #If object has velocity attributes            
     elif hasattr(a, '_xyzvel'):
         
@@ -357,16 +318,6 @@ def plotXYZ(a, number, dest=None, crop=None, show=True, dem=True):
         xyz_xe = xyzend[:,0]                        #pt1 x values
         xyz_ys = xyzstart[:,1]                      #pt0 y values
         xyz_ye = xyzend[:,1]                        #pt1 y values
-
-        #Filter points                 
-        v_all=np.vstack((xyz_xs, xyz_ys, xyz_xe, xyz_ye, xyzvelo))       
-        v_all=v_all.transpose()
-        filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)
-        xyz_xs=filtered[:,0]
-        xyz_ys=filtered[:,1] 
-        xyz_xe=filtered[:,2] 
-        xyz_ye=filtered[:,3] 
-        xyzvelo=filtered[:,4]
                                   
         #Scatter plot velocity                 
         xyzplt = ax1.scatter(xyz_xs, xyz_ys, c=xyzvelo, s=50, 
@@ -379,26 +330,26 @@ def plotXYZ(a, number, dest=None, crop=None, show=True, dem=True):
 
         #Plot color bar
         plt.colorbar(xyzplt, ax=ax1)
-
-        #Save figure
-        if dest != None:
-            plt.savefig(dest, dpi=300)
-         
-        #Show figure
-        if show is True:
-            mng = plt.get_current_fig_manager()
-            mng.window.showMaximized()
-            plt.show()
             
     else:
         print '\nUnrecognised Area/Line class object'
-        pass
+        sys.exit(1)
+    
+    #Save figure
+    if dest != None:
+        plt.savefig(dest  + 'xyz_' + imn, dpi=300)
+     
+    #Show figure
+    if show is True:
+        mng = plt.get_current_fig_manager()
+        mng.window.showMaximized()
+        plt.show()
  
     #Close plot   
     plt.close()
 
 
-def interpolateHelper(a, number, method='linear', filt=True):
+def interpolateHelper(a, number, method='linear'):
     '''Function to interpolate a point dataset. This uses functions of 
     the SciPy package to set up a grid (grid) and then interpolate using a
     linear interpolation method (griddata).
@@ -425,22 +376,20 @@ def interpolateHelper(a, number, method='linear', filt=True):
     x1 = xyzstart[:,0]                                   #pt0 x values
     x2 = xyzend[:,0]                                     #pt1 x values
     y1 = xyzstart[:,1]                                   #pt0 y values
-    y2 = xyzend[:,1]                                     #pt1 y values
-    
-    #Filter points if flag is true
-    if filt is True:
-        
-        #Compile point data and speed 
-        v_all=np.vstack((x1, y1, x2, y2, xyzvelo))
-        v_all=v_all.transpose()
-        
-        #Filter points and extract xy positions and speed
-        filtered=filterSparse(v_all,numNearest=12,threshold=2,item=4)
-        x1=filtered[:,0]
-        y1=filtered[:,1]
-        x2=filtered[:,2]
-        y2=filtered[:,3]            
-        xyzvelo=filtered[:,4]           
+    y2 = xyzend[:,1]                                     #pt1 y values 
+
+    for v,w,x,y,z in zip(xyzvelo,x1,x2,y1,y2):
+        if np.isnan(v) is True:
+            print v,w,x,y,z
+        elif np.isnan(w) is True:
+            print v,w,x,y,z
+        elif np.isnan(x) is True:
+            print v,w,x,y,z
+        elif np.isnan(y) is True:
+            print v,w,x,y,z
+        elif np.isnan(z) is True:
+            print v,w,x,y,z
+
             
     #Bound point positions in array for grid construction
     newpts=np.array([x1,y1]).T  
@@ -472,104 +421,7 @@ def interpolateHelper(a, number, method='linear', filt=True):
 #                     method=method)      
                 
     return grid, pointsextent 
-       
-
-def filterSparse(data,numNearest=12,threshold=2,item=2):
-    '''A function to remove noise from a sparse dataset using a filtering
-    method. This removes points if they are within a specified value 
-    (threshold) from the mean of a specified number of nearest neighbour 
-    points (numNearest). The item field identifies which column of the 
-    array holds the field to be filtered on.
-    
-    This function works best if called iteratively, as more than one point 
-    may be anomolous compared to neighbouring ranges.
-    
-    Inputs
-    data:              Input data to filter.
-    numNearest:     Sample window to assess filtering.
-    threshold:      Threshold range of neighbouring values.
-    item:           Number of neighbouring values to retrieve for assessment.
-    
-    Output
-    goodset:        Array of filtered data. 
-    ''' 
-    
-    #Get XY point data
-    XY=data[:,0:2]
-
-    #Set up KD tree with XY point data
-    tree=spatial.KDTree(XY, 50)
-    
-    goodset=[]
-    for point in XY:        
-        #Get n nearest neighbouring points
-        d,k=tree.query(point, numNearest)
-       
-        #Get the mean and standard deviation for these points
-        stdev=np.std(data[k[1:],item])
-        m=np.mean(data[k[1:],item])
-       
-        #Get the data value for neighbouring points
-        value=data[k[0],item]
-       
-        #Append point to goodset if is within threshold range of neighbours
-        if (value>(m-(stdev*threshold)) and value<(m+(stdev*threshold))):
-            goodset.append(data[k[0]])
-        
-    return np.array(goodset)
-    
-    
-def filterDensity(self,data,numNearest=5,threshold=10.,absthres=float("inf")):
-    '''A function to remove noise from a sparse dataset using a filtering
-    method. This removes points if they are within a specified value 
-    (threshold) and an absolute threshold (absthres) from the mean of a 
-    specified number of nearest neighbour points (numNearest). The item field 
-    identifies which column of the array holds the field to be filtered on.
-    
-    This function works best if called iteratively, as more than one point 
-    may be anomolous compared to neighbouring ranges.
-    
-    Inputs
-    data:           Input data to filter.
-    numNearest:     Sample window to assess filtering.
-    threshold:      Threshold range of neighbouring values.
-    absthres:       Absolute threshold.
-    
-    Output
-    goodset:        Array of filtered data.
-    ''' 
-    
-    # Get XY point data
-    XY=data[:,0:2]
-
-    #Set up KD tree with XY point data    
-    tree=spatial.KDTree(XY)
-    
-    nearestd=[]
-    for point in XY:        
-        #Get n nearest neighbouring points
-        d,k=tree.query(point, numNearest)
-        
-        #Calculate mean value of neighbouring points
-        nearestd.append(np.mean(d[1:]))
-        
-    meand=np.mean(nearestd)
-            
-    goodset=[]
-    for point in XY:
-        #Get n nearest neighbouring points
-        d,k=tree.query(point, numNearest)
-        
-        #Calculate mean value of neighbouring points
-        locmean=np.mean(d[1:])
-
-        #Append point if it is within a given threshold based on neighbouring
-        #points
-        if (locmean<meand*threshold and locmean<absthres):
-            goodset.append(data[k[0]])
-        
-    return np.array(goodset) 
-    
+           
     
 def arrowplot(xst,yst,xend,yend,scale=1.0,headangle=15,headscale=0.2):    
     '''Function to plot arrows to denote the direction and magnitude of the
@@ -658,6 +510,57 @@ def arrowplot(xst,yst,xend,yend,scale=1.0,headangle=15,headscale=0.2):
     
     #Return xy arrow plotting information
     return xs,ys   
+
+
+##Development: sparse filtering using KD Tree. Currently works for data arrays
+##where values have a large range, but bug in function means it doesn't work
+##for values with a small range. Either alternative needs to be found or snr
+##evaluation is purely used as a filtering technique.
+
+#def filterSparse(data,numNearest=12,threshold=2,item=2):
+#    '''A function to remove noise from a sparse dataset using a filtering
+#    method. This removes points if they are within a specified value 
+#    (threshold) from the mean of a specified number of nearest neighbour 
+#    points (numNearest). The item field identifies which column of the 
+#    array holds the field to be filtered on.
+#    
+#    This function works best if called iteratively, as more than one point 
+#    may be anomolous compared to neighbouring ranges.
+#    
+#    Inputs
+#    data:              Input data to filter.
+#    numNearest:     Sample window to assess filtering.
+#    threshold:      Threshold range of neighbouring values.
+#    item:           Number of neighbouring values to retrieve for assessment.
+#    
+#    Output
+#    goodset:        Array of filtered data. 
+#    ''' 
+#    
+#    #Get XY point data
+#    XY=data[:,0:2]
+#
+#    #Set up KD tree with XY point data
+#    tree=spatial.KDTree(XY, 50)
+#    
+#    goodset=[]
+#    for point in XY:        
+#        #Get n nearest neighbouring points
+#        d,k=tree.query(point, numNearest)
+#       
+#        #Get the mean and standard deviation for these points
+#        stdev=np.std(data[k[1:],item])
+#        m=np.mean(data[k[1:],item])
+#       
+#        #Get the data value for neighbouring points
+#        value=data[k[0],item]
+#       
+#        #Append point to goodset if is within threshold range of neighbours
+#        if (value>(m-(stdev*threshold)) and value<(m+(stdev*threshold))):
+#            goodset.append(data[k[0]])
+#        
+#    return np.array(goodset)
+
        
 #------------------------------------------------------------------------------
 

@@ -62,7 +62,7 @@ velo=Velocity(camimgs, cameraenvironment, camvmask, caminvmask, image0=0,
 hmg = True                      #Calculate homography?
 err = True                      #Calculate errors?
 bk = 1.0                        #Back-tracking threshold  
-mpt = 10000                     #Maximum number of points to seed
+mpt = 50000                     #Maximum number of points to seed
 ql = 0.1                        #Corner quality for seeding
 mdis = 5.0                      #Minimum distance between seeded points
 mfeat = 4                       #Minimum number of seeded points to track
@@ -125,23 +125,13 @@ for i in range(velo.getLength()-1):
     plotXYZ(velo, i, (target4 + 'xyzoutput_' + imn), crop=cr1, 
             show=True, dem=True)
 
-            
-    #Interpolate velocity points
-    grid, pointsextent = interpolateHelper(velo,i,method,filt=False)
-    fgrid, fpointsextent = interpolateHelper(velo,i,method,filt=True)
- 
-    
-    #Plot interpolation map (unfiltered velocity points)
+                
+    #Plot interpolation map
     print 'Plotting interpolation map (unfiltered)'
+    grid, pointsextent = interpolateHelper(velo,i,method)
     plotInterpolate(velo, i, grid, pointsextent, show=True, 
-                    save=target4 + 'interpunfilter_' + imn, crop=cr1)                      
-
-
-    #Plot interpolation map (filtered velocity points)                        
-    print 'Plotting interpolation map (filtered)'
-    plotInterpolate(velo, i, fgrid, fpointsextent, show=True, 
-                    save=target4 + 'interpfilter_' + imn, crop=cr1)  
-
+                    save=target4 + 'interp_' + imn, crop=cr1)                      
+                    
                    
 #------------------------------------------------------------------------------
 

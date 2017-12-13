@@ -57,7 +57,7 @@ maxim = 0                   #Image number of maximum areal extent
 imband = 'R'                #Desired image band
 quiet = 2                   #Level of commentary
 loadall = False             #Load all images?
-time = 'EXIF'              #Method to derive image times
+time = 'EXIF'               #Method to derive image times
 
 
 #Set up Area object, from which areal extent will be measured
@@ -111,12 +111,11 @@ writeAreaFile(lakes, destination)
 
 
 #Create shapefiles (only applicable for xyz areas)
-target1 = destination + 'shpfiles/'
+target1 = destination + 'shpfiles/'                 #Set destination
 if not os.path.exists(target1):
-    os.makedirs(target1)
-    
-proj = 32633
-writeSHPFile(lakes, target1, proj) 
+    os.makedirs(target1)                            #Create destination
+proj = 32633                                        #WGS84 projection
+writeSHPFile(lakes, target1, proj)                  #Write shapefiles
 
 
 #Write all image extents and dems 
