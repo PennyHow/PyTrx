@@ -1,9 +1,9 @@
-# PyTrx v1.1 (under development)
+# PyTrx v1.1
 PyTrx is an object-oriented toolbox created for the purpose of calculating real-world measurements from oblique images and time-lapse image series. Its primary purpose is to obtain velocities, surface areas, and volume losses from imagery of glacial environments.<br>
 
 These scripts have not yet been published, but PyTrx has been used for data processing in the following publications: <br>
-How et al. (In Review) Rapidly-changing subglacial hydrology pathways at a tidewater glacier revealed through simultaneous observations of water pressure, supraglacial lakes, meltwater plumes and surface velocities. <i>The Cryosphere Discussions</i>, <a href="http://www.the-cryosphere-discuss.net/tc-2017-74/">doi:10.5194/tc-2017/74</a><br>
-Please use these citations if you are using PyTrx in publishing articles.
+How et al. (2017) Rapidly changing subglacial hydrological pathways at a tidewater glacier revealed through simultaneous observations of water pressure, supraglacial lakes, meltwater plumes and surface velocities. <i>The Cryosphere</i> 11, 2691-2710, <a href="https://doi.org/10.5194/tc-11-2691-2017">doi:10.5194/tc-11-2691-2017</a><br>
+Please use this citation if you are using PyTrx in publishing articles.
 
 Each script contains classes and functions for handling each aspect needed for photogrammetric processing:<br>
 
