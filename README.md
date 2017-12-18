@@ -7,9 +7,9 @@ These scripts have not yet been published, but PyTrx has been used for data proc
 
 <b>How (2018)</b> Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. <i>PhD thesis</i>, University of Edinburgh, UK.<br>
 
-Please use these citations if you are using PyTrx in publishing articles.
+Please use these citations if you are using PyTrx in publishing articles. <br><br>
 
-Each script contains classes and functions for handling each aspect needed for photogrammetric processing:<br><br>
+Each script contains classes and functions for handling each aspect needed for photogrammetric processing:<br>
 
 <b><u>CamEnv.py</b></u><br>
 Handles the associated data with the camera environment.<br>
