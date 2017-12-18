@@ -30,10 +30,10 @@ The <b>ImageSequence</b> class holds information about an image sequence, i.e. a
 Contains classes for calculating homography and velocities, and measuring surface areas and distances from oblique imagery. This module has not yet been fully incorporated into the most up-to-date version of PyTrx.<br>
 The <b>Velocity</b> class enables processing with an ImageSequence object. Camera homography and velocities are derived and held within this class.<br>
 The <b>Area</b> class performs automated and manual detection of surface areas from imagery and georectifies polygons to real-world coordinates.<br>
-The <b>Length</b> class performs manual detection of lines from imagery (e.g. glacier terminus position) and georectifies lines to real-world coordinates.
+The <b>Line</b> class performs manual detection of lines from imagery (e.g. glacier terminus position) and georectifies lines to real-world coordinates.
 <br>
 
 <b><u>Utilities.py</b></u><br>
-This module contains a set of functions for plotting data.
+This module contains a set of functions for plotting and interpolating data.
 
 
