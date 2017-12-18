@@ -12,22 +12,44 @@ object-constructors and functions for:
     real-world coordinates
 The projection and inverse transformation functions are based on 
 those available in the ImGRAFT toolbox for Matlab. Translations from
-ImGRAFT are noted in the comments.
+ImGRAFT are noted in related script comments.
 
-Classes:
-GCPs:       A class to represent the geography of the camera scene and handle 
-            data associated with this (Ground Control Points, the DEM and the 
-            image that the GCPs correspond to).
-CamCalib:   A class that handles the camera calibration values and provides
-            image correction functionality. 
-CamEnv:     A class that represents the camera object. This object inherits
-            from the GCPs and CamCalib classes, containing information about 
-            the intrinsic matrix, lens distortion parameters, camera pose 
-            (position and direction), GCPs, and the DEM.
-    
-@author: Nick Hulton (Nick.Hulton@ed.ac.uk)
-         Lynne Addison
-         Penny How (p.how@ed.ac.uk)
+Classes
+GCPs:                       A class to represent the geography of the camera 
+                            scene and handle data associated with this (Ground 
+                            Control Points, the DEM and the image that the GCPs 
+                            correspond to).
+CamCalib:                   A class that handles the camera calibration values 
+                            and provides image correction functionality. 
+CamEnv:                     A class that represents the camera object. This 
+                            object inherits from the GCPs and CamCalib classes, 
+                            containing information about the intrinsic matrix, 
+                            lens distortion parameters, camera pose (position 
+                            and direction), GCPs, and the DEM.
+
+Key functions in GCPs
+getGCPs():                  Return the world and image GCPs.      
+getDEM():                   Return the dem object. 
+getImage():                 Return the GCP reference image.
+
+Key functions in CamCalib
+getDistortCoeffsCv2():      Return radial and tangential distortion 
+                            coefficients.
+getCamMatrixCV2():          Return camera matrix in a structure that is 
+                            compatible with subsequent photogrammetric 
+                            processing using OpenCV.
+reportCalibData():          Self reporter for Camera Calibration object data.
+
+Key function in CamEnv
+project(xyz):               Project xyz world coordinates into corresponding 
+                            image coordinates (uv). Translated from the ImGRAFT 
+                            projection function found in camera.m.  
+invproject(uv):             Inverse project image coordinates (uv) to xyz world 
+                            coordinates using inverse projection variables.         
+
+@author: Penny How (p.how@ed.ac.uk)
+         Nick Hulton 
+         Lynne Addison       
 '''
 
 #Import packages
@@ -37,6 +59,7 @@ from DEM import ExplicitRaster,load_DEM,voxelviewshed
 from Images import CamImage
 from scipy import interpolate
 import sys
+import matplotlib.pyplot as plt
 
 #------------------------------------------------------------------------------
 
@@ -46,11 +69,13 @@ class GCPs():
     extent, and the image the ground control points correspond to, as an 
     Image object. 
     
-    Inputs:
-        - DEMpath: The file path of the ASCII DEM.
-        - GCPpath: The file path of the GCP text file, with a header line, and
-          tab delimited x, y, z world coordinates and xy image on each line.
-        - imagePath: The file path of the image the GCPs correspond to.'''
+    Inputs
+    DEMpath:        The file path of the ASCII DEM.
+    GCPpath:        The file path of the GCP text file, with a header line, and
+                    tab delimited x, y, z world coordinates and xy image on 
+                    each line.
+    imagePath:      The file path of the image the GCPs correspond to.
+    '''
     
     def __init__(self, dem, GCPpath, imagePath):
         '''Constructor to initiate a geography object.'''                
@@ -79,8 +104,7 @@ class GCPs():
 
     
     def getImage(self):
-        '''Return the GCP reference image.'''
-        
+        '''Return the GCP reference image.'''        
         return self._gcpImage
 
         
@@ -113,15 +137,12 @@ class CamCalib(object):
     
     The object can be initiated directly either as a list of three elements for 
     each of the intrinsic, tangential and radial arrays, or by refencing a file 
-    (.mat or .txt) containing the calibration data in a pre-designated format.'''
+    (.mat or .txt) containing the calibration data in a pre-designated format.
+    '''
     
     def __init__(self,*args): 
-        '''Constructor to initiate a calibration object.'''        
-        ###Also need to deal with None argument to set calibration values for
-        ###Neutral/ nil calibration
-    
-        failed=False
-        
+        '''Constructor to initiate a calibration object.'''            
+        failed=False        
         if len(args)==1:
             
             #Read calibration from file
@@ -268,91 +289,11 @@ class CamCalib(object):
         radDis=np.zeros(6)
         rd = np.array(matrix[2]) 
         radDis[:rd.size] = rd
-        
-    
-#        #Transpose if 0's are not in correct places
-#        if matrix[2,0]!=0 and matrix[2,1]!=0 and matrix[0,2]==0 and matrix[1,2]==0:
-#            mat = matrix.transpose()
-#        else:
-#            mat = matrix
-#         
-#        # Set 0's and 1's in the correct locations
-#        it=np.array([0,1,1,0,2,0,2,1])     
-#        it.shape=(4,2)
-#        for i in range(4):
-#            x = it[i,0]
-#            y = it[i,1]
-#            mat[x,y]=0        
-#        mat[2,2]=1 
-    
+           
         return intrMat,tanDis,radDis
         
-    #    def __checkMatices__():
-    #    radDis=np.zeros(6)
-    #    tanDis=np.zeros(2)
-    #    rd = np.array(calibDict["RadialDistortion"]) # k1,k2,k3
-    #    radDis[:rd.size] = rd
-    #    td = np.array(calibDict["TangentialDistortion"]) # p1,p2
-    #    tanDis[:td.size] = td
-
-
+        
 #------------------------------------------------------------------------------        
-
-###NICK'S OLD CODE. MAKE SURE EVERYTHING HAS BEEN MOVED OVER TO THE NEW CAMERA
-###CLASS.
-#class Camera(CamCalib):
-#    '''A class to represent a distorted camera model.
-#
-# This class is an implementation of a distorted camera model.
-# Implements CV2 camera model: <http://docs.opencv.org/modules/calib3d/doc/camera_calibration_and_3d_reconstruction.html>
-# and as implented in ImGRAFT: <http://imgraft.glaciology.net > 
-# 
-#   Camera calibration coefficient values are inherited by the super-class
-#
-#   self.imgSz   - size of image in pixels [#rows, #columns] #matlab=imgz
-#   self.camLoc     - world coordinates of camera [x,y,z] (three element array [0-2]) #matlab=xyz
-#   self.viewDir - [yaw,pitch,roll]. Yaw: rotation about z (rotation about vertical axis) #matlab=viewdir
-#                              Pitch: look up/down angle (rotation about horizontal axis orthogonal to principal lens direction)
-#                              Roll: camera roll - horizon tilt (rotation about horizontal axis along principal lens direction).'''
-#
-#
-#    def __init__(self,imgSz=None,camcalib=None,camLoc=None,viewDir=None,DEMdensify=1.0):
-#
-## set up the camera calibration by calling the super class.  This should
-## be a list either of the intrinsic matrix, tangential and radial correction
-## matrices, or a list of where the calibration files are        
-#        super(camcalib)
-#        
-#        self._names={'imgSz':'Image Size','camLoc':'Camera Location','viewDir':'View Direction'}
-#        
-## for other vairables, allow passed variable to be any tuple or list or array 
-## but convert to array form as new object if not null and correct size
-## check size passed is as expceted        
-# 
-## image size (pixels)
-#        self.imgSz=self.__setInstVar__(imgSz,2,self._names['imgSz']) 
-#               
-## camera location (real world co-ordinates)
-#        self.camLoc=self.__setInstVar__(camLoc,3,self._names['camLoc'])     
-#            
-## camera orientation in real world (radians with 0 as North)
-#        self.viewDir=self.__setInstVar__(viewDir,3,self._names['viewDir'])  
-#
-#
-#        self.DEMdensify=DEMdensify
-#
-#        self._setInvProjVars()
-#        
-#    def __setInstVar__(self,var,specLen,txt): 
-#        if (var!=None):
-#            if len(var)==specLen:
-#                return np.array(var,dtype=np.float32)
-#            else:
-#                print txt + ' badly speficified - setting to None'
-#                return None
-#        else:
-#            return np.zeros(specLen,dtype=np.float32)
-
 
 class CamEnv(CamCalib):    
     ''' A class to represent the camera object, containing the intrinsic
@@ -362,7 +303,7 @@ class CamEnv(CamCalib):
     data for the camera: two sets of points and the corresponding image and 
     DEM.
     
-    Inputs:
+    Inputs
     name:           The reference name for the camera.
     GCPpath:        The file path of the GCPs, for the GCPs object.
     DEMpath:        The file path for the DEM, for the GCPs object.
@@ -372,9 +313,9 @@ class CamEnv(CamCalib):
                     either as a .mat Matlab file or a text file. The text file 
                     should be of the following tab delimited format:
                     RadialDistortion
-                    [x y z]
+                    [k1 k2 k3...k7]
                     TangentialDistortion
-                    [x y]
+                    [p1 p2]
                     IntrinsicMatrix
                     [x y z]
                     [x y z]
@@ -391,8 +332,6 @@ class CamEnv(CamCalib):
                     2: Detailed commentary.
     '''
     
-#    def __init__(self, name, GCPpath, DEMpath, imagePath, calibPath, coords, ypr=[0,0,0]):
-
     def __init__(self, envFile, quiet=2):
         '''Constructor to initiate Camera Environment object.''' 
         ### Eventually modify this to allow a more flexible
@@ -401,6 +340,7 @@ class CamEnv(CamCalib):
         
         #Set commentary level
         self._quiet = quiet
+        
         #Read parameters from the environment file             
         params = self.dataFromFile(envFile)
 
@@ -411,8 +351,9 @@ class CamEnv(CamCalib):
         else:
             if self._quiet>0:
                 print '\nINITIALISING CAMERA ENVIRONMENT'
-            name, GCPpath, DEMpath, imagePath, calibPath, coords, ypr, DEMdensify = params           
-        
+            (name, GCPpath, DEMpath, imagePath, 
+             calibPath, coords, ypr, DEMdensify) = params           
+
         #Set up object parameters
         self._name = name
         self._camloc = np.array(coords)
@@ -420,35 +361,22 @@ class CamEnv(CamCalib):
         self._DEMdensify=DEMdensify
         self._GCPpath = GCPpath
         self._imagePath = imagePath
-        self._refImage=CamImage(imagePath)
-        
+        self._refImage=CamImage(imagePath)      
 
         #Set yaw, pitch and roll to 0 if no information is given        
-        if ypr == None:
-            self._direction = [0,0,0]
-        else:
-            self._direction = ypr  
-
-        #Initialise CamCalib object for calibration information        
-        self._calibPath=calibPath
-        CamCalib.__init__(self,calibPath)                
-        
         if ypr == None:
             self._camDirection = np.array([0,0,0])
         else:
             self._camDirection =  np.array(ypr)
 
+        #Initialise CamCalib object for calibration information        
+        self._calibPath=calibPath
+        CamCalib.__init__(self,calibPath)                
+                
         #Leave DEM and inverse projection variables empty to begin with
-        self._DEM=None
-        self._invProjVars=None
-            
-        ###Load the dem 
-        ###Again this a a fudge for now since we're only permitting .Mat files
-        #self._DEM=DEM_FromMat(self._DEMpath)
-        #print 'DEM Loaded'
-        #if self._DEMdensify!=1:
-            #self._DEM=self._DEM.densify(self._DEMdensify)
-        
+        self._DEM = None
+        self._invProjVars = None
+      
         #Initialise GCPs object for GCP and DEM information
         if (self._GCPpath!=None and self._imagePath!=None):
             if self._quiet>1:
@@ -476,14 +404,14 @@ class CamEnv(CamCalib):
         f=open(filename)
         lines=f.readlines()
         f.close()
- 
+        
         #Search for keywords and identify which line they are in       
         for i in range(len(lines)):
             stripped=lines[i].split("#")[0].strip().lower().replace(" ","")
             for key in self.key_labels:
                 if self.key_labels[key]==stripped:
                     key_lines.update({key:i})
-
+        
         #Define CamEnv name if information is present in .txt file
         lineNo=key_lines["name"]
         if lineNo!=None:
@@ -601,8 +529,10 @@ class CamEnv(CamCalib):
             
     def _setInvProjVars(self):
         '''Set the inverse projection variables, based on the DEM.'''
+        #Optional commentary        
         if self._quiet>1:        
             print '\nSetting inverse projection coefficients'   
+       
         dem=self.getDEM()
         
         X=dem.getData(0)
@@ -629,6 +559,10 @@ class CamEnv(CamCalib):
         #Set inverse projection variables
         self._invProjVars=[X,Y,Z,uv0]
 
+        #Optional commentary        
+        if self._quiet>1:        
+            print '\nInverse projection coefficients defined'
+            
 
     def project(self,xyz):
         '''Project the xyz world coordinates into the corresponding image 
@@ -636,21 +570,22 @@ class CamEnv(CamCalib):
         projection function found in camera.m:            
         uv,depth,inframe=cam.project(xyz)
         
-        Inputs:
-               xyz: world coordinates            
-        Outputs:
-               uv: pixel coordinates in image
-               depth: view depth
-               inframe: boolean vector containing whether each projected
-               3d point is inside the frame.
-         
+        Inputs
+        xyz:                World coordinates.            
+        
+        Outputs
+        uv:                 Pixel coordinates in image.
+        depth:              View depth.
+        inframe:            Boolean vector containing whether each projected
+                            3d point is inside the frame.        
         '''
-        ###This was in ImGRAFT/Matlab to transpose the input array if it's 
-        ###ordered differently 
-        #if size(xyz,2)>3
-        #   xyz=xyz';
-        #end
-        #xyz=bsxfun(@minus,xyz,cam.xyz);
+        
+        #This was in ImGRAFT/Matlab to transpose the input array if it's 
+        #ordered differently 
+        #if size(xyz,2)>3                                                 (MAT)
+        #   xyz=xyz';                                                     (MAT)
+        #end                                                              (MAT)
+        #xyz=bsxfun(@minus,xyz,cam.xyz);                                  (MAT)
         ###need to check xyz is an array of the correct size
         ###this does element-wise subtraction on the array columns
         
@@ -664,22 +599,16 @@ class CamEnv(CamCalib):
         xyz=np.dot(xyz,Rprime)
         
         #ImGRAFT/Matlab equiv to below command: 
-        #xy=bsxfun(@rdivide,xyz(:,1:2),xyz(:,3))
+        #xy=bsxfun(@rdivide,xyz(:,1:2),xyz(:,3))                          (MAT)
         xy=xyz[:,0:2]/xyz[:,2:3]
                     
         if False:
-            
-            #if (not np.allclose(self.radDstrt,[0.,0.,0.,0.,0.,0.])) or 
-            #(not np.allclose(self.tanDstrt,[0.,0.])):
-            r2=np.sum(xy*xy,1)
-
-            #Have no idea why this line exists - need to ask Aslak                
+            #Transposed from ImGRAFT. Have no idea why this line exists 
+            #Need to ask Aslak
+            r2=np.sum(xy*xy,1)                
             r2[r2>4]=4
 
-            #Have to be careful in the translation from Matlab here in terms of 
-            #getting the logic right. 
-            #Here, 'if not np.allclose(self.radDstrt[2:6], [0., 0., 0., 0.])' 
-            #gives the equivalent of 'any(cam.k(3:6)~=0)'
+            #Transposed from ImGRAFT
             if not np.allclose(self.radDstrt[2:6], [0., 0., 0., 0.]):
                 a=(1. + self.radDstrt[0] * r2+self.radDstrt[1] * r2 * r2 +
                    self.radDstrt[2] * r2 * r2 * r2)
@@ -689,20 +618,15 @@ class CamEnv(CamCalib):
                 a=(1. + self.radDstrt[0] * r2 + self.radDstrt[1] * r2 * r2 + 
                    self.radDstrt[2] * r2 * r2 * r2)
 
-            xty=xy[:,0] * xy[:,1]
-            
+            xty=xy[:,0] * xy[:,1]            
             pt1=a*xy[:,0]+2*self.tanDstrt[0]*xty+self.tanDstrt[1]*(r2+2*xy[:,0]
                                                                    *xy[:,0])
             pt2=a*xy[:,1]+2*self.tanDstrt[0]*xty+self.tanDstrt[1]*(r2+2*xy[:,1]
-                                                                   *xy[:,1])
-            
-            #pt1=xy[:,0]
-            #pt2=xy[:,1]
-            
+                                                                   *xy[:,1])            
             xy=np.column_stack((pt1,pt2))
 
         #ImGRAFT/Matlab version of code below: 
-        #uv=[cam.f[1]*xy(:,1)+cam.c(1), cam.f(2)*xy(:,2)+cam.c(2)];
+        #uv=[cam.f[1]*xy(:,1)+cam.c(1), cam.f(2)*xy(:,2)+cam.c(2)];       (MAT)
         uv=np.empty([xy.shape[0],xy.shape[1]])
                    
         for i in range(xy.shape[0]):
@@ -732,13 +656,15 @@ class CamEnv(CamCalib):
     def invproject(self,uv):  
         '''Inverse project image coordinates (uv) to xyz world coordinates
         using inverse projection variables (set using self._setInvProjVars).         
-
+        This is primarily executed using the ImGRAFT projection function 
+        found in camera.m:            
         uv,depth,inframe=cam.project(xyz)
         
-        Inputs:
-               uv: pixel coordinates in image           
-        Outputs:
-               xyz: world coordinates. 
+        Inputs
+        uv:                 Pixel coordinates in image.
+          
+        Outputs
+        xyz:                World coordinates. 
         '''       
         #Set inverse projection variables if none exists
         if self._invProjVars==None:
@@ -760,13 +686,13 @@ class CamEnv(CamCalib):
         zi=interpolate.griddata(uv0, Z, uv, method='linear')
         
         #Return xyz grids                
-        xyz=np.column_stack([xi,yi,zi])
+        xyz=np.column_stack([xi,yi,zi])       
         return xyz
 
 
     def getR(self):
         '''Calculates Camera rotation matrix calculated from view 
-        direction'''
+        direction.'''
 
         C = np.cos(self._camDirection) 
         S = np.sin(self._camDirection)
@@ -780,6 +706,7 @@ class CamEnv(CamCalib):
 
         return value
 
+
     def report(self):
         '''Reporter for testing that the relevant data has been successfully 
         imported. Testing for:
@@ -790,7 +717,8 @@ class CamEnv(CamCalib):
         - DEM densification
         - GCPs
         - Yaw, pitch, roll
-        - Camera matrix and distortion coefficients'''
+        - Camera matrix and distortion coefficients
+        '''
         
         #Camera name and location
         print '\nCamera Environment setup/data:'
@@ -837,13 +765,99 @@ class CamEnv(CamCalib):
         self.reportCalibData()
 
 
+    def showGCPs(self, extent=None):
+        '''Function to show the ground control points, on the image and DEM.
+        '''
+        
+        #Get GCPs      
+        worldgcp, imgcp = self._gcp.getGCPs()
+        
+        #Get DEM and DEM extent (if specified)
+        dem = self.getDEM()
+        demex=dem.getExtent()
+        xscale=dem.getCols()/(demex[1]-demex[0])
+        yscale=dem.getRows()/(demex[3]-demex[2])
+        
+        if extent is not None:
+            xmin=extent[0]
+            xmax=extent[1]
+            ymin=extent[2]
+            ymax=extent[3]
+                
+            xdmin=(xmin-demex[0])*xscale
+            xdmax=((xmax-demex[0])*xscale)+1
+            ydmin=(ymin-demex[2])*yscale
+            ydmax=((ymax-demex[2])*yscale)+1
+            demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
+            lims = demred.getExtent()
+            
+        else:
+            xdmin=(demex[0]-demex[0])*xscale
+            xdmax=((demex[1]-demex[0])*xscale)+1
+            ydmin=(demex[2]-demex[2])*yscale
+            ydmax=((demex[3]-demex[2])*yscale)+1
+            demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
+            lims = demred.getExtent() 
+        
+        #Get DEM z values for plotting
+        demred=demred.getZ()
+        
+        #Plot image points    
+        plt.figure()
+        plt.tick_params(axis='both', which='major', labelsize=10)
+        plt.xlim([0, self._refImage.getImageSize()[1]])
+        plt.ylim([0, self._refImage.getImageSize()[0]])
+        imgplot = plt.imshow(self._refImage.getImageArray(), origin='lower')
+        imgplot.set_cmap('gray')
+        plt.gca().invert_yaxis()
+        plt.scatter(imgcp[:,0], imgcp[:,1], color='yellow')
+        plt.suptitle('Image showing location of ' + str(self._name) + ' GCPs', 
+                    fontsize=14, y=0.9)
+        
+        #Plot world points
+        plt.figure()
+        plt.locator_params(axis = 'x', nbins=8)
+        plt.tick_params(axis='both', which='major', labelsize=10)
+        plt.xlim([lims[0],lims[1]])
+        plt.ylim([lims[2],lims[3]])
+        imgplot = plt.imshow(demred, origin='lower', 
+                             extent=[lims[0],lims[1],lims[2],lims[3]])
+        imgplot.set_cmap('gray')
+        plt.scatter(worldgcp[:,0], worldgcp[:,1], color='yellow')
+        plt.scatter(self._camloc[0], self._camloc[1], color='blue')
+        plt.suptitle('DEM showing location of ' + str(self._name) + 
+                     ' GCPs', fontsize=14)
+        plt.show()
+
+        
+    def showPrincipalPoint(self):
+        '''Function to show the principal point on the image, along with the 
+        GCPs.
+        '''
+ 
+        #Get the camera centre from the intrinsic matrix 
+        ppx = self._camCen[0] 
+        ppy = self._camCen[1]       
+        
+        #Plot image points    
+        plt.figure()
+        plt.tick_params(axis='both', which='major', labelsize=10)
+        plt.xlim([0, self._refImage.getImageSize()[1]])
+        plt.ylim([0, self._refImage.getImageSize()[0]])
+        imgplot = plt.imshow(self._refImage.getImageArray(), origin='lower')
+        imgplot.set_cmap('gray')
+        plt.gca().invert_yaxis()
+        plt.scatter(ppx, ppy, color='yellow', s=100)
+        plt.axhline(y=ppy)
+        plt.axvline(x=ppx)
+        plt.suptitle('Image showing principal point and GCPs of ' + 
+                     str(self._name), fontsize=14, y=0.9)
+        plt.show() 
+        
+        
 #------------------------------------------------------------------------------
 
-##Tester code to run if main. Requires PyTrx_Tests.py module in visible path
-#if __name__ == "__main__":
-#    from PyTrx_Tests import doCalibrationTests,doCamEnvTests
-#    
-#    doCalibrationTests()
-#    doCamEnvTests()
-        
+#if __name__ == "__main__":   
+#    print '\nProgram finished'
 
+#------------------------------------------------------------------------------   

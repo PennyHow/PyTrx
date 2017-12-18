@@ -1,0 +1,37 @@
+### TUNABREEN CAMERA 2 (2015) camera environment data
+ 
+### FORMAT: Camera environment name, GCP path, DEM path, Image path, 
+### Calibration path, Camera location, Yaw pitch roll
+
+
+Camera_environment_name # Name of CamEnv class
+TU2_2015
+
+
+
+GCP_path #Path name where Ground Control Point data can be found
+..\Examples\camenv_data\gcps\TU2_2015.txt
+
+DEM_path #Path name where DEM data can be found
+..\Examples\camenv_data\dem\TU_demzero.tif
+
+
+
+image_path #Path name where master image can be found (i.e. calibration image where GCPs have been plotted
+..\Examples\camenv_data\refimages\TU2_2015.JPG
+
+
+
+Calibration_path #Path name where camera calibration file can be found
+[..\Examples\camenv_data\calib\TU2_2015_1.txt
+
+]
+
+Camera_location #Location of camera in xyz coordinates
+[551141.156 8710426.44 480.658]
+
+Yaw_pitch_roll #Yaw, pitch, roll of camera (set to [0 0 0] if unknown) 
+[5.9929 0.174   0] 
+
+Dem_densification #Amount to densify the DEM to permit better mapping of image
+2
