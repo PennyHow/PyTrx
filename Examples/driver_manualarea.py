@@ -7,7 +7,7 @@ time-lapse image series.
 
 This driver calculates meltwater plume surface extent at Kronebreen (camera 
 site 1, KR1) for a small subset of the 2014 melt season using modules in PyTrx. 
-Specifically this script performs manual detection of supraglacial lakes 
+Specifically this script performs manual detection of meltwater plumes 
 through sequential images of the glacier to derive surface areas which have 
 been corrected for image distortion. Previously defined pixel areas can also 
 be imported from file (this can be changed by commenting and uncommenting 
