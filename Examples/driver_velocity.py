@@ -5,191 +5,137 @@ This script is part of PyTrx, an object-oriented programme created for the
 purpose of calculating real-world measurements from oblique images and 
 time-lapse image series.
 
-This driver calculates surface velocities using modules in PyTrx at Kronebreen,
-Svalbard, for a subset of the images collected during the 2014 melt season. 
-Specifically this script performs feature-tracking through sequential daily 
-images of the glacier to derive surface velocities (spatial average, 
-individual point displacements and interpolated velocity maps) which have been 
-corrected for image distortion and motion in the camera platform (i.e. image
-registration).
+This driver calculates surface velocities at Kronebreen, Svalbard, for the 2014 
+melt season using modules in PyTrx. Specifically this script performs feature
+tracking through sequential daily images of the glacier to derive surface
+velocities (spatial average, individual point displacements and interpolated
+velocity maps) which have been corrected for image distortion and camera 
+homography.
 
 @author: Penny How (p.how@ed.ac.uk)
-         Nick Hulton 
+         Nick Hulton (nick.hulton@ed.ac.uk)
+
 '''
 
 #Import packages
 import sys
-import os
+import time
+import math
 import numpy as np
-
+import matplotlib.image as mpimg
+import matplotlib.pyplot as plt
+from scipy import interpolate
 
 #Import PyTrx packages
 sys.path.append('../')
 from CamEnv import CamEnv
-from Measure import Velocity
-from FileHandler import writeHomographyFile, writeVelocityFile, writeSHPFile
-from Utilities import plotPX, plotXYZ, interpolateHelper, plotInterpolate
+from Images import TimeLapse
+from FileHandler import writeHomographyFile, writeVelocityFile
+from Utilities import plotVelocity, interpolateHelper, plotInterpolate
 
 
 #-------------------------   Map data sources   -------------------------------
 
 #Get data needed for processing
-camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_KR2_2014.txt'
-camvmask = '../Examples/camenv_data/masks/KR2_2014_vmask.JPG'
-caminvmask = '../Examples/camenv_data/invmasks/KR2_2014_inv.JPG'
+camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_cam2_2014.txt'
+camvmask = '../Examples/camenv_data/masks/c2_2014_vmask.JPG'
+caminvmask = '../Examples/camenv_data/invmasks/c2_2014_inv.JPG'
 camimgs = '../Examples/images/KR2_2014_subset/*.JPG'
 
 
 #Define data output directory
-destination = '../Examples/results/velocity/'
-if not os.path.exists(destination):
-    os.makedirs(destination)
+destination = '../Examples/results/KR2_2014_velocities/'
 
 
 #-----------------------   Create camera object   -----------------------------
 
 #Define camera environment
 cameraenvironment = CamEnv(camdata, quiet=2)
+#cameraenvironment.report()
 
 
 #----------------------   Calculate velocities   ------------------------------
 
-#Set up Velocity object
-velo=Velocity(camimgs, cameraenvironment, camvmask, caminvmask, image0=0, 
-            band='L', quiet=2) 
+#Set up TimeLapse object
+tl=TimeLapse(camimgs, cameraenvironment, camvmask, caminvmask, image0=0, 
+             band='L', quiet=2) 
 
-
-#Set velocity parameters
-hmg = True                      #Calculate homography?
-err = True                      #Calculate errors?
-bk = 1.0                        #Back-tracking threshold  
-mpt = 50000                     #Maximum number of points to seed
-ql = 0.1                        #Corner quality for seeding
-mdis = 5.0                      #Minimum distance between seeded points
-mfeat = 4                       #Minimum number of seeded points to track
-
-
-#Calculate velocities and homography    
-xyz, uv = velo.calcVelocities(homography=hmg, calcErrors=err, back_thresh=bk,
-                              maxpoints=mpt, quality=ql, mindist=mdis, 
-                              min_features=mfeat)
-                                 
-    
-#---------------------------  Export data   -----------------------------------
-
-print '\n\nWRITING DATA TO FILE'
-
-#Write out velocity data to .csv file
-target1 = destination + 'velo_output.csv'
-writeVelocityFile(velo, target1) 
-
-#Write homography data to .csv file
-target2 = destination + 'homography.csv'
-writeHomographyFile(velo, target2)
-
-#Write points to shp file
-target3 = destination + 'shpfiles/'     #Define file destination
-if not os.path.exists(target3):
-    os.makedirs(target3)                #Create file destination
-proj = 32633                            #ESPG:32633 is projection WGS84
-writeSHPFile(velo, target3, proj)       #Write shapefile
-
-
+#Calculate homography and velocities    
+hg, outputV = tl.calcVelocities()
+   
+   
 #----------------------------   Plot Results   --------------------------------
 
-print '\n\nPLOTTING DATA'
+print '\nData plotting...'
+plotcams = False
+plotcombined = False
+plotspeed = False
+plotmaps = False
+save = False
 
-#Set interpolation method ("nearest"/"cubic"/"linear")
-method='linear' 
 
-#Set DEM extent         
-cr1 = [445000, 452000, 8754000, 8760000]            
+#Get DEM from camera environment object
+dem=cameraenvironment.getDEM()
 
-#Set destination for file outputs
-target4 = destination + 'imgfiles/'
-if not os.path.exists(target4):
-    os.makedirs(target4)
- 
-#Cycle through data from image pairs   
-for i in range(velo.getLength()-1):
+#Set extent
+xmin=446000
+xmax=451000
+ymin=8754000
+ymax=8760000
+
+demex=dem.getExtent()
+xscale=dem.getCols()/(demex[1]-demex[0])
+yscale=dem.getRows()/(demex[3]-demex[2])
+
+xdmin=(xmin-demex[0])*xscale
+xdmax=((xmax-demex[0])*xscale)+1
+ydmin=(ymin-demex[2])*yscale
+ydmax=((ymax-demex[2])*yscale)+1
     
-    #Get image0 name and print
-    imn=velo._imageSet[i].getImagePath().split('\\')[1]
-    print '\nVisualising data for ' + str(imn)
+demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
+lims=demred.getExtent()
+demred=demred.getZ()
 
 
-    #Plot uv velocity points on image plane   
-    print 'Plotting image plane output'
-    plotPX(velo, i, target4, crop=None, show=True)
+span=[0,-1]
+im1=tl.getImageObj(0)
 
+for i in range(tl.getLength()-1)[span[0]:span[1]]:
+    for vel in outputV:
+        im0=im1
+        im1=tl.getImageObj(i+1)
+        plotVelocity(vel,im0,im1,cameraenvironment,demred,lims,None,
+                     plotcams,plotcombined,plotspeed,plotmaps)
 
-    #Plot xyz velocity points on dem  
-    print 'Plotting XYZ output'
-    plotXYZ(velo, i, target4, crop=cr1, show=True, dem=True)
+for vel in outputV:
+    xy1 = vel[0][0]
+    xy2 = vel[0][1]
+    method='linear'
 
-                
-    #Plot interpolation map
-    print 'Plotting interpolation map'
-    grid, pointsextent = interpolateHelper(velo, i, method)
-    plotInterpolate(velo, i, grid, pointsextent, show=True, save=target4, 
-                    crop=cr1)                        
-
-
-#--------   Example exporting raster grid of velocities as ASCII file   -------
-
-#The text files generated here are ascii-formatted. These are recognised by
-#many mapping software, such as ArcGIS and QGIS, and imported to create raster
-#surfaces
-
-print '\n\nWRITING ASCII FILES'
-
-#Set destination for file outputs
-target5 = destination + 'asciifiles/'
-if not os.path.exists(target5):
-    os.makedirs(target5)
-
-#Cycle through velocity data from image pairs   
-for i in range(velo.getLength()-1): 
+    grid, pointsextent = interpolateHelper(xy1,xy2,method,filt=False)
+    fgrid, fpointsextent = interpolateHelper(xy1,xy2,method,filt=True)
     
-    #Interpolate velocity points to grid
-    grid, pointsextent = interpolateHelper(velo, i, method)
-    
-    #Change all the nans to -999.999 and flip the y axis
-    grid[np.isnan(grid)] = -999.999     
-    grid = np.flipud(grid)  
+    print 'Plotting unfiltered velocity map...'
+    plotInterpolate(demred, lims, grid, pointsextent, 
+                    save=destination+'interp1.jpg')
+                    
+    print 'Plotting filtered velocity map...'
+    plotInterpolate(demred, lims, fgrid, fpointsextent, 
+                    save=destination+'interp2.jpg')    
 
-    
-    #Open the fileName file with write permissions
-    imn=velo._imageSet[i].getImagePath().split('\\')[1]
-    afile = open(target5 + imn + '_interpmap.txt','w')
-    print '\nWriting file: ' + target5 + imn + '_interpmap.txt'
-    
-    #Make a list for each raster header variable, with the label and value
-    col = ["ncols", str(grid.shape[1])]
-    row = ["nrows", str(grid.shape[0])]
-    x = ["xllcorner", str(pointsextent[0])]
-    y = ["yllcorner", str(pointsextent[2])]
-    cell = ["cellsize", str(10.)]
-    nd = ["NODATA_value", str(-999.999)]
-    
-    #Write each header line on a new line of the file
-    header = [col,row,x,y,cell,nd]       
-    for i in header:
-        afile.write(" ".join(i) + "\n")
-    
-    #Iterate through each row and column value
-    for i in range(grid.shape[0]): 
-        for j in range(grid.shape[1]):
-            
-            #Write each data value to the row, separated by spaces
-            afile.write(str(grid[i,j]) + " ")
-            
-        #New line at end of row
-        afile.write("\n")
-    
-    #Close file
-    afile.close() 
+
+#---------------------------  Export data   -----------------------------------
+
+print '\nBeginning file exporting...'
+
+#Write homography data to .csv file
+target1 = destination + 'homography.csv'
+writeHomographyFile(hg,tl,target1)
+
+#Write out velocity data to .csv file
+target2 = destination + 'velo_output.csv'
+writeVelocityFile(outputV, tl, target2) 
 
 
 #------------------------------------------------------------------------------
-print '\nFinished'
+print 'Finished'
