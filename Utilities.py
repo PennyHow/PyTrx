@@ -205,7 +205,7 @@ def plotPX(a, number, dest=None, crop=None, show=True):
         ax1.plot(xar,yar,color='black')
   
     else:
-        print '\nUnrecognised Area/Line class object'
+        print '\nUnrecognised Velocity/Area/Line class object'
         sys.exit(1)
      
     #Save figure
@@ -332,7 +332,7 @@ def plotXYZ(a, number, dest=None, crop=None, show=True, dem=True):
         plt.colorbar(xyzplt, ax=ax1)
             
     else:
-        print '\nUnrecognised Area/Line class object'
+        print '\nUnrecognised Velocity/Area/Line class object'
         sys.exit(1)
     
     #Save figure
