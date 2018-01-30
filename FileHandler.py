@@ -157,8 +157,8 @@ def readMask(img, writeMask=None):
     myMask=np.array(img1)
     
     #Write to .jpg file
-    writeMask = writeMask.split('.')[0] + '.jpg'
-    print '\nMask plotted: ' + writeMask
+    nameMask = writeMask.split('.')[0] + '.jpg'
+    print '\nMask plotted: ' + nameMask
     if writeMask!=None:
         try:
             img1.save(writeMask, 'jpeg', quality=75)
