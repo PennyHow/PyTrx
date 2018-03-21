@@ -12,7 +12,7 @@ These scripts have not yet been published, but PyTrx has been used for data proc
 
 Please use these citations if you are using PyTrx in publishing articles. <br>
 <hr>
-Each script contains classes and functions for handling each aspect needed for photogrammetric processing:<br>
+Each script contains classes and functions for handling each aspect needed for photogrammetric processing:<br><br>
 
 <b>CamEnv.py</b><br>
 Handles the associated data with the camera environment.<br>
