@@ -8,7 +8,9 @@ These scripts have not yet been published, but PyTrx has been used for data proc
 
 <b>How (2018)</b> Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br>
 
-<b>How et al. (In prep.)</b> Calving controlled by melt-undercutting: detailed mechanisms revealed through time-lapse observations. <i>Annals of Glaciology</i><br>
+<b>How et al. (In Review)</b> Calving controlled by melt-undercutting: detailed mechanisms revealed through time-lapse observations. <i>Annals of Glaciology</i><br>
+
+<b>How et al. (In Prep.)</b> PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. <i>Computers & Geosciences</i><br>
 
 Please use these citations if you are using PyTrx in publishing articles. <br>
 <hr>
