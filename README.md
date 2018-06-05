@@ -41,4 +41,15 @@ The <b>Area</b> class performs automated and manual detection of surface areas f
 The <b>Line</b> class performs manual detection of lines from imagery (e.g. glacier terminus position) and georectifies lines to real-world coordinates. <br>
 
 <b><u>Utilities.py</b></u><br>
-This module contains a set of functions for plotting and interpolating data.
+This module contains a set of functions for plotting and interpolating data.<br>
+<hr>
+
+PyTrx requires the following key Python packages: <br>
+OpenCV (v3.1.0):<br>
+Osgeo (v1.1.4):<br>
+GDAL (v1.1.4):<br>
+
+Other packages: NumPy, PIL, operator, Matplotlib, scipy, glob, os, sys, datetime, imghdr, pylab, math
+
+
+
