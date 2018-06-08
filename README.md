@@ -7,16 +7,16 @@ PyTrx is an object-oriented toolbox created for the purpose of calculating real-
 We are happy for others to use and adapt PyTrx for their own processing needs. If you use PyTrx for scientific papers, please cite some of our previous work which is listed below: <br>
 
 <b>*PyTrx methods paper*</b><br>
-<b>How et al. (In Prep.)</b> PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. <i>Computers & Geosciences</i> <br>
+How et al. (In Prep.) PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. <i>Computers & Geosciences</i> <br>
 
 <b>*PyTrx used for detection of supraglacial lakes and meltwater plumes*</b><br>
-<b>How et al. (2017)</b> Rapidly changing subglacial hydrological pathways at a tidewater glacier revealed through simultaneous observations of water pressure, supraglacial lakes, meltwater plumes and surface velocities. <i>The Cryosphere</i> 11, 2691-2710, <a href="https://doi.org/10.5194/tc-11-2691-2017">doi:10.5194/tc-11-2691-2017</a><br>
+How et al. (2017) Rapidly changing subglacial hydrological pathways at a tidewater glacier revealed through simultaneous observations of water pressure, supraglacial lakes, meltwater plumes and surface velocities. <i>The Cryosphere</i> 11, 2691-2710, <a href="https://doi.org/10.5194/tc-11-2691-2017">doi:10.5194/tc-11-2691-2017</a><br>
 
 <b>*PyTrx used for georectification of point locations*</b><br>
-<b>How et al. (In Review)</b> Calving controlled by melt-undercutting: detailed mechanisms revealed through time-lapse observations. <i>Annals of Glaciology</i><br>
+How et al. (In Review) Calving controlled by melt-undercutting: detailed mechanisms revealed through time-lapse observations. <i>Annals of Glaciology</i><br>
 
 <b>*PhD thesis, from which PyTrx was primarily developed*</b><br>
-<b>How (2018)</b> Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br>
+How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br>
 
 <hr>
 <h3>Ingredients</h3>
