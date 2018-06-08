@@ -47,23 +47,9 @@ This module contains a set of functions for plotting and interpolating data.<br>
 PyTrx requires the following key Python packages in order to run: <br>
 <b>OpenCV (v3.1.0):</b> <a href="https://opencv.org/releases.html">opencv.org</a><br>
 <b>GDAL (v1.1.4):</b> <a href="http://www.gisinternals.com/archive.php">gisinternals.com</a><br>
-These packages may not necessarily be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to download them from the given links. It is important to have these package versions as others may not be compatible with PyTrx. <br>
+<b>Pillow (PIL) (v1.1.7):</b> <a href="http://www.pythonware.com/products/pil/">pythonware.com</a><br>
+<b>OsGeo (v1.1.4):</b> Often comes with distributions of GDAL<br>
+These packages may not necessarily be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to download them from the given links. It is important to have these specific package versions as we cannot guarantee that all others are compatible with PyTrx. Please contact us if you are having major problems with package compatibility. <br>
 
-PyTrx also needs other packages, which are commonly included with distributions of Python. The versions listed below refer to those that PyTrx has been tested with, but compatibility with other versions is highly likely: <br> 
-OsGeo (v1.1.4) <br>
-PIL
-Glob
-Imghdr
-Datetime
-
-NumPy (v1.11.1)
-operator
-Matplotlib (v1.1.5)
-Scipy (v0.17.1)
-Os
-Sys
-Pylab (v1.11.4)
-Math
-
-
-
+PyTrx also needs other packages, which are commonly included with distributions of Python. Compatibility with all versions of these packages are highly likely: <br> 
+datetime, glob, imghdr, math, Matplotlib, NumPy, operator, os, PyLab, SciPy, struct, sys
