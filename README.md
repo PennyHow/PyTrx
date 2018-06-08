@@ -14,7 +14,7 @@ How et al. (In Prep.) PyTrx: A Python toolbox for deriving velocities, surface a
 <b>*PyTrx used for detection of supraglacial lakes and meltwater plumes*</b><br>
 How et al. (2017) Rapidly changing subglacial hydrological pathways at a tidewater glacier revealed through simultaneous observations of water pressure, supraglacial lakes, meltwater plumes and surface velocities. <i>The Cryosphere</i> 11, 2691-2710, <a href="https://doi.org/10.5194/tc-11-2691-2017">doi:10.5194/tc-11-2691-2017</a><br>
 
-<b>*PyTrx used for georectification of point locations*</b><br>
+<b>*PyTrx used for georectification of glacier calving event locations*</b><br>
 How et al. (In Review) Calving controlled by melt-undercutting: detailed mechanisms revealed through time-lapse observations. <i>Annals of Glaciology</i><br>
 
 <b>*PhD thesis, for which PyTrx was developed primarily*</b><br>
