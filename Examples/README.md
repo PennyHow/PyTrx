@@ -1,6 +1,10 @@
 # Example drivers for PyTrx
 This folder contains example applications of PyTrx. Specifically it contains script drivers and the associated data with these examples. These can easily be adapted to different datasets and applications.<br>
 
+Example image sets distributed with PyTrx were collected as part of CRIOS (Calving Rates and Impact On Sea level), and are used here with permission. Other datasets are included with each of these example image sets, including camera location and pose (yaw, pitch, roll), calibration models, ground control points (GCPs), and Digital Elevation Models (DEMs). The available DEMs have been modified and manipulated from their original form, which are derived from TanDEM-X and the Norwegian Geodetic Survey.<br>
+
+<hr>
+
 <b>driver_autoarea.py</b>
 <br>Example driver for deriving changes in surface area of supraglacial lakes captured from Kronebreen, Svalbard, for a small subset of the 2014 melt season. Regions of interest are automatically detected based on differences in pixel intensity and corrected for image distortion. Previously defined areas can also be imported from file (this can be changed by commenting and uncommenting commands in the "Calculate areas" section). This script uses images from those found in the 'KR5_2014_subset' folder, and camera environment data associated with the text file 'CameraEnvironmentData_KR5_2014.txt.'
 
