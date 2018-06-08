@@ -22,7 +22,7 @@ Example image sets distributed with PyTrx were collected as part of <a href="htt
 <hr>
 <h3>Scripts</h3>
 
-Each script contains classes and functions for handling each aspect needed for photogrammetric processing:<br>
+Detailed documentation is included in the scripts that make up PyTrx. Each script contains classes and functions for handling each aspect needed for photogrammetric processing:<br>
 
 <b>*CamEnv.py*</b><br>
 Handles the associated data with the camera environment.<br>
@@ -50,6 +50,8 @@ The <b>Line</b> class performs manual detection of lines from imagery (e.g. glac
 
 <b>*Utilities.py*</b><br>
 This module contains a set of functions for plotting and interpolating data.<br>
+
+<b>For beginners in programming, it is advised to look at the example drivers and adapt them accordingly for your own use. For experienced programmers... get stuck in.</b><br>
 
 <hr>
 <h3>Requirements</h3>
