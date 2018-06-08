@@ -2,18 +2,25 @@
 PyTrx is an object-oriented toolbox created for the purpose of calculating real-world measurements from oblique images and time-lapse image series. Its primary purpose is to obtain velocities, surface areas, and distances from imagery of glacial environments.<br>
 <hr>
 
-These scripts have not yet been published, but PyTrx has been used for data processing in the following publications: <br>
+<h3>Citations and permissions</h3>
 
+We are happy for others to use and adapt PyTrx for their own processing needs. If you use PyTrx for scientific papers, please cite some of our previous work which is listed below: <br>
+
+<b>*PyTrx methods paper*</b><br>
+<b>How et al. (In Prep.)</b> PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. <i>Computers & Geosciences</i> <br>
+
+<b>*PyTrx used for detection of supraglacial lakes and meltwater plumes*</b><br>
 <b>How et al. (2017)</b> Rapidly changing subglacial hydrological pathways at a tidewater glacier revealed through simultaneous observations of water pressure, supraglacial lakes, meltwater plumes and surface velocities. <i>The Cryosphere</i> 11, 2691-2710, <a href="https://doi.org/10.5194/tc-11-2691-2017">doi:10.5194/tc-11-2691-2017</a><br>
 
-<b>How (2018)</b> Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br>
-
+<b>*PyTrx used for georectification of point locations*</b><br>
 <b>How et al. (In Review)</b> Calving controlled by melt-undercutting: detailed mechanisms revealed through time-lapse observations. <i>Annals of Glaciology</i><br>
 
-<b>How et al. (In Prep.)</b> PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. <i>Computers & Geosciences</i><br>
+<b>*PhD thesis, from which PyTrx was primarily developed*</b><br>
+<b>How (2018)</b> Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br>
 
-Please use these citations if you are using PyTrx in publishing articles. <br>
 <hr>
+<h3>Ingredients</h3>
+
 Each script contains classes and functions for handling each aspect needed for photogrammetric processing:<br><br>
 
 <b>CamEnv.py</b><br>
@@ -42,7 +49,9 @@ The <b>Line</b> class performs manual detection of lines from imagery (e.g. glac
 
 <b><u>Utilities.py</b></u><br>
 This module contains a set of functions for plotting and interpolating data.<br>
+
 <hr>
+<h3>Requirements</h3>
 
 PyTrx requires the following key Python packages in order to run: <br>
 
