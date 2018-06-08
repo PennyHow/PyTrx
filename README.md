@@ -18,6 +18,7 @@ How et al. (In Review) Calving controlled by melt-undercutting: detailed mechani
 <b>*PhD thesis, for which PyTrx was developed primarily*</b><br>
 How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br>
 
+Example image sets distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. Other datasets are included with each of these example image sets, including camera location and pose (yaw, pitch, roll), calibration models, ground control points (GCPs), and Digital Elevation Models (DEMs).    
 <hr>
 <h3>Scripts</h3>
 
