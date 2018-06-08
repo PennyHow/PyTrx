@@ -18,7 +18,7 @@ How et al. (In Review) Calving controlled by melt-undercutting: detailed mechani
 <b>*PhD thesis, for which PyTrx was developed primarily*</b><br>
 How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br>
 
-Example image sets distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. Other datasets are included with each of these example image sets, including camera location and pose (yaw, pitch, roll), calibration models, ground control points (GCPs), and Digital Elevation Models (DEMs).    
+Example image sets distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. Other datasets are included with each of these example image sets, including camera location and pose (yaw, pitch, roll), calibration models, ground control points (GCPs), and Digital Elevation Models (DEMs). The available DEMs have been modified and manipulated from their original form, which are derived from TanDEM-X and the Norwegian Geodetic Survey.
 <hr>
 <h3>Scripts</h3>
 
@@ -49,12 +49,12 @@ The <b>Area</b> class performs automated and manual detection of surface areas f
 The <b>Line</b> class performs manual detection of lines from imagery (e.g. glacier terminus position) and georectifies lines to real-world coordinates. <br>
 
 <b>*Utilities.py*</b><br>
-This module contains a set of functions for plotting and interpolating data.<br>
+This module contains a set of functions for plotting and interpolating data.<br><br>
 
-<b>For beginners in programming, it is advised to look at the example drivers and adapt them accordingly for your own use. For experienced programmers... get stuck in.</b><br>
+<b>For beginners in programming, it is advised to look at the example drivers and adapt them accordingly for your own use. For experienced programmers... get stuck in.</b> Feel free to contact us if you run into major problems or have constructive comments. We will not respond to minor troubleshooting or unconstructive comments. <br>
 
 <hr>
-<h3>Requirements</h3>
+<h3>Set-up and requirements</h3>
 
 PyTrx requires the following key Python packages in order to run: <br>
 
@@ -63,7 +63,7 @@ PyTrx requires the following key Python packages in order to run: <br>
 <b>Pillow (PIL) (v1.1.7):</b> <a href="http://www.pythonware.com/products/pil/">pythonware.com</a><br>
 <b>OsGeo (v1.1.4):</b> Often comes with distributions of GDAL<br>
 
-These packages may not necessarily be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to download them from the given links. It is important to download the package versions specified as we cannot guarantee that all others are compatible with PyTrx. Please contact us if you are having major problems with package compatibility. <br>
+These packages may not necessarily be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to download them from the given links. It is important to download the package versions specified as we cannot guarantee that all others are compatible with PyTrx. <br>
 
 PyTrx also needs other packages, which are commonly included with distributions of Python. Compatibility with all versions of these packages are highly likely: <br> 
 
