@@ -4,7 +4,7 @@ PyTrx is an object-oriented toolbox created for the purpose of calculating real-
 
 <h3>Citations and permissions</h3>
 
-We are happy for others to use and adapt PyTrx for their own processing needs. If you use PyTrx for scientific papers, please cite some of our previous work which is listed below: <br>
+We are happy for others to use and adapt PyTrx for their own processing needs. If you use PyTrx for scientific papers, please cite some of our previous work which is listed below: <br><br>
 
 <b>*PyTrx methods paper*</b><br>
 How et al. (In Prep.) PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. <i>Computers & Geosciences</i> <br>
@@ -16,13 +16,13 @@ How et al. (2017) Rapidly changing subglacial hydrological pathways at a tidewat
 How et al. (In Review) Calving controlled by melt-undercutting: detailed mechanisms revealed through time-lapse observations. <i>Annals of Glaciology</i><br>
 
 <b>*PhD thesis, for which PyTrx was developed primarily*</b><br>
-How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br>
+How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br><br>
 
 Example image sets distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. Other datasets are included with each of these example image sets, including camera location and pose (yaw, pitch, roll), calibration models, ground control points (GCPs), and Digital Elevation Models (DEMs). The available DEMs have been modified and manipulated from their original form, which are derived from TanDEM-X and the Norwegian Geodetic Survey.
 <hr>
 <h3>Scripts</h3>
 
-Detailed documentation is included in the scripts that make up PyTrx. Each script contains classes and functions for handling each aspect needed for photogrammetric processing:<br>
+Detailed documentation is included in the scripts that make up PyTrx. Each script contains classes and functions for handling each aspect needed for photogrammetric processing:<br><br>
 
 <b>*CamEnv.py*</b><br>
 Handles the associated data with the camera environment.<br>
