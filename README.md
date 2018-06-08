@@ -44,12 +44,26 @@ The <b>Line</b> class performs manual detection of lines from imagery (e.g. glac
 This module contains a set of functions for plotting and interpolating data.<br>
 <hr>
 
-PyTrx requires the following key Python packages: <br>
-OpenCV (v3.1.0):<br>
-Osgeo (v1.1.4):<br>
-GDAL (v1.1.4):<br>
+PyTrx requires the following key Python packages in order to run: <br>
+<b>OpenCV (v3.1.0):</b> <a href="https://opencv.org/releases.html">opencv.org</a><br>
+<b>GDAL (v1.1.4):</b> <a href="http://www.gisinternals.com/archive.php">gisinternals.com</a><br>
+These packages may not necessarily be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to download them from the given links. It is important to have these package versions as others may not be compatible with PyTrx. <br>
 
-Other packages: NumPy, PIL, operator, Matplotlib, scipy, glob, os, sys, datetime, imghdr, pylab, math
+PyTrx also needs other packages, which are commonly included with distributions of Python. The versions listed below refer to those that PyTrx has been tested with, but compatibility with other versions is highly likely: <br> 
+OsGeo (v1.1.4) <br>
+PIL
+Glob
+Imghdr
+Datetime
+
+NumPy (v1.11.1)
+operator
+Matplotlib (v1.1.5)
+Scipy (v0.17.1)
+Os
+Sys
+Pylab (v1.11.4)
+Math
 
 
 
