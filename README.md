@@ -19,9 +19,9 @@ How et al. (In Review) Calving controlled by melt-undercutting: detailed mechani
 How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br>
 
 <hr>
-<h3>Ingredients</h3>
+<h3>Scripts</h3>
 
-Each script contains classes and functions for handling each aspect needed for photogrammetric processing:<br><br>
+Each script contains classes and functions for handling each aspect needed for photogrammetric processing:<br>
 
 <b>CamEnv.py</b><br>
 Handles the associated data with the camera environment.<br>
