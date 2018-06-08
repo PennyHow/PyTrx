@@ -51,7 +51,7 @@ The <b>Line</b> class performs manual detection of lines from imagery (e.g. glac
 <b>*Utilities.py*</b><br>
 This module contains a set of functions for plotting and interpolating data.<br><br>
 
-<b>For beginners in programming, it is advised to look at the example drivers and adapt them accordingly for your own use. For experienced programmers... get stuck in.</b> Feel free to contact us if you run into major problems or have constructive comments. We will not respond to minor troubleshooting or unconstructive comments. <br>
+<b>For beginners in programming, it is advised to look at the example drivers and adapt them accordingly for your own use. For experienced programmers... get stuck in.</b> Feel free to contact us if you run into major problems or have constructive comments that will help us further PyTrx and its capabilities. We will not respond to minor troubleshooting or unconstructive comments. <br>
 
 <hr>
 <h3>Set-up and requirements</h3>
