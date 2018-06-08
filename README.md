@@ -48,7 +48,7 @@ The <b>Velocity</b> class enables processing with an ImageSequence object. Camer
 The <b>Area</b> class performs automated and manual detection of surface areas from imagery and georectifies polygons to real-world coordinates.<br>
 The <b>Line</b> class performs manual detection of lines from imagery (e.g. glacier terminus position) and georectifies lines to real-world coordinates. <br>
 
-<b><u>Utilities.py</b></u><br>
+<b>*Utilities.py*</b><br>
 This module contains a set of functions for plotting and interpolating data.<br>
 
 <hr>
