@@ -6,7 +6,7 @@ This folder contains example applications of PyTrx. Specifically it contains scr
 <h3>Data provided with PyTrx</h3>
 
 <b>*Image sets*</b><br>
-Example image sets distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. <br><br>
+Example image sets distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. <br>
 
 <b>*Digital Elevation Models (DEMs)*</b><br>
 <b>*1. Kongsfjorden DEMs*</b><br>
