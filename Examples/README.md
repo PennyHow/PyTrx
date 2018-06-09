@@ -1,7 +1,17 @@
 # Example applications of PyTrx
 This folder contains example applications of PyTrx. Specifically it contains script drivers and the associated data with these examples. These can easily be adapted to different datasets and applications.<br>
 
-Example image sets distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. Other datasets are included with each of these example image sets, including camera location and pose (yaw, pitch, roll), calibration models, ground control points (GCPs), and Digital Elevation Models (DEMs). The available DEMs have been modified and manipulated from their original form, which are derived from TanDEM-X and the Norwegian Geodetic Survey.<br>
+<hr>
+
+Example image sets distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. Other data are included with each of these example image sets, including camera location and pose (yaw, pitch, roll), Digital Elevation Models (DEMs), calibration models, and ground control points (GCPs). <br>
+
+The DEM of the Kongsfjorden area distributed here orginates from a freely available dataset provided by the <a href="https://geodata.npolar.no/">Norwegian Geodetic Survey</a> (data product 'S0 Terrengmodell'), licensed under the <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0) license</a>:<br>
+
+Norwegian Polar Institute (2014). Terrengmodell Svalbard (S0 Terrengmodell) [Data set]. Norwegian Polar Institute. https://doi.org/10.21334/npolar.2014.dce53a47
+
+and distributed here in a modified and manipulated form with permission. 
+
+The DEM of the Tempelfjorden area is freely available from <a href="">ArcticDEM</a>, and distributed here in a modified and manipulated form. The DEM was created from DigitalGlobe, Inc., imagery and funded under National Science Foundation awards 1043681, 1559691, and 1542736. Refer to the readme document in the Examples folder of this repository for more information on the DEMs provided and distributed with PyTrx.
 
 <hr>
 
