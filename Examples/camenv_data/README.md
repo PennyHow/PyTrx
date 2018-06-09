@@ -1,13 +1,22 @@
 # Camera Environment data for PyTrx examples
-This folder contains the camera environment data needed in order to run the examples provided with PyTrx.<br>
+This folder contains the camera environment data needed to run the examples provided with PyTrx.<br>
 
-<b>*Camera calibration files (calib)*</b><br>
-Matlab Camera Calibration toolbox. <br>
+<hr>
 
-<b>*Camera Environment text files (camenv)*</b><br>
-Text files for mapping the data to construct the camera environment. <br>
+<h3>Camera calibration files (calib)</h3><br>
+Text files.
+Matlab Camera Calibration toolbox.
+Three Kronebreen cameras (KR1, KR2 and KR5) all derived for imagery collected in 2014, with 4 calibrations performed. PyTrx will take these files and take an average of these repeated calibrations. 
+One Tunabreen camera (TU2) derived for imagery collected in 2015. <br>
 
-<b>*Digital elevation models (dem)*</b><br>
+<hr>
+
+<h3>Camera Environment text files (camenv)</h3><br>
+Text files for mapping the data to construct the camera environment. KR1, KR2 and KR5 for Kronebreen, and TU2 for Tunabreen. <br>
+
+<hr>
+
+<h3>Digital elevation models (dem)</h3><br>
 DEMs for georectification. <br>
 
 <b>*1. Kongsfjorden DEMs*</b><br>
@@ -22,14 +31,22 @@ The DEM of the Tempelfjorden area provided as an example dataset for PyTrx origi
 
 The DEM distributed with PyTrx of the Tempelfjorden region is called 'TU_demzero.tif', which has been modified and manipulated from the original ArcticDEM data. The scene has been clipped to the area of interest, downgraded to 20 metre resolution, and all low-lying elevations (< 150 m) have been transformed to 0 m a.s.l. in order to project point locations and line profiles to a flat, homogeneous surface at sea level. <br>
 
-<b>*Ground control points (gcps)*</b><br>
+<hr>
+
+<h3>Ground control points (gcps)</h3><br>
 Ground control points corresponding to image positions and real-world coordinates. <br>
 
-<b>*Image registration masks (invmasks)*</b><br>
+<hr>
+
+<h3>Image registration masks (invmasks)</h3><br>
 Masks for tracking static features in order to perform image registration. <br>
 
-<b>*Feature-tracking masks (masks)*</b><br>
+<hr>
+
+<h3>Feature-tracking masks (masks)</h3><br>
 Masks for tracking moving features in order to perform feature-tracking and derive velocities. <br>
 
-<b>*Reference Images (refimages)*</b><br>
+<hr>
+
+<h3>Reference Images (refimages)</h3><br>
 Reference images from which image-based GCPs are derived from. <br>
