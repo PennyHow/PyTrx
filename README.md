@@ -36,7 +36,7 @@ The DEM of the Tempelfjorden area provided as an example dataset for PyTrx origi
 Refer to the readme document in the Examples folder of this repository for more information on the DEMs provided and distributed with PyTrx.<br>
 
 <hr>
-<h3>Scripts</h3>
+<h3>PyTrx scripts</h3>
 
 Detailed documentation is included in the scripts that make up PyTrx. Each script contains classes and functions for handling each aspect needed for photogrammetric processing:<br><br>
 
@@ -70,7 +70,7 @@ This module contains a set of functions for plotting and interpolating data.<br>
 <b>For beginners in programming, it is advised to look at the example applications provided and adapt them accordingly for your own use. For experienced programmers... get stuck in. Feel free to contact us if you run into major problems or have constructive comments that will help us further PyTrx and its capabilities. We will not respond to minor troubleshooting or unconstructive comments.</b><br>
 
 <hr>
-<h3>Set-up and requirements</h3>
+<h3>PyTrx set-up and requirements</h3>
 
 PyTrx requires the following key Python packages in order to run: <br><br>
 
@@ -82,3 +82,5 @@ PyTrx requires the following key Python packages in order to run: <br><br>
 These packages may not necessarily be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to download them from the given links. It is important to download the package versions specified as we cannot guarantee that all others are compatible with PyTrx. <br>
 
 PyTrx also needs other packages, which are commonly included with distributions of Python. Compatibility with all versions of these packages are highly likely: <b>datetime</b>, <b>glob</b>, <b>imghdr</b>, <b>math</b>, <b>Matplotlib</b>, <b>NumPy</b>, <b>operator</b>, <b>os</b>, <b>PyLab</b>, <b>SciPy</b>, <b>struct</b>, and <b>sys</b> <br>
+
+We plan on releasing full documentation and instructions on setting up PyTrx and processing simple datasets in due course. <br>
