@@ -3,7 +3,7 @@ This folder contains the camera environment data needed to run the examples prov
 
 <hr>
 
-<h3>Camera calibration files (calib)</h3>
+<h3>Camera calibration files *(calib)*</h3>
 Text files.
 Matlab Camera Calibration toolbox.
 Three Kronebreen cameras (KR1, KR2 and KR5) all derived for imagery collected in 2014, with 4 calibrations performed. PyTrx will take these files and take an average of these repeated calibrations. 
@@ -11,12 +11,12 @@ One Tunabreen camera (TU2) derived for imagery collected in 2015. <br>
 
 <hr>
 
-<h3>Camera Environment text files (camenv)</h3>
+<h3>Camera Environment text files *(camenv)*</h3>
 Text files for mapping the data to construct the camera environment. KR1, KR2 and KR5 for Kronebreen, and TU2 for Tunabreen. <br>
 
 <hr>
 
-<h3>Digital elevation models (dem)</h3>
+<h3>Digital elevation models *(dem)*</h3>
 DEMs for georectification. <br>
 
 <b>*1. Kongsfjorden DEMs*</b>
@@ -33,20 +33,20 @@ The DEM distributed with PyTrx of the Tempelfjorden region is called 'TU_demzero
 
 <hr>
 
-<h3>Ground control points (gcps)</h3>
+<h3>Ground control points *(gcps)*</h3>
 Ground control points corresponding to image positions and real-world coordinates. For the three Kronebreen cameras and Tunabreen camera. Text files are columns for XYZ coordinates, and the XY pixel coordinates. <br>
 
 <hr>
 
-<h3>Image registration masks (invmasks)</h3>
+<h3>Image registration masks *(invmasks)*</h3>
 Masks for tracking static features in order to perform image registration (KR2). <br>
 
 <hr>
 
-<h3>Feature-tracking masks (masks)</h3>
+<h3>Feature-tracking masks *(masks)*</h3>
 Masks for tracking moving features in order to perform feature-tracking and derive velocities (KR2), and for masking areas of interest (KR5). <br>
 
 <hr>
 
-<h3>Reference Images (refimages)</h3>
+<h3>Reference Images *(refimages)*</h3>
 Reference images from which image-based GCPs are derived from for the three Kronebreen cameras, and the Tunabreen camera. <br>
