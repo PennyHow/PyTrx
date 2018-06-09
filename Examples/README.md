@@ -3,7 +3,7 @@ This folder contains example applications of PyTrx. Specifically it contains scr
 
 <hr>
 
-<h3>Data provided with PyTrx</h3><br>
+<h3>Data provided with PyTrx</h3>
 
 <b>*Image sets*</b><br>
 Example image sets distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. <br><br>
@@ -23,7 +23,7 @@ The DEM distributed with PyTrx of the Tempelfjorden region is called 'TU_demzero
 
 <hr>
 
-<h3>Example driver scripts provided with PyTrx</h3><br>
+<h3>Example driver scripts provided with PyTrx</h3>
 
 <b>*driver_autoarea.py*</b>
 <br>Example driver for deriving changes in surface area of supraglacial lakes captured from Kronebreen, Svalbard, for a small subset of the 2014 melt season. Regions of interest are automatically detected based on differences in pixel intensity and corrected for image distortion. Previously defined areas can also be imported from file (this can be changed by commenting and uncommenting commands in the "Calculate areas" section). This script uses images from those found in the 'KR5_2014_subset' folder, and camera environment data associated with the text file 'CameraEnvironmentData_KR5_2014.txt.'<br>
