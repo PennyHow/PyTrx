@@ -20,7 +20,9 @@ How et al. (In Review) Calving controlled by melt-undercutting: detailed mechani
 <b>*PhD thesis, for which PyTrx was developed primarily*</b><br>
 How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br><br>
 
-Example image sets distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. Other data are included with each of these example image sets, including camera location and pose (yaw, pitch, roll), a Digital Elevation Model (DEM), calibration models, and ground control points (GCPs). The DEM has been modified and manipulated from its original form, which is freely available from the <a href="https://geodata.npolar.no/">Norwegian Geodetic Survey</a>.
+Example image sets distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. Other data are included with each of these example image sets, including camera location and pose (yaw, pitch, roll), Digital Elevation Models (DEMs), calibration models, and ground control points (GCPs). <br>
+
+The DEM of the Kongsfjorden area is freely available from the <a href="https://geodata.npolar.no/">Norwegian Geodetic Survey</a>, and distributed here in a modified and manipulated form with permission. The DEM of the Tempelfjorden area is freely available from the <a href="">ArcticDEM</a>, and distributed here in a modified and manipulated form. The DEM was created from DigitalGlobe, Inc., imagery and funded under National Science Foundation awards 1043681, 1559691, and 1542736. Refer to the readme document in the Examples folder of this repository for more information on the DEMs provided and distributed with PyTrx.
 <hr>
 <h3>Scripts</h3>
 
