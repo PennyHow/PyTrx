@@ -21,7 +21,7 @@ How et al. (In Review) Calving controlled by melt-undercutting: detailed mechani
 <b>*PhD thesis, for which PyTrx was developed primarily*</b><br>
 How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br>
 
-<b>*MSc thesis, where PyTrx was initially formed*</b><br>
+<b>*MSc thesis, where PyTrx was created in its earliest form*</b><br>
 Addison (2015) PyTrx: feature tracking software for automated production of glacier velocity. MSc thesis, University of Edinburgh, UK.<br>
 
 <hr>
