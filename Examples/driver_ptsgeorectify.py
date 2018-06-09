@@ -87,8 +87,10 @@ tu2_xy=np.array(tu2_xy)
 
 
 #Define camera environment
-tu2cam = CamEnv(tu2camenv)                              
+tu2cam = CamEnv(tu2camenv)
 
+#Show GCPs                           
+tu2cam.showGCPs()                        
 
 #Inverse project image coordinates using function from CamEnv object                       
 tu2_xyz = tu2cam.invproject(tu2_xy)

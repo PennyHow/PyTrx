@@ -56,7 +56,7 @@ terminus = Line(camimgs, cam)
 #Choose action "plot", "importtxt" or "importshp". Plot proceeds with the 
 #manual  definition of terminus lines, importtxt imports line data from text 
 #files, and  importshp imports line data from shape file (.shp)
-action = 'importtxt'      
+action = 'plot'      
 
 
 #Manually define lines from imagery

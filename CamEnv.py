@@ -810,7 +810,7 @@ class CamEnv(CamCalib):
         imgplot = plt.imshow(self._refImage.getImageArray(), origin='lower')
         imgplot.set_cmap('gray')
         plt.gca().invert_yaxis()
-        plt.scatter(imgcp[:,0], imgcp[:,1], color='yellow')
+        plt.scatter(imgcp[:,0], imgcp[:,1], color='red')
         plt.suptitle('Image showing location of ' + str(self._name) + ' GCPs', 
                     fontsize=14, y=0.9)
         
@@ -823,7 +823,7 @@ class CamEnv(CamCalib):
         imgplot = plt.imshow(demred, origin='lower', 
                              extent=[lims[0],lims[1],lims[2],lims[3]])
         imgplot.set_cmap('gray')
-        plt.scatter(worldgcp[:,0], worldgcp[:,1], color='yellow')
+        plt.scatter(worldgcp[:,0], worldgcp[:,1], color='red')
         plt.scatter(self._camloc[0], self._camloc[1], color='blue')
         plt.suptitle('DEM showing location of ' + str(self._name) + 
                      ' GCPs', fontsize=14)
