@@ -6,12 +6,11 @@ Authors: Dr. Penelope How (p.how@ed.ac.uk), Dr. Nick Hulton, and Lynne Buie<br>
 
 <h3>PyTrx citations</h3>
 
-We are happy for others to use and adapt PyTrx for their own processing needs. Please refer to the following publication and cite it where possible:<br>
+We are happy for others to use and adapt PyTrx for their own processing needs. Please refer to the following key publication and cite it where possible:<br>
 
-<b>*PyTrx methods paper (also contains additional documentation)*</b><br>
-How et al. (In Prep.) PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. <i>Computers & Geosciences</i> <br>
+<b>How et al. (In Prep.) PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. <i>Computers & Geosciences</i></b> <br>
 
-If you use PyTrx for scientific papers, please cite some of our previous work which is listed below: <br><br>
+If you use PyTrx for scientific papers, please cite some of our previous work which is listed below: <br>
 
 <b>*PyTrx used for detection of supraglacial lakes and meltwater plumes*</b><br>
 How et al. (2017) Rapidly changing subglacial hydrological pathways at a tidewater glacier revealed through simultaneous observations of water pressure, supraglacial lakes, meltwater plumes and surface velocities. <i>The Cryosphere</i> 11, 2691-2710, <a href="https://doi.org/10.5194/tc-11-2691-2017">doi:10.5194/tc-11-2691-2017</a><br>
