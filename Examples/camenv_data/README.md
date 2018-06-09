@@ -12,7 +12,7 @@ One Tunabreen camera (TU2) derived for imagery collected in 2015. <br>
 <hr>
 
 <h3>Camera Environment text files (camenv)</h3>
-Text files for mapping the data to construct the camera environment. KR1, KR2 and KR5 for Kronebreen, and TU2 for Tunabreen. <br>
+Text files for mapping the data associated with constructing the camera environment. KR1, KR2 and KR5 for Kronebreen, and TU2 for Tunabreen. <br>
 
 <hr>
 
