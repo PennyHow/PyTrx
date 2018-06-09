@@ -19,7 +19,7 @@ How et al. (2017) Rapidly changing subglacial hydrological pathways at a tidewat
 How et al. (In Review) Calving controlled by melt-undercutting: detailed mechanisms revealed through time-lapse observations. <i>Annals of Glaciology</i><br>
 
 <b>*PhD thesis, for which PyTrx was developed primarily*</b><br>
-How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br><br>
+How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br>
 
 <b>*MSc thesis, where PyTrx was initially formed*</b><br>
 Addison (2015) PyTrx: feature tracking softward for automated production of glacier velocity. MSc thesis, University of Edinburgh, UK.<br>
