@@ -4,12 +4,14 @@ PyTrx (short for 'Python Tracking') is a Python object-oriented toolbox created 
 Authors: Dr. Penelope How (p.how@ed.ac.uk), Dr. Nick Hulton, and Lynne Buie<br>
 <hr>
 
-<h3>Citations and permissions</h3>
+<h3>PyTrx citations</h3>
 
-We are happy for others to use and adapt PyTrx for their own processing needs. If you use PyTrx for scientific papers, please cite some of our previous work which is listed below: <br><br>
+We are happy for others to use and adapt PyTrx for their own processing needs. Please refer to the following publication and cite it where possible:<br>
 
 <b>*PyTrx methods paper (also contains additional documentation)*</b><br>
 How et al. (In Prep.) PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. <i>Computers & Geosciences</i> <br>
+
+If you use PyTrx for scientific papers, please cite some of our previous work which is listed below: <br><br>
 
 <b>*PyTrx used for detection of supraglacial lakes and meltwater plumes*</b><br>
 How et al. (2017) Rapidly changing subglacial hydrological pathways at a tidewater glacier revealed through simultaneous observations of water pressure, supraglacial lakes, meltwater plumes and surface velocities. <i>The Cryosphere</i> 11, 2691-2710, <a href="https://doi.org/10.5194/tc-11-2691-2017">doi:10.5194/tc-11-2691-2017</a><br>
@@ -20,6 +22,9 @@ How et al. (In Review) Calving controlled by melt-undercutting: detailed mechani
 <b>*PhD thesis, for which PyTrx was developed primarily*</b><br>
 How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br><br>
 
+<hr>
+
+<h3>Permissions</h3>
 Example image sets distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. Other data are included with each of these example image sets, including camera location and pose (yaw, pitch, roll), Digital Elevation Models (DEMs), calibration models, and ground control points (GCPs). <br>
 
 The DEM of the Kongsfjorden area provided as an example dataset for PyTrx originates from the freely available DEM dataset provided by the <a href="https://geodata.npolar.no/">Norwegian Polar Institute</a>, data product 'S0 Terrengmodell - Delmodell_5m_2009_13822_33 (GeoTIFF)'  <a href="https://doi.org/10.21334/npolar.2014.dce53a47">doi:10.21334/npolar.2014.dce53a47</a>. This data is licensed under the <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0) license</a>:<br>
