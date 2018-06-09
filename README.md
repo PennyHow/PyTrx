@@ -10,7 +10,7 @@ We are happy for others to use and adapt PyTrx for their own processing needs. P
 
 <h3>How et al. (In Prep.) PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. Geoscientific Instrumentation, Methods and Data Systems Discussion</h3> <br>
 
-If you use PyTrx for scientific papers, please cite some of our previous work which is listed below: <br>
+If you use PyTrx for scientific papers, please also cite some of our previous work which is listed below: <br>
 
 <b>*PyTrx used for detection of supraglacial lakes and meltwater plumes*</b><br>
 How et al. (2017) Rapidly changing subglacial hydrological pathways at a tidewater glacier revealed through simultaneous observations of water pressure, supraglacial lakes, meltwater plumes and surface velocities. <i>The Cryosphere</i> 11, 2691-2710, <a href="https://doi.org/10.5194/tc-11-2691-2017">doi:10.5194/tc-11-2691-2017</a><br>
@@ -22,7 +22,7 @@ How et al. (In Review) Calving controlled by melt-undercutting: detailed mechani
 How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br>
 
 <b>*MSc thesis, where PyTrx was initially formed*</b><br>
-Addison (2015) PyTrx: feature tracking softward for automated production of glacier velocity. MSc thesis, University of Edinburgh, UK.<br>
+Addison (2015) PyTrx: feature tracking software for automated production of glacier velocity. MSc thesis, University of Edinburgh, UK.<br>
 
 <hr>
 
