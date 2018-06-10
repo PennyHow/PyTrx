@@ -32,6 +32,7 @@ Example image sets distributed with PyTrx were collected as part of <a href="htt
 The DEM of the Kongsfjorden area provided as an example dataset for PyTrx originates from the freely available DEM dataset provided by the <a href="https://geodata.npolar.no/">Norwegian Polar Institute</a>, data product 'S0 Terrengmodell - Delmodell_5m_2009_13822_33 (GeoTIFF)'  <a href="https://doi.org/10.21334/npolar.2014.dce53a47">doi:10.21334/npolar.2014.dce53a47</a>. This data is licensed under the <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0) license</a>.<br><br>
 The DEM of the Tempelfjorden area provided as an example dataset for PyTrx originates from <a href="https://www.pgc.umn.edu/data/arcticdem/">ArcticDEM</a>, Scene ID WV01_20130714_1020010 (July 14, 2013). <a href="https://www.pgc.umn.edu/guides/arcticdem/additional-information/">There is no license for the ArcticDEM data and it can be used and distributed freely</a>. The DEM was created from DigitalGlobe, Inc., imagery and funded under National Science Foundation awards 1043681, 1559691, and 1542736. <br><br>
 Refer to the readme document in the Examples folder of this repository for more information on the DEMs provided and distributed with PyTrx.<br>
+Parts of the georectification functions in the PyTrx toolbox were inspired and translated from <a href="http://imgraft.glaciology.net/>ImGRAFT</a>, an open-source photogrammetry toolbox for MATLAB (<a href="https://www.geosci-instrum-method-data-syst.net/4/23/2015/gi-4-23-2015.pdf">Messerli and Grinsted, 2015</a>). Where possible, ImGRAFT has been credited for in the relevant PyTrx scripts (primarily some passages in the CamEnv.py script). 
 
 <hr>
 <h3>PyTrx scripts</h3>
@@ -68,6 +69,7 @@ This module contains a set of functions for plotting and interpolating data.<br>
 <b>For beginners in programming, it is advised to look at the example applications provided and adapt them accordingly for your own use. For experienced programmers... get stuck in. Feel free to contact us if you run into major problems or have constructive comments that will help us further PyTrx and its capabilities. We will not respond to minor troubleshooting or unconstructive comments.</b><br>
 
 <hr>
+
 <h3>PyTrx set-up and requirements</h3>
 
 PyTrx requires the following key Python packages in order to run: <br><br>
