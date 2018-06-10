@@ -14,6 +14,8 @@ Text files for defining data (camera location and pose) and mapping the relevant
 <hr>
 
 <h3>Digital elevation models (dem)</h3>
+DEMs for defining the camera environment and performing georectification. More details about these DEMs are provided below, as previously outlined in the previous PyTrx README files.  
+
 <b>*1. Kongsfjorden DEMs*</b><br>
 The DEM of the Kongsfjorden area provided as an example dataset for PyTrx orginates from the freely available DEM dataset provided by the <a href="https://geodata.npolar.no/">Norwegian Polar Institute</a>, data product 'S0 Terrengmodell - Delmodell_5m_2009_13822_33 (GeoTIFF)'. This data is licensed under the <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0) license</a>:<br>
 
