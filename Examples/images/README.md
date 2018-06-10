@@ -1,7 +1,7 @@
 # Image sets for PyTrx examples
-This folder contains the camera environment data needed to run the examples provided with PyTrx. The camera numbers and references correspond with those given in the PyTrx methods paper:
+This folder contains the camera environment data needed to run the examples provided with PyTrx. The camera numbers and references correspond with those given in the PyTrx methods paper:<br>
 
-<b>How et al. (In Review) PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. *Geoscientific Instrumentation, Methods and Data Systems Discussion*</b>
+<b>How et al. (In Review) PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. *Geoscientific Instrumentation, Methods and Data Systems Discussion*</b><br>
 
 The example image sets distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. 
 
@@ -21,5 +21,5 @@ Images collected from time-lapse camera site 2 at Kronebreen. This specific sequ
 Images collected from time-lapse camera site 3 at Kronebreen. This specific sequence consists of four images, roughly collected on a daily basis (subject to conditions) between 25th-28th June. This image set is used for deriving areas of supraglacial lakes (driver_autoarea.py).
 <hr>
 
-<h3>Tunabreen image set (TU1_2015_subset)</h3><br>
+<h3>Tunabreen image set (TU1_2015_subset)</h3>
 Images collected from time-lapse camera site 1 at Tunabreen. This specific sequence consists of four images, roughly collected on a daily basis (subject to conditions) between 19th-23rd August. This image set is used for deriving georectified point locations of calving events (driver_ptsgeorectify.py) and sequential terminus profiles (driver_manualline.py). 
