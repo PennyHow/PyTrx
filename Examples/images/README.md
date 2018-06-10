@@ -23,4 +23,5 @@ Images collected from time-lapse camera site 3 at Kronebreen. This specific sequ
 <hr>
 
 <h3>Tunabreen image set (TU1_2015_subset)</h3>
+
 Images collected from time-lapse camera site 1 at Tunabreen. This specific sequence consists of four images, roughly collected on a daily basis (subject to conditions) between 19th-23rd August. This image set is used for deriving georectified point locations of calving events (driver_ptsgeorectify.py) and sequential terminus profiles (driver_manualline.py). 
