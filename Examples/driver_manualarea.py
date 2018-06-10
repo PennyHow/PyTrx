@@ -72,12 +72,12 @@ plumes = Area(camimgs, cameraenvironment, calibFlag, None, maxim, imband,
 #polys, areas = plumes.calcManualExtents()
 
 
-##Calculate real areas
-#rpolys, rareas = plumes.calcManualAreas()
+#Calculate real areas
+rpolys, rareas = plumes.calcManualAreas()
 
 
-#Import areal data from file
-rpolys, rareas, pxpolys, pxareas = importAreaData(plumes, destination)
+##Import areal data from file
+#rpolys, rareas, pxpolys, pxareas = importAreaData(plumes, destination)
 
 
 #----------------------------   Export data   ---------------------------------
