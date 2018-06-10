@@ -14,6 +14,7 @@ and as a shape file (.shp).
 
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton
+         Lynne Buie
 '''
 
 #Import packages
@@ -33,8 +34,8 @@ from CamEnv import CamEnv
 #-----------------------------   Map data files   -----------------------------
 
 #Define data inputs
-tu2camenv='../Examples/camenv_data/camenvs/CameraEnvironmentData_TU2_2015.txt'
-tu2calving = '../Examples/results/ptsgeorectify/TU2_calving_xy.csv'
+tu1camenv='../Examples/camenv_data/camenvs/CameraEnvironmentData_TU1_2015.txt'
+tu1calving = '../Examples/results/ptsgeorectify/TU1_calving_xy.csv'
 
 #Define data output directory
 destination = '../Examples/results/ptsgeorectify/'
@@ -45,7 +46,7 @@ if not os.path.exists(destination):
 #----------------------   Import calving data from file   ---------------------
 
 #Import individual calving event data
-f=file(tu2calving,'r')                              #Read file
+f=file(tu1calving,'r')                              #Read file
 header=f.readline()                                 #Read first line
 h=header.split(',')                                 #Split first line
 for name in h:
@@ -79,22 +80,22 @@ for line in alllines:
 #--------------------------   Georectify points   -----------------------------
         
 #Compile xy locations
-tu2_xy=[] 
+tu1_xy=[] 
 for a,b in zip(loc_x,loc_y):
-    tu2_xy.append([a,b])
-print '\n\n' + str(len(tu2_xy)) + ' locations for calving events detected'
-tu2_xy=np.array(tu2_xy)
+    tu1_xy.append([a,b])
+print '\n\n' + str(len(tu1_xy)) + ' locations for calving events detected'
+tu1_xy=np.array(tu1_xy)
 
 
 #Define camera environment
-tu2cam = CamEnv(tu2camenv)
+tu1cam = CamEnv(tu1camenv)
 
 #Show GCPs                           
-tu2cam.showGCPs()                        
+tu1cam.showGCPs()                        
 
 #Inverse project image coordinates using function from CamEnv object                       
-tu2_xyz = tu2cam.invproject(tu2_xy)
-print '\n\n' + str(len(tu2_xyz)) + ' locations for calving events georectified'
+tu1_xyz = tu1cam.invproject(tu1_xy)
+print '\n\n' + str(len(tu1_xyz)) + ' locations for calving events georectified'
 
 
 #-----------------------   Plot xyz location on DEM   -------------------------
@@ -108,18 +109,18 @@ show=True                          #Show plot?
 
         
 #Retrieve DEM from CamEnv object
-demobj=tu2cam.getDEM()
+demobj=tu1cam.getDEM()
 demextent=demobj.getExtent()
 dem=demobj.getZ()
 
    
 #Get camera position (xyz) from CamEnv object
-post = tu2cam._camloc            
+post = tu1cam._camloc            
  
    
 #Plot DEM 
 fig,(ax1) = plt.subplots(1, figsize=(15,15))
-fig.canvas.set_window_title('TU2 calving event locations')
+fig.canvas.set_window_title('TU1 calving event locations')
 ax1.locator_params(axis = 'x', nbins=8)
 ax1.tick_params(axis='both', which='major', labelsize=0)
 ax1.imshow(dem, origin='lower', extent=demextent, cmap='gray')
@@ -130,7 +131,7 @@ cloc = ax1.scatter(post[0], post[1], c='g', s=100, label='Camera location')
 #Plot calving locations on DEM
 xr=[]
 yr=[]               
-for pt in tu2_xyz: 
+for pt in tu1_xyz: 
     xr.append(pt[0])                                #Separate x values
     yr.append(pt[1])                                #Separate y values
 
@@ -203,7 +204,7 @@ ax1.legend(handles=[p2,p4,p3,p1,p5,p6,cloc],
 
 #Save plot if flag is True
 if save is True:
-    plt.savefig(destination + 'TU2_calving_xyz.JPG', dpi=300) 
+    plt.savefig(destination + 'TU1_calving_xyz.JPG', dpi=300) 
 
 
 #Show plot if flag is True    
@@ -220,10 +221,10 @@ print '\n\nSAVING TEXT FILE'
 
 
 #Write xyz coordinates to .txt file
-target1 = destination + 'TU2_calving_xyz.txt'
+target1 = destination + 'TU1_calving_xyz.txt'
 f = open(target1, 'w')
 f.write('x' + '\t' + 'y' + '\t' + 'z' + '\n')
-for i in tu2_xyz:
+for i in tu1_xyz:
     f.write(str(i[0]) + '\t' + str(i[1]) + '\t' + str(i[2]) + '\n')                                  
 f.close()
 
@@ -241,7 +242,7 @@ if driver is None:
 
 
 #Create data source
-shp = destination + 'tu2_calving.shp'   
+shp = destination + 'tu1_calving.shp'   
 if os.path.exists(shp):
     driver.DeleteDataSource(shp)
 ds = driver.CreateDataSource(shp)
@@ -255,7 +256,7 @@ proj.ImportFromEPSG(32633)
 
 
 #Create layer in data source
-layer = ds.CreateLayer('tu2_calving', proj, ogr.wkbPoint)
+layer = ds.CreateLayer('tu1_calving', proj, ogr.wkbPoint)
   
   
 #Add attributes to layer
@@ -270,7 +271,7 @@ layer.CreateField(field_style)                              #Calving size
  
   
 #Create point features with data attributes in layer           
-for a,b,c,d in zip(tu2_xyz, time, region, style):
+for a,b,c,d in zip(tu1_xyz, time, region, style):
     count=1
 
     #Create feature    

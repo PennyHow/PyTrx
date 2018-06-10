@@ -35,7 +35,7 @@ arrowplot:                      Function to plot arrows to denote the direction
              
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton 
-         Lynne Addison
+         Lynne Buie
 '''
 
 #Import packages

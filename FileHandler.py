@@ -89,7 +89,7 @@ importLineData:         Function to get xyz and px line data from text files
                         
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton 
-         Lynne Addison
+         Lynne Buie
 '''
 
 #Import packages

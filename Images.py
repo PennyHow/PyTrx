@@ -39,7 +39,7 @@ getLength():                    Return length of image set.
 
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton 
-         Lynne Addison
+         Lynne Buie
 '''
 
 #Import packages

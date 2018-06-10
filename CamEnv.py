@@ -49,7 +49,7 @@ invproject(uv):             Inverse project image coordinates (uv) to xyz world
 
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton 
-         Lynne Addison       
+         Lynne Buie       
 '''
 
 #Import packages

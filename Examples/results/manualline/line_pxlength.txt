@@ -1,4 +1,4 @@
 Img1_length(px)	5781.1759048
 Img2_length(px)	5784.77985054
-Img3_length(px)	5755.22135385
+Img3_length(px)	5755.22135386
 Img4_length(px)	5842.97157375

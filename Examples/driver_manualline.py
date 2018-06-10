@@ -17,6 +17,7 @@ section of this script).
 
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton
+         Lynne Buie
 '''
 
 #Import packages
@@ -36,8 +37,8 @@ from Utilities import plotPX, plotXYZ
 #---------------------------   Initialisation   -------------------------------
 
 #Define data input directories
-camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_TU2_2015.txt'   
-camimgs = '../Examples/images/TU2_2015_subset/*.JPG'
+camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_TU1_2015.txt'   
+camimgs = '../Examples/images/TU1_2015_subset/*.JPG'
 
 #Define data output directory
 destination = '../Examples/results/manualline/'
@@ -56,7 +57,7 @@ terminus = Line(camimgs, cam)
 #Choose action "plot", "importtxt" or "importshp". Plot proceeds with the 
 #manual  definition of terminus lines, importtxt imports line data from text 
 #files, and  importshp imports line data from shape file (.shp)
-action = 'plot'      
+action = 'importtxt'      
 
 
 #Manually define lines from imagery

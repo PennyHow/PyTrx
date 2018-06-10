@@ -15,6 +15,7 @@ commands in the "Calculate areas" section of this script).
 
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton
+         Lynne Buie
 '''
 
 #Import packages

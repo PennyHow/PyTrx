@@ -28,7 +28,7 @@ voxelviewshed:      Calculate a viewshed over a DEM from a given viewpoint in
       
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton 
-         Lynne Addison
+         Lynne Buie
 '''
 
 #Import packages

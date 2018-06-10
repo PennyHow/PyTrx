@@ -69,7 +69,7 @@ calcManualLinesPX():            Method to manually define a pixel line through
                                                                
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton 
-         Lynne Addison
+         Lynne Buie
 '''
 
 #Import packages

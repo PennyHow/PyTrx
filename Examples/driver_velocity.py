@@ -15,6 +15,7 @@ registration).
 
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton 
+         Lynne Buie
 '''
 
 #Import packages

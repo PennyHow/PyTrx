@@ -1,15 +1,15 @@
-### KRONEBREEN CAMERA 5 (2014) camera environment data
+### KRONEBREEN CAMERA 3 (2014) camera environment data
  
 ### FORMAT: Camera environment name, GCP path, DEM path, Image path, 
 ### Calibration path, Camera location, Yaw pitch roll
 
 
 Camera_environment_name # Name of CamEnv class
-KR5_2014
+KR3_2014
 
 
 GCP_path #Path name where Ground Control Point data can be found
-..\Examples\camenv_data\gcps\KR5_2014.txt
+..\Examples\camenv_data\gcps\KR3_2014.txt
 
 
 DEM_path #Path name where DEM data can be found
@@ -17,11 +17,11 @@ DEM_path #Path name where DEM data can be found
 
 
 image_path #Path name where master image can be found (i.e. calibration image where GCPs have been plotted
-..\Examples\camenv_data\refimages\KR5_2014.JPG
+..\Examples\camenv_data\refimages\KR3_2014.JPG
 
 
 Calibration_path #Path name where camera calibration file can be found
-[..\Examples\camenv_data\calib\KR5_2014_1.txt,..\Examples\camenv_data\calib\KR5_2014_2.txt,..\Examples\camenv_data\calib\KR5_2014_3.txt,..\Examples\camenv_data\calib\KR5_2014_4.txt]
+[..\Examples\camenv_data\calib\KR3_2014_1.txt,..\Examples\camenv_data\calib\KR3_2014_2.txt,..\Examples\camenv_data\calib\KR3_2014_3.txt,..\Examples\camenv_data\calib\KR3_2014_4.txt]
 
 
 Camera_location #Location of camera in xyz coordinates

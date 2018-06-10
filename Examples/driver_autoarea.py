@@ -18,6 +18,7 @@ this script).
 
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton
+         Lynne Buie
 '''
 
 #Import packages
@@ -35,9 +36,9 @@ from Utilities import plotPX, plotXYZ
 #-----------------------------   Map data files   -----------------------------
 
 #Define data inputs
-camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_KR5_2014.txt'
-cammask = '../Examples/camenv_data/masks/KR5_2014_amask.JPG'
-camimgs = '../Examples/images/KR5_2014_subset/*.JPG'
+camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_KR3_2014.txt'
+cammask = '../Examples/camenv_data/masks/KR3_2014_amask.JPG'
+camimgs = '../Examples/images/KR3_2014_subset/*.JPG'
 
 #Define data output directory
 destination = '../Examples/results/autoarea/'
