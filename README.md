@@ -88,6 +88,7 @@ We plan on releasing full documentation and instructions on setting up PyTrx and
 <hr>
 
 <h3>Links</h3>
+
 There are other great software available for glacial photogrammetry:
 <a href="http://imgraft.glaciology.net/">ImGRAFT</a> - MATLAB toolbox for feature-tracking and georectification
 <a href="http://www.lancaster.ac.uk/staff/jamesm/software/pointcatcher.htm">Pointcatcher</a> - MATLAB-based GUI toolbox for feature-tracking and georectification
