@@ -1,27 +1,48 @@
 # Results from PyTrx examples 
-This folder contains the outputs of the example applications of PyTrx. Each folder contains the data and image outputs of each of the driver scripts. 
+This folder contains the outputs of the example applications of PyTrx. Each folder contains the data and image outputs of each of the driver scripts. A selection of these outputs, along with others, are presented in the PyTrx methods paper:
+
+<b>How et al. (In Prep.) PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. Geoscientific Instrumentation, Methods and Data Systems Discussion</b>
 
 <hr>
 
 <h3>Automated detection of supraglacial lakes (autoarea)</h3>
-Example driver for deriving changes in surface area of supraglacial lakes captured from Kronebreen, Svalbard, for a small subset of the 2014 melt season. Regions of interest are automatically detected based on differences in pixel intensity and corrected for image distortion. Previously defined areas can also be imported from file (this can be changed by commenting and uncommenting commands in the "Calculate areas" section). This script uses images from those found in the 'KR5_2014_subset' folder, and camera environment data associated with the text file 'CameraEnvironmentData_KR5_2014.txt.'
+Outputs from the driver script for deriving changes in surface area of supraglacial lakes at Kronebreen (driver_autoarea.py). These outputs include:
+1. Output images of the detected lakes (overlaid onto the oblique imagery and the input DEM)
+2. Shapefiles (.shp) of the detected lakes
+3. Text files containing information about the xyz area and pixel area of each individual lake (area_all.txt and px_all.txt), the xyz and pixel coordinates of each individual lake (area_coords.txt and px_coords.txt), and the cumulative xyz area and pixel area of all the detected lakes in each scene (area_sum.txt and px_sum.txt)
 
 <hr>
 
-<h3>Manual detection of meltwater plume extents (manualarea)*</h3>
-Example driver for calculating meltwater plume surface extent at Kronebreen, Svalbard, for a small subset of the 2014 melt season. Specifically this script performs manual detection of meltwater plumes through sequential images of the glacier to derive surface areas which have been corrected for image distortion. Images are imported from those found in the 'KR1_2014_subset' folder, and the camera environment associated with the text file 'CameraEnvironmentData_KR1_2014.txt'
+<h3>Manual detection of meltwater plume extents (manualarea)</h3>
+Outputs from the driver script for calculating meltwater plume surface extent at Kronebreen (driver_manualarea.py). These outputs include:
+1. Output images of the defined plume extents (overlaid onto the oblique imagery and the input DEM)
+2. Colour output images of the defined plume extents 
+3. Shapefiles (.shp) of the defined plume extents
+4. Text files containing information about the xyz area and pixel area of each plume (area_all.txt and px_all.txt), the xyz and pixel coordinates of each plume (area_coords.txt and px_coords.txt), and the cumulative xyz area and pixel area of all the detected plumes in each scene (area_sum.txt and px_sum.txt)
 
 <hr>
 
 <h3>Manual detection of terminus profiles (manualline)</h3>
-Example driver for calculating terminus profiles (as line features) at Tunabreen, Svalbard, for a small subset of the 2015 melt season using modules in PyTrx. This script performs manual detection of terminus position through sequential images of the glacier to derive line profiles which have been corrected for image distortion. Images are imported from those found in the 'TU2_2015_subset' folder, and the camera environment associated with the text file 'CameraEnvironmentData_TU2_2014.txt'
+Outputs from the driver script for calculating terminus profiles (as line features) at Tunabreen (driver_manualline.py). These outputs include:
+1. Output images of the defined termini (overlaid onto the oblique imagery and the input DEM)
+2. Shapefiles (.shp) of the defined termini
+3. Text files containing information about the xyz and pixel coordinates of each defined termini (line_realcoords.txt and line_pxcoords.txt), and the xyz and pixel length of each line (line_reallength.txt and line_pxlength.txt)
 
 <hr>
 
 <h3>Georectification of calving event point locations (ptsgeorectify)</h3>
-Example driver which demonstrates the capabilities of the georectification functions provided in PyTrx (which are based upon those available in ImGRAFT). Pre-defined points are imported which denote calving events at Tunabreen, Svalbard, that have been distinguished in the image plane. These are subsequently projected to xyz locations using the georectification functions in PyTrx. The xyz locations are plotted onto the DEM, with the colour of each point denoting the style of calving in that particular instance. The xyz locations are finally exported as a text file (.txt) and as a shape file (.shp).
+Outputs from the driver script for georectifying calving event point locations at Tunabreen (driver_ptsgeorectify.py). These outputs include:
+1. Shapefile (.shp) of the georectified points 
+2. An output image of the georectified points overlaid onto the DEM
+3. Text files containing the xyz locations of all the georectified points
+In addition, this folder contains the original pixel locations of each calving event (TU1_calving_xy.csv).
 
 <hr>
 
 <h3>Glacier velocity feature-tracking (velocity)</h3>
-Example driver for deriving velocities from Kronebreen, Svalbard, for a small subset of the 2014 melt season. Specifically this script performs feature-tracking through sequential daily images of the glacier to derive surface velocities (spatial average, individual point displacements and interpolated velocity maps) which have been corrected for image distortion and motion in the camera platform (i.e. image registration). This script uses images from those found in the 'KR2_2014_subset' folder, and camera environment data associated with the text file 'CameraEnvironmentData_KR2_2014.txt'.
+Outputs from the driver script for deriving surface glacier velocities at Kronebreen, Svalbard (driver_velocity.py). These outputs include:
+1. ASCII files of each interpolated velocity map, which can be imported into most mapping software as a raster grid
+2. Output images of the tracked feature points on the oblique time-lapse image, the georectified points on the DEM, and the interpolated velocity maps 
+3. Shapefiles (.shp) of the georectified feature points (including velocity information)
+4. CSV file containing information about the image registration and camera homography - image 1, image 2, the 3 by 3 homography matrix, number of static features successfully tracked, mean x displacement, mean y displacement, standard deviation x displacement, standard deviation y displacement, mean error, mean homography displacement, mean homography signal-to-noise ratio (SNR)
+5. CSV file containing information about the measured velocities - image 1, image 2, average xyz velocity, number of features successfully tracked, average pixel velocity, average homography error, signal-to-noise ratio (the signal being velocity and the noise being average homography error)
