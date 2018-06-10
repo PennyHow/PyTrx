@@ -84,3 +84,12 @@ These packages may not necessarily be installed with distributions of Python (e.
 PyTrx also needs other packages, which are commonly included with distributions of Python. Compatibility with all versions of these packages are highly likely: <b>datetime</b>, <b>glob</b>, <b>imghdr</b>, <b>math</b>, <b>Matplotlib</b>, <b>NumPy</b>, <b>operator</b>, <b>os</b>, <b>PyLab</b>, <b>SciPy</b>, <b>struct</b>, and <b>sys</b> <br>
 
 We plan on releasing full documentation and instructions on setting up PyTrx and processing simple datasets in due course. <br>
+
+<hr>
+
+<h3>Links</h3>
+There are other great software available for glacial photogrammetry:
+<a href="http://imgraft.glaciology.net/">ImGRAFT</a> - MATLAB toolbox for feature-tracking and georectification
+<a href="http://www.lancaster.ac.uk/staff/jamesm/software/pointcatcher.htm">Pointcatcher</a> - MATLAB-based GUI toolbox for feature-tracking and georectification
+<a href="http://www.mn.uio.no/geo/english/research/projects/icemass/cias/">CIAS</a> - IDL gui for feature-tracking
+<a href="https://www.geosci-model-dev.net/9/307/2016/">PRACTISE</a> - MATLAB toolbox for georectification
