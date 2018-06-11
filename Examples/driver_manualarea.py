@@ -51,6 +51,9 @@ if not os.path.exists(destination):
 #Define camera environment
 cameraenvironment = CamEnv(camdata)
 
+#Show ground control points
+cameraenvironment.showGCPs()
+
 
 #Define Area class initialisation variables
 calibFlag = True            #Detect with corrected or uncorrected images
