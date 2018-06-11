@@ -1,7 +1,7 @@
 # Results from PyTrx examples 
 This folder contains the outputs of the example applications of PyTrx. Each folder contains the data and image outputs of each of the driver scripts. A selection of these outputs, along with others, are presented in the PyTrx methods paper:
 
-<b>How et al. (In Prep.) PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. Geoscientific Instrumentation, Methods and Data Systems Discussion</b>
+<h3>How et al. (In Review) PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. Geoscientific Instrumentation, Methods and Data Systems Discussions</h3>
 
 <hr>
 
