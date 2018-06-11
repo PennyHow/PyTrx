@@ -41,7 +41,7 @@ The boolean image masks that are needed for tracking static features and perform
 <hr>
 
 <h3>Feature-tracking masks (masks)</h3>
-The boolean image masks for masking areas of interest, used subsequently for either tracking moving features and performing feature-tracking, or for detecting areal features (e.g. supraglacial lakes).
+The boolean image masks for masking areas of interest, used subsequently for either tracking moving features and performing feature-tracking (e.g. glacier surface velocities), or for detecting areal features (e.g. supraglacial lakes).
 
 <hr>
 
