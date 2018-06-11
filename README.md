@@ -7,7 +7,7 @@ Authors: Penelope How (p.how@ed.ac.uk), Nick Hulton, and Lynne Buie (née Addiso
 
 <h3>PyTrx citations</h3>
 
-We are happy for others to use and adapt PyTrx for their own processing needs. Please reference to the following key publication and Digital Object Identifier (DOI) where possible:<br>
+We are happy for others to use and adapt PyTrx for their own processing needs. Please refer to the following key publication and Digital Object Identifier (DOI) where possible:<br>
 
 <h3>How et al. (In Review) PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. Geoscientific Instrumentation, Methods and Data Systems Discussions</h3> <br>
 
