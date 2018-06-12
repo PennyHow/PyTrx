@@ -23,7 +23,7 @@ How et al. (In Review) Calving controlled by melt-undercutting: detailed mechani
 How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK.<br>
 
 <b>*MSc thesis by Lynne Buie, where PyTrx was created in its earliest form*</b><br>
-Addison (2015) PyTrx: feature tracking software for automated production of glacier velocity. MSc thesis, University of Edinburgh, UK.<br>
+Addison (2015) <a href="https://hdl.handle.net/1842/11794>PyTrx: feature tracking software for automated production of glacier velocity.</a> MSc thesis, University of Edinburgh, UK.<br>
 
 <hr>
 
