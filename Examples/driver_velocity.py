@@ -28,9 +28,8 @@ import numpy as np
 sys.path.append('../')
 from CamEnv import CamEnv
 from Measure import Velocity
-from FileHandler import writeHomographyFile, writeVelocityFile, writeSHPFile
+from FileHandler import writeHomographyFile, writeVelocityFile, writeSHPFile, writeCalibFile
 from Utilities import plotPX, plotXYZ, interpolateHelper, plotInterpolate
-
 
 #-------------------------   Map data sources   -------------------------------
 
@@ -52,6 +51,11 @@ if not os.path.exists(destination):
 #Define camera environment
 cameraenvironment = CamEnv(camdata, quiet=2)
 
+#Report camera data and show corrected image
+cameraenvironment.reportCamData()
+cameraenvironment.showGCPs()
+cameraenvironment.showPrincipalPoint()
+cameraenvironment.showCalib()
 
 #----------------------   Calculate velocities   ------------------------------
 
@@ -80,20 +84,26 @@ xyz, uv = velo.calcVelocities(homography=hmg, calcErrors=err, back_thresh=bk,
 
 print '\n\nWRITING DATA TO FILE'
 
+#Write out camera calibration info to .txt file
+target1 = '../Examples/camenv_data/calib/KR2_2014_1.txt'
+writeCalibFile(cameraenvironment, target1)
+
+
 #Write out velocity data to .csv file
-target1 = destination + 'velo_output.csv'
-writeVelocityFile(velo, target1) 
+target2 = destination + 'velo_output.csv'
+writeVelocityFile(velo, target2) 
 
 #Write homography data to .csv file
-target2 = destination + 'homography.csv'
-writeHomographyFile(velo, target2)
+target3 = destination + 'homography.csv'
+writeHomographyFile(velo, target3)
 
 #Write points to shp file
-target3 = destination + 'shpfiles/'     #Define file destination
-if not os.path.exists(target3):
+target4 = destination + 'shpfiles/'     #Define file destination
+if not os.path.exists(target4):
     os.makedirs(target3)                #Create file destination
 proj = 32633                            #ESPG:32633 is projection WGS84
-writeSHPFile(velo, target3, proj)       #Write shapefile
+writeSHPFile(velo, target4, proj)       #Write shapefile
+
 
 
 #----------------------------   Plot Results   --------------------------------

@@ -182,10 +182,7 @@ def readCalib(fileName, paramList):
                  toolbox).             
     '''    
     #Load as text file if txt format
-    if fileName[-3:] == 'txt':       
-        #print 'You have loaded a text file to find the parameters: ' 
-        #print str(paramList)
-        
+    if fileName[-3:] == 'txt':            
         #Open file
         try:        
             myFile=open(fileName,'r')
@@ -210,10 +207,7 @@ def readCalib(fileName, paramList):
         return calib
     
     #Load as matlab file if mat format
-    elif fileName[-3:] == 'mat':        
-        #print 'You have loaded a matlab file to find the parameters: '
-        #print str(paramList)
-    
+    elif fileName[-3:] == 'mat':            
         #Get the Matlab file as a dictionary
         mat = sio.loadmat(fileName)
            
@@ -224,7 +218,7 @@ def readCalib(fileName, paramList):
     #Incompatible file types     
     else:
         print ('\nYou have specified an incorrect calibration file type'
-               'Acceptable file types are .txt and .mat.')
+               '\nAcceptable file types are .txt and .mat.')
 
 
 def lineSearch(lineList, search):
@@ -564,7 +558,22 @@ def readDEMmat(matfile):
     Y = np.flipud(Y)
     Z = np.flipud(Z)
     return X,Y,Z  
-    
+
+
+def writeCalibFile(camenv, fname):
+    '''Function to write camera calibration data to .txt file:
+        Camera matrix
+        Radial and tangential distortion parameters 
+    Data formatting is compliant with the .txt calibration importing function 
+    readCalib.    
+    '''     
+    #Write camera calibration variables to text file
+    f=open(fname,'w')                            
+    f.write('RadialDistortion' + '\n' + str(camenv._radCorr[:3]) + '\n' +
+            'TangentialDistortion' + '\n' + str(camenv._tanCorr) + '\n' +
+            'IntrinsicMatrix' + '\n' + str(camenv._intrMat) + '\n' +
+            'End')
+            
 
 def writeVelocityFile(velocity, fname):
     '''Function to write all velocity data from a given timeLapse sequence to 
@@ -796,9 +805,9 @@ def createThumbs(directory='.'):
         im.thumbnail([512,512],Image.ANTIALIAS)
         
         #Save thumbnail to file directory
-        out=impath.split('\\')[0]+'/thumb_'+impath.split('\\')[1]
-        print '\nSaving thumbnail image as',out
-        im.save(out, "JPEG")
+        out=impath.split('\\')[0]+'/thumb_' + impath.split('\\')[1]
+        print '\nSaving thumbnail image as', out
+        im.save(out, 'JPEG')
 
 
 def writeAreaFile(a, dest):

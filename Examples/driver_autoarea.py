@@ -29,7 +29,7 @@ import os
 sys.path.append('../')
 from Measure import Area
 from CamEnv import CamEnv
-from FileHandler import writeAreaFile, writeSHPFile
+from FileHandler import writeAreaFile, writeSHPFile, writeCalibFile
 from Utilities import plotPX, plotXYZ
 
 
@@ -51,6 +51,14 @@ if not os.path.exists(destination):
 #Define camera environment
 cameraenvironment = CamEnv(camdata)
 
+#Report camera data and show corrected image
+cameraenvironment.reportCamData()
+cameraenvironment.showGCPs()
+cameraenvironment.showPrincipalPoint()
+cameraenvironment.showCalib()
+             
+
+#---------------------   Set area detection parameters   ----------------------             
 
 #Define Area class initialisation variables
 calibFlag = True            #Detect with corrected or uncorrected images
@@ -65,9 +73,6 @@ time = 'EXIF'               #Method to derive image times
 lakes = Area(camimgs, cameraenvironment, calibFlag, cammask, maxim, imband, 
              quiet, loadall, time)
              
-
-#---------------------   Set area detection parameters   ----------------------             
-
 #Set image enhancement parameters. If these are undefined then they will be 
 #set to a default enhancement of ('light', 50, 20)
 lakes.setEnhance('light', 50, 20)
@@ -106,6 +111,11 @@ rpolys, rareas = lakes.calcAutoAreas(px, colour, verify)
 
 
 #----------------------------   Export data   ---------------------------------
+
+#Write out camera calibration info to .txt file
+target1 = '../Examples/camenv_data/calib/KR3_2014_1.txt'
+writeCalibFile(cameraenvironment, target1)
+
 
 #Write results to file
 writeAreaFile(lakes, destination)

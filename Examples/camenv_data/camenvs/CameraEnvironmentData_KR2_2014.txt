@@ -22,7 +22,7 @@ image_path #Path name where master image can be found (i.e. calibration image wh
 
 
 Calibration_path #Path name where camera calibration file can be found
-[..\Examples\camenv_data\calib\KR2_2014_1.txt,..\Examples\camenv_data\calib\KR2_2014_2.txt,..\Examples\camenv_data\calib\KR2_2014_3.txt,..\Examples\camenv_data\calib\KR2_2014_4.txt] 
+[..\Examples\camenv_data\calib\KR2_calibimgs\*.JPG, 6, 9] 
 
 
 Camera_location #Location of camera in xyz coordinates

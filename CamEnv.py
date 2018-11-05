@@ -60,6 +60,8 @@ from Images import CamImage
 from scipy import interpolate
 import sys
 import matplotlib.pyplot as plt
+import cv2
+import glob
 
 #------------------------------------------------------------------------------
 
@@ -107,9 +109,9 @@ class GCPs():
         '''Return the GCP reference image.'''        
         return self._gcpImage
 
-        
-#------------------------------------------------------------------------------      
-
+                
+#------------------------------------------------------------------------------        
+   
 class CamCalib(object):
     '''This base class models a standard camera calibration matrix as per 
     OpenCV, MatLab and ImGRAFT. The class uses a standard pinhole camera model, 
@@ -136,18 +138,20 @@ class CamCalib(object):
         - Tangential Distortion Coefficients: p ([p1,p2])
     
     The object can be initiated directly either as a list of three elements for 
-    each of the intrinsic, tangential and radial arrays, or by refencing a file 
-    (.mat or .txt) containing the calibration data in a pre-designated format.
+    each of the intrinsic, tangential and radial arrays, or by referencing a 
+    file (.mat or .txt) containing the calibration data in a pre-designated 
+    format.
     '''
     
-    def __init__(self,*args): 
+    def __init__(self, *args): 
         '''Constructor to initiate a calibration object.'''            
-        failed=False        
+        failed=False 
+        
         if len(args)==1:
             
             #Read calibration from file
             if isinstance(args[0],str):
-                print('\nAttempting to read camera calibs from a single file')
+                print '\nAttempting to read camera calibs from a single file'
                 args=readMatrixDistortion(args[0])
                 args=self.checkMatrix(args)
                 if args==None:
@@ -156,42 +160,66 @@ class CamCalib(object):
                     self._intrMat=args[0]
                     self._tanCorr=args[1]
                     self._radCorr=args[2]
-                    
-            #Read calibration from several files        
-            elif isinstance(args[0],list):
-                print('\nAttempting to read camera calibs from average over ' 
-                      'several files')
-                intrMat=[]
-                tanCorr=[]
-                radCorr=[]               
-                for item in args[0]:
-                    if isinstance(item,str):
-                        arg=readMatrixDistortion(item)
-                        arg=self.checkMatrix(arg)
-                        if arg==None:
-                            failed=True
-                            break
-                        else:
-                            intrMat.append(arg[0])
-                            tanCorr.append(arg[1])
-                            radCorr.append(arg[2])
-                    else:
-                        failed=True
-
-                self._intrMat = sum(intrMat)/len(intrMat)
-                self._tanCorr = sum(tanCorr)/len(tanCorr)
-                self._radCorr = sum(radCorr)/len(radCorr)
+                    self._calibErr=None
                 
+                         
+            elif isinstance(args[0],list):
+
+               #Read calibration from several files                  
+                if args[0][0][-4:] == '.txt':
+                    print('\nAttempting to read camera calibs from average over ' 
+                          'several files')
+                    intrMat=[]
+                    tanCorr=[]
+                    radCorr=[]               
+                    for item in args[0]:
+                        if isinstance(item,str):
+                            arg=readMatrixDistortion(item)
+                            arg=self.checkMatrix(arg)
+                            if arg==None:
+                                failed=True
+                                break
+                            else:
+                                intrMat.append(arg[0])
+                                tanCorr.append(arg[1])
+                                radCorr.append(arg[2])
+                        else:
+                            failed=True
+    
+                    self._intrMat = sum(intrMat)/len(intrMat)
+                    self._tanCorr = sum(tanCorr)/len(tanCorr)
+                    self._radCorr = sum(radCorr)/len(radCorr)
+                    self._calibErr=None
+                    
+                #Calculate calibration from images                    
+                elif args[0][0][-4:] == '.JPG' or '.PNG':
+                    print ('\nAttempting to calculate camera calibs from input'
+                            + ' images')
+                            
+                    arg, err = self.calibrateImages(args[0][0], 
+                                                    [int(args[0][1]),
+                                                     int(args[0][2])])
+                    arg = self.checkMatrix(arg)
+                    
+                    if arg==None:
+                        failed=True
+                    else:
+                        self._intrMat=arg[0]
+                        self._tanCorr=arg[1]
+                        self._radCorr=arg[2]
+                        self._calibErr=err
+
             else:
                 failed=True
-        
+                        
         #Read calibration from list
         elif len(args)==3:   
-            print('\nAttempting to make camera calibs from raw data sequences')
+            print '\nAttempting to make camera calibs from raw data sequences'
             args=self.checkMatrix(args)            
             self._intrMat=args[0]
             self._tanCorr=args[1]
             self._radCorr=args[2]
+            self._calibErr=None
         else:
             failed=True
             
@@ -208,7 +236,7 @@ class CamCalib(object):
     def getCalibdata(self):
         '''Return camera matrix, and tangential and radial distortion 
         coefficients.'''
-        return self._intrMat,self._tanCorr,self._radCorr
+        return self._intrMat, self._tanCorr, self._radCorr
 
         
     def getCamMatrix(self):
@@ -219,9 +247,9 @@ class CamCalib(object):
     def getDistortCoeffsCv2(self):
         '''Return radial and tangential distortion coefficients.'''
         #Returns certain number of values depending on number of coefficients
-        #inputted        
+        #inputted         
         if self._radCorr[3]!=0.0:
-            return np.append(self._radCorr[0:2],self._tanCorr,
+            return np.append(np.append(self._radCorr[0:2],self._tanCorr),
                              self._radCorr[2:])
         elif self._radCorr[2]!=0.0:
             return np.append(np.append(self._radCorr[0:2],self._tanCorr),
@@ -255,34 +283,37 @@ class CamCalib(object):
         
     def reportCalibData(self):
         '''Self reporter for Camera Calibration object data.'''
-        print '\nData from camera calibration object:'
+        print '\nDATA FROM CAMERA CALIBRATION OBJECT'
         print 'Intrinsic Matrix:'
         for row in self._intrMat:
                 print row[0],row[1],row[2]
-        print 'Tangential Correction:'
+        print '\nTangential Correction:'
         print self._tanCorr[0],self._tanCorr[1]
-        print 'Radial Correction:'
+        print '\nRadial Correction:'
         print (self._radCorr[0],self._radCorr[1],self._radCorr[2],
                self._radCorr[3],self._radCorr[4],self._radCorr[5])
-        print 'Focal Length:'
+        print '\nFocal Length:'
         print self._focLen
-        print 'Camera Centre:'
-        print self._camCen        
+        print '\nCamera Centre:'
+        print self._camCen
+        if self._calibErr != None:
+            print '\nCalibration Error:'
+            print self._calibErr
 
         
-    def checkMatrix(self,matrix):
+    def checkMatrix(self, matrix):
         '''Function to support the calibrate function. Checks and converts the 
         intrinsic matrix to the correct format for calibration with opencv.'''  
         ###This is moved over from readfile. Need to check calibration matrices
         if matrix==None:
             return None
-        
+                
         #Check matrix
         intrMat=matrix[0]
         
         #Check tangential distortion coefficients
         tanDis=np.zeros(2)
-        td = np.array(matrix[1]) 
+        td = np.array(matrix[1])
         tanDis[:td.size] = td
         
         #Check radial distortion coefficients
@@ -290,11 +321,123 @@ class CamCalib(object):
         rd = np.array(matrix[2]) 
         radDis[:rd.size] = rd
            
-        return intrMat,tanDis,radDis
+        return intrMat, tanDis, radDis
         
+            
+    def calibrateImages(self, imageFile, xy):
+        '''Function for calibrating a camera from a set of input calibration
+        images. Calibration is performed using OpenCV's chessboard calibration 
+        functions. Input images (imageFile) need to be of a chessboard with 
+        regular dimensions and a known number of corner features (xy).
         
-#------------------------------------------------------------------------------        
+        Please note that OpenCV's calibrateCamera function is incompatible 
+        between different versions of OpenCV. Included here are both functions 
+        for version 2 and version 3. Please see OpenCV's documentation for 
+        newer versions.
+        '''        
+        #Define shape of array
+        objp = np.zeros((xy[0]*xy[1],3), np.float32)           
+        objp[:,:2] = np.mgrid[0:xy[1],0:xy[0]].T.reshape(-1,2) 
+    
+        #Array to store object pts and img pts from all images
+        objpoints = []                                   
+        imgpoints = []                                   
+    
+        #Define location of calibration photos
+        imgs = glob.glob(imageFile)
+        
+        #Set image counter for loop
+        imageCount = 0
+        
+        #Loop to determine if each image contains a chessboard pattern and 
+        #store corner values if it does
+        for fname in imgs:
+            
+            #Read file as an image using OpenCV
+            img = cv2.imread(fname)   
+    
+            #Change RGB values to grayscale             
+            gray = cv2.cvtColor(img,cv2.COLOR_BGR2GRAY)    
+            
+            #Find chessboard corners in image
+            patternFound, corners = cv2.findChessboardCorners(gray,
+                                                              (xy[1],xy[0]),
+                                                              None)
+            
+            #Cycle through images, print if chessboard corners have been found 
+            #for each image
+            imageCount += 1
+            print str(imageCount) + ': ' + str(patternFound) + ' ' + fname
+            
+            #If found, append object points to objp array
+            if patternFound == True:
+                objpoints.append(objp)
+                
+                #Determine chessboard corners to subpixel accuracy
+                #Inputs: winSize specified 11x11, zeroZone is nothing (-1,-1), 
+                #opencv criteria
+                cv2.cornerSubPix(gray,corners,(11,11),(-1,-1),
+                                 (cv2.TERM_CRITERIA_EPS+cv2.TERM_CRITERIA_MAX_ITER,
+                                 30,0.001))
+                                 
+                imgpoints.append(corners)
+                
+                #Draw and display corners
+                cv2.drawChessboardCorners(img,(xy[1],xy[0]),corners,
+                                          patternFound)
+        
+        #Try OpenCV v3 calibration function
+        try:
+            #Calculate initial camera matrix and distortion
+            err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
+                                                           imgpoints,
+                                                           gray.shape[::-1],
+                                                           None,
+                                                           5)
+            #Retain principal point coordinates
+            pp = [mtx[0][2],mtx[1][2]]
+            
+            #Optimise camera matrix and distortion using fixed principal point
+            err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
+                                                           imgpoints,
+                                                           gray.shape[::-1],
+                                                           mtx,
+                                                           5,
+                                                           flags=cv2.CALIB_FIX_PRINCIPAL_POINT)
 
+        #Else use OpenCV v2 calibration function
+        except:
+            #Calculate initial camera matrix and distortion
+            err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
+                                                           imgpoints,
+                                                           gray.shape[::-1])
+
+            #Retain principal point coordinates
+            pp = [mtx[0][2],mtx[1][2]]
+            
+            #Optimise camera matrix and distortion using fixed principal point
+            err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
+                                                           imgpoints,
+                                                           gray.shape[::-1],
+                                                           cameraMatrix=mtx,
+                                                           flags=cv2.CALIB_FIX_PRINCIPAL_POINT)                                                                     
+
+        #Change matrix structure for compatibility with PyTrx
+        mtx = np.array([mtx[0][0],mtx[0][1],0,
+                       1,mtx[1][1],0,
+                       pp[0],pp[1],1]).reshape(3,3)
+
+        
+        #Restructure distortion parameters for compatibility with PyTrx
+        rad = np.array([dist[0],dist[1],dist[4], 0.0, 0.0, 0.0]).reshape(6)
+        tan = np.array(dist[2:4]).reshape(2)
+        
+        #Return matrix, radial distortion and tangential distortion parameters
+        return [mtx, tan, rad], err
+                       
+                          
+#------------------------------------------------------------------------------
+                          
 class CamEnv(CamCalib):    
     ''' A class to represent the camera object, containing the intrinsic
     matrix, distortion parameters and camera pose (position and direction).
@@ -334,34 +477,53 @@ class CamEnv(CamCalib):
     
     def __init__(self, envFile, quiet=2):
         '''Constructor to initiate Camera Environment object.''' 
-        ### Eventually modify this to allow a more flexible
-        ### constructor to take a raw input specification in addition to 
-        ### file input.
         
         #Set commentary level
         self._quiet = quiet
-        
-        #Read parameters from the environment file             
-        params = self.dataFromFile(envFile)
 
-        if params==False:
-            print '\nUnable to define camera environment'
-            print '\nExiting programme'
-            sys.exit()
+        if self._quiet>0:
+            print '\nINITIALISING CAMERA ENVIRONMENT'
+            
+        #Read camera environment from text file        
+        if isinstance(envFile, str):
+            #Read parameters from the environment file             
+            params = self.dataFromFile(envFile)
+    
+            #Exit programme if file is invalid
+            if params==False:
+                print '\nUnable to define camera environment'
+                print 'Exiting programme'
+                sys.exit()
+            
+            #Extract input files from camera environment file 
+            else:
+                (name, GCPpath, DEMpath, imagePath, 
+                 calibPath, coords, ypr, DEMdensify) = params           
+
+        #Read camera environment from files as input variables
+        elif isinstance(envFile, list):
+            name = envFile[0]
+            GCPpath = envFile[1]
+            DEMpath = envFile[2]
+            imagePath = envFile[3]
+            calibPath = envFile[4]
+            coords = envFile[5]
+            ypr = envFile[6]
+            DEMdensify = envFile[7]
+
         else:
-            if self._quiet>0:
-                print '\nINITIALISING CAMERA ENVIRONMENT'
-            (name, GCPpath, DEMpath, imagePath, 
-             calibPath, coords, ypr, DEMdensify) = params           
-
+            print '\nInvalid camera environment data type'
+            print 'Exiting programme'
+            sys.exit()
+            
         #Set up object parameters
         self._name = name
         self._camloc = np.array(coords)
         self._DEMpath = DEMpath        
-        self._DEMdensify=DEMdensify
+        self._DEMdensify = DEMdensify
         self._GCPpath = GCPpath
         self._imagePath = imagePath
-        self._refImage=CamImage(imagePath)      
+        self._refImage = CamImage(imagePath)      
 
         #Set yaw, pitch and roll to 0 if no information is given        
         if ypr == None:
@@ -388,14 +550,14 @@ class CamEnv(CamCalib):
         '''Read CamEnv data from .txt file containing keywords and file paths
         to associated data.'''
         #Define keywords to search for in file        
-        self.key_labels={"name":"camera_environment_name",
-                         "GCPpath":"gcp_path",
-                         "DEMpath":"dem_path",
-                         "imagePath":"image_path",
-                         "calibPath":"calibration_path",
-                         "coords":"camera_location",
-                         "ypr":"yaw_pitch_roll",
-                         "DEMdensify":"dem_densification"}
+        self.key_labels={'name':'camera_environment_name',
+                         'GCPpath':'gcp_path',
+                         'DEMpath':'dem_path',
+                         'imagePath':'image_path',
+                         'calibPath':'calibration_path',
+                         'coords':'camera_location',
+                         'ypr':'yaw_pitch_roll',
+                         'DEMdensify':'dem_densification'}
         key_lines=dict(self.key_labels)
         for key in key_lines:
             key_lines.update({key:None})
@@ -468,7 +630,7 @@ class CamEnv(CamCalib):
             for f in fields:
                 calibPath.append(f)
             if len(calibPath) == 1:
-                calibPath = calibPath[0]                
+                calibPath = calibPath[0]              
         else:
             if self._quiet>0:
                 print "\ncalibPath not supplied in: " + filename              
@@ -542,7 +704,8 @@ class CamEnv(CamCalib):
         #Define visible extent of the DEM from the location of the camera
         visible=voxelviewshed(dem,self._camloc)
         self._visible=visible
-        Z=Z/visible
+#        Z=Z/visible
+
 
         #Snap image plane to DEM extent
         XYZ=np.column_stack([X[visible[:]],Y[visible[:]],Z[visible[:]]])
@@ -707,7 +870,7 @@ class CamEnv(CamCalib):
         return value
 
 
-    def report(self):
+    def reportCamData(self):
         '''Reporter for testing that the relevant data has been successfully 
         imported. Testing for:
         - Camera Environment name
@@ -721,40 +884,58 @@ class CamEnv(CamCalib):
         '''
         
         #Camera name and location
-        print '\nCamera Environment setup/data:'
-        print '\nCamera Environment name: ',self._name 
-        print '\nCamera Location [X,Y,Z]:  ',self._camloc
+        print '\nCAMERA ENVIRONMENT REPORT'
+        print 'Camera Environment name: ',self._name 
+        print 'Camera Location [X,Y,Z]:  ',self._camloc
         
         #Reference image
         print ('\nReference image used for baseline homography and/or GCP' 
-               'control: ', self._imagePath)
+               'control: ')
+        print self._imagePath
         
         #DEM and densification        
-        print '\nDEM file used for projection:',self._DEMpath
+        print '\nDEM file used for projection:',
+        print self._DEMpath
         if self._DEMdensify==1:
             print 'DEM is used at raw resolution'
         else:
-            print ('\nDEM is resampled at '+str(self._DEMdensify) + 
+            print ('DEM is resampled at '+str(self._DEMdensify) + 
                   ' times resolution')
         
         #GCPs        
         if self._GCPpath!=None:
-            print '\nGCP file used to define camera pose: ',self._GCPpath
+            print '\nGCP file used to define camera pose:'
+            print self._GCPpath
         else:
-            print '\nNo GCP file defined'
+            print 'No GCP file defined'
          
         #Yaw, pitch, roll
-        if self._direction==[0,0,0]:
+        if self._camDirection is None:
             print '\nCamera pose assumed unset (zero values)'
         else:
-            print '\nCamera pose set as [Roll,Pitch,Yaw]: ',self._direction
+            print '\nCamera pose set as [Roll,Pitch,Yaw]: '
+            print self._camDirection
 
         #Camera calibration (matrix and distortion coefficients)
-        if isinstance(self._calibPath,list):
-            print '\nMultiple camera calibration files defined: '
+        if isinstance(self._calibPath[0],list):
+            if self._calibPath[0][0][-4:] == '.txt':
+                print '\nCalibration calculated from multiple files:'
+                print self._calibPath                   
+            elif self._calibPath[0][0][-4:] == '.JPG' or '.PNG':
+                print '\nCalibration calculated from raw images:'                      
             print self._calibPath
+
+        elif isinstance(self._calibPath[0],str):
+            print '\nCalibration calculated from single file:'
+            print self._calibPath
+                                         
+        elif isinstance(self._calibPath[0],np.array):   
+            print '\nCalibration calculated from raw data:' 
+            print self._calibPath
+        
         else:
-            print '\nCamera calibration file:'
+            print '\nCalibration undefined'
+        
         
         #Report raster DEM details from the DEM class
         if isinstance(self._DEM,ExplicitRaster):
@@ -803,30 +984,20 @@ class CamEnv(CamCalib):
         demred=demred.getZ()
         
         #Plot image points    
-        plt.figure()
-        plt.tick_params(axis='both', which='major', labelsize=10)
-        plt.xlim([0, self._refImage.getImageSize()[1]])
-        plt.ylim([0, self._refImage.getImageSize()[0]])
-        imgplot = plt.imshow(self._refImage.getImageArray(), origin='lower')
-        imgplot.set_cmap('gray')
-        plt.gca().invert_yaxis()
-        plt.scatter(imgcp[:,0], imgcp[:,1], color='red')
-        plt.suptitle('Image showing location of ' + str(self._name) + ' GCPs', 
-                    fontsize=14, y=0.9)
+        fig, (ax1,ax2) = plt.subplots(1,2)
+        fig.canvas.set_window_title('GCP locations of '+str(self._name))
+        ax1.axis([0,self._refImage.getImageSize()[1],
+                  self._refImage.getImageSize()[0],0])  
+        ax1.imshow(self._refImage.getImageArray(), origin='lower', cmap='gray')
+        ax1.scatter(imgcp[:,0], imgcp[:,1], color='red')
         
         #Plot world points
-        plt.figure()
-        plt.locator_params(axis = 'x', nbins=8)
-        plt.tick_params(axis='both', which='major', labelsize=10)
-        plt.xlim([lims[0],lims[1]])
-        plt.ylim([lims[2],lims[3]])
-        imgplot = plt.imshow(demred, origin='lower', 
-                             extent=[lims[0],lims[1],lims[2],lims[3]])
-        imgplot.set_cmap('gray')
-        plt.scatter(worldgcp[:,0], worldgcp[:,1], color='red')
-        plt.scatter(self._camloc[0], self._camloc[1], color='blue')
-        plt.suptitle('DEM showing location of ' + str(self._name) + 
-                     ' GCPs', fontsize=14)
+        ax2.locator_params(axis = 'x', nbins=8)
+        ax2.axis([lims[0],lims[1],lims[2],lims[3]])
+        ax2.imshow(demred, origin='lower', 
+                   extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
+        ax2.scatter(worldgcp[:,0], worldgcp[:,1], color='red')
+        ax2.scatter(self._camloc[0], self._camloc[1], color='blue')
         plt.show()
 
         
@@ -838,22 +1009,52 @@ class CamEnv(CamCalib):
         #Get the camera centre from the intrinsic matrix 
         ppx = self._camCen[0] 
         ppy = self._camCen[1]       
-        
-        #Plot image points    
-        plt.figure()
-        plt.tick_params(axis='both', which='major', labelsize=10)
-        plt.xlim([0, self._refImage.getImageSize()[1]])
-        plt.ylim([0, self._refImage.getImageSize()[0]])
-        imgplot = plt.imshow(self._refImage.getImageArray(), origin='lower')
-        imgplot.set_cmap('gray')
-        plt.gca().invert_yaxis()
-        plt.scatter(ppx, ppy, color='yellow', s=100)
-        plt.axhline(y=ppy)
-        plt.axvline(x=ppx)
-        plt.suptitle('Image showing principal point and GCPs of ' + 
-                     str(self._name), fontsize=14, y=0.9)
+         
+        #Plot image points
+        fig, (ax1) = plt.subplots(1)
+        fig.canvas.set_window_title('Principal Point of '+str(self._name))
+        ax1.axis([0,self._refImage.getImageSize()[1],
+                  self._refImage.getImageSize()[0],0])        
+
+        ax1.imshow(self._refImage.getImageArray(), origin='lower', cmap='gray')
+        ax1.scatter(ppx, ppy, color='yellow', s=100)
+        ax1.axhline(y=ppy)
+        ax1.axvline(x=ppx)
         plt.show() 
+ 
+ 
+    def showCalib(self):
+        '''Function to show camera calibration. Two images are plotted, the 
+        first with the original input image and the second with the calibrated
+        image. This calibrated image is corrected for distortion using the 
+        distortion parameters held in the CamCalib object.
+        '''
+        #Get camera matrix and distortion parameters
+        matrix = self.getCamMatrixCV2()
+        dist = self.getDistortCoeffsCv2()
+
+        #Calculate optimal camera matrix 
+        h = self._refImage.getImageSize()[0]
+        w = self._refImage.getImageSize()[1]
+        newMat, roi = cv2.getOptimalNewCameraMatrix(matrix, dist, (w,h), 1, 
+                                                    (w,h))
+
+        #Correct image for distortion                                                
+        corr_image = cv2.undistort(self._refImage.getImageArray(), matrix, 
+                                   dist, newCameraMatrix=newMat)
+   
         
+        #Plot uncorrected and corrected images                         
+        fig, (ax1,ax2) = plt.subplots(1,2)
+        fig.canvas.set_window_title('Calibration output of '+str(self._name))
+        implot1 = ax1.imshow(self._refImage.getImageArray())
+        implot1.set_cmap('gray')    
+        ax1.axis([0,w,h,0])
+        implot2 = ax2.imshow(corr_image)        
+        implot2.set_cmap('gray')    
+        ax2.axis([0,w,h,0])    
+        plt.show()
+      
         
 #------------------------------------------------------------------------------
 

@@ -141,7 +141,7 @@ def plotPX(a, number, dest=None, crop=None, show=True):
           
     #Create image plotting window
     fig, (ax1) = plt.subplots(1, figsize=(20,10))
-    fig.canvas.set_window_title(imn + ': UV output ')
+    fig.canvas.set_window_title(imn + ': UV output')
     implot = ax1.imshow(img)        
     implot.set_cmap('gray')    
     ax1.axis([0,imsz[1],imsz[0],0])
