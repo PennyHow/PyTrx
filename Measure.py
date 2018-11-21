@@ -799,13 +799,13 @@ class Velocity(ImageSequence):
         '''         
         # Feature track between images
         trackdata = self._featureTrack(img1, img2, 
-                                      self.getInverseMask(),
-                                      back_thresh=back_thresh, 
-                                      calcErrors=calcErrors,
-                                      maxpoints=maxpoints, 
-                                      quality=quality,
-                                      mindist=mindist, 
-                                      min_features=min_features) 
+                                       self.getInverseMask(),
+                                       back_thresh=back_thresh, 
+                                       calcErrors=calcErrors,
+                                       maxpoints=maxpoints, 
+                                       quality=quality,
+                                       mindist=mindist, 
+                                       min_features=min_features) 
 
         #Pass empty object if tracking insufficient
         if trackdata==None:
@@ -2184,7 +2184,8 @@ class Line(Area):
 
         #Optional commentary
         if self._quiet>2:            
-            print ('\nYou clicked ' + str(len(pts)) + ' in image ' + imn)
+            print ('\nYou clicked ' + str(len(pts)) + ' points in image ' 
+                   + imn)
         
         #Show plot
         plt.show()

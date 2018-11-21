@@ -373,7 +373,7 @@ def readGCPs(fileName):
     #Iterate through lines and append to lists
     gcps= []
     count=2
-    for line in myFile.readlines():       
+    for line in myFile.readlines():  
         items=line.split('\t')
         gcp = []
         
@@ -388,9 +388,7 @@ def readGCPs(fileName):
         if len(gcp)==5:    
             gcps.append(gcp)
         else:
-            print ('\nGCP ERROR: ' + str(len(gcp)) + 
-                   '/5 values found in line ' + str(count))
-            print 'Values not passed forward. Check GCP file'
+            print ('\nGCP file line ' + str(count) + ' not passed forward')
         
         #Update counter        
         count=count+1

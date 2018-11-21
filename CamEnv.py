@@ -146,82 +146,84 @@ class CamCalib(object):
     def __init__(self, *args): 
         '''Constructor to initiate a calibration object.'''            
         failed=False 
-        
-        if len(args)==1:
             
-            #Read calibration from file
-            if isinstance(args[0],str):
-                print '\nAttempting to read camera calibs from a single file'
-                args=readMatrixDistortion(args[0])
-                args=self.checkMatrix(args)
-                if args==None:
+        #Read calibration from file
+        if isinstance(args[0],str):
+            print '\nAttempting to read camera calibs from a single file'
+            args=readMatrixDistortion(args[0])
+            args=self.checkMatrix(args)
+            if args==None:
+                failed=True
+            else:
+                self._intrMat=args[0]
+                self._tanCorr=args[1]
+                self._radCorr=args[2]
+                self._calibErr=None
+            
+                     
+        elif isinstance(args[0],list):
+
+           #Read calibration from several files                  
+            if args[0][0][-4:] == '.txt':
+                print('\nAttempting to read camera calibs from average over ' 
+                      'several files')
+                intrMat=[]
+                tanCorr=[]
+                radCorr=[]               
+                for item in args[0]:
+                    if isinstance(item,str):
+                        arg=readMatrixDistortion(item)
+                        arg=self.checkMatrix(arg)
+                        if arg==None:
+                            failed=True
+                            break
+                        else:
+                            intrMat.append(arg[0])
+                            tanCorr.append(arg[1])
+                            radCorr.append(arg[2])
+                    else:
+                        failed=True
+
+                self._intrMat = sum(intrMat)/len(intrMat)
+                self._tanCorr = sum(tanCorr)/len(tanCorr)
+                self._radCorr = sum(radCorr)/len(radCorr)
+                self._calibErr=None
+                
+            #Calculate calibration from images                    
+            elif args[0][0][-4:] == '.JPG' or '.PNG':
+                print ('\nAttempting to calculate camera calibs from input'
+                        + ' images')
+
+                arg, err = self.calibrateImages(args[0][0], 
+                                                [int(args[0][1]),
+                                                 int(args[0][2])])
+                arg = self.checkMatrix(arg)
+                
+                if arg==None:
                     failed=True
                 else:
-                    self._intrMat=args[0]
-                    self._tanCorr=args[1]
-                    self._radCorr=args[2]
-                    self._calibErr=None
-                
-                         
-            elif isinstance(args[0],list):
-
-               #Read calibration from several files                  
-                if args[0][0][-4:] == '.txt':
-                    print('\nAttempting to read camera calibs from average over ' 
-                          'several files')
-                    intrMat=[]
-                    tanCorr=[]
-                    radCorr=[]               
-                    for item in args[0]:
-                        if isinstance(item,str):
-                            arg=readMatrixDistortion(item)
-                            arg=self.checkMatrix(arg)
-                            if arg==None:
-                                failed=True
-                                break
-                            else:
-                                intrMat.append(arg[0])
-                                tanCorr.append(arg[1])
-                                radCorr.append(arg[2])
-                        else:
-                            failed=True
-    
-                    self._intrMat = sum(intrMat)/len(intrMat)
-                    self._tanCorr = sum(tanCorr)/len(tanCorr)
-                    self._radCorr = sum(radCorr)/len(radCorr)
-                    self._calibErr=None
-                    
-                #Calculate calibration from images                    
-                elif args[0][0][-4:] == '.JPG' or '.PNG':
-                    print ('\nAttempting to calculate camera calibs from input'
-                            + ' images')
-                            
-                    arg, err = self.calibrateImages(args[0][0], 
-                                                    [int(args[0][1]),
-                                                     int(args[0][2])])
-                    arg = self.checkMatrix(arg)
-                    
-                    if arg==None:
-                        failed=True
-                    else:
-                        self._intrMat=arg[0]
-                        self._tanCorr=arg[1]
-                        self._radCorr=arg[2]
-                        self._calibErr=err
-
+                    self._intrMat=arg[0]
+                    self._tanCorr=arg[1]
+                    self._radCorr=arg[2]
+                    self._calibErr=err
             else:
                 failed=True
-                        
-        #Read calibration from list
-        elif len(args)==3:   
-            print '\nAttempting to make camera calibs from raw data sequences'
-            args=self.checkMatrix(args)            
-            self._intrMat=args[0]
-            self._tanCorr=args[1]
-            self._radCorr=args[2]
-            self._calibErr=None
+        
+        #Define calibration from raw input
+        elif isinstance(args[0],tuple):
+            print ('\nAttempting to make camera calibs from raw data '
+                   + 'sequences')
+            
+            arg = self.checkMatrix([args[0][0],args[0][1],args[0][2]]) 
+            
+            self._intrMat=arg[0]
+            self._tanCorr=arg[1]
+            self._radCorr=arg[2]
+            self._calibErr=None 
+            
         else:
             failed=True
+                        
             
         if failed:
             print '\nError creating camera calibration object:'
@@ -424,7 +426,7 @@ class CamCalib(object):
 
         #Change matrix structure for compatibility with PyTrx
         mtx = np.array([mtx[0][0],mtx[0][1],0,
-                       1,mtx[1][1],0,
+                       0,mtx[1][1],0,
                        pp[0],pp[1],1]).reshape(3,3)
 
         
@@ -526,7 +528,7 @@ class CamEnv(CamCalib):
         self._refImage = CamImage(imagePath)      
 
         #Set yaw, pitch and roll to 0 if no information is given        
-        if ypr == None:
+        if ypr is None:
             self._camDirection = np.array([0,0,0])
         else:
             self._camDirection =  np.array(ypr)
@@ -770,7 +772,7 @@ class CamEnv(CamCalib):
             #Need to ask Aslak
             r2=np.sum(xy*xy,1)                
             r2[r2>4]=4
-
+            
             #Transposed from ImGRAFT
             if not np.allclose(self.radDstrt[2:6], [0., 0., 0., 0.]):
                 a=(1. + self.radDstrt[0] * r2+self.radDstrt[1] * r2 * r2 +
@@ -854,7 +856,7 @@ class CamEnv(CamCalib):
 
 
     def getR(self):
-        '''Calculates Camera rotation matrix calculated from view 
+        '''Calculates camera rotation matrix calculated from view 
         direction.'''
 
         C = np.cos(self._camDirection) 
