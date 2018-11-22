@@ -4,7 +4,7 @@ This folder contains the camera environment data needed to run the examples prov
 <hr>
 
 <h3>Camera calibration files (calib)</h3>
-Text files containing information about the camera matrix and lens parameters, which are needed to correct images for distortion. Four separate calibrations were performed for each of the three Kronebreen cameras (KR1, KR2 and KR3), and one was calculated for the Tunabreen camera (TU1). Where defined (in the camera environment text file), PyTrx will take an average of multiple calibration files. 
+Text and image files for determining information about the camera matrix and lens parameters, which are needed to correct images for distortion. The text files contain the camera matrix and lens distortion parameters already calculated - four separate calibrations were performed for first of the Kronebreen cameras (KR1), and one was calculated for the Tunabreen camera (TU1). Where defined (in the camera environment text file), PyTrx will take an average of multiple calibration files. Calibration images from the second and third Kronebreen cameras (KR2 and KR3) are provided in the two folders of images, which are used to calculate the camera matrix and lens distortion parameters within PyTrx and its calibration capabilities. This can either be defined in the camera environment text file, or performed in situ (see one of the extended example scripts for an example).
 
 <hr>
 
