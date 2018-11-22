@@ -72,7 +72,7 @@ This module contains a set of functions for plotting and interpolating data.<br>
 
 <h3>PyTrx set-up and requirements</h3>
 
-PyTrx requires the following key Python packages in order to run: <br><br>
+PyTrx has been coded with Python 2.7 and requires the following key Python packages in order to run: <br><br>
 
 <b>OpenCV (v3.1.0):</b> <a href="https://opencv.org/releases.html">opencv.org</a><br>
 <b>GDAL (v1.1.4):</b> <a href="http://www.gisinternals.com/archive.php">gisinternals.com</a><br>
