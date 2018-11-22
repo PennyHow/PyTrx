@@ -115,6 +115,9 @@ class Velocity(ImageSequence):
                         analysis will commence. This is set to the first image 
                         in the ImageSet by default.
     band:               String denoting the desired image band.
+    equal:              Flag denoting whether histogram equalisation is applied 
+                        to images (histogram equalisation is applied if True). 
+                        Default is True.
     quiet:              Level of commentary during processing. This can be a 
                         integer value between 0 and 2.
                         0: No commentary.
@@ -158,10 +161,10 @@ class Velocity(ImageSequence):
     '''   
         
     def __init__(self, imageList, camEnv, maskPath=None, invmaskPath=None,
-                 calibFlag=True, image0=0, band='L', quiet=2, loadall=False, 
-                 timingMethod='EXIF'):
+                 calibFlag=True, image0=0, band='L', equal=True, quiet=2, 
+                 loadall=False, timingMethod='EXIF'):
         
-        ImageSequence.__init__(self, imageList, band, loadall, quiet)
+        ImageSequence.__init__(self, imageList, band, equal, loadall, quiet)
         
         #Set initial class properties
         self._camEnv = camEnv
@@ -995,6 +998,9 @@ class Area(Velocity):
     maxim (int):               Image with maximum areal extent to be detected 
                                (for mask generation).     
     band (str):                String denoting the desired image band.
+    equal (bool):              Flag denoting whether histogram equalisation is 
+                               applied to images (histogram equalisation is 
+                               applied if True). Default is True.
     quiet (int):               Level of commentary during processing. This can 
                                be an integer value between 0 and 2.
                                0: No commentary.
@@ -1053,12 +1059,12 @@ class Area(Velocity):
     
     #Initialisation of Area class object          
     def __init__(self, imageList, cameraenv, calibFlag=True, 
-                 maxMaskPath=None, maxim=0, band='L', quiet=2, loadall=False, 
-                 timingMethod='EXIF'):
+                 maxMaskPath=None, maxim=0, band='L', equal=True, quiet=2, 
+                 loadall=False, timingMethod='EXIF'):
                      
         #Initialise and inherit from the TimeLapse class object
         Velocity.__init__(self, imageList, cameraenv, None, None, calibFlag, 
-                          0, band, quiet, loadall, timingMethod)
+                          0, band, equal, quiet, loadall, timingMethod)
                  
         #Optional commentary        
         if self._quiet>0:
@@ -2012,6 +2018,9 @@ class Line(Area):
     calibFlag (bool):          An indicator of whether images are calibrated, 
                                for the ImageSet object.          
     band (str):                String denoting the desired image band.
+    equal (bool):              Flag denoting whether histogram equalisation is 
+                               applied to images (histogram equalisation is 
+                               applied if True). Default is True.
     quiet (int):               Level of commentary during processing. This can 
                                be an integer value between 0 and 2.
                                0: No commentary.
@@ -2039,11 +2048,12 @@ class Line(Area):
      
     #Object initialisation        
     def __init__(self, imageList, cameraenv, calibFlag=True,
-                 band='L', quiet=2, loadall=False, timingMethod='EXIF'):
+                 band='L', equal=True, quiet=2, loadall=False, 
+                 timingMethod='EXIF'):
         
         #Initialise and inherit from Area class
         Area.__init__(self, imageList, cameraenv, calibFlag, None, 0, 
-                      band, quiet, loadall, timingMethod)
+                      band, equal, quiet, loadall, timingMethod)
         
         #Optional commentary
         if self._quiet>0:

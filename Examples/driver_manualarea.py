@@ -59,13 +59,14 @@ cameraenvironment.showGCPs()
 calibFlag = True            #Detect with corrected or uncorrected images
 maxim = 0                   #Image number of maximum areal extent 
 imband = 'R'                #Desired image band
+equal = True                #Images with histogram equalisation?
 loadall = False             #Load all images?
 time = 'EXIF'               #Method to derive image times
 quiet = 2                   #Level of commentary
 
 #Set up Area object, from which areal extent will be measured
 plumes = Area(camimgs, cameraenvironment, calibFlag, None, maxim, imband, 
-              quiet, loadall, time)
+              equal, quiet, loadall, time)
 
 
 #-------------------------   Calculate areas   --------------------------------

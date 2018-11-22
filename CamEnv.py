@@ -3,7 +3,7 @@ PYTRX CAMERA ENVIRONMENT MODULE
 
 This script is part of PyTrx, an object-oriented programme created for the 
 purpose of calculating real-world measurements from oblique images and 
-time-lapse image series.
+time-lapse image series. 
 
 The Camera Environment module of PyTrx. This module contains the 
 object-constructors and functions for:

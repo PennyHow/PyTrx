@@ -61,7 +61,7 @@ cameraenvironment.showCalib()
 
 #Set up Velocity object
 velo=Velocity(camimgs, cameraenvironment, camvmask, caminvmask, image0=0, 
-            band='L', quiet=2) 
+            band='L', equal=True, quiet=2) 
 
 
 #Set velocity parameters

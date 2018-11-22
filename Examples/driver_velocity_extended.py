@@ -45,8 +45,7 @@ import matplotlib.pyplot as plt
 sys.path.append('../')
 from CamEnv import CamEnv
 from Measure import Velocity
-from FileHandler import writeHomographyFile, writeVelocityFile, writeSHPFile, writeCalibFile
-from Utilities import arrowplot, interpolateHelper, plotInterpolate
+from Utilities import arrowplot
 
 
 #------------------------   Define input parameters   -------------------------
@@ -210,6 +209,7 @@ velo=Velocity(imgFiles,                     #Path to image files
               caminvmask,                   #Mask for homography tracking
               image0=0,                     #Image start (i.e. image 0)
               band='L',                     #Image band extraction (L,R,G,B)
+              equal=True,                   #Histogram equalisation for imgs?
               quiet=2)                      #Level of commentary (0-3)
 
 

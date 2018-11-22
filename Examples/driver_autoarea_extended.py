@@ -27,7 +27,6 @@ This breakdown script has been included in order to provide the user with a
 more detailed overview of PyTrx's functionality. It also allows flexible
 intervention and adaptation where needed.
 
-
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton
          Lynne Buie
@@ -91,6 +90,7 @@ maxim = 0                   #Image number of maximum areal extent
 thresh = 5                  #Maximum number of detected lakes
 maxim = 0                   #Image number with maximum extents
 band = 'R'                  #Image band
+equal = True                #Images with histogram equalisation?
 quiet = 2                   #Level of commentary
 
 #Image enhancement for detection variables

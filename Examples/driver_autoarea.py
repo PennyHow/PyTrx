@@ -64,6 +64,7 @@ cameraenvironment.showCalib()
 calibFlag = True            #Detect with corrected or uncorrected images
 maxim = 0                   #Image number of maximum areal extent 
 imband = 'R'                #Desired image band
+equal = True                #Images with histogram equalisation? 
 quiet = 2                   #Level of commentary
 loadall = False             #Load all images?
 time = 'EXIF'               #Method to derive image times
@@ -71,7 +72,7 @@ time = 'EXIF'               #Method to derive image times
 
 #Set up Area object, from which areal extent will be measured
 lakes = Area(camimgs, cameraenvironment, calibFlag, cammask, maxim, imband, 
-             quiet, loadall, time)
+             equal, quiet, loadall, time)
              
 #Set image enhancement parameters. If these are undefined then they will be 
 #set to a default enhancement of ('light', 50, 20)

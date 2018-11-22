@@ -68,7 +68,7 @@ class CamImage(object):
         
     No image calibration is undertaken.'''
     
-    def __init__(self, imagePath, band='l',quiet=2):
+    def __init__(self, imagePath, band='l', equal=True, quiet=2):
         '''CamImage constructor to set image path, read in image data in the 
         specified band and access Exif data. 
         
@@ -79,6 +79,9 @@ class CamImage(object):
                         'b': blue band
                         'g': green band
                         'l': grayscale (default)
+        equal:          Flag denoting whether histogram equalisation is applied 
+                        to images (histogram equalisation is applied if True).
+                        Default is True.
         quiet:          Level of commentary during processing. This can be a 
                         integer value between 0 and 2.
                         0: No commentary.
@@ -95,6 +98,8 @@ class CamImage(object):
                               correct.
             self._impath:     String of image path.
             self._band:       String denoting the desired image band.
+            self._equal:      Flag denoting whether histogram equalisation is
+                              applied to images.
             self._imageArray: Image data as numpy array
             self._imsize:     Image size as list [rows,columns].
             self._image:      Floating point array of image data [rows,columns].
@@ -107,6 +112,7 @@ class CamImage(object):
         self._imageGood=True
         self._impath = imagePath
         self._band = band.upper()
+        self._equal = equal
         self._imageArray=None
         self._image=None
         self._imsize=None
@@ -296,33 +302,37 @@ class CamImage(object):
         a desired band or grayscale, then returning a copy.'''        
         #Open image from file using PIL
         if self._image is None:
-            self._image=Image.open(self._impath)
+            self._image = Image.open(self._impath)
         
-        #Apply histogram equalisation
-        h = self._image.convert("L").histogram()
-        lut = []
-        for b in range(0, len(h), 256):
-            # step size
-            step = reduce(operator.add, h[b:b+256]) / 255
-            # create equalization lookup table
-            n = 0
-            for i in range(256):
-                lut.append(n / step)
-                n = n + h[i+b]
+        img = self._image
         
-        #Convert to grayscale or desired band
-        gray = self._image.point(lut*self._image.layers)
-        if self._band=='R':
-            gray,g,b=gray.split()
-        elif self._band=='G':
-            r,gray,b=gray.split() 
-        elif self._band=='B':
-            r,g,gray=gray.split() 
+        if self._equal is True:
+            #Apply histogram equalisation
+            h = img.convert("L").histogram()
+            lut = []
+            for b in range(0, len(h), 256):
+                # step size
+                step = reduce(operator.add, h[b:b+256]) / 255
+                # create equalization lookup table
+                n = 0
+                for i in range(256):
+                    lut.append(n / step)
+                    n = n + h[i+b]
+            
+            #Convert to grayscale or desired band
+            img = img.point(lut*img.layers)
+        
+        if self._band == 'R':
+            img,g,b = img.split()
+        elif self._band == 'G':
+            r,img,b = img.split() 
+        elif self._band == 'B':
+            r,g,img = img.split() 
         else:
-            gray = gray.convert('L')
+            img = img.convert('L')
         
         #Copy image array
-        self._imageArray = np.array(gray).copy()
+        self._imageArray = np.array(img).copy()
                 
 
 #------------------------------------------------------------------------------
@@ -348,6 +358,9 @@ class ImageSequence(object):
                     'b': blue band
                     'g': green band
                     'l': grayscale (default)
+        equal:     Flag denoting whether histogram equalisation is applied to 
+                   images (histogram equalisation is applied if True). Default
+                   is True.
         loadall:   Flag which, if true, will force all images in the sequence
                    to be loaded as images (array) initially and thus not 
                    re-loaded in subsequent processing. This is only advised
@@ -364,14 +377,18 @@ class ImageSequence(object):
         self._imageList:      Inputted list of images.
         self._imageSet:       Sequence of CamImage objects.
         self._band:           String denoting the desired image band.
+        self._equal:          Flag denoting whether histogram equalisation 
+                              is applied to images
     '''
-    def __init__(self, imageList, band='L', loadall=False, quiet=2):
+    def __init__(self, imageList, band='L', equal=True, loadall=False, 
+                 quiet=2):
         
         self._quiet=quiet        
         if self._quiet>0:
             print '\n\nCONSTRUCTING IMAGE SEQUENCE'
         
         self._band=band
+        self._equal=equal
         self._imageList=imageList
         
         #Construct image set (as CamImage objects)
@@ -437,7 +454,7 @@ class ImageSequence(object):
         #Construct CamImage objects
         self._imageSet = []
         for imageStr in imageList:
-            im=CamImage(imageStr, self._band)
+            im=CamImage(imageStr, self._band, self._equal)
             
             #Load image arrays if loadall is true
             if im.imageGood():

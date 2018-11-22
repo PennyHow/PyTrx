@@ -99,7 +99,6 @@ import operator
 import matplotlib.pyplot as plt
 import scipy.io as sio
 from osgeo import ogr,osr
-import gdal
 import glob
 import os
 import sys

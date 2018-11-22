@@ -4,7 +4,6 @@
 ### Calibration path, Camera location, Yaw pitch roll
 
 
-
 Camera_environment_name #Name of CamEnv class
 KR2_2014
 
@@ -22,7 +21,7 @@ image_path #Path name where master image can be found (i.e. calibration image wh
 
 
 Calibration_path #Path name where camera calibration file can be found
-[..\Examples\camenv_data\calib\KR2_calibimgs\*.JPG, 6, 9] 
+[..\Examples\camenv_data\calib\KR2_calibimgs\*.JPG, 6, 9]
 
 
 Camera_location #Location of camera in xyz coordinates
