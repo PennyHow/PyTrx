@@ -17,7 +17,7 @@ If you use PyTrx for scientific papers, please also cite some of our previous wo
 How et al. (2017) Rapidly changing subglacial hydrological pathways at a tidewater glacier revealed through simultaneous observations of water pressure, supraglacial lakes, meltwater plumes and surface velocities. <i>The Cryosphere</i> 11, 2691-2710, <a href="https://doi.org/10.5194/tc-11-2691-2017">doi:10.5194/tc-11-2691-2017</a><br>
 
 <b>*PyTrx used for georectification of glacier calving event locations*</b><br>
-How et al. (In Review) Calving controlled by melt-undercutting: detailed mechanisms revealed through time-lapse observations. <i>Annals of Glaciology</i><br>
+How et al. (Accepted) Calving controlled by melt-undercutting: detailed mechanisms revealed through time-lapse observations. <i>Annals of Glaciology</i>, <a href="https://dx.doi.org/10.1017/aog.2018.28">doi:10.1017/aog.2018.28</a><br>
 
 <b>*PhD thesis by Penelope How, for which PyTrx was developed primarily*</b><br>
 How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK, <a href="https://hdl.handle.net/1842/31103">https://hdl.handle.net/1842/31103</a><br>
