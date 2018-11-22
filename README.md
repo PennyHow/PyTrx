@@ -77,7 +77,7 @@ PyTrx requires the following key Python packages in order to run: <br><br>
 <b>OpenCV (v3.1.0):</b> <a href="https://opencv.org/releases.html">opencv.org</a><br>
 <b>GDAL (v1.1.4):</b> <a href="http://www.gisinternals.com/archive.php">gisinternals.com</a><br>
 <b>Pillow (PIL) (v1.1.7):</b> <a href="http://www.pythonware.com/products/pil/">pythonware.com</a><br>
-<b>OsGeo (v1.1.4):</b> Often comes with distributions of GDAL<br><br>
+<b>OsGeo (v1.1.4):</b> Often associated with distributions of GDAL<br><br>
 
 These packages may not necessarily be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to download them from the given links. It is important to download the package versions specified as we cannot guarantee that all others are compatible with PyTrx. <br>
 
