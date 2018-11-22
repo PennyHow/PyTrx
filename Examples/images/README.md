@@ -13,15 +13,15 @@ Images collected from time-lapse camera site 1 at Kronebreen. This specific sequ
 <hr>
 
 <h3>Kronebreen camera 2 image set (KR2_2014_subset)</h3>
-Images collected from time-lapse camera site 2 at Kronebreen. This specific sequence consists of six images, roughly collected on a daily basis (subject to conditions) between 8th-15th May. This image set is used for deriving glacier surface velocities (driver_velocity.py).
+Images collected from time-lapse camera site 2 at Kronebreen. This specific sequence consists of six images, roughly collected on a daily basis (subject to conditions) between 8th-15th May. This image set is used for deriving glacier surface velocities (driver_velocity.py and driver_velocity_extended.py).
 
 <hr>
 
 <h3>Kronebreen camera 3 image set (KR3_2014_subset)</h3>
-Images collected from time-lapse camera site 3 at Kronebreen. This specific sequence consists of four images, roughly collected on a daily basis (subject to conditions) between 25th-28th June. This image set is used for deriving areas of supraglacial lakes (driver_autoarea.py).
+Images collected from time-lapse camera site 3 at Kronebreen. This specific sequence consists of four images, roughly collected on a daily basis (subject to conditions) between 25th-28th June. This image set is used for deriving areas of supraglacial lakes (driver_autoarea.py and driver_autoarea_extended.py).
 
 <hr>
 
 <h3>Tunabreen image set (TU1_2015_subset)</h3>
 
-Images collected from time-lapse camera site 1 at Tunabreen. This specific sequence consists of four images, roughly collected on a daily basis (subject to conditions) between 19th-23rd August. This image set is used for deriving georectified point locations of calving events (driver_ptsgeorectify.py) and sequential terminus profiles (driver_manualline.py). 
+Images collected from time-lapse camera site 1 at Tunabreen. This specific sequence consists of four images, roughly collected on a daily basis (subject to conditions) between 19th-23rd August. This image set is used for deriving georectified point locations of calving events (driver_ptsgeorectify.py) and sequential terminus profiles (driver_manualline.py and driver_manualline_extended.py). 
