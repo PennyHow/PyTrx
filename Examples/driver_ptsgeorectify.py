@@ -12,7 +12,7 @@ with the colour of each point denoting the style of calving in that particular
 instance. The xyz locations are exported subsequently as a text file (.txt) 
 and as a shape file (.shp).
 
-@author: Penny How (p.how@ed.ac.uk)
+@author: Penny How (pennyruthhow@gmail.com)
          Nick Hulton
          Lynne Buie
 '''
@@ -69,7 +69,6 @@ i=0
 for line in alllines:
     i=i+1
     temp=line.split(',')    
-    
     time.append(float(temp[0].rstrip()))            #Calving event time      
     region.append(temp[1].rstrip())                 #Calving event region             
     style.append(temp[2].rstrip())                  #Calving event style
@@ -125,7 +124,7 @@ ax1.locator_params(axis = 'x', nbins=8)
 ax1.tick_params(axis='both', which='major', labelsize=0)
 ax1.imshow(dem, origin='lower', extent=demextent, cmap='gray')
 ax1.axis([demextent[0], demextent[1], demextent[2], demextent[3]])
-cloc = ax1.scatter(post[0], post[1], c='g', s=100, label='Camera location')
+cloc = ax1.scatter(post[0], post[1], c='g', s=10, label='Camera location')
      
       
 #Plot calving locations on DEM
@@ -182,17 +181,17 @@ print 'Subaqueous events: ' + str(len(subx))
 
 
 #Plot calving event locations by calving style (denoted by colour)
-p6=ax1.scatter(nanx, nany, c='k', s=100, 
+p6=ax1.scatter(nanx, nany, c='k', s=10, 
                label='Unknown', alpha=1.0) 
-p1=ax1.scatter(waterx, watery, c='#00c5ff',s=100, 
+p1=ax1.scatter(waterx, watery, c='#00c5ff',s=10, 
                label='Waterline', alpha=1.0)
-p2=ax1.scatter(icex, icey, c='#00ff00', s=100, 
+p2=ax1.scatter(icex, icey, c='#00ff00', s=10, 
                label='Ice-fall', alpha=1.0)
-p3=ax1.scatter(stackx, stacky, c='#e60000', s=100, 
+p3=ax1.scatter(stackx, stacky, c='#e60000', s=10, 
                label='Stack collapse', alpha=1.0) 
-p4=ax1.scatter(sheetx, sheety, c='#ffaa00', s=100, 
+p4=ax1.scatter(sheetx, sheety, c='#ffaa00', s=10, 
                label='Sheet collapse', alpha=1.0)
-p5=ax1.scatter(subx, suby, c='#8400a8', s=100, 
+p5=ax1.scatter(subx, suby, c='#8400a8', s=10, 
                label='Subaqueous', alpha=1.0)
 
 

@@ -9,19 +9,19 @@ KR3_2014
 
 
 GCP_path #Path name where Ground Control Point data can be found
-..\Examples\camenv_data\gcps\KR3_2014.txt
+../Examples/camenv_data/gcps/KR3_2014.txt
 
 
 DEM_path #Path name where DEM data can be found
-..\Examples\camenv_data\dem\KR_demsmooth.tif
+../Examples/camenv_data/dem/KR_demsmooth.tif
 
 
 image_path #Path name where master image can be found (i.e. calibration image where GCPs have been plotted
-..\Examples\camenv_data\refimages\KR3_2014.JPG
+../Examples/camenv_data/refimages/KR3_2014.JPG
 
 
 Calibration_path #Path name where camera calibration file can be found
-[..\Examples\camenv_data\calib\KR3_calibimgs\*.JPG, 6, 9]
+[../Examples/camenv_data/calib/KR3_calibimgs/*.JPG, 6, 9]
 
 Camera_location #Location of camera in xyz coordinates
 [451632.669 8754648.786 624.699]

@@ -27,17 +27,17 @@ import os
 
 #Import PyTrx packages
 sys.path.append('../')
-from Measure import Area
+from Area import Area
 from CamEnv import CamEnv
-from FileHandler import writeAreaFile, writeSHPFile, writeCalibFile
-from Utilities import plotPX, plotXYZ
+from FileHandler import writeAreaFile, writeAreaSHP, writeCalibFile
+from Utilities import plotAreaPX, plotAreaXYZ
 
 
 #-----------------------------   Map data files   -----------------------------
 
 #Define data inputs
 camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_KR3_2014.txt'
-cammask = '../Examples/camenv_data/masks/KR3_2014_amask.JPG'
+cammask = '../Examples/camenv_data/masks/KR3_2014_amask.jpg'
 camimgs = '../Examples/images/KR3_2014_subset/*.JPG'
 
 #Define data output directory
@@ -61,85 +61,91 @@ cameraenvironment.showCalib()
 #---------------------   Set area detection parameters   ----------------------             
 
 #Define Area class initialisation variables
+colour=False                #Define colour range for every image?
+verify=False                #Manually verify detected areas?
 calibFlag = True            #Detect with corrected or uncorrected images
 maxim = 0                   #Image number of maximum areal extent 
 imband = 'R'                #Desired image band
-equal = True                #Images with histogram equalisation? 
-quiet = 2                   #Level of commentary
-loadall = False             #Load all images?
-time = 'EXIF'               #Method to derive image times
+equal = True                #Images with histogram equalisation?
+threshold = 5               #Threshold for number of retained polygons
+diff = 'light'              #Image enhancement parameter 1
+phi = 50                    #Image enhancement parameter 2
+theta = 20                  #Image enhancement parameter 3
+maxcol = 8                  #Max value from which areas will be distinguished
+mincol = 1                  #Min value from which areas will be distinguished
+maxim = 3                   #Image number with maximum area of interest
+pxext = [0,1200,2000,1500]  #Plotting extent for interactive plots
 
 
 #Set up Area object, from which areal extent will be measured
-lakes = Area(camimgs, cameraenvironment, calibFlag, cammask, maxim, imband, 
-             equal, quiet, loadall, time)
-             
+lakes = Area(camimgs, cameraenvironment, calibFlag, imband, equal)
+
+
 #Set image enhancement parameters. If these are undefined then they will be 
 #set to a default enhancement of ('light', 50, 20)
-lakes.setEnhance('light', 50, 20)
+lakes.setEnhance(diff, phi, theta)
 
 
 #Set colour range, from which extents will be distinguished. If colour range 
 #is not specified, it will be manually defined 
-lakes.setColourrange(8, 1)                                                                                                                                                      
+lakes.setColourrange(maxcol, mincol) 
+
+
+#Set mask and image with maximum area of interest 
+lakes.setMax(cammask, maxim)                                                                                                                                                     
 
 
 #Set px plotting extent for easier colourrange definition and area verification
-lakes.setPXExt(0,1200,2000,1500)
+lakes.setPXExt(pxext[0], pxext[1], pxext[2], pxext[3])
 
 
 #Set polygon threshold (i.e. number of polygons kept)
-lakes.setThreshold(5)
-
-#Set automated area detection input arguments
-px=None                 #Pre-defined pixel extents?
-colour=False            #Define colour range for every image?
-verify=False            #Manually verify detected areas?
+lakes.setThreshold(threshold)
 
 
 #-------------------------   Calculate areas   --------------------------------
 
 #Calculate real areas
-rpolys, rareas = lakes.calcAutoAreas(px, colour, verify)
+areas = lakes.calcAutoAreas(colour, verify)
 
-##Calculate pixel extents. Use this function if pixel extents are only needed, 
-##or a DEM is not available. Pixel extents are automatically calculated if 
-##calcAreas is called.
-#polys, areas = lakes.calcExtents()
 
 ##Import data from file
-#rpolys, rareas, pxpolys, pxareas = lakes.importData(destination)
+#areas = lakes.importData(destination)
 
 
 #----------------------------   Export data   ---------------------------------
 
+#Get information for writing to files
+matrix, tancorr, radcorr = cameraenvironment.getCalibdata()         #CV2 calib
+imn = lakes.getImageNames()                                         #Img names
+proj = 32633                                                        #Projection (WGS84)
+xyzpts = [item[0][1] for item in areas]                             #XYZ coords
+dem = cameraenvironment.getDEM()                                    #DEM
+imgset=lakes._imageSet                                              #Images
+uvpts = [item[1][1] for item in areas]                              #UV coords
+cameraMatrix=cameraenvironment.getCamMatrixCV2()                    #Matrix
+distortP=cameraenvironment.getDistortCoeffsCV2()                    #Distort
+
+
 #Write out camera calibration info to .txt file
 target1 = '../Examples/camenv_data/calib/KR3_2014_1.txt'
-writeCalibFile(cameraenvironment, target1)
-
+writeCalibFile(matrix, tancorr, radcorr, target1)
 
 #Write results to file
-writeAreaFile(lakes, destination)
+writeAreaFile(areas, imn, destination)
 
-
-#Create shapefiles (only applicable for xyz areas)
-target1 = destination + 'shpfiles/'                 #Set destination
-if not os.path.exists(target1):
-    os.makedirs(target1)                            #Create destination
-proj = 32633                                        #WGS84 projection
-writeSHPFile(lakes, target1, proj)                  #Write shapefiles
-
+#Create shapefiles
+target1 = destination + 'shpfiles/'                 
+writeAreaSHP(xyzpts, imn, target1, proj)            
 
 #Write all image extents and dems 
 target2 = destination + 'outputimgs/'
-if not os.path.exists(target2):
-    os.makedirs(target2)
 
-
-#Plot areas in image plane and as XYZ polygons (only if xyz areas calculated)   
-for i in range(len(rpolys)):
-    plotPX(lakes, i, target2, crop=None, show=True)  
-    plotXYZ(lakes, i, target2, crop=None, show=True, dem=False)
+#Plot areas in image plane and as XYZ polygons  
+for i in range(len(areas)):
+    plotAreaPX(uvpts[i], imgset[i].getImageCorr(cameraMatrix, distortP), 
+               show=True, save=target2+'uv_'+str(imn[i]))  
+    plotAreaXYZ(xyzpts[i], dem, show=True, save=target2+'xyz_'+str(imn[i]))
 
 
 #------------------------------------------------------------------------------                                                                                                                                                                                                                                                                                                      

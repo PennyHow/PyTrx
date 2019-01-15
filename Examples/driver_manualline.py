@@ -28,10 +28,10 @@ import glob
 
 #Import PyTrx packages
 sys.path.append('../')
-from Measure import Line
+from Line import Line
 from CamEnv import CamEnv
-from FileHandler import writeLineFile, writeSHPFile, importLineData
-from Utilities import plotPX, plotXYZ
+from FileHandler import writeLineFile, writeLineSHP, importLineData
+from Utilities import plotLinePX, plotLineXYZ
 
 
 #---------------------------   Initialisation   -------------------------------
@@ -54,23 +54,20 @@ terminus = Line(camimgs, cam)
 
 #-----------------------   Calculate/import lines   ---------------------------
 
-#Choose action "plot", "importtxt" or "importshp". Plot proceeds with the 
-#manual  definition of terminus lines, importtxt imports line data from text 
-#files, and  importshp imports line data from shape file (.shp)
-action = 'importtxt'      
-
-
-#Manually define lines from imagery
-if action == 'plot':
-    rline, rlength = terminus.calcManualLinesXYZ()
-    pxlength = terminus._pxline
-    pxline = terminus._pxpts
-
+#Choose action "importtxt" or "importshp". Importtxt imports line data from text 
+#files, and  importshp imports line data from shape file (.shp). Any other 
+#input proceeds with the manual definition of terminus lines
+action = 'plot'      
 
 #Import line data from text files   
-elif action == 'importtxt':
+if action == 'importtxt':
+    
+    #Define file locations
+    xyzfile=destination+'line_realcoords.txt'
+    pxfile=destination+'line_pxcoords.txt'
+    
     #Import lines to terminus object
-    rline, rlength, pxline, pxlength = importLineData(terminus, destination)
+    xyzcoords, xyzline, pxcoords, pxline = importLineData(xyzfile, pxfile)
 
 
 #Import line data from shape files (only imports real line data, not pixel)
@@ -99,48 +96,46 @@ elif action == 'importshp':
             xyz_corr.append(pt3)
         
     #Append data to Line object
-    terminus._realpts = xyz_corr
-    terminus._realline = xyz_line
+    xyzcoords = xyz_corr
+    xyzline = xyz_line
 
 
-#Program will terminate if an invalid string is inputted as the action variable        
+#Plot terminus lines       
 else:
-    print 'Invalid action. Please re-define.'
-    sys.exit(1)
-   
-   
+    lines = terminus.calcManualLines()
+    
+
 #----------------------------   Export data   ---------------------------------
 
-#Change flags to write text and shape files
-write = True
-shp = True
-
 #Write line data to txt file
-if write is True:   
-    writeLineFile(terminus, destination)
+imn=terminus.getImageNames()
+writeLineFile(lines, imn, destination)
 
 #Write shapefiles from line data
-if shp is True:   
-    target1 = destination + 'shapefiles/'
-    if not os.path.exists(target1):
-        os.makedirs(target1)    
-    proj = 32633
-    writeSHPFile(terminus, target1, proj)
+target1 = destination + 'shapefiles/'   
+proj = 32633
+xyzcoords = [item[0][1] for item in lines]
+writeLineSHP(xyzcoords, imn, target1, proj)
 
 
-#----------------------------   Show results   --------------------------------
+#----------------------------   Show results   --------------------------------  
 
-#Generate destination location
+#Define destination
 target2 = destination + 'outputimgs/'
-if not os.path.exists(target2):
-    os.makedirs(target2)
 
-#Plot and save all extent and area images
-length=len(pxline)
-for i in range(len(pxline)):
-    plotPX(terminus, i, target2, crop=None, show=False)
-    plotXYZ(terminus, i, target2, crop=None, show=False, dem=True)
-    
+#Get dem, images, camera matrix and distortion parameters
+dem = cam.getDEM()
+imgset=terminus._imageSet
+cameraMatrix=cam.getCamMatrixCV2()
+distortP=cam.getDistortCoeffsCV2()
+pxcoords = [item[1][1] for item in lines]
+
+#Plot lines in image plane and as XYZ lines 
+for i in range(len(pxcoords)):
+    plotLinePX(pxcoords[i], imgset[i].getImageCorr(cameraMatrix, distortP), 
+               show=True, save=target2+'uv_'+str(imn[i]))  
+    plotLineXYZ(xyzcoords[i], dem, show=True, save=target2+'xyz_'+str(imn[i]))
+
     
 #------------------------------------------------------------------------------
 

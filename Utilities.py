@@ -5,33 +5,37 @@ This script is part of PyTrx, an object-oriented programme created for the
 purpose of calculating real-world measurements from oblique images and 
 time-lapse image series.
 
-This module, Utilities, contains functions needed for simple plotting and 
-interpolation. These merely serve as examples and it is highly encouraged to 
-adapt these functions for visualising datasets.
+This module, Utilities, contains stand-alone functions needed for simple 
+plotting and interpolation. These merely serve as examples and it is highly 
+encouraged to adapt these functions for visualising datasets.
 
 Functions available in Utilities
-plotInterpolate:                Function to plot the results of the 
-                                interpolation process for a particular 
-                                timestep.
-plotPX:                         Return image overlayed with pixel velocities/
-                                areas/lines for a given image number. 
-                                Measurement is distinguished automatically from 
-                                the given Measure class object (i.e. Velocity, 
-                                Area, or Line).
-plotXYZ:                        Plot xyz points of real velocities/areas/lines 
-                                for a given image number. Measurement is 
-                                distinguished automatically from the given 
-                                Measure class object (i.e. Velocity, Area, or 
-                                Line).
-interpolateHelper:              Function to interpolate a point dataset. This 
-                                uses functions of the SciPy package to set up a 
-                                grid (grid) and then interpolate using a linear 
-                                interpolation method (griddata).
-arrowplot:                      Function to plot arrows to denote the direction 
-                                and magnitude of the displacement. Direction is 
-                                indicated by the bearing of the arrow, and the
-                                magnitude is indicated by the length of the 
-                                arrow.
+plotGCPs:                       Plot GCPs onto a reference image, with 
+                                corresponding xyz points plotted onto DEM
+plotPrinciplePoint:             Plot principle point on image
+plotCalib:                      Plot image corrected for distortion (and 
+                                uncorrected image for comparison)
+plotAreaPX:                     Plot figure with image overlayed with detected
+                                areas
+plotLinePX:                     Plot figure with image overlayed with detected
+                                lines
+plotVeloPX:                     Plot figure with image overlayed with pixel 
+                                velocities. UV data are depicted as the uv 
+                                point in img0 and the corresponding pixel 
+                                velocity as a proportional arrow (computed 
+                                using the arrowplot function)
+plotAreaXYZ:                    Plot figure with image overlayed with xyz 
+                                coordinates representing detected areas
+plotLineXYZ:                    Plot figure with image overlayed with xyz 
+                                coordinates representing detected lines
+plotVeloXYZ:                    Plot figure with image overlayed with xyz 
+                                velocities. XYZ data are depicted as the xyz 
+                                point in img0 and the corresponding velocity as 
+                                a proportional arrow (computed using the 
+                                arrowplot function)
+plotInterpolate:                Plot the results of the velocity 
+                                interpolation process for a particular image 
+                                pair
              
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton 
@@ -39,354 +43,498 @@ arrowplot:                      Function to plot arrows to denote the direction
 '''
 
 #Import packages
+from scipy.interpolate import griddata
 import matplotlib.pyplot as plt
 import numpy as np
 import math
-from scipy.interpolate import griddata
-import sys
+import cv2
 
 #------------------------------------------------------------------------------  
+
+def plotGCPs(gcps, img, imn, dem, camloc, extent=None):
+    '''Function to show the ground control points, on the image and DEM.
+    '''       
+    #Get GCPs      
+    worldgcp=gcps[0]
+    imgcp = gcps[1]
     
-def plotInterpolate(a, number, grid, pointextent, show=True, save=None, 
-                    crop=None):
-    '''Function to plot the results of the velocity interpolation process for 
-    a particular timestep.
-
-    Inputs
-    a:              A Velocity object.
-    number:         Sequence number.
-    grid:           Numpy grid. It is recommended that this is constructed 
-                    using the interpolateHelper function.
-    pointextent:    Grid extent.
-    show:           Flag to denote whether the figure is shown.
-    save:           Destination file to save figure to.
-    crop:           Crop output if desired ([x1,x2,y1,y2]).
-    ''' 
-    #Get image name
-    imn=a._imageSet[number].getImagePath().split('\\')[1]   
-
-    #Set-up plot
-    fig, (ax1) = plt.subplots(1, figsize=(20,10))
-    fig.canvas.set_window_title(imn + ': XYZ interpolate')
-    ax1.set_xticks([])
-    ax1.set_yticks([])
+    #Get DEM and DEM extent (if specified)
+    demex=dem.getExtent()
+    xscale=dem.getCols()/(demex[1]-demex[0])
+    yscale=dem.getRows()/(demex[3]-demex[2])
+    
+    if extent is not None:
+        xmin=extent[0]
+        xmax=extent[1]
+        ymin=extent[2]
+        ymax=extent[3]
+            
+        xdmin=(xmin-demex[0])*xscale
+        xdmax=((xmax-demex[0])*xscale)+1
+        ydmin=(ymin-demex[2])*yscale
+        ydmax=((ymax-demex[2])*yscale)+1
+        demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
+        lims = demred.getExtent()
         
-    #Prepare DEM
-    demobj=a._camEnv.getDEM()
-    demextent=demobj.getExtent()
-    dem=demobj.getZ()
-   
-    #Get camera position (from the CamEnv class)
-    post = a._camEnv._camloc            
-    
-    #Plot DEM and set cmap
-    implot = ax1.imshow(dem, origin='lower', extent=demextent)
-    implot.set_cmap('gray')
-    ax1.axis([demextent[0], demextent[1],demextent[2], demextent[3]])
-        
-    #Plot camera location
-    ax1.scatter(post[0], post[1], c='g')
-     
-    #Crop extent
-    if crop != None:
-        ax1.axis([crop[0], crop[1], crop[2], crop[3]])
-    
-    #Plot grid onto DEM
-    interp = ax1.imshow(grid, 
-                        origin='lower', 
-                        cmap=plt.get_cmap("gist_ncar"), 
-                        extent=pointextent, 
-                        alpha=0.5) #alpha=1
-               
-    plt.colorbar(interp, ax=ax1)
-    
-    #Save if flag is true
-    if save != None:
-        plt.savefig(save + 'interp_' + imn, dpi=300)
-        
-    #Show plot
-    if show is True:
-        mng = plt.get_current_fig_manager()
-        mng.window.showMaximized()
-        plt.show()
-    
-    plt.close()
-
-
-def plotPX(a, number, dest=None, crop=None, show=True):
-    '''Return image overlayed with pixel velocities/areas/lines for a given 
-    image number. Measurement is distinguished automatically from the given
-    Measure class object (i.e. Velocity, Area, or Line).
-    
-    Inputs
-    a:              An Area/Line/Velocity object.
-    number:         Sequence number.
-    dest:           Destination to save plot to.
-    crop:           Crop output if desired ([x1,x2,y1,y2]).
-    show:           Flag to denote whether the figure is shown.
-    '''
-    
-    #Call corrected/uncorrected image
-    if a._calibFlag is True:
-        img=a._imageSet[number].getImageCorr(a._camEnv.getCamMatrixCV2(), 
-                                            a._camEnv.getDistortCoeffsCv2())      
     else:
-        img=a._imageSet[number].getImageArray() 
+        xdmin=(demex[0]-demex[0])*xscale
+        xdmax=((demex[1]-demex[0])*xscale)+1
+        ydmin=(demex[2]-demex[2])*yscale
+        ydmax=((demex[3]-demex[2])*yscale)+1
+        demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
+        lims = demred.getExtent() 
     
-    #Get image name
-    imn=a._imageSet[number].getImagePath().split('\\')[1] 
+    #Get DEM z values for plotting
+    demred=demred.getZ()
     
+    #Plot image points    
+    fig, (ax1,ax2) = plt.subplots(1,2)
+    fig.canvas.set_window_title('GCP locations of '+str(imn))
+    ax1.axis([0,img.shape[1],
+              img.shape[0],0])  
+    ax1.imshow(img, origin='lower', cmap='gray')
+    ax1.scatter(imgcp[:,0], imgcp[:,1], color='red')
+    
+    #Plot world points
+    ax2.locator_params(axis = 'x', nbins=8)
+    ax2.axis([lims[0],lims[1],lims[2],lims[3]])
+    ax2.imshow(demred, origin='lower', 
+               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
+    ax2.scatter(worldgcp[:,0], worldgcp[:,1], color='red')
+    ax2.scatter(camloc[0], camloc[1], color='blue')
+    plt.show()
+    plt.close()
+ 
+    
+def plotPrincipalPoint(camcen, img, imn):
+    '''Function to show the principal point on the image, along with the 
+    GCPs.
+    '''
+ 
+    #Get the camera centre from the intrinsic matrix 
+    ppx = camcen[0] 
+    ppy = camcen[1]       
+     
+    #Plot image points
+    fig, (ax1) = plt.subplots(1)
+    fig.canvas.set_window_title('Principal Point of '+str(imn))
+    ax1.axis([0,img.shape[1],
+              img.shape[0],0])        
+
+    ax1.imshow(img, origin='lower', cmap='gray')
+    ax1.scatter(ppx, ppy, color='yellow', s=100)
+    ax1.axhline(y=ppy)
+    ax1.axvline(x=ppx)
+    plt.show() 
+    plt.close()
+    
+ 
+def plotCalib(matrix, distortion, img, imn):
+    '''Function to show camera calibration. Two images are plotted, the 
+    first with the original input image and the second with the calibrated
+    image. This calibrated image is corrected for distortion using the 
+    distortion parameters held in the CamCalib object.
+    '''
+
+    #Calculate optimal camera matrix 
+    h = int(img.shape[0])
+    w = int(img.shape[1])
+    newMat, roi = cv2.getOptimalNewCameraMatrix(matrix, distortion, 
+                                                (w,h), 1, (w,h))
+
+    #Correct image for distortion                                                
+    corr_image = cv2.undistort(img, matrix, 
+                               distortion, newCameraMatrix=newMat)
+   
+    
+    #Plot uncorrected and corrected images                         
+    fig, (ax1,ax2) = plt.subplots(1,2)
+    fig.canvas.set_window_title('Calibration output of '+str(imn))
+    implot1 = ax1.imshow(img)
+    implot1.set_cmap('gray')    
+    ax1.axis([0,w,h,0])
+    implot2 = ax2.imshow(corr_image)        
+    implot2.set_cmap('gray')    
+    ax2.axis([0,w,h,0])    
+    plt.show()
+    plt.close()
+        
+        
+def plotAreaPX(uv, img, show=True, save=None):
+    '''Plot figure with image overlayed with pixel features (either areas or 
+    line features).
+    
+    Variables
+    uv (arr):           Input uv coordinates for plotting over image
+    img (arr):          Image array
+    show (bool):        Flag to denote whether the figure is shown
+    save (str):         Destination file to save figure to    
+    '''
+        
     #Get image size
-    imsz = a._imageSet[number].getImageSize()
+    imsz = img.shape
           
     #Create image plotting window
     fig, (ax1) = plt.subplots(1, figsize=(20,10))
-    fig.canvas.set_window_title(imn + ': UV output')
+    
+    #Plot image
     implot = ax1.imshow(img)        
     implot.set_cmap('gray')    
     ax1.axis([0,imsz[1],imsz[0],0])
     ax1.set_xticks([])
     ax1.set_yticks([])
     
-    #Crop image if desired
-    if crop != None:
-        ax1.axis([crop[0],crop[1],crop[2],crop[3]])
-
-
-    #Plot pixel polygon areas
-    if hasattr(a, '_pxpoly'):
-        polys = a._pxpoly[number]           #Get polygon
-        for p in polys:
-            x=[]
-            y=[]
-            for xy in p:
-                if len(xy)==1:
-                    x.append(xy[0][0])      #Get X coordinates
-                    y.append(xy[0][1])      #Get Y coordinates
-                elif len(xy)==2:
-                    x.append(xy[0])
-                    y.append(xy[1])
-            ax1.plot(x,y,'w-')              #Plot polygon
-
-    
-    #Plot pixel lines        
-    elif hasattr(a, '_pxpts'):
-        line = a._pxpts[number]             #Get line        
-        x=[]
-        y=[]
-        for xy in line:
-            x.append(xy[0])                 #Get X coordinates
-            y.append(xy[1])                 #Get Y coordinates
-        ax1.plot(x,y,'w-')                  #Plot line
-
-
-    #Plot velocity points
-    elif hasattr(a, '_uvvel'):
-        velocity = a._uvvel[number]         #Get Velocities
-        pt0 = a._uv0[number]                #Get point positions from im0
-        
-        if a._uv1corr[number] is None:           
-            pt1 = a._uv1[number]
-        else:
-            pt1 = a._uv1corr[number]        #Get point positions from im1
-                
-        pt0x=pt0[:,0,0]                     #pt0 x values
-        pt0y=pt0[:,0,1]                     #pt0 y values
-        pt1x=pt1[:,0,0]                     #pt1 x values
-        pt1y=pt1[:,0,1]                     #pt1 y values
-        
-        #Plot xy positions onto images
-        uvplt = ax1.scatter(pt0x, pt0y, c=velocity, s=50, vmin=0,
-                            vmax=max(velocity), cmap=plt.get_cmap("gist_ncar"))
-        plt.colorbar(uvplt, ax=ax1)
-
-        #Plot arrows
-        xar,yar=arrowplot(pt0x, pt0y, pt1x, pt1y, scale=5.0,headangle=15)
-        ax1.plot(xar,yar,color='black')
-  
+    #Set window name
+    if save != None:
+        fig.canvas.set_window_title('UV output: ' + save)
     else:
-        print '\nUnrecognised Velocity/Area/Line class object'
-        sys.exit(1)
-     
+        fig.canvas.set_window_title('UV output')
+    
+    #Extract xy data from features               
+    for shp in uv: 
+        xl=[]
+        yl=[]
+        for pt in shp:
+            if len(pt)==1:
+                xl.append(pt[0][0])
+                yl.append(pt[0][1])
+            elif len(pt)==2:
+                xl.append(pt[0])
+                yl.append(pt[1])
+            else:
+                print 'Unrecognised point structure for plotting'
+                pass
+            
+        ax1.plot(xl, yl, c='#FFFF33', linestyle='-') 
+    
     #Save figure
-    if dest != None:
-        plt.savefig(dest + 'uv_' + imn, dpi=300) 
+    if save != None:
+        plt.savefig(save, dpi=300) 
     
     #Show figure    
     if show is True:
-        mng = plt.get_current_fig_manager()
-        mng.window.showMaximized()
+        plt.show()    
+
+
+def plotLinePX(uv, img, show=True, save=None):
+    '''Plot figure with image overlayed with pixel features (either areas or 
+    line features).
+    
+    Variables
+    uv (arr):           Input uv coordinates for plotting over image
+    img (arr):          Image array
+    show (bool):        Flag to denote whether the figure is shown
+    save (str):         Destination file to save figure to    
+    '''
+        
+    #Get image size
+    imsz = img.shape
+          
+    #Create image plotting window
+    fig, (ax1) = plt.subplots(1, figsize=(20,10))
+    
+    #Plot image
+    implot = ax1.imshow(img)        
+    implot.set_cmap('gray')    
+    ax1.axis([0,imsz[1],imsz[0],0])
+    ax1.set_xticks([])
+    ax1.set_yticks([])
+    
+    #Set window name
+    if save != None:
+        fig.canvas.set_window_title('UV output: ' + save)
+    else:
+        fig.canvas.set_window_title('UV output')
+                   
+    ax1.plot(uv[:,0], uv[:,1], c='#FFFF33', linestyle='-') 
+    
+    #Save figure
+    if save != None:
+        plt.savefig(save, dpi=300) 
+    
+    #Show figure    
+    if show is True:
         plt.show()    
     
-    #Close figure                        
-    plt.close()
+ 
+def plotVeloPX(uvvel, uv0, uv1, img, show=True, save=None):
+    '''Plot figure with image overlayed with pixel velocities. UV data are
+    depicted as the uv point in img0 and the corresponding pixel velocity as a 
+    proportional arrow (computed using the arrowplot function).
     
-    #Clear memory
-    a._imageSet[number].clearAll()  
+    Variables    
+    uvvel (arr):        Input pixel velocities
+    uv0 (arr):          Coordinates (u,v) for points in first image
+    uv1 (arr):          Coordinates (u,v) for points in second image
+    img (arr):          Image array
+    show (bool):        Flag to denote whether the figure is shown
+    save (str):         Destination file to save figure to  
+    '''
+        
+    #Get image size
+    imsz = img.shape
+          
+    #Create image plotting window
+    fig, (ax1) = plt.subplots(1, figsize=(20,10))
     
+    #Plot image
+    implot = ax1.imshow(img)        
+    implot.set_cmap('gray')    
+    ax1.axis([0,imsz[1],imsz[0],0])
+    ax1.set_xticks([])
+    ax1.set_yticks([])  
     
-def plotXYZ(a, number, dest=None, crop=None, show=True, dem=True):
-    '''Plot xyz points of real velocities/areas/lines for a given image number.
-    Measurement is distinguished automatically from the given Measure class 
-    object (i.e. Velocity, Area, or Line).
-    
-    Inputs
-    a:              An Area/Line/Velocity object.
-    number:         Sequence number.
-    dest:           Destination to save plot to.
-    crop:           Crop output if desired ([x1,x2,y1,y2]).
-    show:           Flag to denote whether the figure is shown.
-    dem:            Flag to denote whether DEM is shown or not.
-    '''                           
+    #Set window name
+    if save != None:
+        fig.canvas.set_window_title('UV output: ' + save)
+    else:
+        fig.canvas.set_window_title('UV output')
+        
+    #Plot xy positions onto images
+    uvplt = ax1.scatter(uv0[:,0,0], uv0[:,0,1], c=uvvel, s=30, vmin=0,
+                        vmax=max(uvvel), cmap=plt.get_cmap("gist_ncar"))
+    plt.colorbar(uvplt, ax=ax1)
 
-    #Get image name
-    imn=a._imageSet[number].getImagePath().split('\\')[1]   
+    #Plot arrows
+    xar,yar=arrowplot(uv0[:,0,0], uv0[:,0,1], uv1[:,0,0], uv1[:,0,1], 
+                      scale=5.0, headangle=15)
+    ax1.plot(xar,yar,color='black',linewidth=1)
+       
+    #Save figure
+    if save != None:
+        plt.savefig(save, dpi=300) 
+    
+    #Show figure    
+    if show is True:
+        plt.show()    
+    
+       
+def plotAreaXYZ(xyz, dem, show=True, save=None):    
+    '''Plot figure with image overlayed with xyz coordinates representing 
+    either areas or line features.
+    
+    Variables
+    xyz (arr):              Input xyz coordinates for plotting
+    dem (ExplicitRaster):   Underlying DEM for plotting over
+    show (bool):            Flag to denote whether the figure is shown
+    save (str):             Destination file to save figure to 
+    '''                           
 
     #Set-up plot
     fig, (ax1) = plt.subplots(1, figsize=(20,10))
-    fig.canvas.set_window_title(imn + ': XYZ output')
     ax1.set_xticks([])
     ax1.set_yticks([])
+    
+    #Set window name
+    if save != None:
+        fig.canvas.set_window_title('XYZ output: ' + save)
+    else:
+        fig.canvas.set_window_title('XYZ output')        
         
-    #Prepare DEM if desired
-    if dem is True:
-        demobj=a._camEnv.getDEM()
-        demextent=demobj.getExtent()
-        dem=demobj.getZ()
-   
-        #Get camera position (from the CamEnv class)
-        post = a._camEnv._camloc            
+    #Prepare DEM for plotting
+    if dem is not None:
+        demextent = dem.getExtent()
+        demz = dem.getZ()           
     
         #Plot DEM and set cmap
-        implot = ax1.imshow(dem, origin='lower', extent=demextent)
+        implot = ax1.imshow(demz, origin='lower', extent=demextent)
         implot.set_cmap('gray')
         ax1.axis([demextent[0], demextent[1],demextent[2], demextent[3]])
-        
-        #Plot camera location
-        ax1.scatter(post[0], post[1], c='g')
-     
-    #Crop extent
-    if crop != None:
-        ax1.axis([crop[0], crop[1], crop[2], crop[3]])
-                
-    #If object has area attributes
-    if hasattr(a, '_realpoly'):
-
-        #Get xyz points for polygons in a given image
-        xyz = a._realpoly[number]
-        
-        #Extract xy data from poly pts
-        count=1                
-        for shp in xyz: 
-            xl=[]
-            yl=[]
-            for pt in shp:
-                xl.append(pt[0])
-                yl.append(pt[1])
-            lab = 'Area ' + str(count)
-            ax1.plot(xl, yl, c=np.random.rand(3,1), linestyle='-', label=lab)
-            count=count+1
-        
-        ax1.legend()
-           
-    #If object has line attributes            
-    elif hasattr(a, '_realpts'):
-        
-        #Get xyz points for lines in a given image
-        line = a._realpts[number]
-        
-        #Get xy data from line pts
+                           
+    #Extract xy data from features               
+    for shp in xyz: 
         xl=[]
-        yl=[]        
-        for pt in line:
+        yl=[]
+        for pt in shp:
             xl.append(pt[0])
             yl.append(pt[1])
-        
-        #Plot line points and camera position on to DEM image        
-        ax1.plot(xl, yl, 'y-')
-        
-    #If object has velocity attributes            
-    elif hasattr(a, '_xyzvel'):
-        
-        #Get xyz points and velocities 
-        xyzvelo = a._xyzvel[number]               #xyz velocity
-        xyzstart = a._xyz0[number]                #xyz pt0 position
-        xyzend = a._xyz1[number]                  #xyz pt1 position
-           
-        #Get xyz positions from image0 and image1
-        xyz_xs = xyzstart[:,0]                      #pt0 x values
-        xyz_xe = xyzend[:,0]                        #pt1 x values
-        xyz_ys = xyzstart[:,1]                      #pt0 y values
-        xyz_ye = xyzend[:,1]                        #pt1 y values
-                                  
-        #Scatter plot velocity                 
-        xyzplt = ax1.scatter(xyz_xs, xyz_ys, c=xyzvelo, s=50, 
-                             cmap=plt.get_cmap('gist_ncar'), 
-                             vmin=0, vmax=max(xyzvelo))  
-
-        #Plot vector arrows denoting direction                             
-        xar,yar=arrowplot(xyz_xs,xyz_ys,xyz_xe,xyz_ye,scale=5.0,headangle=15)
-        ax1.plot(xar,yar,color='black')
-
-        #Plot color bar
-        plt.colorbar(xyzplt, ax=ax1)
-            
-    else:
-        print '\nUnrecognised Velocity/Area/Line class object'
-        sys.exit(1)
+        ax1.plot(xl, yl, c='#FFFF33', linestyle='-')        
     
     #Save figure
-    if dest != None:
-        plt.savefig(dest  + 'xyz_' + imn, dpi=300)
+    if save != None:
+        plt.savefig(save)
+    
+    #Show figure
+    if show is True:
+        plt.show()         
+
+
+def plotLineXYZ(xyz, dem, show=True, save=None):    
+    '''Plot figure with image overlayed with xyz coordinates representing 
+    either areas or line features.
+    
+    Variables
+    xyz (arr):              Input xyz coordinates for plotting
+    dem (ExplicitRaster):   Underlying DEM for plotting over
+    show (bool):            Flag to denote whether the figure is shown
+    save (str):             Destination file to save figure to 
+    '''                           
+
+    #Set-up plot
+    fig, (ax1) = plt.subplots(1, figsize=(20,10))
+    ax1.set_xticks([])
+    ax1.set_yticks([])
+    
+    #Set window name
+    if save != None:
+        fig.canvas.set_window_title('XYZ output: ' + save)
+    else:
+        fig.canvas.set_window_title('XYZ output')        
+        
+    #Prepare DEM for plotting
+    if dem is not None:
+        demextent = dem.getExtent()
+        demz = dem.getZ()           
+    
+        #Plot DEM and set cmap
+        implot = ax1.imshow(demz, origin='lower', extent=demextent)
+        implot.set_cmap('gray')
+        ax1.axis([demextent[0], demextent[1],demextent[2], demextent[3]])
+                           
+    ax1.plot(xyz[:,0], xyz[:,1], c='#FFFF33', linestyle='-')        
+    
+    #Save figure
+    if save != None:
+        plt.savefig(save)
+    
+    #Show figure
+    if show is True:
+        plt.show()
+        
+
+def plotVeloXYZ(xyzvel, xyz0, xyz1, dem, show=True, save=None):
+    '''Plot figure with image overlayed with xyz velocities. XYZ data are
+    depicted as the xyz point in img0 and the corresponding velocity as a 
+    proportional arrow (computed using the arrowplot function).
+    
+    Variables   
+    xyzvel (arr):           Input xyz velocities
+    xyz0 (arr):             Coordinates (x,y) for points in first image
+    xyz1 (arr):             Coordinates (x,y) for points in second image
+    dem (ExplicitRaster):   Underlying DEM for plotting over
+    show (bool):            Flag to denote whether the figure is shown
+    save (str):             Destination file to save figure to 
+    '''                           
+
+    #Set-up plot
+    fig, (ax1) = plt.subplots(1, figsize=(20,10))
+    ax1.set_xticks([])
+    ax1.set_yticks([])
+    
+    #Set window name
+    if save != None:
+        fig.canvas.set_window_title('XYZ output: ' + save)
+    else:
+        fig.canvas.set_window_title('XYZ output')
+        
+    #Prepare DEM for plotting
+    if dem is not None:
+        demextent = dem.getExtent()
+        demz = dem.getZ()           
+    
+        #Plot DEM and set cmap
+        implot = ax1.imshow(demz, origin='lower', extent=demextent)
+        implot.set_cmap('gray')   
+                                      
+    #Scatter plot velocity points from img0                 
+    xyzplt = ax1.scatter(xyz0[:,0], xyz0[:,1], c=xyzvel, s=30, 
+                         cmap=plt.get_cmap('gist_ncar'), 
+                         vmin=0, vmax=max(xyzvel))  
+
+    #Plot vector arrows denoting direction                             
+    xar,yar=arrowplot(xyz0[:,0],xyz0[:,1],xyz1[:,0],xyz1[:,1],scale=5.0,
+                      headangle=15)
+    ax1.plot(xar,yar,color='black', linewidth=1)
+
+    #Plot color bar
+    plt.colorbar(xyzplt, ax=ax1)
+                
+    #Save figure
+    if save != None:
+        plt.savefig(save, dpi=300)
      
     #Show figure
     if show is True:
-        mng = plt.get_current_fig_manager()
-        mng.window.showMaximized()
         plt.show()
- 
-    #Close plot   
-    plt.close()
+        
 
+def plotInterpolate(grid, pointextent, dem, show=True, save=None):
+    '''Function to plot the results of the velocity interpolation process for 
+    a particular image pair.
 
-def interpolateHelper(a, number, method='linear'):
+    Variables
+    grid (arr):             Numpy grid. It is recommended that this is 
+                            constructed using the interpolateHelper function
+    pointextent (list):     Grid extent
+    show (bool):            Flag to denote whether the figure is shown
+    dem (ExplicitRaster):   Underlying DEM for plotting over
+    save (str):             Destination file to save figure to
+    ''' 
+    #Set-up plot
+    fig, (ax1) = plt.subplots(1, figsize=(20,10))
+    ax1.set_xticks([])
+    ax1.set_yticks([])    
+
+    #Set name of window
+    if save != None:
+        fig.canvas.set_window_title('XYZ interpolate: ' + save)
+    else:
+        fig.canvas.set_window_title('XYZ interpolate')        
+        
+    #Prepare DEM for plotting
+    if dem != None:
+        demextent = dem.getExtent()
+        demz = dem.getZ()           
+    
+        #Plot DEM and set cmap
+        implot = ax1.imshow(demz, origin='lower', extent=demextent)
+        implot.set_cmap('gray')
+        ax1.axis([demextent[0], demextent[1],demextent[2], demextent[3]])
+                    
+    #Plot interpolated grid with colour bar legend 
+    interp = ax1.imshow(grid, origin='lower', cmap=plt.get_cmap("gist_ncar"), 
+                        extent=pointextent, alpha=0.5)                
+    plt.colorbar(interp, ax=ax1)
+    
+    #Save if variable not none
+    if save != None:
+        plt.savefig(save + 'interp.jpg', dpi=300)  
+            
+    #Show plot
+    if show is True:
+        plt.show()
+    
+
+def interpolateHelper(xyzvel, xyz0, xyz1, method='linear'):
     '''Function to interpolate a point dataset. This uses functions of 
     the SciPy package to set up a grid (grid) and then interpolate using a
     linear interpolation method (griddata).
+    
     Methods are those compatible with SciPy's interpolate.griddata function: 
     "nearest", "cubic" and "linear"
     
-    Inputs
-    a:              A Velocity object.
-    number:         Sequence number.
-    method:         Interpolation method ("nearest"/"cubic"/"linear").
-    filt:           Flag to denote if points should be filtered or not.
+    Variables
+    xyzvel (arr):           Input xyz velocities
+    xyz0 (arr):             Coordinates (x,y) for points in first image
+    xyz1 (arr):             Coordinates (x,y) for points in second image
+    method (str):           Interpolation method ("nearest"/"cubic"/"linear")
     
-    Output
-    grid:           Interpolated grid. 
-    pointsextent:   Grid extent. 
-    '''   
-    
-    #Get xyz positions from image0 and image1
-    xyzstart = a._xyz0[number]                             #pt0                                   
-    xyzend = a._xyz1[number]                               #pt1 
-    
-    startx = xyzstart[:,0]                                 #pt0 x values
-    endx = xyzend[:,0]                                     #pt1 x values
-    starty = xyzstart[:,1]                                 #pt0 y values
-    endy = xyzend[:,1]                                     #pt1 y values                                         
-    
+    Returns
+    grid (arr):             Interpolated grid 
+    pointsextent (list):    Grid extent
+    '''                                             
     #Create empty lists for xyz information without NaNs
-    xyzvelo=[]  
+    velo=[]  
     x1=[]
     x2=[]
     y1=[]
     y2=[] 
                                      
     #Remove NaN values from velocities and points                   
-    for v,sx,ex,sy,ey in zip(a._xyzvel[number],startx, endx, starty, endy):                          
+    for v,sx,ex,sy,ey in zip(xyzvel, xyz0[:,0], xyz1[:,0], xyz0[:,1], 
+                             xyz1[:,1]):                          
         if np.isnan(v)==False:
-            xyzvelo.append(v)                            #xyz velocities
+            velo.append(v)                            #xyz velocities
             x1.append(sx)                                #pt0 x values
             x2.append(ex)                                #pt1 x values
             y1.append(sy)                                #pt0 y values
@@ -416,7 +564,7 @@ def interpolateHelper(a, number, method='linear'):
                              minx:maxx:complex(incrsx)]
     
     #Interpolate the velocity points to the grid
-    grid = griddata(newpts, np.float64(xyzvelo), (grid_x, grid_y), 
+    grid = griddata(newpts, np.float64(velo), (grid_x, grid_y), 
                     method=method)
      
 #    DEVELOPMENT TO BE COMPLETED: snr grid
@@ -426,23 +574,23 @@ def interpolateHelper(a, number, method='linear'):
     return grid, pointsextent 
            
     
-def arrowplot(xst,yst,xend,yend,scale=1.0,headangle=15,headscale=0.2):    
-    '''Function to plot arrows to denote the direction and magnitude of the
-    displacement. Direction is indicated by the bearing of the arrow, and the
-    magnitude is indicated by the length of the arrow.
+def arrowplot(xst, yst, xend, yend, scale=1.0, headangle=15, headscale=0.2):    
+    '''Plot arrows to denote the direction and magnitude of the displacement. 
+    Direction is indicated by the bearing of the arrow, and the magnitude is 
+    indicated by the length of the arrow.
     
-    Inputs
-    xst:            x coordinates for pt0.
-    yst:            y coordinates for pt0.
-    xend:           x coordinates for pt1.
-    yend:           y coordinates for pt1.
-    scale:          Arrow scale.
-    headangle:      Plotting angle.
-    headscale:      Arrow head scale.
+    Variables
+    x0 (arr):           X coordinates for pt0
+    y0 (arr):           Y coordinates for pt0
+    x1 (arr):           X coordinates for pt1
+    y1 (arr):           Y coordinates for pt1
+    scale (int):        Arrow scale
+    headangle (int):    Plotting angle
+    headscale (int):    Arrow head scale
     
-    Outputs
-    xs              x coordinates for arrowplot.
-    ys:             y coordinates for arrowplot.
+    Returns
+    xs (arr):           x coordinates for arrowplot
+    ys (arr):           y coordinates for arrowplot
     '''
     
     #Define plotting angle
@@ -513,56 +661,6 @@ def arrowplot(xst,yst,xend,yend,scale=1.0,headangle=15,headscale=0.2):
     
     #Return xy arrow plotting information
     return xs,ys   
-
-
-##Development: sparse filtering using KD Tree. Currently works for data arrays
-##where values have a large range, but bug in function means it doesn't work
-##for values with a small range. Either alternative needs to be found or snr
-##evaluation is purely used as a filtering technique.
-
-#def filterSparse(data,numNearest=12,threshold=2,item=2):
-#    '''A function to remove noise from a sparse dataset using a filtering
-#    method. This removes points if they are within a specified value 
-#    (threshold) from the mean of a specified number of nearest neighbour 
-#    points (numNearest). The item field identifies which column of the 
-#    array holds the field to be filtered on.
-#    
-#    This function works best if called iteratively, as more than one point 
-#    may be anomolous compared to neighbouring ranges.
-#    
-#    Inputs
-#    data:              Input data to filter.
-#    numNearest:     Sample window to assess filtering.
-#    threshold:      Threshold range of neighbouring values.
-#    item:           Number of neighbouring values to retrieve for assessment.
-#    
-#    Output
-#    goodset:        Array of filtered data. 
-#    ''' 
-#    
-#    #Get XY point data
-#    XY=data[:,0:2]
-#
-#    #Set up KD tree with XY point data
-#    tree=spatial.KDTree(XY, 50)
-#    
-#    goodset=[]
-#    for point in XY:        
-#        #Get n nearest neighbouring points
-#        d,k=tree.query(point, numNearest)
-#       
-#        #Get the mean and standard deviation for these points
-#        stdev=np.std(data[k[1:],item])
-#        m=np.mean(data[k[1:],item])
-#       
-#        #Get the data value for neighbouring points
-#        value=data[k[0],item]
-#       
-#        #Append point to goodset if is within threshold range of neighbours
-#        if (value>(m-(stdev*threshold)) and value<(m+(stdev*threshold))):
-#            goodset.append(data[k[0]])
-#        
-#    return np.array(goodset)
 
        
 #------------------------------------------------------------------------------

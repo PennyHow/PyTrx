@@ -19,35 +19,37 @@ ImageSequence:                  A class to model a raw collection of CamImage
                                 objects.
 
 Key functions in CamImage
-getImagePath():                 Return the file path of the image.
-getImageCorr():                 Return the image array that is corrected for 
+getImageCorr:                   Return the image array that is corrected for 
                                 the specified camera matrix and distortion 
                                 parameters.
-getImageArray():                Return the image as an array.
-getExif():                      Return the exif image size and time stamp data 
-                                from an image. Image size is returned as a 
-                                string (height, width). The time stamp is 
-                                returned as a Python datetime object.
+getImageArray:                  Return the image as an array.
                         
 Key functions in ImageSequence
-getImageArrNo(i):               Get image array i from image sequence.
-getImageObj(i):                 Get CamImage object i from image sequence.
-getImages():                    Return image set (i.e. a sequence of CamImage 
-                                objects).
-getFileList():                  Return list of image file paths.
-getLength():                    Return length of image set.
+getImageArrNo:                  Get image array i from image sequence
+getImageObj:                    Get CamImage object i from image sequence
+getImages:                      Return image set (i.e. a sequence of CamImage 
+                                objects)
+getFileList:                    Return list of image file paths
+getLength:                      Return length of image set
 
+
+Key stand-alone functions
+enhanceImage:                   Change brightness and contrast of image using 
+                                phi and theta variables
+    
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton 
          Lynne Buie
 '''
 
 #Import packages
+from pathlib import Path
 import numpy as np
 import operator
 from PIL import Image 
 from PIL.ExifTags import TAGS
 from datetime import datetime
+from pylab import array, uint8
 import glob
 import imghdr
 import os
@@ -64,62 +66,40 @@ class CamImage(object):
         
     Optionally the user can specify whether the red, blue or green values 
     should be used, or whether the images should be converted to grey scale 
-    which is the default.  
-        
-    No image calibration is undertaken.'''
+    which is the default. No image calibration is undertaken at this point.
     
-    def __init__(self, imagePath, band='l', equal=True, quiet=2):
-        '''CamImage constructor to set image path, read in image data in the 
-        specified band and access Exif data. 
-        
-        Inputs:
-        imagePath:      The file path to a given image.
-        band:           Specified image band to pass forward
-                        'r': red band
-                        'b': blue band
-                        'g': green band
-                        'l': grayscale (default)
-        equal:          Flag denoting whether histogram equalisation is applied 
-                        to images (histogram equalisation is applied if True).
-                        Default is True.
-        quiet:          Level of commentary during processing. This can be a 
-                        integer value between 0 and 2.
-                        0: No commentary.
-                        1: Minimal commentary.
-                        2: Detailed commentary.
+    Args
+    imagePath:        The file path to a given image
+    band:             Specified image band to pass forward
+                      'r': red band
+                      'b': blue band
+                      'g': green band
+                      'l': grayscale (default)
+    equal:            Flag denoting whether histogram equalisation is 
+                      applied to images (histogram equalisation is applied 
+                      if True). Default is True
                           
-        The default grayscale band option ('l') applies an equalization filter 
-        on the image whereas the RGB splits are raw RGB. This could be modified 
-        to permit more sophisticated settings of RGB combinations and/or 
-        filters with file reading.
-        
-        Class properties:
-            self._imageGood:  Boolean denoting whether image file path is 
-                              correct.
-            self._impath:     String of image path.
-            self._band:       String denoting the desired image band.
-            self._equal:      Flag denoting whether histogram equalisation is
-                              applied to images.
-            self._imageArray: Image data as numpy array
-            self._imsize:     Image size as list [rows,columns].
-            self._image:      Floating point array of image data [rows,columns].
-            self._timestamp:  Python datetime object derived from exif data, if 
-                              present (otherwise set as None).
-            self._quiet:      Integer value denoting amount of commentary 
-                              whilst processing.
+    The default grayscale band option ('l') applies an equalization filter 
+    on the image whereas the RGB splits are raw RGB. This could be modified 
+    to permit more sophisticated settings of RGB combinations and/or 
+    filters with file reading.
+    '''
+    
+    def __init__(self, imagePath, band='l', equal=True):
+        '''CamImage constructor to set image path, read in image data in the 
+        specified band and access Exif data.         
         '''
         #Define class properties
-        self._imageGood=True
-        self._impath = imagePath
+        self._imageGood = True
         self._band = band.upper()
         self._equal = equal
-        self._imageArray=None
-        self._image=None
-        self._imsize=None
-        self._timestamp=None
-        self._quiet=quiet
+        self._imageArray = None
+        self._image = None
+        self._imsize = None
+        self._timestamp = None
+        self._impath = imagePath
         
-        # Checks image file paths 
+        #Check image file path
         success=self._checkImage(imagePath)
         if not success:
             self._imageGood=False
@@ -147,10 +127,9 @@ class CamImage(object):
         self._imageArray=None      
 
      
-    def _checkImage(self,path):
+    def _checkImage(self, path):
         '''Check that the given image file path is correct.'''
-        if self._quiet>2:
-            print '\nChecking image file ',path
+        print '\nChecking image file ', path
         
         #Check file path using os package
         exists=os.path.isfile(path) 
@@ -159,17 +138,14 @@ class CamImage(object):
             #Check file type
             ftype=imghdr.what(path)
             if ftype is None:
-                if self._quiet>2:
-                    print 'File exists but not image type'
+                print 'File exists but not image type: ', ftype
                 return False
             else:
-                if self._quiet>2:
-                    print 'File found of image type: ', ftype
+                print 'File found of image type: ', ftype
                 return True
 
-        else:
-            if self._quiet>0:            
-                print 'File does not exist',path
+        else:           
+            print 'File does not exist: ',path
             return False
 
         
@@ -183,6 +159,13 @@ class CamImage(object):
         return self._impath
 
 
+    def getImageName(self):
+        '''Return image name.'''
+        imn = self.getImagePath()
+        imn = Path(imn)
+        return imn.name   
+
+
     def getImage(self):
         '''Return the image.'''
         if self._image is None:
@@ -190,20 +173,14 @@ class CamImage(object):
         return self._image
 
     
-    def getImageCorr(self,cameraMatrix, distortP):
+    def getImageCorr(self, cameraMatrix, distortP):
         '''Return the image array that is corrected for the specificied 
         camera matrix and distortion parameters.'''
         #Get image array        
         if self._imageArray is None:
             self._readImageData()
             
-        if self._quiet>2:    
-            print '\nMatrix: ' + str(cameraMatrix)
-            print 'Distortion: ' + str(distortP)
-            
-        size=self.getImageSize()
-        if self._quiet>2:        
-            print 'Image size: ', size
+        size=self.getImageSize()      
         
         #Calculate optimal camera matrix 
         h = size[0]
@@ -227,6 +204,13 @@ class CamImage(object):
             self._readImageData()   
         return self._imageArray
  
+
+    def getImageEnhance(self, diff, phi, theta):
+        '''Return enhanced image using enhanceImage function.'''
+        image = self.getImageArray()
+        image1 = enhanceImage(image, diff, phi, theta)
+        return image1
+
        
     def getImageSize(self):
         '''Return the size of the image (which is obtained from the image Exif 
@@ -270,9 +254,8 @@ class CamImage(object):
             timestamp=datetime(int(date[0]),int(date[1]),int(date[2]),
                                int(time[0]),int(time[1]),int(time[2]))
         except:
-            if self._quiet>0:
-                print ('\nUnable to get valid timestamp for image file: '
-                        + self._impath)
+            print ('\nUnable to get valid timestamp for image file: '
+                   + self._impath)
             timestamp=None
             
         return imsize, timestamp      
@@ -299,14 +282,15 @@ class CamImage(object):
     
     def _readImageData(self):
         '''Function to prepare an image by opening, equalising, converting to 
-        a desired band or grayscale, then returning a copy.'''        
-        #Open image from file using PIL
+        a desired band or grayscale, then returning a copy.'''                
+        #Open image from file using PIL        
         if self._image is None:
             self._image = Image.open(self._impath)
         
         img = self._image
         
         if self._equal is True:
+            
             #Apply histogram equalisation
             h = img.convert("L").histogram()
             lut = []
@@ -361,31 +345,9 @@ class ImageSequence(object):
         equal:     Flag denoting whether histogram equalisation is applied to 
                    images (histogram equalisation is applied if True). Default
                    is True.
-        loadall:   Flag which, if true, will force all images in the sequence
-                   to be loaded as images (array) initially and thus not 
-                   re-loaded in subsequent processing. This is only advised
-                   for small image sequences.
-        quiet:     Level of commentary during processing. This can be a integer 
-                   value between 0 and 2.
-                   0: No commentary.
-                   1: Minimal commentary.
-                   2: Detailed commentary.
-                                               
-    Class variables:
-        self._quiet:          Integer value denoting amount of commentary 
-                              whilst processing.
-        self._imageList:      Inputted list of images.
-        self._imageSet:       Sequence of CamImage objects.
-        self._band:           String denoting the desired image band.
-        self._equal:          Flag denoting whether histogram equalisation 
-                              is applied to images
     '''
-    def __init__(self, imageList, band='L', equal=True, loadall=False, 
-                 quiet=2):
-        
-        self._quiet=quiet        
-        if self._quiet>0:
-            print '\n\nCONSTRUCTING IMAGE SEQUENCE'
+    def __init__(self, imageList, band='L', equal=True):
+        print '\n\nCONSTRUCTING IMAGE SEQUENCE'
         
         self._band=band
         self._equal=equal
@@ -396,41 +358,36 @@ class ImageSequence(object):
             
             #Construction from list of CamImage objects
             if isinstance(imageList[0],CamImage):
-                if self._quiet>1:
-                    print '\nList of camera images assumed in image sequence'
-                    print ' Attempting to add all to sequence'
+                print '\nList of camera images assumed in image sequence'
+                print ' Attempting to add all to sequence'
                 self._imageSet = []
                 for item in list:
                     if isinstance(item,CamImage):
                         self._imageSet.append(item)
                     else:
-                        if self._quiet>1:
-                            print ('\nWarning non-image item found in image' 
+                        print ('\nWarning non-image item found in image' 
                                    ' set list specification - item not added')
                 return
                 
             #Construction from list containing file name strings                
-            elif isinstance(imageList[0],str):
-                if self._quiet>1:                
-                    print '\nList of camera images assumed of image sequence'
-                    print ' Attempting to add all to sequence'
-                self._loadImageStringSequence(imageList,loadall)
+            elif isinstance(imageList[0],str):               
+                print '\nList of camera images assumed of image sequence'
+                print ' Attempting to add all to sequence'
+                self._loadImageStringSequence(imageList)
                 
-            else:
-                if self._quiet>1:                
-                    print ('\nList item type used to define image list neither' 
+            else:                
+                print ('\nList item type used to define image list neither' 
                            ' image nor strings (filenames)')
                 return None
         
         #Construction from string of file paths
         if isinstance(imageList, str):
-            if self._quiet>1:
-                print ('\nImage directory path assumed. Searching for images.' 
-                       ' Attempting to add all to sequence')
-                print imageList
-            self._imageList = sorted(glob.glob(imageList), 
-                                     key=os.path.getmtime)
-            self._loadImageStringSequence(self._imageList,loadall)
+            print ('\nImage directory path assumed. Searching for images.' 
+                   ' Attempting to add all to sequence')
+            print imageList
+            self._imageList = sorted(glob.glob(imageList))
+#                                     key=os.path.getmtime)
+            self._loadImageStringSequence(self._imageList)
             
             
     def getImageArrNo(self,i):
@@ -447,25 +404,21 @@ class ImageSequence(object):
         return imo
 
         
-    def _loadImageStringSequence(self,imageList,loadall):
+    def _loadImageStringSequence(self,imageList):
         '''Function for generating an image set (of CamImage objects) from a 
-        list of images. Sequence of image arrays will be loaded if the loadall 
-        flag is set to true.'''       
+        list of images.'''       
         #Construct CamImage objects
         self._imageSet = []
         for imageStr in imageList:
             im=CamImage(imageStr, self._band, self._equal)
             
-            #Load image arrays if loadall is true
+            #Append image filepath if filepath is true
             if im.imageGood():
                 self._imageSet.append(im)
-                if loadall:
-                    im.getImageArray(self)
                     
             else:
-                if self._quiet>0:
-                    print '\nProblem reading image: ',imageStr
-                    print 'Image:',imageStr,' not added to sequence'
+                print '\nProblem reading image: ',imageStr
+                print 'Image:',imageStr,' not added to sequence'
 
                 
     def getImages(self):
@@ -473,14 +426,78 @@ class ImageSequence(object):
         return self._imageSet
 
         
-    def getFileList(self):
+    def getImageFileList(self):
         '''Return list of image file paths.'''
         return self._imageList
+
+
+    def getImageNames(self):
+        '''Return list of image file names.'''
+        imgf = self.getImageFileList()
+        imns = []
+        for i in imgf:
+            imn=Path(i)
+            imns.append(imn.name)
+        return imns
 
         
     def getLength(self):
         '''Return length of image set.'''
         return len(self._imageSet)
+
+
+def enhanceImage(img, diff, phi, theta):
+    '''Change brightness and contrast of image using phi and theta 
+    variables. Change phi and theta values accordingly.
+    
+    Args
+    img (arr):                    Input image array for enhancement.
+    
+    Returns
+    img1 (arr):                   Enhanced image.
+    
+    Enhancement parameters (self._enhance):
+    diff:                   Inputted as either 'light or 'dark', signifying 
+                            the intensity of the image pixels. 'light' 
+                            increases the intensity such that dark pixels 
+                            become much brighter and bright pixels become 
+                            slightly brighter. 
+                            'dark' decreases the intensity such that dark 
+                            pixels become much darker and bright pixels 
+                            become slightly darker.
+    phi:                    Defines the intensity of all pixel values.
+    theta:                  Defines the number of "colours" in the image, 
+                            e.g. 3 signifies that all the pixels will be 
+                            grouped into one of three pixel values.
+    '''                          
+    #Define maximum pixel intensity
+    maxIntensity = 255.0 #depends on dtype of image data 
+    
+    #If diff variable is light
+    if diff == 'light':        
+
+        #Increase intensity such that dark pixels become much brighter
+        #and bright pixels become slightly brighter
+        img1 = (maxIntensity/phi)*(img/(maxIntensity/theta))**0.5
+        img1 = array(img1, dtype = uint8)
+    
+    #If diff variable is dark
+    elif diff == 'dark':        
+
+        #Decrease intensity such that dark pixels become much darker and 
+        #bright pixels become slightly darker          
+        img1 = (maxIntensity/phi)*(img/(maxIntensity/theta))**2
+        img1 = array(img1, dtype=uint8)
+    
+    #If diff variable not assigned then reassign to light
+    else:          
+        print '\nInvalid diff variable' 
+        print 'Re-assigning diff variable to "light"'
+        img1 = (maxIntensity/phi)*(img/(maxIntensity/theta))**0.5
+        img1 = array(img1, dtype = uint8)
+    
+    #Return enhanced image
+    return img1
 
 
 #------------------------------------------------------------------------------

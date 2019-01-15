@@ -9,22 +9,18 @@ This module, DEM, contains functionality for handling DEM data and implementing
 this data into the camera environment (CamEnv) object class.
 
 Classes
-ExplicitRaster:      A class to represent a numeric Raster with explicit XY 
-                     cell referencing in each grid cell.
+ExplicitRaster:                 A class to represent a numeric Raster with 
+                                explicit XY cell referencing in each grid cell
 
 
 Key functions
-loadDEM:            Function for loading DEM data from different file types, 
-                    which is automatically detected. Recognised file types: 
-                    .mat and .tif.
-DEM_FromMat:        Function for loading a DEM array from a Matlab (.mat) file 
-                    containing separate X, Y, Z matrices.
-DEM_FromTiff:       Function for loading a DEM array from a .tiff file 
-                    containing raster-formatted data. The tiff data importing 
-                    is handled by GDAL.
-voxelviewshed:      Calculate a viewshed over a DEM from a given viewpoint in 
-                    the DEM scene. This function is based on the viewshed 
-                    function (voxelviewshed.m) available in ImGRAFT. 
+densify:                        Densify a DEM array by a given densification 
+                                factor (i.e. 'smoothing')           
+
+Key stand-alone functions
+load_DEM:                       Load DEM from .mat or .tiff file
+voxelviewshed:                  Calculate a viewshed over a DEM from a given 
+                                viewpoint in the DEM scene    
       
 @author: Penny How (p.how@ed.ac.uk)
          Nick Hulton 
@@ -46,6 +42,12 @@ from scipy.interpolate import RectBivariateSpline
 class ExplicitRaster(object):   
     '''A class to represent a numeric Raster with explicit XY cell referencing
     in each grid cell.
+    
+    Args
+    X:              X data
+    Y:              Y data
+    Z:              Z data
+    nodata:         Condition for NaN data values (default: 'nan')
     '''
     
     #Basic constuctor method
@@ -195,13 +197,12 @@ class ExplicitRaster(object):
         print 'No data item is: ',self.getNoData()
         print ('Data Extent Coordinates are [xmin,xmax,ymin,ymax]: ',
                self.getExtent())
+ 
     
-        
 def load_DEM(demfile):
     '''Function for loading DEM data from different file types, which is 
     automatically detected. Recognised file types: .mat and .tif.
-    '''
-    
+    '''   
     #Determine file type based on filename suffix
     suffix=demfile.split('.')[-1].upper()
     
@@ -291,8 +292,8 @@ def DEM_FromTiff(tiffFile):
     dem=ExplicitRaster(X,Y,Z)    
     return dem
 
-    
-def voxelviewshed(dem,viewpoint):
+            
+def voxelviewshed(dem, viewpoint):
     '''Calculate a viewshed over a DEM from a given viewpoint in the DEM scene.
     This function is based on the viewshed function (voxelviewshed.m) available 
     in ImGRAFT.
