@@ -57,13 +57,13 @@ Handles the image data, and the image sequence.<br>
 The <b>CamImage</b> class holds information about a singular image and contains functionality for importing image data from file and passing specific image bands forward for subsequent processing.<br>
 The <b>ImageSequence</b> class holds information about an image sequence, i.e. a collection of CamImage objects, from which specific images and image pairs can be called.<br>
 
-<b>*Velocity</b><br> 
+<b>*Velocity.py*</b><br> 
 Calculates velocities and homography through a series of images held as an ImageSequence object.<br>
 
-<b>*Area</b><br>
+<b>*Area.py*</b><br>
 Automated and manual detection of surface areas from imagery and georectifies polygons to real-world coordinates.<br>
 
-<b>*Line</b><br>
+<b>*Line.py*</b><br>
 Manual detection of lines from imagery (e.g. glacier terminus position) and georectifies lines to real-world coordinates.<br>
 
 <b>*Utilities.py*</b><br>
