@@ -57,11 +57,14 @@ Handles the image data, and the image sequence.<br>
 The <b>CamImage</b> class holds information about a singular image and contains functionality for importing image data from file and passing specific image bands forward for subsequent processing.<br>
 The <b>ImageSequence</b> class holds information about an image sequence, i.e. a collection of CamImage objects, from which specific images and image pairs can be called.<br>
 
-<b>*Measure.py*</b><br>
-Contains classes for calculating homography and velocities, and measuring surface areas and distances from oblique imagery.<br>
-The <b>Velocity</b> class enables processing with an ImageSequence object. Camera homography and velocities are derived and held within this class.<br>
-The <b>Area</b> class performs automated and manual detection of surface areas from imagery and georectifies polygons to real-world coordinates.<br>
-The <b>Line</b> class performs manual detection of lines from imagery (e.g. glacier terminus position) and georectifies lines to real-world coordinates. <br>
+<b>*Velocity</b><br> 
+Calculates velocities and homography through a series of images held as an ImageSequence object.<br>
+
+<b>*Area</b><br>
+Automated and manual detection of surface areas from imagery and georectifies polygons to real-world coordinates.<br>
+
+<b>*Line</b><br>
+Manual detection of lines from imagery (e.g. glacier terminus position) and georectifies lines to real-world coordinates.<br>
 
 <b>*Utilities.py*</b><br>
 This module contains a set of functions for plotting and interpolating data.<br><br>
