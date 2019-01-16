@@ -58,13 +58,13 @@ The <b>CamImage</b> class holds information about a singular image and contains 
 The <b>ImageSequence</b> class holds information about an image sequence, i.e. a collection of CamImage objects, from which specific images and image pairs can be called.<br>
 
 <b>*Velocity.py*</b><br> 
-Calculates velocities and homography through a series of images held as an ImageSequence object.<br>
+Calculates velocities and homography. This can either be achieved through the <b>Velocity</b> class for processing velocities and homography through a series of images, or using the functions provided within the script for processing velocities and homography between an image pair.<br>
 
 <b>*Area.py*</b><br>
-Automated and manual detection of surface areas from imagery and georectifies polygons to real-world coordinates.<br>
+Automated and manual detection of surface areas from imagery (e.g. supraglacial lakes, meltwater plume surface extent). This can either be achieved through the <b>Area</b> class for defining areas of interest through a series of images, or using the functions provided within the script for defining areas of interest in a single image.<br>
 
 <b>*Line.py*</b><br>
-Manual detection of lines from imagery (e.g. glacier terminus position) and georectifies lines to real-world coordinates.<br>
+Manual detection of line features from imagery (e.g. glacier terminus position). This can either be achieved through the <b>Line</b> class for defining line features through a series of images, or using the functions provided within the script for defining line features in a single image.<br>
 
 <b>*Utilities.py*</b><br>
 This module contains a set of functions for plotting and interpolating data.<br><br>
