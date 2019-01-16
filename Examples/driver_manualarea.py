@@ -70,9 +70,10 @@ plumes = Area(camimgs, cameraenvironment, calibFlag, imband, equal)
 #Calculate real areas
 areas = plumes.calcManualAreas()
 
-
 ##Import areal data from file
-#areas = importAreaData(plumes, destination)
+#xyzfile=destination+'area_coords.txt'
+#pxfile=destination+'px_coords.txt'
+#areas = importAreaData(xyzfile, pxfile)
 
 
 #----------------------------   Export data   ---------------------------------
@@ -98,8 +99,8 @@ distortP=cameraenvironment.getDistortCoeffsCV2()
 #Plot areas in image plane and as XYZ polygons (only if xyz areas calculated)   
 for i in range(len(xyzpts)):
     plotAreaPX(uvpts[i], imgset[i].getImageCorr(cameraMatrix, distortP), 
-               show=True, save=target2+'uv_'+str(imn[i]))  
-    plotAreaXYZ(xyzpts[i], dem, show=True, save=target2+'xyz_'+str(imn[i]))
+               show=True, save=None)  
+    plotAreaXYZ(xyzpts[i], dem, show=True, save=None)
     
     
 #---Alternative method for plotting image extents using original RGB images----                                                                                                                                                                                                                                                                                                      
@@ -108,8 +109,6 @@ for i in range(len(xyzpts)):
 ims = sorted(glob.glob(camimgs))
 
 #Get camera correction variables
-cameraMatrix=cameraenvironment.getCamMatrixCV2()
-distortP=cameraenvironment.getDistortCoeffsCv2()
 newMat, roi = cv2.getOptimalNewCameraMatrix(cameraMatrix, distortP, 
                                             (5184,3456),1,(5184,3456))                                                                                                 
     

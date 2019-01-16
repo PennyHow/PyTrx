@@ -1085,19 +1085,21 @@ def importAreaData(xyzfile, pxfile):
     pxfile (str):       File directory to uv coordinates
             
     Returns
-    rpoly (list):       Real xyz coordinates of detected areas
-    rarea (list):       Real-world surface areas
-    pxpoly (list):      XY pixel coordinates of detected areas
-    pxarea (list):      Pixel areas
+    areas (list):       Coordinates and areas of detected areas
     '''
     #Get real-world coordinates and areas       
-    rpoly, rarea = importAreaXYZ(xyzfile)
+    xyz = importAreaFile(xyzfile,3)
 
     #Get pixel coordinates and areas    
-    pxpoly, pxarea = importAreaPX(pxfile)
+    uv = importAreaFile(pxfile,2)
 
+    #Compile data together
+    areas=[]
+    for i,j in zip(xyz, uv):
+        areas.append([i,j])
+        
     #Return all area data   
-    return rpoly, rarea, pxpoly, pxarea
+    return areas
 
 
 def importLineData(xyzfile, pxfile):
@@ -1108,89 +1110,24 @@ def importLineData(xyzfile, pxfile):
     pxfile (str):        File directory to uv coordinates
             
     Returns
-    rline:        Real xyz coordinates of detected lines
-    rlength:      Real-world surface distances
-    pxline:       XY pixel coordinates of detected lines
-    pxlength:     Pixel distances
+    lines (list):        Coordinates and lengths of detected lines
     '''
     #Get real-world coordinates and distances
-    rline, rlength = importLineXYZ(xyzfile)
+    xyz = importLineFile(xyzfile, 3)
     
     #Get pixel coordinates and distances
-    pxline, pxlength = importLinePX(pxfile)
+    uv = importLineFile(pxfile, 2)
     
+    #Compile data together
+    lines=[]
+    for i,j in zip(xyz, uv):
+        lines.append([i,j])
+        
     #Return all line data
-    return rline, rlength, pxline, pxlength
-        
-        
-def importAreaXYZ(fname):
-    '''Import xyz polygon data from text file and compute areas.
-    
-    Variables    
-    fname (str):         Path to the text file containing the xyz coordinate 
-                         data
-
-    Returns
-    xyz (list):         XYZ coordinates for polygons from images
-    area (list):        XYZ areas for polygons from images
-    '''
-    #Import polygon coordinates from text file
-    f=file(fname,'r')                                
-    alllines=[]
-    for line in f.readlines():
-        if len(line) >= 6:
-            alllines.append(line)  #Read lines in file             
-    print '\nDetected xyz coordinates from ' + str(len(alllines)) + ' images'
-    f.close()
-    
-    #Set up xyz object
-    xyz=[] 
-    area=[]
-    count=0
-
-    #Extract polygon data as strings
-    for line in alllines:
-        img=[]
-        strpolys=[] 
-        ogrpolys=[]            
-        temp=line.split('Pol')                                    
-        for i in temp:
-            if len(i) >=10:
-                strpolys.append(i)
-        count=count+1
-        print 'Detected '+str(len(strpolys))+' polygons in image '+(str(count))                
-        
-        #Extract polygon values from strings
-        for strp in strpolys:
-            pts = strp.split('\t')
-            coords=[]
-            for p in pts:
-                try:
-                    coords.append(float(p))
-                except ValueError:
-                    pass
-            struc = len(coords)/3
-            polygon = np.array(coords).reshape(struc, 3)
-            img.append(polygon)
-        
-        #Create geometries from polgon values using ogr               
-        for shape in img:
-            ring = ogr.Geometry(ogr.wkbLinearRing)
-            for pt in shape:
-                if np.isnan(pt[0]) == False:                   
-                    ring.AddPoint(pt[0],pt[1],pt[2])
-            poly = ogr.Geometry(ogr.wkbPolygon)
-            poly.AddGeometry(ring)
-            ogrpolys.append(poly.Area())  
-            
-        xyz.append(img)
-        area.append(ogrpolys)
-    
-    #Return polygon and area data
-    return xyz, area
+    return lines
    
 
-def importAreaPX(fname):
+def importAreaFile(fname, dimension):
     '''Import pixel polygon data from text file and compute pixel extents.
     
     Variables    
@@ -1200,74 +1137,6 @@ def importAreaPX(fname):
     Returns
     uv (list):           UV coordinates for polygons 
     extent (list):       Pixel areas for polygons          
-    '''
-    #Import px polygon coordinates from text file
-    f=file(fname, 'r')
-    alllines=[]
-    for line in f.readlines():
-        if len(line) >=6:
-            alllines.append(line)
-    print '\nDetected px coordinates from ' + str(len(alllines)) + ' images'
-    f.close()
-    
-    #Set up xyz object
-    uv=[]
-    extent=[]
-    count=0
-
-    #Extract polygon data as strings
-    for line in alllines:
-        img=[]
-        strpolys=[]  
-        ogrpolys=[]         
-        temp=line.split('Pol')                                    
-        for i in temp:
-            if len(i) >=10:
-                strpolys.append(i)
-
-        count=count+1
-        print ('Detected ' + str(len(strpolys)) + ' polygons in image ' 
-               + (str(count)))                
-        
-        #Extract polygon values from strings
-        for strp in strpolys:
-            pts = strp.split('\t')
-            coords=[]
-            for p in pts:
-                try:
-                    coords.append(float(p))
-                except ValueError:
-                    pass
-            struc = len(coords)/2
-            polygon = np.array(coords).reshape(struc, 2)
-            img.append(polygon)
-        
-        #Create geometries from polgon values using ogr               
-        for shape in img:
-            ring = ogr.Geometry(ogr.wkbLinearRing)
-            for pt in shape:
-                if np.isnan(pt[0]) == False:                   
-                    ring.AddPoint(pt[0],pt[1])
-            poly = ogr.Geometry(ogr.wkbPolygon)
-            poly.AddGeometry(ring)
-            ogrpolys.append(poly.Area())  
-        
-        uv.append(img)
-        extent.append(ogrpolys)
-    
-    return uv, extent
-     
-     
-def importLineXYZ(fname):
-    '''Import XYZ line data from text file and compute line lengths.
-    
-    Variables    
-    fname (str):         Path to the text file containing the XYZ coordinate 
-                         data
-
-    Returns
-    xyz (list):          XYZ coordinates for lines from images  
-    lines (list):        Line lengths
     '''
     #Read file and detect number of images based on number of lines
     f=file(fname,'r')      
@@ -1279,14 +1148,13 @@ def importLineXYZ(fname):
     f.close() 
     
     #Extract strings from lines         
-    xyz=[] 
-    for line in alllines:
-        vals = line.split('\t')
-        
+    areas=[] 
+    for line in alllines:        
         coords=[]
         raw=[]
                       
         #Extract coordinate values from strings
+        vals = line.split('\t')
         for v in vals:
             try:
                 a=float(v)
@@ -1294,34 +1162,40 @@ def importLineXYZ(fname):
             except ValueError:
                 pass
             
-        #Restructure coordinates based into 3D points
-        struc = len(raw)/3            
-        coords = np.array(raw).reshape(struc, 3)
-        xyz.append(coords)
+        if dimension==2:
+            struc = len(raw)/2
+            coords = np.array(raw).reshape(struc, 2)
+        elif dimension==3:
+            struc = len(raw)/3
+            coords = np.array(raw).reshape(struc, 3)
+        
+        #Create geometries from polgon values using ogr               
+        ring = ogr.Geometry(ogr.wkbLinearRing)
+        for pt in coords:
+            if dimension==2:                   
+                ring.AddPoint(pt[0],pt[1])
+            elif dimension==3:
+                ring.AddPoint(pt[0],pt[1],pt[2])
+        poly = ogr.Geometry(ogr.wkbPolygon)
+        poly.AddGeometry(ring) 
+        
+        #Append coordinates and polygon area
+        areas.append([[poly.GetArea()],[coords]])
+    
+    return areas
      
-    #Create OGR line object
-    lines=[]
-    for line in xyz:        
-        length = ogr.Geometry(ogr.wkbLineString)   
-        for p in line:
-            length.AddPoint(p[0],p[1])
-        lines.append(length)
+     
+def importLineFile(fname, dimension):
+    '''Import XYZ line data from text file and compute line lengths.
     
-    return xyz, lines
-   
-
-def importLinePX(fname):
-    '''Get px line and length data from multiple text files and import
-    into a Line class object.
-    
-    Variables    
-    fname (str):         Path to the text file containing the UV coordinate 
+    Args   
+    fname (str):         Path to the text file containing the XYZ coordinate 
                          data
+    dimension (int):     Number of dimensions in point coordinates i.e. 2 or 3
 
     Returns
-    uv (list):           UV coordinates for lines from images  
-    lines (list):        Line lengths
-     '''
+    lines (list):        Line coordinates and lengths
+    '''
     #Read file and detect number of images based on number of lines
     f=file(fname,'r')      
     alllines=[]
@@ -1329,16 +1203,16 @@ def importLinePX(fname):
         if len(line) >= 6:
             alllines.append(line)  #Read lines in file             
     print '\nDetected coordinates from ' + str(len(alllines)) + ' images'
-    f.close()
+    f.close() 
     
-    #Extract strings from lines   
-    uv=[]        
-    for line in alllines:
-        vals = line.split('\t')        
+    #Extract strings from lines         
+    lines=[] 
+    for line in alllines:        
         coords=[]
         raw=[]
                       
         #Extract coordinate values from strings
+        vals = line.split('\t')
         for v in vals:
             try:
                 a=float(v)
@@ -1346,21 +1220,25 @@ def importLinePX(fname):
             except ValueError:
                 pass
             
-        #Restructure coordinates based on 2D dimension
-        struc = len(raw)/2            
-        coords = np.array(raw).reshape(struc, 2)
-        uv.append(coords)
-       
-    #Create OGR line object
-    lines = []
-    for line in uv:        
-        length = ogr.Geometry(ogr.wkbLineString)   
-        for p in line:
-            length.AddPoint(p[0],p[1])
-        lines.append(length)
+        #Restructure coordinates based into 2D or 3D points
+        if dimension==2:
+            struc = len(raw)/2            
+            coords = np.array(raw).reshape(struc, 2)
+        elif dimension==3:
+            struc = len(raw)/3            
+            coords = np.array(raw).reshape(struc, 3)
+     
+        #Create OGR line object       
+        ogrline = ogr.Geometry(ogr.wkbLineString)   
+        for p in coords:
+            if dimension==2:
+                ogrline.AddPoint(p[0],p[1])
+            elif dimension==3:
+                ogrline.AddPoint(p[0],p[1],p[2])
+        lines.append([ogrline.Length(),coords])
     
-    return uv, lines
-
+    return lines
+   
     
 #------------------------------------------------------------------------------
 

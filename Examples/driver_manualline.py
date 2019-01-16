@@ -23,8 +23,6 @@ section of this script).
 #Import packages
 import sys
 import os
-from osgeo import ogr
-import glob
 
 #Import PyTrx packages
 sys.path.append('../')
@@ -54,60 +52,17 @@ terminus = Line(camimgs, cam)
 
 #-----------------------   Calculate/import lines   ---------------------------
 
-#Choose action "importtxt" or "importshp". Importtxt imports line data from text 
-#files, and  importshp imports line data from shape file (.shp). Any other 
-#input proceeds with the manual definition of terminus lines
-action = 'plot'      
+#Manually define terminus lines
+lines = terminus.calcManualLines()
 
-#Import line data from text files   
-if action == 'importtxt':
-    
-    #Define file locations
-    xyzfile=destination+'line_realcoords.txt'
-    pxfile=destination+'line_pxcoords.txt'
-    
-    #Import lines to terminus object
-    xyzcoords, xyzline, pxcoords, pxline = importLineData(xyzfile, pxfile)
-
-
-#Import line data from shape files (only imports real line data, not pixel)
-elif action == 'importshp':
-    shpfiles = destination + 'shapefiles/*.SHP'
-    xyz_line=[]    
-    xyz_corr=[]
-    xyz_len=[]
-   
-    #Get shape object from files
-    for i in glob.glob(shpfiles):
-        driver = ogr.GetDriverByName("ESRI Shapefile")
-        dataSource = driver.Open(i, 0)
-        layer = dataSource.GetLayer()
-        
-        #Append line length and xyz coordinates to lists           
-        for feature in layer:
-            geom = feature.GetGeometryRef()
-            xyz_line.append(geom)
-            xyz_len.append(geom.Length())
-            ptpos = geom.Centroid().ExportToWkt()
-            pt2=[ptpos]
-            pt2 = ptpos.split('(')
-            pt3 = pt2[1].split(')')
-            pt3 = pt3[0].split(' ')
-            xyz_corr.append(pt3)
-        
-    #Append data to Line object
-    xyzcoords = xyz_corr
-    xyzline = xyz_line
-
-
-#Plot terminus lines       
-else:
-    lines = terminus.calcManualLines()
-    
+##Import lines from textfiles
+#xyzfile=destination+'line_realcoords.txt'
+#pxfile=destination+'line_pxcoords.txt'
+#lines=importLineData(xyzfile, pxfile)
 
 #----------------------------   Export data   ---------------------------------
 
-#Write line data to txt file
+##Write line data to txt file
 imn=terminus.getImageNames()
 writeLineFile(lines, imn, destination)
 
@@ -116,9 +71,9 @@ target1 = destination + 'shapefiles/'
 proj = 32633
 xyzcoords = [item[0][1] for item in lines]
 writeLineSHP(xyzcoords, imn, target1, proj)
-
-
-#----------------------------   Show results   --------------------------------  
+#
+#
+##----------------------------   Show results   --------------------------------  
 
 #Define destination
 target2 = destination + 'outputimgs/'
@@ -129,7 +84,7 @@ imgset=terminus._imageSet
 cameraMatrix=cam.getCamMatrixCV2()
 distortP=cam.getDistortCoeffsCV2()
 pxcoords = [item[1][1] for item in lines]
-
+#
 #Plot lines in image plane and as XYZ lines 
 for i in range(len(pxcoords)):
     plotLinePX(pxcoords[i], imgset[i].getImageCorr(cameraMatrix, distortP), 

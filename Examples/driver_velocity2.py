@@ -228,13 +228,13 @@ uvvel=[item[1][0] for item in velo]
 xyz0=[item[0][1] for item in velo]
 
 #Write out velocity data to .csv file
-FileHandler.writeVeloFile(xyzvel, uvvel, homog, imn, target1) 
+FileHandler.writeVeloFile(xyzvel, uvvel, homog, names, target1) 
 
 #Write homography data to .csv file
-FileHandler.writeHomogFile(homog, imn, target2)
+FileHandler.writeHomogFile(homog, names, target2)
 
 #Write points to shp file                
-FileHandler.writeVeloSHP(xyzvel, xyz0, imn, target3, projection)       
+FileHandler.writeVeloSHP(xyzvel, xyz0, names, target3, projection)       
 
 
 #----------------------------   Plot Results   --------------------------------
