@@ -39,8 +39,8 @@ In addition, this folder contains the original pixel locations of each calving e
 
 <hr>
 
-<h3>Glacier velocity feature-tracking (velocity)</h3>
-Outputs from the driver script for deriving surface glacier velocities at Kronebreen, Svalbard (driver_velocity.py). These outputs include: <br>
+<h3>Glacier velocity feature-tracking (velocity1 and velocity2)</h3>
+Outputs from the driver scripts for deriving surface glacier velocities at Kronebreen, Svalbard (driver_velocity.py and driver_velocity2.py). These outputs include: <br>
 1. ASCII files of each interpolated velocity map, which can be imported into most mapping software as a raster grid <br>
 2. Output images of the tracked feature points on the oblique time-lapse image, the georectified points on the DEM, and the interpolated velocity maps <br> 
 3. Shapefiles (.shp) of the georectified feature points (including velocity information) <br>
