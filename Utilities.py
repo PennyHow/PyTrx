@@ -157,7 +157,7 @@ def plotCalib(matrix, distortion, img, imn):
     implot2.set_cmap('gray')    
     ax2.axis([0,w,h,0])    
     plt.show()
-    plt.close()
+#    plt.close()
         
         
 def plotAreaPX(uv, img, show=True, save=None):

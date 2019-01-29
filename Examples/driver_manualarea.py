@@ -29,8 +29,9 @@ import glob
 #Import PyTrx packages
 sys.path.append('../')
 from Area import Area
+from Velocity import Homography
 from CamEnv import CamEnv
-from FileHandler import writeAreaFile, writeAreaSHP, importAreaData
+from FileHandler import writeAreaFile, writeAreaSHP, importAreaData, writeHomogFile
 from Utilities import plotAreaPX, plotAreaXYZ
 
 
@@ -38,6 +39,7 @@ from Utilities import plotAreaPX, plotAreaXYZ
 
 #Define data inputs
 camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_KR1_2014.txt'
+caminvmask = '../Examples/camenv_data/invmasks/KR1_2014_inv.jpg'
 camimgs = '../Examples/images/KR1_2014_subset/*.JPG'
 
 #Define data output directory
@@ -51,9 +53,29 @@ if not os.path.exists(destination):
 #Define camera environment
 cameraenvironment = CamEnv(camdata)
 
-#Show ground control points
-cameraenvironment.showGCPs()
+##Show ground control points
+#cameraenvironment.showGCPs()
 
+
+#-----------------------   Calculate homography   -----------------------------
+
+#Set homography parameters
+hgback=1.0                      #Back-tracking threshold
+hgmax=50000                     #Maximum number of points to seed
+hgqual=0.1                      #Corner quality for seeding
+hgmind=5.0                      #Minimum distance between seeded points
+hgminf=4                        #Minimum number of seeded points to track
+
+#Set up Homography object
+homog = Homography(camimgs, cameraenvironment, caminvmask, calibFlag=True, 
+                   band='L', equal=True)
+
+#Calculate homography
+hg = homog.calcHomographyPairs(hgback, hgmax, hgqual, hgmind, hgminf)             
+homogmatrix = [item[0] for item in hg] 
+
+
+#------------------------   Calculate Areas   ---------------------------------
 
 #Define Area class initialisation variables
 calibFlag = True            #Detect with corrected or uncorrected images
@@ -62,7 +84,7 @@ imband = 'R'                #Desired image band
 equal = True                #Images with histogram equalisation?
 
 #Set up Area object, from which areal extent will be measured
-plumes = Area(camimgs, cameraenvironment, calibFlag, imband, equal)
+plumes = Area(camimgs, cameraenvironment, homogmatrix, calibFlag, imband, equal)
 
 
 #-------------------------   Calculate areas   --------------------------------
@@ -81,6 +103,11 @@ areas = plumes.calcManualAreas()
 #Write results to file
 imn=plumes.getImageNames()
 writeAreaFile(areas, imn, destination)
+
+#Write homography to file
+target1 = destination + 'homography.csv'
+writeHomogFile(hg, imn, target1)
+
 
 #Create shapefiles
 target1 = destination + 'shpfiles/'    

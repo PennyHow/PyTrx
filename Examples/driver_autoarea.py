@@ -28,8 +28,9 @@ import os
 #Import PyTrx packages
 sys.path.append('../')
 from Area import Area
+from Velocity import Homography
 from CamEnv import CamEnv
-from FileHandler import writeAreaFile, writeAreaSHP, writeCalibFile
+from FileHandler import writeAreaFile, writeAreaSHP, writeCalibFile, writeHomogFile
 from Utilities import plotAreaPX, plotAreaXYZ
 
 
@@ -37,7 +38,8 @@ from Utilities import plotAreaPX, plotAreaXYZ
 
 #Define data inputs
 camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_KR3_2014.txt'
-cammask = '../Examples/camenv_data/masks/KR3_2014_amask.jpg'
+camamask = '../Examples/camenv_data/masks/KR3_2014_amask.jpg'
+caminvmask = '../Examples/camenv_data/invmasks/KR3_2014_inv.jpg'
 camimgs = '../Examples/images/KR3_2014_subset/*.JPG'
 
 #Define data output directory
@@ -53,12 +55,30 @@ cameraenvironment = CamEnv(camdata)
 
 #Report camera data and show corrected image
 cameraenvironment.reportCamData()
-cameraenvironment.showGCPs()
-cameraenvironment.showPrincipalPoint()
-cameraenvironment.showCalib()
-             
+#cameraenvironment.showGCPs()
+#cameraenvironment.showPrincipalPoint()
+#cameraenvironment.showCalib()
 
-#---------------------   Set area detection parameters   ----------------------             
+
+#---------------------   Calculate homography   -------------------------------
+
+#Set homography parameters
+hgback=1.0                      #Back-tracking threshold
+hgmax=50000                     #Maximum number of points to seed
+hgqual=0.1                      #Corner quality for seeding
+hgmind=5.0                      #Minimum distance between seeded points
+hgminf=4                        #Minimum number of seeded points to track
+
+#Set up Homography object
+homog = Homography(camimgs, cameraenvironment, caminvmask, calibFlag=True, 
+                   band='L', equal=True)
+
+#Calculate homography
+hg = homog.calcHomographyPairs(hgback, hgmax, hgqual, hgmind, hgminf)             
+homogmatrix = [item[0] for item in hg] 
+
+
+#----------------------   Detect and calculate areas  -------------------------             
 
 #Define Area class initialisation variables
 colour=False                #Define colour range for every image?
@@ -78,8 +98,7 @@ pxext = [0,1200,2000,1500]  #Plotting extent for interactive plots
 
 
 #Set up Area object, from which areal extent will be measured
-lakes = Area(camimgs, cameraenvironment, calibFlag, imband, equal)
-
+lakes = Area(camimgs, cameraenvironment, homogmatrix, calibFlag, imband, equal)
 
 #Set image enhancement parameters. If these are undefined then they will be 
 #set to a default enhancement of ('light', 50, 20)
@@ -92,7 +111,7 @@ lakes.setColourrange(maxcol, mincol)
 
 
 #Set mask and image with maximum area of interest 
-lakes.setMax(cammask, maxim)                                                                                                                                                     
+lakes.setMax(camamask, maxim)                                                                                                                                                     
 
 
 #Set px plotting extent for easier colourrange definition and area verification
@@ -131,17 +150,23 @@ distortP=cameraenvironment.getDistortCoeffsCV2()                    #Distort
 target1 = '../Examples/camenv_data/calib/KR3_2014_1.txt'
 writeCalibFile(matrix, tancorr, radcorr, target1)
 
+
+#Write homography data to .csv file
+target3 = destination + 'homography.csv'
+writeHomogFile(hg, imn, target3)
+
+
 #Write results to file
 writeAreaFile(areas, imn, destination)
+
 
 #Create shapefiles
 target1 = destination + 'shpfiles/'                 
 writeAreaSHP(xyzpts, imn, target1, proj)            
 
+
 #Write all image extents and dems 
 target2 = destination + 'outputimgs/'
-
-#Plot areas in image plane and as XYZ polygons  
 for i in range(len(areas)):
     plotAreaPX(uvpts[i], imgset[i].getImageCorr(cameraMatrix, distortP), 
                show=True, save=target2+'uv_'+str(imn[i]))  

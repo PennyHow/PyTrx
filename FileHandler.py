@@ -117,9 +117,7 @@ def readMask(img, writeMask=None):
         try:
             myMask = Image.open(writeMask)
             myMask = np.array(myMask)
-            print ('\nMask loaded. It is recommended that you check this ' 
-                   'against the start and end of the sequence using the ' 
-                   'self.checkMask() function of the TimeLapse object')
+            print ('\nMask loaded')
             return myMask
         except:
             print '\nMask file not found. Proceeding to manually digitise...'
@@ -134,6 +132,7 @@ def readMask(img, writeMask=None):
                     mouse_stop=2)
     print '\n' + str(len(x1)) + ' points seeded'
     plt.show()
+    plt.close()
     
     #Close shape
     x1.append(x1[0])
@@ -159,7 +158,7 @@ def readMask(img, writeMask=None):
     if writeMask!=None:
         print '\nMask plotted: ' + writeMask
         try:
-            img1.save(writeMask, 'jpg', quality=75)
+            img1.save(writeMask, quality=75)
         except:
             print '\nFailed to write file: ' + writeMask
         
@@ -500,7 +499,7 @@ def writeVeloFile(xyzvel, uvvel, homog, imn, fname):
     f.write(header + '\n')
 
     #Iterate through timeLapse object
-    for i in range(len(xyzvel)-1):
+    for i in range(len(xyzvel)):
         
         #Re-define image0 for each iteration
         fn0=fn1
@@ -515,6 +514,7 @@ def writeVeloFile(xyzvel, uvvel, homog, imn, fname):
         #Calculate average xyz and px velocities
         xyzvelav = sum(xyz)/len(xyz)
         uvvelav = sum(uv)/len(uv)
+        
         #Write average xyzvel, number of features tracked, and uvvel
         f.write(str(fn0) + ','+ str(fn1) + ',' + str(xyzvelav) + ',' 
                 + str(len(xyz)) + ',' + str(uvvelav) + ',')
@@ -601,13 +601,13 @@ def writeHomogFile(homog, imn, fname):
     f.write(header+'\n')
 
     #Iterate through timeLapse object
-    for i in range(len(homog)-1):
+    for i in range(len(homog)):
         
         #Re-define image0 for each iteration
         fn0=fn1
         
         #Get image1
-        fn0=imn[i+1]
+        fn1=imn[i+1]
 
         #Write image file names to file        
         f.write(fn0 + ',' + fn1 + ',')
@@ -618,7 +618,7 @@ def writeHomogFile(homog, imn, fname):
         hpt1 = homog[i][1][1]               #Tracked pts in im1
         hpt1corr = homog[i][1][2]           #Corrected pts im1
         herr = homog[i][3]                  #Homography error
-
+        
         #Define output homography matrix
         if hmatrix is not None:
             hmatrix.shape=(9)

@@ -26,7 +26,7 @@ import numpy as np
 #Import PyTrx packages
 sys.path.append('../')
 from CamEnv import CamEnv
-from Velocity import Velocity
+from Velocity import Velocity, Homography
 from FileHandler import writeHomogFile, writeVeloFile, writeVeloSHP, writeCalibFile
 from Utilities import plotVeloPX, plotVeloXYZ, interpolateHelper, plotInterpolate
 
@@ -56,11 +56,24 @@ cameraenvironment.showGCPs()
 cameraenvironment.showPrincipalPoint()
 cameraenvironment.showCalib()
 
-#----------------------   Calculate velocities   ------------------------------
+#----------------------   Calculate homography   ------------------------------
 
-#Set up Velocity object
-velo=Velocity(camimgs, cameraenvironment, camvmask, caminvmask, calibFlag=True,
-              band='L', equal=True) 
+#Set homography parameters
+hgback=1.0                      #Back-tracking threshold
+hgmax=50000                     #Maximum number of points to seed
+hgqual=0.1                      #Corner quality for seeding
+hgmind=5.0                      #Minimum distance between seeded points
+hgminf=4                        #Minimum number of seeded points to track
+
+#Set up Homography object
+homog = Homography(camimgs, cameraenvironment, caminvmask, calibFlag=True, 
+                band='L', equal=True)
+
+#Calculate homography
+hgout = homog.calcHomographyPairs(hgback, hgmax, hgqual, hgmind, hgminf)
+
+
+#----------------------   Calculate velocities   ------------------------------
 
 #Set velocity parameters
 bk = 1.0                        #Back-tracking threshold  
@@ -69,11 +82,11 @@ ql = 0.1                        #Corner quality for seeding
 mdis = 5.0                      #Minimum distance between seeded points
 mfeat = 4                       #Minimum number of seeded points to track
 
-#Calculate velocities and homography  
-hg = velo.calcHomographyPairs() 
+#Set up Velocity object
+velo=Velocity(camimgs, cameraenvironment, hgout, camvmask, calibFlag=True, 
+              band='L', equal=True) 
 
-velocities = velo.calcVelocities(homog=hg, back_thresh=bk, maxpoints=mpt, 
-                                 quality=ql, mindist=mdis, min_features=mfeat)
+velocities = velo.calcVelocities(bk, mpt, ql, mdis, mfeat)
 
 xyzvel=[item[0][0] for item in velocities] 
 xyz0=[item[0][1] for item in velocities]
@@ -95,11 +108,11 @@ writeCalibFile(matrix, tancorr, radcorr, target1)
 #Write out velocity data to .csv file
 target2 = destination + 'velo_output.csv'
 imn = velo.getImageNames()
-writeVeloFile(xyzvel, uvvel, hg, imn, target2) 
+writeVeloFile(xyzvel, uvvel, hgout, imn, target2) 
 
 #Write homography data to .csv file
 target3 = destination + 'homography.csv'
-writeHomogFile(hg, imn, target3)
+writeHomogFile(hgout, imn, target3)
 
 #Write points to shp file
 target4 = destination + 'shpfiles/'     #Define file destination

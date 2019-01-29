@@ -28,7 +28,7 @@ import matplotlib.pyplot as plt
               
 #Import PyTrx packages
 sys.path.append('../')
-from CamEnv import CamEnv
+from CamEnv import CamEnv, setProjection, projectUV
 
 
 #-----------------------------   Map data files   -----------------------------
@@ -89,11 +89,19 @@ tu1_xy=np.array(tu1_xy)
 #Define camera environment
 tu1cam = CamEnv(tu1camenv)
 
+#Get DEM from camera environment
+dem = tu1cam.getDEM() 
+
+#Get inverse projection variables through camera info               
+invprojvars = setProjection(dem, tu1cam._camloc, tu1cam._camDirection, 
+                            tu1cam._radCorr, tu1cam._tanCorr, tu1cam._focLen, 
+                            tu1cam._camCen, tu1cam._refImage)
+        
 #Show GCPs                           
 tu1cam.showGCPs()                        
 
 #Inverse project image coordinates using function from CamEnv object                       
-tu1_xyz = tu1cam.invproject(tu1_xy)
+tu1_xyz = projectUV(tu1_xy, invprojvars)
 print '\n\n' + str(len(tu1_xyz)) + ' locations for calving events georectified'
 
 

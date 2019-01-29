@@ -35,7 +35,7 @@ from pathlib import Path
 
 #Import PyTrx packages
 sys.path.append('../')
-from CamEnv import setInvProjVars, calibrateImages
+from CamEnv import setProjection, calibrateImages
 from Velocity import calcVelocity, calcHomography
 from DEM import load_DEM
 import FileHandler
@@ -43,7 +43,7 @@ import Utilities
  
 #------------------------   Define inputs/outputs   ---------------------------
 
-print '\nDEFINING DATA INPUTS'
+print '\nDEFINING DATA INPUTS'  
 
 #Camera name, location (XYZ) and pose (yaw, pitch, roll)
 camname = 'KR2_2014'
@@ -143,9 +143,10 @@ matrix=np.transpose(calib[0])                               #Get matrix
 tancorr=calib[1]                                            #Get tangential
 radcorr=calib[2]                                            #Get radial
 focal = [matrix[0,0], matrix[1,1]]                          #Focal length
-camcen = [matrix[0,2], matrix[1,2]]                         #Principal point         
-invprojvars = setInvProjVars(dem, camloc, campose, radcorr, tancorr, focal, 
-                             camcen, refimagePath) 
+camcen = [matrix[0,2], matrix[1,2]]                         #Principal point 
+    
+invprojvars = setProjection(dem, camloc, campose, radcorr, tancorr, focal, 
+                            camcen, refimagePath) 
 
 
 #--------------------   Plot camera environment info   ------------------------
@@ -198,16 +199,15 @@ for i in range(len(imagelist)-1):
     print '\nProcessing images: ', imn0,' and ', imn1
         
     #Calculate homography between image pair
-    print 'Calculating homography...'    
+    print 'Calculating homography...'  
     hg = calcHomography(im0, im1, hmask, [matrix,distort], hmethod, hreproj, 
                         hback, hmax, hqual, hmindist, hminfeat)
-                                 
+                             
     #Calculate velocities between image pair
     print 'Calculating velocity...'
     vl = calcVelocity(im0, im1, vmask, [matrix,distort], [hg[0],hg[3]], 
-                      invprojvars, vback, vmax, vqual, vmindist, vminfeat)
-                                                                                                                        
-
+                      invprojvars, vback, vmax, vqual, vmindist, vminfeat)                                                                                                                        
+    
     #Append velocity and homography information
     velo.append(vl)
     homog.append(hg)
@@ -248,7 +248,7 @@ xyz0=[item[0][1] for item in velo]
 xyz1=[item[0][2] for item in velo]
 
 #Cycle through data from image pairs   
-for i in range(len(xyz0)-1):
+for i in range(len(xyz0)):
     
     #Get image from sequence
     im=FileHandler.readImg(imagelist[i], band, equal)

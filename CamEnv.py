@@ -51,7 +51,6 @@ from Images import CamImage
 
 #Import other packages
 from scipy import interpolate
-from PIL import Image
 import numpy as np
 import cv2
 import glob
@@ -790,7 +789,7 @@ def constructDEM(dempath, densefactor):
     return dem
 
             
-def setInvProjVars(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg):
+def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg):
     '''Set the inverse projection variables, based on the DEM.'''             
     print '\nSetting inverse projection coefficients'         
 
@@ -812,7 +811,7 @@ def setInvProjVars(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg):
 
     #Snap image plane to DEM extent
     XYZ=np.column_stack([X[visible[:]],Y[visible[:]],Z[visible[:]]])
-    uv0,dummy,inframe=project(camloc, camdir, radial, tangen, foclen, 
+    uv0,dummy,inframe=projectXYZ(camloc, camdir, radial, tangen, foclen, 
                               camcen, refimg, XYZ)
     uv0=np.column_stack([uv0,XYZ])
     uv0=uv0[inframe,:]
@@ -829,10 +828,11 @@ def setInvProjVars(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg):
     return invProjVars
             
 
-def project(camloc, camdirection, radial, tangen, foclen, camcen, refimg, xyz):
+def projectXYZ(camloc, camdirection, radial, tangen, foclen, camcen, refimg, 
+               xyz):
     '''Project the xyz world coordinates into the corresponding image 
-    coordinates (uv). This is primarily executed using the ImGRAFT 
-    projection function found in camera.m:            
+    coordinates (uv). This is primarily executed using the ImGRAFT projection 
+    function found in camera.m:            
     uv,depth,inframe=cam.project(xyz)
     
     Inputs
@@ -919,7 +919,7 @@ def project(camloc, camdirection, radial, tangen, foclen, camcen, refimg, xyz):
     return uv,depth,inframe
 
  
-def invproject(uv, invprojvars):  
+def projectUV(uv, invprojvars):  
     '''Inverse project image coordinates (uv) to xyz world coordinates
     using inverse projection variables (set using self._setInvProjVars).         
     This is primarily executed using the ImGRAFT projection function 

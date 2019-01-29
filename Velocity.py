@@ -1,5 +1,5 @@
 '''
-PYTRX MEASURE MODULE
+PYTRX VELOCITY MODULE
 
 This script is part of PyTrx, an object-oriented programme created for the 
 purpose of calculating real-world measurements from oblique images and 
@@ -43,15 +43,12 @@ import math
 #Import PyTrx functions and classes
 from FileHandler import readMask
 from Images import ImageSequence
-from CamEnv import invproject, setInvProjVars
+from CamEnv import projectUV, setProjection
 
 #------------------------------------------------------------------------------
-
-class Velocity(ImageSequence):
-    '''A class for the processing of an ImageSet to determine pixel 
-    displacements and real-world velocities from a sparse set of points, with 
-    methods to track in the xy image plane and project tracks to real-world 
-    (xyz) coordinates.
+class Homography(ImageSequence):
+    '''A class for the processing the homography of an image sequence to 
+    determine motion in a camera platform.
     
     This class treats the images as a contigous sequence of name references by
     default.
@@ -60,31 +57,17 @@ class Velocity(ImageSequence):
     imageList:          List of images, for the ImageSet object.
     camEnv:             The Camera Environment corresponding to the images, 
                         for the ImageSequence object.
-    maskPath:           The file path for the mask indicating the target area
-                        for deriving velocities from. If this file exists, the 
-                        mask will be loaded. If this file does not exist, then 
-                        the mask generation process will load, and the result 
-                        will be saved with this path.
     invmaskPath:        As above, but the mask for the stationary feature 
                         tracking (for camera registration/determining
                         camera homography).
-    image0:             The image number in the ImageSet from which the 
-                        analysis will commence. This is set to the first image 
-                        in the ImageSet by default.
     band:               String denoting the desired image band.
     equal:              Flag denoting whether histogram equalisation is applied 
                         to images (histogram equalisation is applied if True). 
                         Default is True.                        
-    loadall:            Flag which, if true, will force all images in the 
-                        sequence to be loaded as images (array) initially and 
-                        thus not re-loaded in subsequent processing. This is 
-                        only advised for small image sequences. 
-    timingMethod:       Method for deriving timings from imagery. By default, 
-                        timings are extracted from the image EXIF data. 
     '''
         
-    def __init__(self, imageList, camEnv, maskPath=None, invmaskPath=None,
-                 calibFlag=True, band='L', equal=True):
+    def __init__(self, imageList, camEnv, invmaskPath=None, calibFlag=True, 
+                 band='L', equal=True):
         
         ImageSequence.__init__(self, imageList, band, equal)
         
@@ -92,15 +75,8 @@ class Velocity(ImageSequence):
         self._camEnv = camEnv
         self._imageN = self.getLength()-1
         self._calibFlag = calibFlag
-        
-        #Set mask 
-        if maskPath is None:
-            self._mask = None
-        else:
-            self._mask = readMask(self.getImageArrNo(0), maskPath)
-            print '\nVelocity mask set'
          
-        #Set inverse mask
+        #Set mask
         if invmaskPath is None:
             self._invmask = None
         else:
@@ -108,113 +84,6 @@ class Velocity(ImageSequence):
             print '\nHomography mask set'
 
 
-    def calcVelocities(self, homog=None, back_thresh=1.0, maxpoints=50000, 
-                       quality=0.1, mindist=5.0, min_features=4):
-        '''Function to calculate velocities between succesive image pairs. 
-        Image pairs are called from the ImageSequence object. Points are seeded
-        in the first of these pairs using the Shi-Tomasi algorithm with 
-        OpenCV's goodFeaturesToTrack function. 
-        
-        The Lucas Kanade optical flow algorithm is applied using the OpenCV 
-        function calcOpticalFlowPyrLK to find these tracked points in the 
-        second image of each image pair. A backward tracking method then tracks 
-        back from these to the first image in the pair, checking if this is 
-        within a certain distance as a validation measure.
-        
-        Tracked points are corrected for image distortion and camera platform
-        motion (if needed). The points in each image pair are georectified 
-        subsequently to obtain xyz points. The georectification functions are 
-        called from the Camera Environment object, and are based on those in
-        ImGRAFT (Messerli and Grinsted, 2015). Velocities are finally derived 
-        from these using a simple Pythagoras' theorem method.
-        
-        This function returns the xyz velocities and points from each image 
-        pair, and their corresponding uv velocities and points in the image 
-        plane.
-        
-        Inputs
-        homography:                 Flag to denote whether homography should
-                                    be calculated and images should be 
-                                    corrected for image registration.
-        back_thesh:                 Threshold for back-tracking distance (i.e.
-                                    the difference between the original seeded
-                                    point and the back-tracked point in im0).
-        maxpoints:                  Maximum number of points to seed in im0
-        quality:                    Corner feature quality.
-        mindist:                    Minimum distance between seeded points.                 
-        min_features:               Minimum number of seeded points to track.
-        
-        Outputs
-        xyz:                        List containing the xyz velocities for each 
-                                    point (xyz[0]), the xyz positions for the 
-                                    points in the first image (xyz[1]), and the 
-                                    xyz positions for the points in the second 
-                                    image(xyz[2]). 
-        uv:                         List containing the uv velocities for each
-                                    point (uv[0], the uv positions for the 
-                                    points in the first image (uv[1]), the
-                                    uv positions for the points in the second
-                                    image (uv[2]), and the corrected uv points 
-                                    in the second image if they have been 
-                                    calculated using the homography model for
-                                    image registration (uv[3]). If the 
-                                    corrected points have not been calculated 
-                                    then an empty list is merely returned.                                 
-        '''
-           
-        print '\n\nCALCULATING VELOCITIES'
-        velocity=[]
-        
-        #Get camera environment 
-        camenv = self.getCamEnv()
-        
-        #Get DEM from camera environment
-        dem = camenv.getDEM() 
-
-        #Get inverse projection variables through camera info               
-        invprojvars = setInvProjVars(dem, camenv._camloc, camenv._camDirection, 
-                                     camenv._radCorr, camenv._tanCorr, 
-                                     camenv._focLen, camenv._camCen, 
-                                     camenv._refImage) 
-        
-        #Get camera matrix and distortion parameters for calibration
-        mtx=self._camEnv.getCamMatrixCV2()
-        distort=self._camEnv.getDistortCoeffsCV2()
-        
-        #Get mask
-        mask=self.getMask()
-        
-        #Get first image (image0) file path and array data for initial tracking
-        imn1=self._imageSet[0].getImageName()
-        im1=self._imageSet[0].getImageArray()
-        
-        #Cycle through image pairs (numbered from 0)
-        for i in range(self.getLength()-1):
-
-            #Re-assign first image in image pair
-            im0=im1
-            imn0=imn1
-                            
-            #Get second image in image pair (and subsequently clear memory)
-            im1=self._imageSet[i+1].getImageArray()
-            imn1=self._imageSet[i+1].getImageName()       
-            self._imageSet[i].clearAll()
-           
-            print '\nFeature-tracking for images: ',imn0,' and ',imn1
-
-            #Calculate velocities between image pair with homography
-            pts=calcVelocity(im0, im1, mask, [mtx,distort], 
-                             [homog[i][0],homog[i][3]], invprojvars, 
-                             back_thresh, maxpoints, quality, mindist, 
-                             min_features)                      
-
-            #Append output
-            velocity.append(pts)         
-        
-        #Return XYZ and UV velocity information
-        return velocity
-        
-        
     def calcHomographyPairs(self, back_thresh=1.0, maxpoints=50000, 
                             quality=0.1, mindist=5.0, min_features=4):
         '''Function to generate a homography model through a sequence of 
@@ -278,17 +147,184 @@ class Velocity(ImageSequence):
             #Assign homography information as object attributes
             homog.append(hg)
             
-        return homog
+        return homog            
 
 
-    def getMask(self):
-        '''Return image mask.'''
-        return self._mask
-
-    
     def getInverseMask(self):
         '''Return inverse mask.'''
         return self._invmask
+
+            
+class Velocity(ImageSequence):
+    '''A class for the processing of an ImageSet to determine pixel 
+    displacements and real-world velocities from a sparse set of points, with 
+    methods to track in the xy image plane and project tracks to real-world 
+    (xyz) coordinates.
+    
+    This class treats the images as a contigous sequence of name references by
+    default.
+    
+    Args
+    imageList:          List of images, for the ImageSet object.
+    camEnv:             The Camera Environment corresponding to the images, 
+                        for the ImageSequence object.
+    maskPath:           The file path for the mask indicating the target area
+                        for deriving velocities from. If this file exists, the 
+                        mask will be loaded. If this file does not exist, then 
+                        the mask generation process will load, and the result 
+                        will be saved with this path.
+    invmaskPath:        As above, but the mask for the stationary feature 
+                        tracking (for camera registration/determining
+                        camera homography).
+    image0:             The image number in the ImageSet from which the 
+                        analysis will commence. This is set to the first image 
+                        in the ImageSet by default.
+    band:               String denoting the desired image band.
+    equal:              Flag denoting whether histogram equalisation is applied 
+                        to images (histogram equalisation is applied if True). 
+                        Default is True.                        
+    loadall:            Flag which, if true, will force all images in the 
+                        sequence to be loaded as images (array) initially and 
+                        thus not re-loaded in subsequent processing. This is 
+                        only advised for small image sequences. 
+    timingMethod:       Method for deriving timings from imagery. By default, 
+                        timings are extracted from the image EXIF data. 
+    '''
+        
+    def __init__(self, imageList, camEnv, homography=None, maskPath=None, 
+                 calibFlag=True, band='L', equal=True):
+        
+        ImageSequence.__init__(self, imageList, band, equal)
+        
+        #Set initial class properties
+        self._camEnv = camEnv
+        self._homog = homography
+        self._imageN = self.getLength()-1
+        self._calibFlag = calibFlag
+        
+        #Set mask 
+        if maskPath is None:
+            self._mask = None
+        else:
+            self._mask = readMask(self.getImageArrNo(0), maskPath)
+            print '\nVelocity mask set'
+
+
+    def calcVelocities(self, back_thresh=1.0, maxpoints=50000, 
+                       quality=0.1, mindist=5.0, min_features=4):
+        '''Function to calculate velocities between succesive image pairs. 
+        Image pairs are called from the ImageSequence object. Points are seeded
+        in the first of these pairs using the Shi-Tomasi algorithm with 
+        OpenCV's goodFeaturesToTrack function. 
+        
+        The Lucas Kanade optical flow algorithm is applied using the OpenCV 
+        function calcOpticalFlowPyrLK to find these tracked points in the 
+        second image of each image pair. A backward tracking method then tracks 
+        back from these to the first image in the pair, checking if this is 
+        within a certain distance as a validation measure.
+        
+        Tracked points are corrected for image distortion and camera platform
+        motion (if needed). The points in each image pair are georectified 
+        subsequently to obtain xyz points. The georectification functions are 
+        called from the Camera Environment object, and are based on those in
+        ImGRAFT (Messerli and Grinsted, 2015). Velocities are finally derived 
+        from these using a simple Pythagoras' theorem method.
+        
+        This function returns the xyz velocities and points from each image 
+        pair, and their corresponding uv velocities and points in the image 
+        plane.
+        
+        Inputs
+        homography:                 Flag to denote whether homography should
+                                    be calculated and images should be 
+                                    corrected for image registration.
+        back_thesh:                 Threshold for back-tracking distance (i.e.
+                                    the difference between the original seeded
+                                    point and the back-tracked point in im0).
+        maxpoints:                  Maximum number of points to seed in im0
+        quality:                    Corner feature quality.
+        mindist:                    Minimum distance between seeded points.                 
+        min_features:               Minimum number of seeded points to track.
+        
+        Outputs
+        xyz:                        List containing the xyz velocities for each 
+                                    point (xyz[0]), the xyz positions for the 
+                                    points in the first image (xyz[1]), and the 
+                                    xyz positions for the points in the second 
+                                    image(xyz[2]). 
+        uv:                         List containing the uv velocities for each
+                                    point (uv[0], the uv positions for the 
+                                    points in the first image (uv[1]), the
+                                    uv positions for the points in the second
+                                    image (uv[2]), and the corrected uv points 
+                                    in the second image if they have been 
+                                    calculated using the homography model for
+                                    image registration (uv[3]). If the 
+                                    corrected points have not been calculated 
+                                    then an empty list is merely returned.                                 
+        '''
+           
+        print '\n\nCALCULATING VELOCITIES'
+        velocity=[]
+        
+        #Get camera environment 
+        camenv = self.getCamEnv()
+        
+        #Get DEM from camera environment
+        dem = camenv.getDEM() 
+
+        #Get inverse projection variables through camera info               
+        invprojvars = setProjection(dem, camenv._camloc, camenv._camDirection, 
+                                    camenv._radCorr, camenv._tanCorr, 
+                                    camenv._focLen, camenv._camCen, 
+                                    camenv._refImage) 
+        
+        #Get camera matrix and distortion parameters for calibration
+        mtx=self._camEnv.getCamMatrixCV2()
+        distort=self._camEnv.getDistortCoeffsCV2()
+        
+        #Get mask
+        mask=self.getMask()
+        
+        #Get first image (image0) file path and array data for initial tracking
+        imn1=self._imageSet[0].getImageName()
+        im1=self._imageSet[0].getImageArray()
+        
+        #Cycle through image pairs (numbered from 0)
+        for i in range(self.getLength()-1):
+
+            #Re-assign first image in image pair
+            im0=im1
+            imn0=imn1
+                            
+            #Get second image in image pair (and subsequently clear memory)
+            im1=self._imageSet[i+1].getImageArray()
+            imn1=self._imageSet[i+1].getImageName()       
+            self._imageSet[i].clearAll()
+           
+            print '\nFeature-tracking for images: ',imn0,' and ',imn1
+
+            #Calculate velocities between image pair with homography
+            if self._homog is not None:
+                pts=calcVelocity(im0, im1, mask, [mtx,distort], 
+                                 [self._homog[i][0],self._homog[i][3]], 
+                                 invprojvars, back_thresh, maxpoints, quality, 
+                                 mindist, min_features)                      
+            else:
+                pts=calcVelocity(im0, im1, mask, [mtx,distort], 
+                                 [None, None], invprojvars, back_thresh, 
+                                 maxpoints, quality, mindist, min_features)
+                
+            #Append output
+            velocity.append(pts)         
+        
+        #Return XYZ and UV velocity information
+        return velocity
+        
+        
+    def getMask(self):
+        '''Return image mask.'''
+        return self._mask
  
  
     def getCamEnv(self):
@@ -392,7 +428,7 @@ def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None,
         src_pts_corr = points[0]
         dst_pts_corr = points[1]
 
-    #Calculate homography if desired
+    #Calculate homography-corrected pts if desired
     if homog is not None:
         
         #Get homography matrix and homography points
@@ -443,11 +479,11 @@ def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None,
     if invprojvars is not None:        
         #Project good points from image0
         uvs=src_pts_corr[:,0,:]
-        xyzs=invproject(uvs, invprojvars)
+        xyzs=projectUV(uvs, invprojvars)
         
         #Project good points from image1
         uvd=dst_pts_homog[:,0,:]
-        xyzd=invproject(uvd, invprojvars)
+        xyzd=projectUV(uvd, invprojvars)
         
         #Calculate xyz velocity
         xyzvel=[]
@@ -576,8 +612,7 @@ def calcHomography(img1, img2, mask, correct, method=cv2.RANSAC,
 
     #Compile all error measures    
     homogerrors=([xmean,ymean,xsd,ysd],[xd,yd])
-        
-        
+                
     return (homogMatrix, [src_pts_corr,dst_pts_corr,homog_pts], ptserrors, 
             homogerrors)
 
@@ -591,9 +626,7 @@ def apply_persp_homographyPts(pts, homog, inverse=False):
     
     Variables
     pts:                  Input point positions to correct.
-    homog:                Perspective homography matrix.
-    typ:                  Format of input points (either can be an 'array 
-                          or 'list'.                                   
+    homog:                Perspective homography matrix.                                   
     inverse:              Flag to denote if perspective homography matrix 
                           needs inversing.
     
@@ -601,13 +634,12 @@ def apply_persp_homographyPts(pts, homog, inverse=False):
     hpts:                 Corrected point positions.
     '''         
     if isinstance(pts,np.ndarray):
-        #Get empty array that is the same size as pts
         n=pts.shape[0]
         hpts=np.zeros(pts.shape)
        
         if inverse:
            val,homog=cv2.invert(homog)       
-
+        
         for i in range(n):
             div=1./(homog[2][0]*pts[i][0][0] + homog[2][1]*pts[i][0][1] + 
                     homog[2][2])
@@ -619,12 +651,11 @@ def apply_persp_homographyPts(pts, homog, inverse=False):
         return hpts 
        
     elif isinstance(pts, list):
-        #Create empty output list
         hpts=[]
                
         if inverse:
             val,homog=cv2.invert(homog) 
-            
+
         for p in pts:
             div=1./(homog[2][0]*p[0]+homog[2][1]*p[1]+homog[2][2])
             xh=(homog[0][0]*p[0]+homog[0][1]*p[1]+homog[0][2])*div
@@ -633,6 +664,7 @@ def apply_persp_homographyPts(pts, homog, inverse=False):
     else:
         print 'PERPECTIVE INPUT:'
         print type(pts)
+        hpts=None
               
         return hpts 
         
