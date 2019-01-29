@@ -27,15 +27,17 @@ import os
 #Import PyTrx packages
 sys.path.append('../')
 from Line import Line
+from Velocity import Homography
 from CamEnv import CamEnv
-from FileHandler import writeLineFile, writeLineSHP, importLineData
+from FileHandler import writeLineFile, writeLineSHP, writeHomogFile, importLineData
 from Utilities import plotLinePX, plotLineXYZ
 
 
 #---------------------------   Initialisation   -------------------------------
 
 #Define data input directories
-camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_TU1_2015.txt'   
+camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_TU1_2015.txt'
+invmask = '../Examples/camenv_data/invmasks/TU1_2015_inv.jpg'  
 camimgs = '../Examples/images/TU1_2015_subset/*.JPG'
 
 #Define data output directory
@@ -46,14 +48,33 @@ if not os.path.exists(destination):
 #Define camera environment
 cam = CamEnv(camdata)
 
-#Set up line object
-terminus = Line(camimgs, cam)
+
+#---------------------   Calculate homography   -------------------------------
+
+#Set homography parameters
+hgback=1.0                      #Back-tracking threshold
+hgmax=50000                     #Maximum number of points to seed
+hgqual=0.1                      #Corner quality for seeding
+hgmind=5.0                      #Minimum distance between seeded points
+hgminf=4                        #Minimum number of seeded points to track
+
+#Set up Homography object
+homog = Homography(camimgs, cam, invmask, calibFlag=True, band='L', equal=True)
+
+#Calculate homography
+hg = homog.calcHomographyPairs(hgback, hgmax, hgqual, hgmind, hgminf)             
+homogmatrix = [item[0] for item in hg] 
 
 
 #-----------------------   Calculate/import lines   ---------------------------
 
+#Set up line object
+terminus = Line(camimgs, cam, homogmatrix)
+
+
 #Manually define terminus lines
 lines = terminus.calcManualLines()
+
 
 ##Import lines from textfiles
 #xyzfile=destination+'line_realcoords.txt'
@@ -62,21 +83,25 @@ lines = terminus.calcManualLines()
 
 #----------------------------   Export data   ---------------------------------
 
-##Write line data to txt file
+#Write line data to txt file
 imn=terminus.getImageNames()
 writeLineFile(lines, imn, destination)
 
+#Write homography data to .csv file
+target1 = destination + 'homography.csv'
+writeHomogFile(hg, imn, target1)
+
 #Write shapefiles from line data
-target1 = destination + 'shapefiles/'   
+target2 = destination + 'shapefiles/'   
 proj = 32633
 xyzcoords = [item[0][1] for item in lines]
-writeLineSHP(xyzcoords, imn, target1, proj)
+writeLineSHP(xyzcoords, imn, target2, proj)
 #
 #
 ##----------------------------   Show results   --------------------------------  
 
 #Define destination
-target2 = destination + 'outputimgs/'
+target3 = destination + 'outputimgs/'
 
 #Get dem, images, camera matrix and distortion parameters
 dem = cam.getDEM()
@@ -88,8 +113,8 @@ pxcoords = [item[1][1] for item in lines]
 #Plot lines in image plane and as XYZ lines 
 for i in range(len(pxcoords)):
     plotLinePX(pxcoords[i], imgset[i].getImageCorr(cameraMatrix, distortP), 
-               show=True, save=target2+'uv_'+str(imn[i]))  
-    plotLineXYZ(xyzcoords[i], dem, show=True, save=target2+'xyz_'+str(imn[i]))
+               show=True, save=target3+'uv_'+str(imn[i]))  
+    plotLineXYZ(xyzcoords[i], dem, show=True, save=target3+'xyz_'+str(imn[i]))
 
     
 #------------------------------------------------------------------------------

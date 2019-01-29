@@ -85,6 +85,8 @@ class Line(ImageSequence):
             self._hmatrix=hmatrix
             hmat0=None
             self._hmatrix.insert(0, hmat0)
+        else:
+            self._hmatrix=None
         
         
     def calcManualLines(self):
@@ -128,8 +130,8 @@ class Line(ImageSequence):
             imn=self._imageSet[i].getImageName()
             
             #Define line data
-            if self._homog is not None:
-                out = calcManualLine(img1, imn, self._homog[i][0], invprojvars)
+            if self._hmatrix is not None:
+                out = calcManualLine(img1, imn, self._hmatrix[i], invprojvars)
             else:
                 out = calcManualLine(img1, imn, None, invprojvars)
                 
@@ -176,16 +178,20 @@ def calcManualLine(img, imn, hmatrix=None, invprojvars=None):
     plt.show()
     plt.close()
 
+    #Convert coordinates to array
+    pxpts=[]
+    for i in rawpx:
+        pxpts.append([[i[0],i[1]]])
+    pxpts=np.asarray(pxpts)
+    
     #Calculate homography-corrected pts if desired
     if hmatrix is not None:
         print 'Correcting for camera motion'
-        pxpts=[]
-        for i in rawpx:
-            corr = Velocity.apply_persp_homographyPts(i, hmatrix, inverse=True)
-            pxpts.append(corr)
-    else:
-        pxpts=rawpx
+        pxpts = Velocity.apply_persp_homographyPts(pxpts, hmatrix, 
+                                                   inverse=True)
         
+    #Re-format pixel point coordinates
+    pxpts = np.squeeze(pxpts)
         
     #Create OGR pixl line object and extract length
     pxline = getOGRLine(pxpts)
@@ -193,8 +199,6 @@ def calcManualLine(img, imn, hmatrix=None, invprojvars=None):
     pxline = pxline.Length()                 
     print 'Line length: %d px' % (pxline)
     
-    #Re-format pixel point coordinates
-    pxpts = np.squeeze(pxpts)
              
     if invprojvars is not None:  
         #Get xyz coordinates with inverse projection           

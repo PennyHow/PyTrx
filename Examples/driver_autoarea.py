@@ -152,8 +152,8 @@ writeCalibFile(matrix, tancorr, radcorr, target1)
 
 
 #Write homography data to .csv file
-target3 = destination + 'homography.csv'
-writeHomogFile(hg, imn, target3)
+target2 = destination + 'homography.csv'
+writeHomogFile(hg, imn, target2)
 
 
 #Write results to file
@@ -161,16 +161,16 @@ writeAreaFile(areas, imn, destination)
 
 
 #Create shapefiles
-target1 = destination + 'shpfiles/'                 
-writeAreaSHP(xyzpts, imn, target1, proj)            
+target3 = destination + 'shpfiles/'                 
+writeAreaSHP(xyzpts, imn, target3, proj)            
 
 
 #Write all image extents and dems 
-target2 = destination + 'outputimgs/'
+target4 = destination + 'outputimgs/'
 for i in range(len(areas)):
     plotAreaPX(uvpts[i], imgset[i].getImageCorr(cameraMatrix, distortP), 
-               show=True, save=target2+'uv_'+str(imn[i]))  
-    plotAreaXYZ(xyzpts[i], dem, show=True, save=target2+'xyz_'+str(imn[i]))
+               show=True, save=target4+'uv_'+str(imn[i]))  
+    plotAreaXYZ(xyzpts[i], dem, show=True, save=target4+'xyz_'+str(imn[i]))
 
 
 #------------------------------------------------------------------------------                                                                                                                                                                                                                                                                                                      

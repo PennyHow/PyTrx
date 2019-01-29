@@ -149,6 +149,8 @@ class Area(ImageSequence):
             self._hmatrix=hmatrix
             hmat0=None
             self._hmatrix.insert(0, hmat0)
+        else:
+            self._hmatrix=None
             
             
     def calcAutoAreas(self, colour=False, verify=False):
@@ -254,7 +256,7 @@ class Area(ImageSequence):
                 defineColourrange(img2, imn, pxplot=self._pxplot)
             
             #Calculate extent
-            if self._hmatrix[i] is not None:
+            if self._hmatrix is not None:
                 out = calcAutoArea(img2, imn, self._colourrange, 
                                    self._hmatrix[i], self._threshold, 
                                    invprojvars)  
@@ -315,7 +317,7 @@ class Area(ImageSequence):
             imn=self._imageSet[i].getImageName()
             
             #Manually define extent and append
-            if self._hmatrix[i] is not None:
+            if self._hmatrix is not None:
                 polys = calcManualArea(img, imn, self._hmatrix[i], 
                                        self._pxplot, invprojvars) 
             else:
