@@ -461,8 +461,8 @@ def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None,
         dst_pts_corr=dst_pts_corr[good]
         dst_pts_homog=dst_pts_homog[good]
         
-        print 'Points removed because of homography uncertainty:'
-        print 'Before: '+str(tracked)+' After: '+str(dst_pts_corr.shape[0])
+        print (str(dst_pts_corr.shape[0]) + 
+               ' Points remaining after homography correction')
 
     else:
         #Original tracked points assigned if homography not given
@@ -754,6 +754,7 @@ def featureTrack(i0, iN, mask, back_thresh=1.0, maxpoints=50000, quality=0.1,
         p0=p0[good]
         p1=p1[good]
         p0r=p0r[good]
+        print 'Average back-tracking difference: ' + str(np.mean(good))
 
         #Return None if number of tracked features is under the 
         #min_features threshold

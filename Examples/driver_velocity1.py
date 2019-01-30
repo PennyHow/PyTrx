@@ -96,6 +96,7 @@ uv0=[item[1][1] for item in velocities]
 uv1=[item[1][2] for item in velocities]
 uv1corr=[item[1][3] for item in velocities]
 
+
 #---------------------------  Export data   -----------------------------------
 
 print '\n\nWRITING DATA TO FILE'
