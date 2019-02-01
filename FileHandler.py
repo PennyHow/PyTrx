@@ -42,18 +42,17 @@ readGCPs:               Function to read ground control points from a .txt
                         each line.
 writeVeloFile:          Function to write all velocity data.
 writeHomogFile:         Function to write all homography data.
-writeAreaFile:          Function to write all area data (if it has been 
-                        calculated) to separate .txt files containing the pixel
-                        extents, polygon pixel coordinates, xyz polygon areas,
-                        cumulative areas of all polygons, and polygon xyz 
-                        coordinates. All these output files are compatible with 
+writeAreaFile:          Function to write UV and XYZ area data to .csv file 
+                        containing the pixel extents and xyz areas (if 
+                        calculated).
+WriteLineFile:          Function to write UV and XYZ line to .csv file 
+                        containing the pixel line lengths and XYZ line lengths.
+writeAreaCoords:        Function to write UV and XYZ area feature coordinates 
+                        to .txt files. These output files are compatible with 
                         the importing tools, namely importAreaData.
-WriteLineFile:          Function to write all line data (if it has been 
-                        calculated) to separate .txt files containing the pixel
-                        coordinates of the lines, the pixel line length, the
-                        xyz coordinates of the lines, and the real (xyz) line 
-                        lengths. All these output files are compatible with the 
-                        importing tools, namely importLineData.
+WriteLineCoords:        Function to write UV and XYZ line feature coordinates 
+                        to .txt files. These output files are compatible with 
+                        the importing tools, namely importLineData.
 writeVeloSHP:           Function to write OGR points representing velocities 
                         (from ALL images) to file in a .shp file type that is 
                         compatible with mapping sofrware such as ArcMap and 
@@ -105,7 +104,7 @@ def readMask(img, writeMask=None):
     The writeMask file path is used to either open the existing mask at that 
     path or to write the generated mask to this path.
     
-    Variables
+    Args
     img (arr):          Image to define mask in
     writeMask (str):    File destination that mask output is written to
     
@@ -178,7 +177,7 @@ def readCalib(fileName, paramList):
                  Calibration App (available in the Computer Vision Systems 
                  toolbox).
     
-    Variables
+    Args
     fileName (str):         File directory for calibration file
     paramList (list):       List of strings denoting keywords to look for in 
                             calibration file
@@ -231,7 +230,7 @@ def lineSearch(lineList, search):
     '''Function to supplement the readCalib function. Given an input parameter 
     to search within the file, this will return the line numbers of the data.
     
-    Variables
+    Args
     lineList (list):        List of strings within a file line
     search (str):           Target keyword to search for
     
@@ -263,7 +262,7 @@ def returnData(lines, data):
     numbers of the parameter data (the ouput of the lineSearch function), this 
     will return the data.
     
-    Variables
+    Args
     lines (list):          Given line numbers to extract data from
     data (list):           Raw line data 
     
@@ -296,7 +295,7 @@ def readMatrixDistortion(path):
     intrinsic matrix and distortion parameters required for calibration from a
     given file.
     
-    Variables
+    Args
     path (str):         Directory of calibration file
     
     Returns
@@ -325,7 +324,7 @@ def checkMatrix(matrix):
     '''Function to support the calibrate function. Checks and converts the 
     intrinsic matrix to the correct format for calibration with OpenCV.
     
-    Variables
+    Args
     matrix (arr):       Inputted matrix for checking
     
     Returns 
@@ -353,7 +352,7 @@ def readImg(path, band='L', equal=True):
     '''Function to prepare an image by opening, equalising, converting to 
     either grayscale or a specified band, then returning a copy.
 
-    Variables
+    Args
     path (str):     Image file path directory.
     band (str):     Desired band output
                     'R': red band
@@ -408,7 +407,7 @@ def readGCPs(fileName):
     file is referenced to under a header line. Data is appended by skipping the
     header line and finding the world and image coordinates from each line.
     
-    Variables
+    Args
     fileName (str):         File path directory for GCP file
     
     Returns
@@ -453,7 +452,7 @@ def writeCalibFile(intrMat, tanDis, radDis, fname):
     '''Write camera calibration data to .txt file, including camera matrix, and 
     radial and tangential distortion parameters. 
 
-    Variables
+    Args
     intrMat (arr):          Intrinsic camera matrix
     tanDis (arr):           Tangential distortion parameters
     radDis (arr):           Radial distortion parameters
@@ -479,7 +478,7 @@ def writeVeloFile(xyzvel, uvvel, homog, imn, fname):
         Homography residual mean error (RMS)
         Signal-to-noise ratio
     
-    Variables     
+    Args     
     xyzvel (list):          XYZ velocities
     uvvel (list):           Pixel velocities
     homog (list):           Homography (mtx, im0pts, im1pts, ptserr, homogerr)
@@ -581,7 +580,7 @@ def writeHomogFile(homog, imn, fname):
         Mean homographic displacement
         Signal-to-noise ratio
     
-    Variables
+    Args
     homog (list):           Homography (mtx, im0pts, im1pts, ptserr, homogerr)
     imn (list):             List of image names
     fname (str):            Directory for file to be written to
@@ -663,56 +662,47 @@ def writeHomogFile(homog, imn, fname):
     print '\nHomography file written' + fname
 
 
-def writeAreaFile(areas, imn, dest):
-    '''Write all area data (if it has been calculated) to the given files:
-        
-        Cumulative pixel extent:        Written as a single text file 
-                                        containing delineated values of total 
-                                        pixel area recorded for all images in 
-                                        the sequence.
-        Polygon pixel coordinates:      Written as a tab delimited text file 
-                                        containing polygon xy coordinates.
-        Cumulative xyz :                Written as a single text file 
-                                        containing the total area of all the 
-                                        polgons from each image.
-        Polygon real coordinates:       Written as a tab delimited text file 
-                                        containing polygon xyz coordinates
-                                        
-    All these file types are compatible with the importing tools (importPX, 
-    importXYZ).
+def writeAreaFile(pxareas, xyzareas, imn, destination):
+    '''Write UV and XYZ areas to csv file.
+
+    Args
+    pxarea (list):                    Pixel extents
+    xyzarea (list):                   XYZ areas
+    imn (list):                       Image names
+    destination (str):                File directory where csv file will be 
+                                      written to
+    ''' 
+    #Create file location
+    f = open(destination, 'w')
     
-    Variables
-    pxextent (list):                    Pixel extents
-    pxpts (list):                       Pixel coordinates
+    #Write data headers
+    f.write('Image,UV area,XYZ area \n')    
+     
+    #Write image name, pixel area, and xyz area data     
+    for i in range(len(imn)):
+        if xyzareas is None:
+            f.write(str(imn[i]) + ',' + str(sum(pxareas[i])) + '\n')
+        else:
+            f.write(str(imn[i]) + ',' + str(sum(pxareas[i])) + ',' 
+                    + str(sum(xyzareas[i])) + '\n')
+            
+
+def writeAreaCoords(pxpts, xyzpts, imn, pxdestination, xyzdestination):
+    '''Write UV and XYZ area coordinates to text files. These file types are 
+    compatible with the importing tools (importAreaPX, importAreaXYZ).
+    
+    Args
     xyzarea (list):                     XYZ areas
     xyzpts (list):                      XYZ coordinates
     imn (list):                         Image names
-    dest (str):                         Folder directory where output files 
-                                        will be written to (NOT a specific 
-                                        file).
-    ''' 
-    #Make directory if it does not exist
-    if not os.path.exists(dest):
-        os.makedirs(dest)
-    
-    #Get xyz and px info from input
-    xyzarea = [item[0][0] for item in areas]
-    xyzpts = [item[0][1] for item in areas]
-    pxextent = [item[1][0] for item in areas]
-    pxpts = [item[1][1] for item in areas]
-    
-    #Cumulative area of all pixel extents       
-    if pxextent is not None:
-        target = dest + 'px_sum.txt'
-        f = open(target, 'w')
-        f.write('Image \t Pixel extent \n')            
-        for i in range(len(pxextent)):
-            f.write(str(imn[i]) + '\t' + str(pxextent[i]) + '\n')
-
+    pxdestination (str):                File directory where UV coordinates 
+                                        will be written to
+    xyzdestination (str):               File directory where XYZ coordinates 
+                                        will be written to
+    '''     
     #Pixel cooridnates of all pixel extents
-    if pxpts is not None:
-        target = dest + 'px_coords.txt'        
-        f = open(target, 'w')
+    if pxpts is not None:       
+        f = open(pxdestination, 'w')
         polycount=1        
         for i in range(len(pxpts)):
             f.write('Img ' + str(imn[i]) + '\t')                
@@ -726,20 +716,11 @@ def writeAreaFile(areas, imn, dest):
                 polycount = polycount+1
             f.write('\n\n')
             polycount=1
-            
-    #Areas and cumulative areas of polygons
-    if xyzarea is not None:
-        target = dest + 'area_sum.txt'
-        f = open(target, 'w')
-        f.write('Image \t XYZ area \n')                       
-        for i in range(len(xyzarea)):
-            f.write(str(imn[i]) + '\t' + str(sum(xyzarea[i])) + '\n')
 
     #XYZ coordinates of polygons
-    if xyzpts is not None:             
-        target = dest + 'area_coords.txt'                   
+    if xyzpts is not None:                               
         polycount=1  
-        f = open(target, 'w')
+        f = open(xyzdestination, 'w')
         for i in range(len(xyzpts)):                
             f.write('Img ' + str(imn[i]) + '\t')
             for pol in xyzpts[i]:
@@ -750,89 +731,69 @@ def writeAreaFile(areas, imn, dest):
                 polycount=polycount+1
             f.write('\n\n')
             polycount=1
-                    
+                                        
 
-def writeLineFile(lines, imn, dest):
-    '''Write all line data (if it has been calculated) to separate files.
+def writeLineFile(pxline, xyzline, imn, destination):
+    '''Write UV and XYZ line lengths to csv file.
 
-        Pixel line length:              Written as a single text file 
-                                        containing delineated values of total 
-                                        pixel length recorded for all images in 
-                                        the sequence.
-        Line pixel coordinates:         Written as a tab delimited text file 
-                                        containing line pixel coordinates.
-        XYZ line length :               Written as a single text file 
-                                        containing the total XYZ length for all 
-                                        images in the sequence.
-        Line XYZ coordinates:           Written as a tab delimited text file 
-                                        containing line xyz coordinates 
-    
-    All these file types are compatible with the importing tools 
-    (importLinePX, importLineXYZ)
-    
-    Variables
+    Args
     pxline (list):                      Pixel line lengths
-    pxpts (list):                       Pixel coordinates
     xyzline (list):                     XYZ line lengths
+    imn (list):                         Image names
+    destination (str):                  File directory where output will be 
+                                        written to 
+    '''
+    #Create file
+    f = open(destination, 'w')
+    
+    #Write file headers
+    f.write('Image, UV length, XYZ length \n')            
+        
+    for i in range(len(pxline)):
+        if xyzline is None:
+            f.write(str(imn[i]) + ',' + str(pxline[i]) + '\n')
+        else:
+            f.write(str(imn[i]) + ',' + str(pxline[i]) + ',' + str(xyzline[i]) 
+                    + '\n')
+    
+
+
+def writeLineCoords(uvpts, xyzpts, imn, pxdestination, xyzdestination):
+    '''Write UV and XYZ line coordinates to text file. These file types are 
+    compatible with the importing tools (importLinePX, importLineXYZ)
+    
+    Args
+    uvpts (list):                       Pixel coordinates
     xyzpts (list):                      XYZ coordinates
     imn (list):                         Image names
-    dest (str):                         Folder directory where output files 
-                                        will be written to (NOT a specific 
-                                        file).      
-    '''
-    #Make directory if it does not exist
-    if not os.path.exists(dest):
-        os.makedirs(dest)
-
-    #Get xyz and px info from input
-    xyzline = [item[0][0] for item in lines]
-    xyzpts = [item[0][1] for item in lines]
-    pxline = [item[1][0] for item in lines]
-    pxpts = [item[1][1] for item in lines]
-        
+    pxdestination (str):                File directory for pixel coordinates
+    xyzdestination (str):               File directory for xyz coordinates     
+    '''    
     #Pixel line coordinates file generation             
-    if pxpts is not None:            
-        target = dest + 'line_pxcoords.txt'
-        f = open(target, 'w')
-        for i in range(len(pxpts)):
+    if uvpts is not None:            
+        f = open(pxdestination, 'w')
+        for i in range(len(uvpts)):
             f.write('Img ' + str(imn[i]) + '\t')                                   
-            for pts in pxpts[i]:
+            for pts in uvpts[i]:
                 f.write(str(pts[0]) + '\t' + str(pts[1]) + '\t')    
             f.write('\n\n')
-
-    #Pixel line length file generation            
-    if pxline is not None:
-        target = dest + 'line_pxlength.txt'
-        f = open(target, 'w')
-        f.write('Image \t Pixel length \n')            
-        for i in range(len(pxline)):
-            f.write(str(imn[i]) + '\t' + str(pxline[i]) + '\n')
-    
+            
     #Real line coordinates file generation
-    if xyzpts is not None:
-        target = dest + 'line_realcoords.txt'                    
-        f = open(target, 'w')
+    if xyzpts is not None:                   
+        f = open(xyzdestination, 'w')
         for i in range(len(xyzpts)):                
             f.write('Img ' + str(imn[i]) + '\t')
             for pts in xyzpts[i]:
                 f.write(str(pts[0]) + '\t' + str(pts[1]) + '\t' + str(pts[2]) 
                 + '\t')
             f.write('\n\n')
-    
-    #Real line length file generation            
-    if xyzline is not None:
-        target = dest + 'line_reallength.txt'
-        f = open(target, 'w')
-        f.write('Image \t XYZ length \n')
-        for i in range(len(xyzline)):
-            f.write(str(imn[i]) + '\t' + str(xyzline[i]) + '\n')
-
-
+                
+            
 def writeVeloSHP(xyzvel, xyz0, imn, fileDirectory, projection=None):
     '''Write OGR real velocity points (from ALL images) to file in a .shp
     file type that is compatible with ESRI mapping software.
     
-    Inputs
+    Args
     xyzvel (list):              XYZ velocities
     xyz0 (list):                XYZ pt0
     imn (list):                 Image name
@@ -921,7 +882,7 @@ def writeAreaSHP(xyzpts, imn, fileDirectory, projection=None):
     '''Write OGR real polygon areas (from ALL images) to file in a .shp
     file type that is compatible with ESRI mapping software.
     
-    Inputs
+    Args
     xyzpts (list):              XYZ coordinates for polygons
     imn (list):                 Iname names
     fileDirectory (str):        Destination that shapefiles will be written to           
@@ -1005,7 +966,7 @@ def writeLineSHP(xyzpts, imn, fileDirectory, projection=None):
     '''Write OGR real line features (from ALL images) to file in a .shp
     file type that is compatible with ESRI mapping software.
     
-    Inputs
+    Args
     xyzpts (list):              XYZ coordinates for lines
     imn (list):                 Image names
     fileDirectory (str):        Destination that shapefiles will be written to           
@@ -1080,7 +1041,7 @@ def writeLineSHP(xyzpts, imn, fileDirectory, projection=None):
 def importAreaData(xyzfile, pxfile):
     '''Import xyz and px data from text files.
     
-    Variables
+    Args
     xyzfile (str):      File directory to xyz coordinates
     pxfile (str):       File directory to uv coordinates
             
@@ -1105,7 +1066,7 @@ def importAreaData(xyzfile, pxfile):
 def importLineData(xyzfile, pxfile):
     '''Import xyz and px data from text files.
     
-    Variables
+    Args
     xyzfile (str):       File directory to xyz coordinates
     pxfile (str):        File directory to uv coordinates
             
@@ -1130,7 +1091,7 @@ def importLineData(xyzfile, pxfile):
 def importAreaFile(fname, dimension):
     '''Import pixel polygon data from text file and compute pixel extents.
     
-    Variables    
+    Args   
     fname (str):         Path to the text file containing the UV coordinate 
                          data
 
@@ -1188,7 +1149,7 @@ def importAreaFile(fname, dimension):
 def importLineFile(fname, dimension):
     '''Import XYZ line data from text file and compute line lengths.
     
-    Args   
+    Args  
     fname (str):         Path to the text file containing the XYZ coordinate 
                          data
     dimension (int):     Number of dimensions in point coordinates i.e. 2 or 3

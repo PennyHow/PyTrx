@@ -29,7 +29,7 @@ sys.path.append('../')
 from Line import Line
 from Velocity import Homography
 from CamEnv import CamEnv
-from FileHandler import writeLineFile, writeLineSHP, writeHomogFile, importLineData
+import FileHandler
 from Utilities import plotLinePX, plotLineXYZ
 
 
@@ -83,38 +83,44 @@ lines = terminus.calcManualLines()
 
 #----------------------------   Export data   ---------------------------------
 
-#Write line data to txt file
+#Get image names and line data
 imn=terminus.getImageNames()
-writeLineFile(lines, imn, destination)
+xyzlines = [item[0][0] for item in lines]
+pxlines = [item[1][0] for item in lines]
+xyzcoords = [item[0][1] for item in lines]
+pxcoords = [item[1][1] for item in lines]
+
+#Write line data to .csv file
+FileHandler.writeLineFile(pxlines, xyzlines, imn, destination+'lines.csv')
+
+#Write line coordinates to txt file
+FileHandler.writeLineCoords(pxcoords, xyzcoords, imn, 
+                           destination+'uvcoord.txt', 
+                           destination+'xyzcoords.txt')
 
 #Write homography data to .csv file
-target1 = destination + 'homography.csv'
-writeHomogFile(hg, imn, target1)
+FileHandler.writeHomogFile(hg, imn, destination+'homography.csv')
 
-#Write shapefiles from line data
-target2 = destination + 'shapefiles/'   
-proj = 32633
-xyzcoords = [item[0][1] for item in lines]
-writeLineSHP(xyzcoords, imn, target2, proj)
-#
-#
-##----------------------------   Show results   --------------------------------  
+#Write shapefiles from line data  
+FileHandler.writeLineSHP(xyzcoords, imn, destination + 'shapefiles/', 32633)
+
+
+#----------------------------   Show results   --------------------------------  
 
 #Define destination
-target3 = destination + 'outputimgs/'
+target = destination + 'outputimgs/'
 
 #Get dem, images, camera matrix and distortion parameters
 dem = cam.getDEM()
 imgset=terminus._imageSet
 cameraMatrix=cam.getCamMatrixCV2()
 distortP=cam.getDistortCoeffsCV2()
-pxcoords = [item[1][1] for item in lines]
-#
+
 #Plot lines in image plane and as XYZ lines 
 for i in range(len(pxcoords)):
     plotLinePX(pxcoords[i], imgset[i].getImageCorr(cameraMatrix, distortP), 
-               show=True, save=target3+'uv_'+str(imn[i]))  
-    plotLineXYZ(xyzcoords[i], dem, show=True, save=target3+'xyz_'+str(imn[i]))
+               show=True, save=target+'uv_'+str(imn[i]))  
+    plotLineXYZ(xyzcoords[i], dem, show=True, save=target+'xyz_'+str(imn[i]))
 
     
 #------------------------------------------------------------------------------

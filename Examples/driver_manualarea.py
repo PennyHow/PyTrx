@@ -31,7 +31,7 @@ sys.path.append('../')
 from Area import Area
 from Velocity import Homography
 from CamEnv import CamEnv
-from FileHandler import writeAreaFile, writeAreaSHP, importAreaData, writeHomogFile
+import FileHandler 
 from Utilities import plotAreaPX, plotAreaXYZ
 
 
@@ -100,30 +100,35 @@ areas = plumes.calcManualAreas()
 
 #----------------------------   Export data   ---------------------------------
 
-#Write results to file
-imn=plumes.getImageNames()
-writeAreaFile(areas, imn, destination)
-
-#Write homography to file
-target1 = destination + 'homography.csv'
-writeHomogFile(hg, imn, target1)
-
-
-#Create shapefiles
-target1 = destination + 'shpfiles/'    
-proj = 32633
+#Get area data
+xyzareas = [item[0][0] for item in areas]
 xyzpts = [item[0][1] for item in areas]
-writeAreaSHP(xyzpts, imn, target1, proj) 
-   
-#Write all image extents and dems 
-target2 = destination + 'outputimgs/'
+uvareas = [item[1][0] for item in areas]
 uvpts = [item[1][1] for item in areas]
+
+#Get relevant camera and dem data
+imn=plumes.getImageNames()
 dem = cameraenvironment.getDEM()
 imgset=plumes._imageSet
 cameraMatrix=cameraenvironment.getCamMatrixCV2()
 distortP=cameraenvironment.getDistortCoeffsCV2()
 
-#Plot areas in image plane and as XYZ polygons (only if xyz areas calculated)   
+#Write results to file
+FileHandler.writeAreaFile(uvareas, xyzareas, imn, destination+'areas.csv')
+FileHandler.writeAreaCoords(uvpts, xyzpts, imn, 
+                            destination+'uvcoords.txt', 
+                            destination+'xyzcoords.txt')
+
+#Write homography to file
+FileHandler.writeHomogFile(hg, imn, destination+'homography.csv')
+
+#Create shapefiles
+target1 = destination + 'shpfiles/'    
+proj = 32633
+FileHandler.writeAreaSHP(xyzpts, imn, target1, proj) 
+   
+#Plot areas in image plane and as XYZ polygons  
+target2 = destination + 'outputimgs/'
 for i in range(len(xyzpts)):
     plotAreaPX(uvpts[i], imgset[i].getImageCorr(cameraMatrix, distortP), 
                show=True, save=None)  

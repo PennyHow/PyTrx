@@ -6,8 +6,8 @@ purpose of calculating real-world measurements from oblique images and
 time-lapse image series.
 
 This is the Velocity module of PyTrx. It handles the functionality for 
-obtaining velocity measurements from oblique time-lapse imagery. Specifically, 
-this module contains functions for:
+obtaining velocity and homography  measurements from oblique time-lapse imagery. 
+Specifically, this module contains functions for:
 (1) Performing camera registration from static point feature tracking (referred 
     to here as homography).
 (2) Calculating surface velocities derived from feature tracking, with 
@@ -15,14 +15,17 @@ this module contains functions for:
 (3) Determining real-world surface areas and distances from oblique imagery.
 
 Classes
-Velocity:                       A class for the processing of an image Sequence 
+Velocity:                       A class for the processing of an image sequence 
                                 to determine pixel displacements and real-world 
-                                velocities from a sparse set of points, and 
-                                correct for camera platform motion
+                                velocities from a sparse set of points
+Homography:                     A class for determining camera platform motion 
+                                through an image sequence
 
-Key class functions 
+Key Velocity functions 
 calcVelocities:                 Calculate velocities between succesive image 
                                 pairs in an image sequence
+
+Key Homography functions
 calcHomographyPairs:            Calculate homography between succesive image 
                                 pairs in an image sequence
                                

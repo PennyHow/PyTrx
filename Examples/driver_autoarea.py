@@ -28,9 +28,9 @@ import os
 #Import PyTrx packages
 sys.path.append('../')
 from Area import Area
+import FileHandler
 from Velocity import Homography
 from CamEnv import CamEnv
-from FileHandler import writeAreaFile, writeAreaSHP, writeCalibFile, writeHomogFile
 from Utilities import plotAreaPX, plotAreaXYZ
 
 
@@ -134,35 +134,39 @@ areas = lakes.calcAutoAreas(colour, verify)
 
 #----------------------------   Export data   ---------------------------------
 
-#Get information for writing to files
+#Get area data for writing to files
+xyzareas = [item[0][0] for item in areas]                           #XYZ areas
+xyzpts = [item[0][1] for item in areas]                             #XYZ coords
+uvareas = [item[1][0] for item in areas]                            #UV areas
+uvpts = [item[1][1] for item in areas]                              #UV coords
+
+#Get camera and dem information for writing to files
 matrix, tancorr, radcorr = cameraenvironment.getCalibdata()         #CV2 calib
 imn = lakes.getImageNames()                                         #Img names
 proj = 32633                                                        #Projection (WGS84)
-xyzpts = [item[0][1] for item in areas]                             #XYZ coords
 dem = cameraenvironment.getDEM()                                    #DEM
 imgset=lakes._imageSet                                              #Images
-uvpts = [item[1][1] for item in areas]                              #UV coords
 cameraMatrix=cameraenvironment.getCamMatrixCV2()                    #Matrix
 distortP=cameraenvironment.getDistortCoeffsCV2()                    #Distort
 
 
 #Write out camera calibration info to .txt file
 target1 = '../Examples/camenv_data/calib/KR3_2014_1.txt'
-writeCalibFile(matrix, tancorr, radcorr, target1)
+FileHandler.writeCalibFile(matrix, tancorr, radcorr, target1)
 
 
 #Write homography data to .csv file
-target2 = destination + 'homography.csv'
-writeHomogFile(hg, imn, target2)
+FileHandler.writeHomogFile(hg, imn, destination+'homography.csv')
 
 
 #Write results to file
-writeAreaFile(areas, imn, destination)
+FileHandler.writeAreaFile(uvareas, xyzareas, imn, destination+'areas.csv')
+FileHandler.writeAreaCoords(uvpts, xyzpts, imn, 
+                            destination+'uvcoords.txt', 
+                            destination+'xyzcoords.txt')
 
-
-#Create shapefiles
-target3 = destination + 'shpfiles/'                 
-writeAreaSHP(xyzpts, imn, target3, proj)            
+#Create shapefiles                
+FileHandler.writeAreaSHP(xyzpts, imn, destination+'shpfiles/', proj)            
 
 
 #Write all image extents and dems 
