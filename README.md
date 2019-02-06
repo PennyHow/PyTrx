@@ -84,7 +84,7 @@ PyTrx has been coded with Python 2.7 and requires the following key Python packa
 
 These packages may not necessarily be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to download them from the given links or with a package installer (e.g. pip). It is important to download the package versions (and above) specified as we cannot guarantee that all others are compatible with PyTrx. <br>
 
-PyTrx also needs other packages, which are commonly included with distributions of Python. Compatibility with all versions of these packages are highly likely: <b>datetime</b>, <b>glob</b>, <b>imghdr</b>, <b>math</b>, <b>Matplotlib</b>, <b>NumPy</b>, <b>operator</b>, <b>os</b>, <b>Path</b>, <b>PyLab</b>, <b>SciPy</b>, <b>struct</b>, and <b>sys</b> <br>
+PyTrx also needs other packages, which are commonly included with distributions of Python. Compatibility with all versions of these packages are highly likely: <b>datetime</b>, <b>glob</b>, <b>imghdr</b>, <b>math</b>, <b>Matplotlib</b>, <b>NumPy</b>, <b>operator</b>, <b>os</b>, <b>pathlib</b>, <b>PyLab</b>, <b>SciPy</b>, <b>struct</b>, and <b>sys</b> <br>
 
 PyTrx was originally written using a Linux operating system. Inputted file path structures may differ between operating systems and it is therefore advised to check file path structures before running scripts.
 
