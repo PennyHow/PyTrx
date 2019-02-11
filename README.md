@@ -75,14 +75,13 @@ This module contains a set of functions for plotting and interpolating data.<br>
 
 <h3>PyTrx set-up and requirements</h3>
 
-PyTrx has been coded with Python 2.7 and requires the following key Python packages in order to run: <br><br>
+PyTrx has been coded with Python 2.7 and has the following key dependencies: <br><br>
 
-<b>OpenCV (v3.1.0):</b> <a href="https://opencv.org/releases.html">opencv.org</a><br>
-<b>GDAL (v1.1.4):</b> <a href="http://www.gisinternals.com/archive.php">gisinternals.com</a><br>
-<b>Pillow (PIL) (v1.1.7):</b> <a href="http://www.pythonware.com/products/pil/">pythonware.com</a><br>
-<b>OsGeo (v1.1.4):</b> Often associated with distributions of GDAL<br><br>
+<b>OpenCV (v3.4.2):</b> <a href="https://opencv.org/releases.html">opencv.org</a><br>
+<b>GDAL (v2.3.2):</b> <a href="http://www.gisinternals.com/archive.php">gisinternals.com</a><br>
+<b>Pillow (PIL) (v5.3.0):</b> <a href="http://www.pythonware.com/products/pil/">pythonware.com</a><br><br>
 
-These packages may not necessarily be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to download them from the given links or with a package installer (e.g. pip). It is important to download the package versions (and above) specified as we cannot guarantee that all others are compatible with PyTrx. <br>
+These packages may not necessarily be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to download them from the given links or with a package installer (e.g. pip, conda). It is important to download the package versions specified as we cannot guarantee that all others are compatible with PyTrx. <br>
 
 PyTrx also needs other packages, which are commonly included with distributions of Python. Compatibility with all versions of these packages are highly likely: <b>datetime</b>, <b>glob</b>, <b>imghdr</b>, <b>math</b>, <b>Matplotlib</b>, <b>NumPy</b>, <b>operator</b>, <b>os</b>, <b>pathlib</b>, <b>PyLab</b>, <b>SciPy</b>, <b>struct</b>, and <b>sys</b> <br>
 
