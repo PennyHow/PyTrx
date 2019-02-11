@@ -135,7 +135,8 @@ GCPxyz, GCPuv = FileHandler.readGCPs(GCPpath)
 
 print '\nCALIBRATING CAMERA'
 calibimgs = sorted(glob.glob(calibPath))                    #Get imagefiles
-calib, err = calibrateImages(calibimgs, chessboard)
+calib, err = calibrateImages(calibimgs, chessboard, 
+                             cv2.CALIB_FIX_PRINCIPAL_POINT)
 
 
 print '\nDEFINING CAMERA PROJECTION'
@@ -144,7 +145,7 @@ tancorr=calib[1]                                            #Get tangential
 radcorr=calib[2]                                            #Get radial
 focal = [matrix[0,0], matrix[1,1]]                          #Focal length
 camcen = [matrix[0,2], matrix[1,2]]                         #Principal point 
-    
+   
 invprojvars = setProjection(dem, camloc, campose, radcorr, tancorr, focal, 
                             camcen, refimagePath) 
 

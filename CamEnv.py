@@ -398,7 +398,7 @@ class CamEnv(CamCalib):
         self._DEMdensify = DEMdensify
         self._GCPpath = GCPpath
         self._imagePath = imagePath
-        self._refImage = CamImage(imagePath)      
+        self._refImage = CamImage(imagePath) 
 
         #Set yaw, pitch and roll to 0 if no information is given        
         if ypr is None:
@@ -668,7 +668,7 @@ class CamEnv(CamCalib):
         self.reportCalibData()
 
 
-def calibrateImages(imageFiles, xy):
+def calibrateImages(imageFiles, xy, refine=None):
     '''Function for calibrating a camera from a set of input calibration
     images. Calibration is performed using OpenCV's chessboard calibration 
     functions. Input images (imageFile) need to be of a chessboard with 
@@ -678,7 +678,29 @@ def calibrateImages(imageFiles, xy):
     between different versions of OpenCV. Included here are both functions 
     for version 2 and version 3. Please see OpenCV's documentation for 
     newer versions.
-    '''        
+    
+    Args    
+    imageFiles (list):   List of image file names
+    xy (list):           Chessboard corner dimensions [rows, columns]
+    refine (int):        OpenCV camera model refinement:
+                         cv2.CALIB_FIX_PRINCIPAL_POINT: Fix principal point
+                         cv2.CALIB_FIX_ASPECT_RATIO: Fix aspect ratio
+                         cv2.CALIB_FIX_FOCAL_LENGTH: Fix focal length
+                         cv2.CALIB_FIX_INTRINSIC: Fix camera model
+                         cv2.CALIB_FIX_K1...6: Fix radial coefficient 1-6
+                         cv2.CALIB_FIX_TANGENT_DIST: Fix tangential 
+                         coefficients
+                         cv2.CALIB_USE_INTRINSIC_GUESS: Use initial intrinsic
+                         values
+                         cv2.CALIB_ZERO_TANGENT_DIST: Set tangential distortion 
+                         coefficients to zero
+                         cv2.CALIB_RATIONAL_MODEL: Calculate radial distortion
+                         coefficients k4, k5, and k6
+    Returns
+    [mtx,tan,rad] (arr): Camera intrinsic matrix, and tangential and radial
+                         distortion coefficents
+    err (int):           Camera calibration error
+    '''   
     #Define shape of array
     objp = np.zeros((xy[0]*xy[1],3), np.float32)           
     objp[:,:2] = np.mgrid[0:xy[1],0:xy[0]].T.reshape(-1,2) 
@@ -735,16 +757,15 @@ def calibrateImages(imageFiles, xy):
                                                        gray.shape[::-1],
                                                        None,
                                                        5)
-        #Retain principal point coordinates
-        pp = [mtx[0][2],mtx[1][2]]
         
         #Optimise camera matrix and distortion using fixed principal point
-        err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
-                                                       imgpoints,
-                                                       gray.shape[::-1],
-                                                       mtx,
-                                                       5,
-                                                       flags=cv2.CALIB_FIX_PRINCIPAL_POINT)
+        if refine is not None:
+            err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
+                                                           imgpoints,
+                                                           gray.shape[::-1],
+                                                           mtx,
+                                                           5,
+                                                           flags=refine)
 
     #Else use OpenCV v2 calibration function
     except:
@@ -752,21 +773,19 @@ def calibrateImages(imageFiles, xy):
         err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
                                                        imgpoints,
                                                        gray.shape[::-1])
-
-        #Retain principal point coordinates
-        pp = [mtx[0][2],mtx[1][2]]
         
         #Optimise camera matrix and distortion using fixed principal point
-        err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
-                                                       imgpoints,
-                                                       gray.shape[::-1],
-                                                       cameraMatrix=mtx,
-                                                       flags=cv2.CALIB_FIX_PRINCIPAL_POINT)                                                                     
+        if refine is not None:        
+            err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
+                                                           imgpoints,
+                                                           gray.shape[::-1],
+                                                           cameraMatrix=mtx,
+                                                           flags=refine)                                                                     
 
     #Change matrix structure for compatibility with PyTrx
     mtx = np.array([mtx[0][0],mtx[0][1],0,
                    0,mtx[1][1],0,
-                   pp[0],pp[1],1]).reshape(3,3)
+                   mtx[0][2],mtx[1][2],1]).reshape(3,3)
 
     
     #Restructure distortion parameters for compatibility with PyTrx
@@ -778,7 +797,7 @@ def calibrateImages(imageFiles, xy):
         
 
 def constructDEM(dempath, densefactor):
-    '''Return the dem object.'''
+    '''Construct DEM from a given file path and densification factor.'''
     #Prepare DEM from file
     dem=load_DEM(dempath)
         
@@ -790,7 +809,22 @@ def constructDEM(dempath, densefactor):
 
             
 def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg):
-    '''Set the inverse projection variables, based on the DEM.'''             
+    '''Set the inverse projection variables.
+    
+    Args
+    dem (ExplicitRaster):       DEM object
+    camloc (arr):               Camera location [X,Y,Z]
+    camdir (arr):               Camera pose [yaw, pitch, roll]
+    radial (arr):               Radial distortion coefficients
+    tangen (arr):               Tangential distortion coefficients
+    foclen (arr):               Camera focal length
+    camcen (arr):               Camera principal point
+    refimg (arr):               Reference image (function only uses the image 
+                                dimensions)
+    
+    Returns
+    invProjVars (list):         Inverse projection coefficients
+    '''             
     print '\nSetting inverse projection coefficients'         
 
     if isinstance(dem, list):
@@ -812,7 +846,7 @@ def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg):
     #Snap image plane to DEM extent
     XYZ=np.column_stack([X[visible[:]],Y[visible[:]],Z[visible[:]]])
     uv0,dummy,inframe=projectXYZ(camloc, camdir, radial, tangen, foclen, 
-                              camcen, refimg, XYZ)
+                                 camcen, refimg, XYZ)
     uv0=np.column_stack([uv0,XYZ])
     uv0=uv0[inframe,:]
 
@@ -835,16 +869,23 @@ def projectXYZ(camloc, camdirection, radial, tangen, foclen, camcen, refimg,
     function found in camera.m:            
     uv,depth,inframe=cam.project(xyz)
     
-    Inputs
-    xyz:                World coordinates.            
+    Args
+    camloc (arr):               Camera location [X,Y,Z]
+    camdirection (arr):         Camera pose [yaw, pitch, roll]
+    radial (arr):               Radial distortion coefficients
+    tangen (arr):               Tangential distortion coefficients
+    foclen (arr):               Camera focal length
+    camcen (arr):               Camera principal point
+    refimg (arr):               Reference image (function only uses the image 
+                                dimensions)
+    xyz:                        World coordinates            
     
     Outputs
-    uv:                 Pixel coordinates in image.
-    depth:              View depth.
-    inframe:            Boolean vector containing whether each projected
-                        3d point is inside the frame.        
-    '''
-    
+    uv:                         Pixel coordinates in image
+    depth:                      View depth
+    inframe:                    Boolean vector containing whether each 
+                                projected 3D point is inside the frame        
+    '''   
     #This was in ImGRAFT/Matlab to transpose the input array if it's 
     #ordered differently 
     #if size(xyz,2)>3                                                 (MAT)
@@ -921,8 +962,8 @@ def projectXYZ(camloc, camdirection, radial, tangen, foclen, camcen, refimg,
  
 def projectUV(uv, invprojvars):  
     '''Inverse project image coordinates (uv) to xyz world coordinates
-    using inverse projection variables (set using self._setInvProjVars).         
-    This is primarily executed using the ImGRAFT projection function 
+    using inverse projection variables (set using setProjection function).         
+    This function is primarily adopted from the ImGRAFT projection function 
     found in camera.m:            
     uv,depth,inframe=cam.project(xyz)
     
@@ -955,7 +996,13 @@ def projectUV(uv, invprojvars):
 
 def getR(camDirection):
     '''Calculates camera rotation matrix calculated from view 
-    direction.'''
+    direction.
+    
+    Args 
+    camDirection (arr):         Camera pose [yaw,pitch,roll]
+    
+    Returns
+    value (arr):                Rotation matrix'''
 
     C = np.cos(camDirection) 
     S = np.sin(camDirection)
