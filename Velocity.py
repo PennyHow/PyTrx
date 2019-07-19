@@ -42,6 +42,7 @@ calcHomography:                 Calculate homography between an image pair
 import numpy as np
 import cv2
 import math
+import matplotlib.pyplot as plt
 
 #Import PyTrx functions and classes
 from FileHandler import readMask
@@ -87,8 +88,8 @@ class Homography(ImageSequence):
             print '\nHomography mask set'
 
 
-    def calcHomographyPairs(self, back_thresh=1.0, maxpoints=50000, 
-                            quality=0.1, mindist=5.0, min_features=4):
+    def calcHomographyPairs(self, winsize=(25,25), back_thresh=1.0, 
+                            min_features=4, seedparams=[50000, 0.1, 5.0]):
         '''Function to generate a homography model through a sequence of 
         images, and perform for image registration. Points that are assumed 
         to be static in the image plane are tracked between image pairs, and 
@@ -139,13 +140,14 @@ class Homography(ImageSequence):
                
             #Calculate homography and errors from image pair
             hg=calcHomography(im0, im1, invmask, [cameraMatrix, distortP], 
-                              back_thresh=back_thresh,
                               method=cv2.RANSAC,
                               ransacReprojThreshold=5.0,
-                              maxpoints=maxpoints,
-                              quality=quality, 
-                              mindist=mindist, 
-                              min_features=min_features)
+                              winsize=winsize,
+                              back_thresh=back_thresh,
+                              min_features=min_features,
+                              seedparams=[seedparams[0],
+                                          seedparams[1],
+                                          seedparams[2]])
         
             #Assign homography information as object attributes
             homog.append(hg)
@@ -213,8 +215,8 @@ class Velocity(ImageSequence):
             print '\nVelocity mask set'
 
 
-    def calcVelocities(self, back_thresh=1.0, maxpoints=50000, 
-                       quality=0.1, mindist=5.0, min_features=4):
+    def calcVelocities(self, winsize=(25,25), back_thresh=1.0, min_features=4,
+                       seedparams=[50000, 0.1, 5.0]):
         '''Function to calculate velocities between succesive image pairs. 
         Image pairs are called from the ImageSequence object. Points are seeded
         in the first of these pairs using the Shi-Tomasi algorithm with 
@@ -311,13 +313,15 @@ class Velocity(ImageSequence):
             if self._homog is not None:
                 pts=calcVelocity(im0, im1, mask, [mtx,distort], 
                                  [self._homog[i][0],self._homog[i][3]], 
-                                 invprojvars, back_thresh, maxpoints, quality, 
-                                 mindist, min_features)                      
+                                 invprojvars, winsize, back_thresh, 
+                                 min_features, 
+                                 [seedparams[0], seedparams[1], seedparams[2]])                      
             else:
                 pts=calcVelocity(im0, im1, mask, [mtx,distort], 
-                                 [None, None], invprojvars, back_thresh, 
-                                 maxpoints, quality, mindist, min_features)
-                
+                                 [None, None], invprojvars, winsize, 
+                                 back_thresh, min_features, 
+                                 [seedparams[0], seedparams[1], seedparams[2]]) 
+                                                 
             #Append output
             velocity.append(pts)         
         
@@ -337,12 +341,12 @@ class Velocity(ImageSequence):
 
 #------------------------------------------------------------------------------    
 
-def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None, 
-                 back_thresh=1.0, maxpoints=50000, quality=0.1, mindist=5.0, 
-                 min_features=4):
+def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None,
+                 winsize=(25,25), back_thresh=1.0, min_features=4,
+                 seedparams=[50000, 0.1, 5.0]):
     '''Function to calculate the velocity between a pair of images. Points 
-    are seeded in the first of these using the Shi-Tomasi algorithm with 
-    OpenCV's goodFeaturesToTrack function. 
+    are seeded in the first of these either by a defined grid spacing, or using 
+    the Shi-Tomasi algorithm with OpenCV's goodFeaturesToTrack function. 
     
     The Lucas Kanade optical flow algorithm is applied using the OpenCV 
     function calcOpticalFlowPyrLK to find these tracked points in the 
@@ -361,25 +365,32 @@ def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None,
     corresponding uv velocities and points in the image plane.
     
     Inputs
-    img1:                       Image 1 in the image pair.
-    img2:                       Image 2 in the image pair.
-    hmatrix:                    Homography matrix.
-    hpts:                       Homography points.
-    back_thesh:                 Threshold for back-tracking distance (i.e.
+    img1 (arr):                 Image 1 in the image pair.
+    img2 (arr):                 Image 2 in the image pair.
+    hmatrix (arr):              Homography matrix.
+    hpts (arr):                 Homography points.
+    back_thesh (int):           Threshold for back-tracking distance (i.e.
                                 the difference between the original seeded
                                 point and the back-tracked point in im0).
-    maxpoints:                  Maximum number of points to seed in im0
-    quality:                    Corner feature quality.
-    mindist:                    Minimum distance between seeded points.                 
-    min_features:               Minimum number of seeded points to track.
-    
+    min_features (int):         Minimum number of seeded points to track.
+    seedparams (list):          Point seeding parameters, which indicate
+                                whether points are generated based on corner
+                                features or a grid with defined spacing. 
+                                The three corner features parameters denote 
+                                maximum number of corners detected, corner
+                                quality, and minimum distance between corners; 
+                                inputted as a list. For grid generation, the
+                                only input parameter needed is the grid 
+                                spacing; inputted as a list containing the 
+                                horizontal and vertical grid spacing.
+                 
     Outputs
-    xyz:                        List containing the xyz velocities for each 
+    xyz (list)                  List containing the xyz velocities for each 
                                 point (xyz[0]), the xyz positions for the 
                                 points in the first image (xyz[1]), and the 
                                 xyz positions for the points in the second 
                                 image(xyz[2]). 
-    uv:                         List containing the uv velocities for each
+    uv (list):                  List containing the uv velocities for each
                                 point (uv[0], the uv positions for the 
                                 points in the first image (uv[1]), the
                                 uv positions for the points in the second
@@ -393,14 +404,18 @@ def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None,
     #Set threshold difference for point tracks
     displacement_tolerance_rel=2.0
     
-    #Track points between the image pair
-    points, ptserrors = featureTrack(img1, img2, mask,
-                                     back_thresh=back_thresh, 
-                                     maxpoints=maxpoints, 
-                                     quality=quality,
-                                     mindist=mindist, 
-                                     min_features=min_features) 
+    #Seed features
+    if len(seedparams)==2:
+        p0 = seedGrid(img1, mask, seedparams)
     
+    else:
+        p0 = seedCorners(img1, mask, seedparams[0], seedparams[1], 
+                         seedparams[2], min_features)
+    
+    #Track points between the image pair
+    points, ptserrors = featureTrack(img1, img2, p0, winsize, back_thresh,  
+                                     min_features) 
+ 
     #Pass empty object if tracking was insufficient
     if points==None:
         print '\nNo features to undertake velocity measurements'
@@ -426,10 +441,15 @@ def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None,
         #Correct points in second image                                         
         dst_pts_corr=cv2.undistortPoints(points[1], 
                                          calib[0], 
-                                         calib[1],P=newMat) 
+                                         calib[1],P=newMat)
+        
+        back_pts_corr=cv2.undistortPoints(points[2],
+                                          calib[0],
+                                          calib[1],P=newMat)
     else:
         src_pts_corr = points[0]
         dst_pts_corr = points[1]
+        back_pts_corr = points[2]
 
     #Calculate homography-corrected pts if desired
     if homog is not None:
@@ -463,6 +483,8 @@ def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None,
         src_pts_corr=src_pts_corr[good]
         dst_pts_corr=dst_pts_corr[good]
         dst_pts_homog=dst_pts_homog[good]
+        back_pts_corr=back_pts_corr[good]
+        ptserrors=ptserrors[good]
         
         print (str(dst_pts_corr.shape[0]) + 
                ' Points remaining after homography correction')
@@ -487,31 +509,42 @@ def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None,
         #Project good points from image1
         uvd=dst_pts_homog[:,0,:]
         xyzd=projectUV(uvd, invprojvars)
+
+        #Project good points from image0 back-tracked
+        uvb=back_pts_corr[:,0,:]
+        xyzb=projectUV(uvb, invprojvars)
         
         #Calculate xyz velocity
         xyzvel=[]
         for a,b in zip(xyzs, xyzd):                        
             xyzvel.append(np.sqrt((b[0]-a[0])*(b[0]-a[0])+
-                          (b[1]-a[1])*(b[1]-a[1])))
+                         (b[1]-a[1])*(b[1]-a[1])))
+        
+        #Calculate xyz error
+        xyzerr=[]
+        for a,b in zip(xyzs, xyzb):
+            xyzerr.append(np.sqrt((b[0]-a[0])*(b[0]-a[0])+
+                         (b[1]-a[1])*(b[1]-a[1])))
     else:
         xyzs=None
         xyzd=None
         xyzvel=None
+        xyzerr=None
             
     #Return real-world point positions (original and tracked points),
     #and xy pixel positions (original, tracked, and homography-corrected)
-    if hmatrix is not None:
-        return [[xyzvel, xyzs, xyzd], 
-                [pxvel, src_pts_corr, dst_pts_corr, dst_pts_homog]]
+    if homog is not None:
+        return [[xyzvel, xyzs, xyzd, xyzerr], 
+                [pxvel, src_pts_corr, dst_pts_corr, dst_pts_homog, ptserrors]]
     
     else:
-        return [[xyzvel, xyzs, xyzd], 
-                [pxvel, src_pts_corr, dst_pts_corr, None]]
+        return [[xyzvel, xyzs, xyzd, xyzerr], 
+                [pxvel, src_pts_corr, dst_pts_corr, None, ptserrors]]
         
         
 def calcHomography(img1, img2, mask, correct, method=cv2.RANSAC, 
-                   ransacReprojThreshold=5.0, back_thresh=1.0, maxpoints=50000, 
-                   quality=0.1, mindist=5.0, min_features=4):
+                   ransacReprojThreshold=5.0, winsize=(25,25), back_thresh=1.0, 
+                   min_features=4, seedparams=[50000, 0.1, 5.0]):
     '''Function to supplement correction for movement in the camera 
     platform given an image pair (i.e. image registration). Returns the 
     homography representing tracked image movement, and the tracked 
@@ -549,23 +582,20 @@ def calcHomography(img1, img2, mask, correct, method=cv2.RANSAC,
     homogerror:                 Difference between the interpolated 
                                 homography matrix and the equivalent 
                                 tracked points
-    '''         
-    # Feature track between images
-    trackdata = featureTrack(img1, img2,
-                             mask,
-                             back_thresh=back_thresh, 
-                             maxpoints=maxpoints, 
-                             quality=quality,
-                             mindist=mindist, 
-                             min_features=min_features) 
+    ''' 
+    
+    #Seed corner features
+    p0 = seedCorners(img1, mask, seedparams[0], seedparams[1], seedparams[2], 
+                     min_features)
+        
+    #Feature track between images
+    points, ptserrors = featureTrack(img1, img2, p0, winsize, back_thresh, 
+                                      min_features) 
 
     #Pass empty object if tracking insufficient
-    if trackdata==None:
+    if points==None:
         print '\nNo features to undertake Homography'
         return None
-
-    #Separate raw tracked points and errors            
-    points, ptserrors=trackdata
     
     if correct is not None:
         
@@ -628,13 +658,13 @@ def apply_persp_homographyPts(pts, homog, inverse=False):
     in OpenCV.
     
     Variables
-    pts:                  Input point positions to correct.
-    homog:                Perspective homography matrix.                                   
-    inverse:              Flag to denote if perspective homography matrix 
-                          needs inversing.
+    pts (arr/list):             Input point positions to correct
+    homog (arr):                Perspective homography matrix                                  
+    inverse (bool):             Flag to denote if perspective homography matrix 
+                                needs inversing
     
     Returns
-    hpts:                 Corrected point positions.
+    hpts (arr):                 Corrected point positions
     '''         
     if isinstance(pts,np.ndarray):
         n=pts.shape[0]
@@ -672,39 +702,24 @@ def apply_persp_homographyPts(pts, homog, inverse=False):
         return hpts 
         
 
-def featureTrack(i0, iN, mask, back_thresh=1.0, maxpoints=50000, quality=0.1, 
-                 mindist=5.0, min_features=1):
-    '''Function to feature track between two masked images. The
-    Shi-Tomasi algorithm with OpenCV's goodFeaturesToTrack function is used
-    to initially seed points in the first image. Then, the Lucas Kanade 
+def featureTrack(i0, iN, p0, winsize, back_thresh, min_features):
+    '''Function to feature track between two masked images. The Lucas Kanade 
     optical flow algorithm is applied using the OpenCV function 
-    calcOpticalFlowPyrLK to find these tracked points in the second image.
+    calcOpticalFlowPyrLK to find these tracked points in the second image. A 
+    backward tracking then tracks back from these to the original points, 
+    checking if this is within a given number of pixels as a validation 
+    measure. The resulting error is the difference between the original feature 
+    point and the backtracked feature point. 
     
-    A backward tracking then tracks back from these to the original
-    points, checking if this is within one pixel as a validation measure.
-    
-    The error associated with this tracking is a signal-to-noise ratio. 
-    This is defined as the ratio between the distance 
-    originally tracked and the error between the original and back-tracked 
-    point.        
-    
-    This class returns the points in both images as a list, along with the 
-    corresponding list of SNR measures.
-
     Variables
     i0 (arr):                   Image 1 in the image pair
     iN (arr):                   Image 2 in the image pair
-    mask (arr):                 Image mask to seed points in
+    winsize (tuple):            Window size for tracking e.g. (25,25)
     back_thesh (int):           Threshold for back-tracking distance (i.e.
                                 the difference between the original seeded
                                 point and the back-tracked point in im0)
-    maxpoints (int):            Maximum number of points to seed in im0
-    quality (int):              Corner feature quality
-    mindist (int):              Minimum distance between seeded points                
-    min_features (int):         Minimum number of seeded points to track
     
     Returns
-    p0 (arr):                   Point coordinates for points seeded in image 1
     p1 (arr):                   Point coordinates for points tracked to image 2
     p0r (arr):                  Point coordinates for points back-tracked
                                 from image 2 to image 1
@@ -715,17 +730,69 @@ def featureTrack(i0, iN, mask, back_thresh=1.0, maxpoints=50000, quality=0.1,
                                 p0
     '''
     #Feature tracking set-up parameters
-    lk_params = dict( winSize  = (25,25),
+    lk_params = dict( winSize  = winsize,
                       maxLevel = 2,
                       criteria = (cv2.TERM_CRITERIA_EPS | 
                                   cv2.TERM_CRITERIA_COUNT, 10, 0.03))
-                                  
+        
+    #Track forward from im0 to im1. p1 is returned as an array of shape
+    #(n,1,2), where n is the number of features tracked
+    p1, status1, error1  = cv2.calcOpticalFlowPyrLK(i0, iN, p0, 
+                                                    None, **lk_params) 
+                                                    
+    #Track backwards from im1 to im0 using the forward-tracked points
+    p0r, status0, error0  = cv2.calcOpticalFlowPyrLK(iN, i0, p1, 
+                                                     None, **lk_params)         
+   
+    #Find euclidian pixel distance beween original(p0) and backtracked 
+    #(p0r) points and discard point greater than the threshold. This is 
+    #a way of checking tracking robustness
+    dist=(p0-p0r)*(p0-p0r)
+    dist=np.sqrt(dist[:,0,0]+dist[:,0,1])            
+    tracked=len(dist)
+    good = dist < back_thresh
+    
+    #Points are boolean filtered by the backtracking success 
+    p0=p0[good]
+    p1=p1[good]
+    p0r=p0r[good]
+    error=dist[good]
+    print 'Average back-tracking difference: ' + str(np.mean(good))
+
+    #Return None if number of tracked features is under the 
+    #min_features threshold
+    if p0.shape[0]<min_features:
+        print 'Not enough features successfully tracked.' 
+        return None
+           
+    print str(tracked)+' features tracked'
+    print str(p0.shape[0]) + ' features remaining after forward-backward error'
+       
+    return [p0,p1,p0r], error
+
+
+def seedCorners(im, mask, maxpoints, quality, mindist, min_features):
+    '''Function to seed corner features using the Shi-Tomasi corner feature 
+    detection method in OpenCV's goodFeaturesToTrack function. 
+        
+    Variables
+    im (arr):                   Image for seeding corner points
+    mask (arr):                 Image mask to seed points in
+    maxpoints (int):            Maximum number of corner points to seed
+    quality (int):              Corner feature quality
+    mindist (int):              Minimum distance between seeded points                
+    min_features (int):         Minimum number of seeded points to track
+    
+    Returns
+    p0 (arr):                   Point coordinates for corner features seeded in 
+                                image
+    '''    
     #Find corners of the first image. p0 is returned as an array of shape 
     #(n,1,2), where n is the number of features identified 
     if mask is not None:       
-        p0=cv2.goodFeaturesToTrack(i0,maxpoints,quality,mindist,mask=mask)
+        p0=cv2.goodFeaturesToTrack(im,maxpoints,quality,mindist,mask=mask)
     else:
-        p0=cv2.goodFeaturesToTrack(i0,maxpoints,quality,mindist)
+        p0=cv2.goodFeaturesToTrack(im,maxpoints,quality,mindist)
         
     #tracked is the number of features returned by goodFeaturesToTrack        
     tracked=p0.shape[0]
@@ -734,78 +801,51 @@ def featureTrack(i0, iN, mask, back_thresh=1.0, maxpoints=50000, quality=0.1,
     if tracked<min_features:
         print 'Not enough features found to track.  Found: ',len(p0)
         return None
-        
     else:
-        #Track forward from im0 to im1. p1 is returned as an array of shape
-        #(n,1,2), where n is the number of features tracked
-        p1, status1, error1  = cv2.calcOpticalFlowPyrLK(i0, iN, p0, 
-                                                        None, **lk_params) 
-                                                        
-        #Track backwards from im1 to im0 using the forward-tracked points
-        p0r, status0, error0  = cv2.calcOpticalFlowPyrLK(iN, i0, p1, 
-                                                         None, **lk_params)         
-       
-        #Find euclidian pixel distance beween original(p0) and backtracked 
-        #(p0r) points and discard point greater than the threshold. This is 
-        #a way of checking tracking robustness
-        dist=(p0-p0r)*(p0-p0r)
-        dist=np.sqrt(dist[:,0,0]+dist[:,0,1])            
-        tracked=len(dist)
-        good = dist < back_thresh
+        return p0
+
+
+def seedGrid(im, mask, griddistance):
+    '''Define pixel grid at a specified grid distance, taking into 
+    consideration the image size and image mask.
+    
+    Input variables:
+    im (arr):               Image array
+    mask (bool):            Boolean denoting image mask
+    griddistance (list):    rows, columns
+    
+    Returns:
+    grid (arr):             Grid point array  
+    '''
+    #Define grid as empty list    
+    grid=[]
+    
+    #Define pixel spacings    
+    linx = np.linspace(0,im.shape[1]-1,griddistance[1])
+    liny = np.linspace(0,im.shape[0]-1,griddistance[0])
+
+    #Create mesh
+    meshx, meshy = np.meshgrid(linx, liny)  
+    
+    #Merge point coordinates together and reshape array    
+    for a,b in zip(meshx, meshy):
+        for c,d in zip(a,b):
+            grid.append([[c.astype(np.float32),d.astype(np.float32)]])
+    
+    #Mask grid points with image mask
+    gridmask=[]
+    for i in grid:
+        y=int(i[0][0])
+        x=int(i[0][1])
+        if mask[x][y] == 1:
+            gridmask.append(i)
+        else:
+            pass
+    
+    #Reshape masked grid array
+    gridmask=np.asarray(gridmask).reshape(len(gridmask),1,2)
+
+    #Create image plotting window
+    fig, (ax1,ax2) = plt.subplots(2, figsize=(20,10))
         
-        #Points are boolean filtered by the backtracking success   
-        p0=p0[good]
-        p1=p1[good]
-        p0r=p0r[good]
-        print 'Average back-tracking difference: ' + str(np.mean(good))
-
-        #Return None if number of tracked features is under the 
-        #min_features threshold
-        if p0.shape[0]<min_features:
-            print 'Not enough features successfully tracked.' 
-            return None
-           
-    print str(tracked)+' features tracked'
-    print str(p0.shape[0]) + ' features remaining after forward-backward error'
-       
-    #Calculate signal-to-noise error               
-    #Signal-to-noise is defined as the ratio between the distance 
-    #originally tracked and the error between the original and back-tracked 
-    #point.
-    dist=dist[good]
-    length,snr=calcTrackErrors(p0,p1,dist)
-    
-    #Error to contain the original lengths, back-tracking error and snr
-    error=[length,dist,snr]
-        
-    return [p0,p1,p0r], error
-
-
-def calcTrackErrors(p0,p1,dist):
-    '''Function to calculate signal-to-noise ratio with forward-backward 
-    tracking data. The distance between the backtrack and original points
-    (dist) is assumed to be pre-calcuated.
-    
-    Variables
-    p0 (arr):                   Point coordinates for points seeded in 
-                                image 1
-    p1 (arr):                   Point coordinates for points tracked to
-                                image 2
-    dist (arr):                 Distance between p0 and p0r (i.e. points
-                                back-tracked from image 2 to image 1)
-                                                    
-    Returns
-    length (arr):               Displacement between p0 and p1 (i.e. a
-                                velocity, or signal)
-    snr (arr):                  Signal-to-noise ratio, the signal being
-                                the variable 'length' and the noise being
-                                the variable 'dist'
-    '''               
-    #Determine length between the two sets of points
-    length=(p0-p1)*(p0-p1)
-    length=np.sqrt(length[:,0,0]+length[:,0,1])
-    
-    #Calculate signal-to-noise ratio
-    snr = dist/length
-    
-    return length,snr 
+    return grid

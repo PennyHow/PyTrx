@@ -190,8 +190,7 @@ class ExplicitRaster(object):
         '''Self reporter for DEM class object. Returns the number of rows and
         columns in the array, how NaN values in the array are filled, and the
         data extent coordinates.
-        '''
-        
+        '''      
         print '\nDEM object reporting:\n'
         print 'Data has ',self.getRows(),' rows by ',self.getCols(),' columns'
         print 'No data item is: ',self.getNoData()
@@ -202,7 +201,7 @@ class ExplicitRaster(object):
 def load_DEM(demfile):
     '''Function for loading DEM data from different file types, which is 
     automatically detected. Recognised file types: .mat and .tif.
-    '''   
+    '''    
     #Determine file type based on filename suffix
     suffix=demfile.split('.')[-1].upper()
     

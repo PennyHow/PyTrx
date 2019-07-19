@@ -384,7 +384,9 @@ def readImg(path, band='L', equal=True):
                 n = n + h[i+b]
         
         #Convert to grayscale
-        gray = im.point(lut*im.layers)
+        gray = im.point(lut*im.layers)    
+    else:
+        gray=im
     
     #Split bands if R, B or G is specified in inputs    
     if band=='R':
@@ -789,7 +791,7 @@ def writeLineCoords(uvpts, xyzpts, imn, pxdestination, xyzdestination):
             f.write('\n\n')
                 
             
-def writeVeloSHP(xyzvel, xyz0, imn, fileDirectory, projection=None):
+def writeVeloSHP(xyzvel, xyzerr, xyz0, imn, fileDirectory, projection=None): 
     '''Write OGR real velocity points (from ALL images) to file in a .shp
     file type that is compatible with ESRI mapping software.
     
@@ -822,6 +824,7 @@ def writeVeloSHP(xyzvel, xyz0, imn, fileDirectory, projection=None):
         
         #Get velocity, pt and image name for time step
         vel = xyzvel[i]
+        err = xyzerr[i]
         pt0 = xyz0[i]            
         im = imn[i] 
         
@@ -848,13 +851,15 @@ def writeVeloSHP(xyzvel, xyz0, imn, fileDirectory, projection=None):
         #Add attributes to layer
         layer.CreateField(ogr.FieldDefn('id', ogr.OFTInteger))     #ID    
         layer.CreateField(ogr.FieldDefn('velocity', ogr.OFTReal))  #Velo
+        layer.CreateField(ogr.FieldDefn('error', ogr.OFTReal))  #Velo        
+        layer.CreateField(ogr.FieldDefn('snr', ogr.OFTReal))  #Velo 
         
         #Get xy coordinates
         x0 = pt0[:,0]
         y0 = pt0[:,1]
         
         #Create point features with data attributes in layer           
-        for v,x,y in zip(vel, x0, y0):
+        for v,e,x,y in zip(vel, err, x0, y0):
             count=1
         
             #Create feature    
@@ -863,7 +868,9 @@ def writeVeloSHP(xyzvel, xyz0, imn, fileDirectory, projection=None):
             #Create feature attributes    
             feature.SetField('id', count)
             feature.SetField('velocity', v)
-        
+            feature.SetField('error', e)
+            feature.SetField('snr', e/v)
+            
             #Create feature location
             wkt = "POINT(%f %f)" %  (float(x) , float(y))
             point = ogr.CreateGeometryFromWkt(wkt)

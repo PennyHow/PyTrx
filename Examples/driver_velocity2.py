@@ -48,7 +48,10 @@ print '\nDEFINING DATA INPUTS'
 #Camera name, location (XYZ) and pose (yaw, pitch, roll)
 camname = 'KR2_2014'
 camloc = np.array([447948.820, 8759457.100, 407.092])
+
+#campose = np.array([4.80926, 0.05768, 0.14914]) 
 campose = np.array([4.80926, 0.05768, 0.14914]) 
+
 
 #Define image folder and image file type for velocity tracking
 imgFiles = '../Examples/images/KR2_2014_subset/*.JPG'
@@ -99,6 +102,7 @@ band = 'L'                          #Image band extraction (R, B, G, or L)
 equal = True                        #Histogram equalisation?
 
 #Velocity parameters
+vwin = (25,25)                      #Tracking window size
 vback = 1.0                         #Back-tracking threshold  
 vmax = 50000                        #Maximum number of points to seed
 vqual = 0.1                         #Corner quality for seeding
@@ -106,10 +110,11 @@ vmindist = 5.0                      #Minimum distance between seeded points
 vminfeat = 4                        #Minimum number of seeded points to track
                            
 #Homography parameters
+hwin = (25,25)                      #Stable pt tracking window size
 hmethod = cv2.RANSAC                #Homography calculation method 
                                     #(cv2.RANSAC, cv2.LEAST_MEDIAN, or 0)
 hreproj = 5.0                       #Maximum allowed reprojection error
-hback = 1.0                         #Back-tracking threshold
+hback = 0.5                         #Back-tracking threshold
 herr = True                         #Calculate tracking error?
 hmax = 50000                        #Maximum number of points to seed
 hqual = 0.1                         #Corner quality for seeding
@@ -202,12 +207,13 @@ for i in range(len(imagelist)-1):
     #Calculate homography between image pair
     print 'Calculating homography...'  
     hg = calcHomography(im0, im1, hmask, [matrix,distort], hmethod, hreproj, 
-                        hback, hmax, hqual, hmindist, hminfeat)
+                        hwin, hback, hminfeat, [hmax, hqual, hmindist])
                              
     #Calculate velocities between image pair
     print 'Calculating velocity...'
     vl = calcVelocity(im0, im1, vmask, [matrix,distort], [hg[0],hg[3]], 
-                      invprojvars, vback, vmax, vqual, vmindist, vminfeat)                                                                                                                        
+                      invprojvars, vwin, vback, vminfeat, [vmax, vqual, 
+                      vmindist])                                                                                                                        
     
     #Append velocity and homography information
     velo.append(vl)
@@ -225,6 +231,7 @@ for i in imagelist:
 
 #Extract xyz velocities, uv velocities, and xyz0 locations
 xyzvel=[item[0][0] for item in velo] 
+xyzerr=[item[0][3] for item in velo]
 uvvel=[item[1][0] for item in velo]
 xyz0=[item[0][1] for item in velo]
 
@@ -235,7 +242,7 @@ FileHandler.writeVeloFile(xyzvel, uvvel, homog, names, target1)
 FileHandler.writeHomogFile(homog, names, target2)
 
 #Write points to shp file                
-FileHandler.writeVeloSHP(xyzvel, xyz0, names, target3, projection)       
+FileHandler.writeVeloSHP(xyzvel, xyzerr, xyz0, names, target3, projection)       
 
 
 #----------------------------   Plot Results   --------------------------------
@@ -245,8 +252,10 @@ print '\nPLOTTING OUTPUTS'
 #Extract uv0, uv1corr, xyz0 and xyz1 locations 
 uv0=[item[1][1] for item in velo]
 uv1corr=[item[1][3] for item in velo]
+uverr=[item[1][4] for item in velo]
 xyz0=[item[0][1] for item in velo]
 xyz1=[item[0][2] for item in velo]
+
 
 #Cycle through data from image pairs   
 for i in range(len(xyz0)):
@@ -264,21 +273,30 @@ for i in range(len(xyz0)):
     imn = Path(imagelist[i]).name
     print 'Visualising data for ' + str(imn) 
         
-    #Plot uv velocity points on image plane   
+    #Plot uv velocity points on image plane  
     Utilities.plotVeloPX(uvvel[i], uv0[i], uv1corr[i], im, show=True, 
                          save=target4+'uv_'+imn)
+
+#    Utilities.plotVeloPX(uverr[i], uv0[i], uv1corr[i], im, show=True, 
+#                         save=target4+'uverr_'+imn)
+#    
+#    uvsnr=uverr[i]/uvvel[i]
+#    Utilities.plotVeloPX(uvsnr, uv0[i], uv1corr[i], im, show=True, 
+#                         save=target4+'uvsnr_'+imn)    
 
 
     #Plot xyz velocity points on dem  
     Utilities.plotVeloXYZ(xyzvel[i], xyz0[i], xyz1[i], dem, show=True, 
                           save=target4+'xyz_'+imn)
-    
+
+#    Utilities.plotVeloXYZ(xyzerr[i], xyz0[i], xyz1[i], dem, show=True, 
+#                          save=target4+'xyzerr_'+imn)    
                 
-    #Plot interpolation map
-    grid, pointsextent = Utilities.interpolateHelper(xyzvel[i], xyz0[i], 
-                                                     xyz1[i], interpmethod)
-    Utilities.plotInterpolate(grid, pointsextent, dem, show=True, 
-                              save=target4+'interp_'+imn)  
+#    #Plot interpolation map
+#    grid, pointsextent = Utilities.interpolateHelper(xyzvel[i], xyz0[i], 
+#                                                     xyz1[i], interpmethod)
+#    Utilities.plotInterpolate(grid, pointsextent, dem, show=True, 
+#                              save=target4+'interp_'+imn)  
 
     
 #------------------------------------------------------------------------------

@@ -103,7 +103,7 @@ def plotGCPs(gcps, img, imn, dem, camloc, extent=None):
     ax2.scatter(worldgcp[:,0], worldgcp[:,1], color='red')
     ax2.scatter(camloc[0], camloc[1], color='blue')
     plt.show()
-    plt.close()
+#    plt.close()
  
     
 def plotPrincipalPoint(camcen, img, imn):
@@ -126,7 +126,7 @@ def plotPrincipalPoint(camcen, img, imn):
     ax1.axhline(y=ppy)
     ax1.axvline(x=ppx)
     plt.show() 
-    plt.close()
+#    plt.close()
     
  
 def plotCalib(matrix, distortion, img, imn):

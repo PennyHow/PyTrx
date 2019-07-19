@@ -63,6 +63,7 @@ cameraenvironment.reportCamData()
 #---------------------   Calculate homography   -------------------------------
 
 #Set homography parameters
+hgwinsize=(25,25)               #Tracking window size
 hgback=1.0                      #Back-tracking threshold
 hgmax=50000                     #Maximum number of points to seed
 hgqual=0.1                      #Corner quality for seeding
@@ -74,14 +75,15 @@ homog = Homography(camimgs, cameraenvironment, caminvmask, calibFlag=True,
                    band='L', equal=True)
 
 #Calculate homography
-hg = homog.calcHomographyPairs(hgback, hgmax, hgqual, hgmind, hgminf)             
-homogmatrix = [item[0] for item in hg] 
+hg = homog.calcHomographyPairs(hgwinsize, hgback, hgminf, 
+                               [hgmax, hgqual, hgmind])         
+homogmatrix = [item[0] for item in hg]
 
 
 #----------------------   Detect and calculate areas  -------------------------             
 
-#Define Area class initialisation variables
-colour=False                #Define colour range for every image?
+#Define Area class initialisa    
+colour=False                #Define colour range?
 verify=False                #Manually verify detected areas?
 calibFlag = True            #Detect with corrected or uncorrected images
 maxim = 0                   #Image number of maximum areal extent 

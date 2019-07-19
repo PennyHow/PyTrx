@@ -60,6 +60,7 @@ cameraenvironment = CamEnv(camdata)
 #-----------------------   Calculate homography   -----------------------------
 
 #Set homography parameters
+hgwinsize=(25,25)               #Tracking window size
 hgback=1.0                      #Back-tracking threshold
 hgmax=50000                     #Maximum number of points to seed
 hgqual=0.1                      #Corner quality for seeding
@@ -71,7 +72,8 @@ homog = Homography(camimgs, cameraenvironment, caminvmask, calibFlag=True,
                    band='L', equal=True)
 
 #Calculate homography
-hg = homog.calcHomographyPairs(hgback, hgmax, hgqual, hgmind, hgminf)             
+hg = homog.calcHomographyPairs(hgwinsize, hgback, hgminf, 
+                               [hgmax, hgqual, hgmind])            
 homogmatrix = [item[0] for item in hg] 
 
 

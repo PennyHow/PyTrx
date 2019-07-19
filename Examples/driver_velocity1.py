@@ -59,6 +59,7 @@ cameraenvironment.showCalib()
 #----------------------   Calculate homography   ------------------------------
 
 #Set homography parameters
+hgwinsize=(25,25)                 #Tracking window size
 hgback=1.0                      #Back-tracking threshold
 hgmax=50000                     #Maximum number of points to seed
 hgqual=0.1                      #Corner quality for seeding
@@ -70,12 +71,14 @@ homog = Homography(camimgs, cameraenvironment, caminvmask, calibFlag=True,
                 band='L', equal=True)
 
 #Calculate homography
-hgout = homog.calcHomographyPairs(hgback, hgmax, hgqual, hgmind, hgminf)
+hgout = homog.calcHomographyPairs(hgwinsize, hgback, hgminf, 
+                                  [hgmax, hgqual, hgmind])
 
 
 #----------------------   Calculate velocities   ------------------------------
 
 #Set velocity parameters
+vwinsize=(25,25)                 #Tracking window size
 bk = 1.0                        #Back-tracking threshold  
 mpt = 50000                     #Maximum number of points to seed
 ql = 0.1                        #Corner quality for seeding
@@ -86,11 +89,12 @@ mfeat = 4                       #Minimum number of seeded points to track
 velo=Velocity(camimgs, cameraenvironment, hgout, camvmask, calibFlag=True, 
               band='L', equal=True) 
 
-velocities = velo.calcVelocities(bk, mpt, ql, mdis, mfeat)
+velocities = velo.calcVelocities(vwinsize, bk, mfeat, [mpt, ql, mdis])
 
 xyzvel=[item[0][0] for item in velocities] 
 xyz0=[item[0][1] for item in velocities]
 xyz1=[item[0][2] for item in velocities]
+xyzerr=[item[0][3] for item in velocities]
 uvvel=[item[1][0] for item in velocities]
 uv0=[item[1][1] for item in velocities] 
 uv1=[item[1][2] for item in velocities]
@@ -120,9 +124,9 @@ target4 = destination + 'shpfiles/'     #Define file destination
 if not os.path.exists(target4):
     os.makedirs(target3)                #Create file destination
 proj = 32633                            #ESPG:32633 is projection WGS84
-writeVeloSHP(xyzvel, xyz0, imn, target4, proj)       #Write shapefile
+writeVeloSHP(xyzvel, xyzerr, xyz0, imn, target4, proj)       #Write shapefile
 
-
+  
 #----------------------------   Plot Results   --------------------------------
 
 print '\n\nPLOTTING DATA'
