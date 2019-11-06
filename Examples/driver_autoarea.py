@@ -16,7 +16,7 @@ by commenting and uncommenting commands in the "Calculate areas" section of
 this script).
 
 
-@author: Penny How (p.how@ed.ac.uk)
+@author: Penny How (how@asiaq.gl)
          Nick Hulton
          Lynne Buie
 '''
@@ -181,4 +181,4 @@ for i in range(len(areas)):
 
 #------------------------------------------------------------------------------                                                                                                                                                                                                                                                                                                      
 
-print '\n\nFINISHED'
+print('\n\nFINISHED')

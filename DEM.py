@@ -22,7 +22,7 @@ load_DEM:                       Load DEM from .mat or .tiff file
 voxelviewshed:                  Calculate a viewshed over a DEM from a given 
                                 viewpoint in the DEM scene    
       
-@author: Penny How (p.how@ed.ac.uk)
+@author: Penny How (how@asiaq.gl)
          Nick Hulton 
          Lynne Buie
 '''
@@ -51,13 +51,14 @@ class ExplicitRaster(object):
     '''
     
     #Basic constuctor method
-    def __init__(self, X, Y, Z, nodata=float('nan')): 
+    def __init__(self, X, Y, Z, nodata=float('nan')):
+        
         #Check XYZ data is all the same size
         if not (X.shape==Y.shape and X.shape==Z.shape):
-            print 'Raster data and/or co-ordinate arrays are differently sized'
-            print 'X-shape',X.shape
-            print 'Y-shape',Y.shape
-            print 'Z-shape',Z.shape
+            print('Raster data and/or co-ordinate arrays are differently sized')
+            print('X-shape ' + str(X.shape))
+            print('Y-shape ' + str(Y.shape))
+            print('Z-shape ' + str(Z.shape))
             return
         
         #Define class atrributes
@@ -191,11 +192,12 @@ class ExplicitRaster(object):
         columns in the array, how NaN values in the array are filled, and the
         data extent coordinates.
         '''      
-        print '\nDEM object reporting:\n'
-        print 'Data has ',self.getRows(),' rows by ',self.getCols(),' columns'
-        print 'No data item is: ',self.getNoData()
-        print ('Data Extent Coordinates are [xmin,xmax,ymin,ymax]: ',
-               self.getExtent())
+        print('\nDEM object reporting:\n')
+        print('Data has ' + str(self.getRows()) + ' rows by ' + 
+              str(self.getCols()) + ' columns')
+        print('No data item is: ' + str(self.getNoData()))
+        print('Data Extent Coordinates are [xmin,xmax,ymin,ymax]: ' +
+               str(self.getExtent()))
  
     
 def load_DEM(demfile):
@@ -215,8 +217,8 @@ def load_DEM(demfile):
     
     #No DEM data passed if file type is not recognised
     else:
-        print 'DEM format (suffix) not supported'
-        print 'DEM file: ',demfile,' not read'
+        print('DEM format (suffix) not supported')
+        print('DEM file: ' + str(demfile) + ' not read')
         return None
 
     
@@ -233,7 +235,7 @@ def DEM_FromMat(matfile):
 
     #Flip array if not compatible
     if Y[0][0]>Y[-1][0]:
-        print '\nFlipping input DEM'
+        print('\nFlipping input DEM')
         X = np.flipud(X)
         Y = np.flipud(Y)
         Z = np.flipud(Z)
@@ -348,7 +350,7 @@ def voxelviewshed(dem, viewpoint):
     x=np.empty(X.shape[0])
 
     #Populate array
-    for i in xrange(X.shape[0]):
+    for i in range(X.shape[0]):
         x[i]=(math.atan2(Y[i],X[i])+math.pi)/(math.pi*2)
     y=Z/d
     

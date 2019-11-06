@@ -21,7 +21,7 @@ This script has been included in order to provide the user with a more detailed
 overview of PyTrx's functionality beyond its object-oriented structure. It also 
 allows flexible intervention and adaptation where needed. 
 
-@author: Penny How (p.how@ed.ac.uk)
+@author: Penny How (how@asiaq.gl)
          Nick Hulton 
          Lynne Buie
 '''
@@ -43,7 +43,7 @@ import Utilities
  
 #------------------------   Define inputs/outputs   ---------------------------
 
-print '\nDEFINING DATA INPUTS'  
+print('\nDEFINING DATA INPUTS')
 
 #Camera name, location (XYZ) and pose (yaw, pitch, roll)
 camname = 'KR2_2014'
@@ -74,7 +74,7 @@ refimagePath = '../Examples/camenv_data/refimages/KR2_2014.JPG'
 GCPpath = '../Examples/camenv_data/gcps/KR2_2014.txt'
 
 
-print '\nDEFINING DATA OUTPUTS'
+print('\nDEFINING DATA OUTPUTS')
 
 #Velocity output
 target1 = '../Examples/results/velocity2/velo_output.csv'
@@ -124,27 +124,27 @@ hminfeat = 4                        #Minimum number of seeded points to track
 
 #----------------------   Set up camera environment   -------------------------
 
-print '\nLOADING MASKS'
+print('\nLOADING MASKS')
 vmask = FileHandler.readMask(None, vmaskPath)
 hmask = FileHandler.readMask(None, hmaskPath)
 
 
-print '\nLOADING DEM'
+print('\nLOADING DEM')
 dem = load_DEM(DEMpath)
 dem=dem.densify(DEMdensify)
 
 
-print '\nLOADING GCPs'
+print('\nLOADING GCPs')
 GCPxyz, GCPuv = FileHandler.readGCPs(GCPpath)
 
 
-print '\nCALIBRATING CAMERA'
+print('\nCALIBRATING CAMERA')
 calibimgs = sorted(glob.glob(calibPath))                    #Get imagefiles
 calib, err = calibrateImages(calibimgs, chessboard, 
                              cv2.CALIB_FIX_PRINCIPAL_POINT)
 
 
-print '\nDEFINING CAMERA PROJECTION'
+print('\nDEFINING CAMERA PROJECTION')
 matrix=np.transpose(calib[0])                               #Get matrix
 tancorr=calib[1]                                            #Get tangential
 radcorr=calib[2]                                            #Get radial
@@ -157,7 +157,7 @@ invprojvars = setProjection(dem, camloc, campose, radcorr, tancorr, focal,
 
 #--------------------   Plot camera environment info   ------------------------
 
-print '\nPLOTTING CAMERA ENVIRONMENT INFO'
+print('\nPLOTTING CAMERA ENVIRONMENT INFO')
 
 #Load reference image
 refimg = FileHandler.readImg(refimagePath) 
@@ -178,7 +178,7 @@ Utilities.plotCalib(matrix, distort, refimg, imn)
 
 #----------------------   Calculate velocities   ------------------------------
 
-print '\nCALCULATING VELOCITIES'                               
+print('\nCALCULATING VELOCITIES')
 
 #Get list of images
 imagelist = sorted(glob.glob(imgFiles))
@@ -202,15 +202,15 @@ for i in range(len(imagelist)-1):
     im1 = FileHandler.readImg(imagelist[i+1], band, equal)
     imn1 = Path(imagelist[i+1]).name                                                       
        
-    print '\nProcessing images: ', imn0,' and ', imn1
+    print('\nProcessing images: ' + str(imn0) + ' and ' + str(imn1))
         
     #Calculate homography between image pair
-    print 'Calculating homography...'  
+    print('Calculating homography...')
     hg = calcHomography(im0, im1, hmask, [matrix,distort], hmethod, hreproj, 
                         hwin, hback, hminfeat, [hmax, hqual, hmindist])
                              
     #Calculate velocities between image pair
-    print 'Calculating velocity...'
+    print('Calculating velocity...')
     vl = calcVelocity(im0, im1, vmask, [matrix,distort], [hg[0],hg[3]], 
                       invprojvars, vwin, vback, vminfeat, [vmax, vqual, 
                       vmindist])                                                                                                                        
@@ -222,7 +222,7 @@ for i in range(len(imagelist)-1):
 
 #---------------------------  Export data   -----------------------------------
 
-print '\nWRITING DATA TO FILE'
+print('\nWRITING DATA TO FILE')
 
 #Get all image names
 names=[]
@@ -247,7 +247,7 @@ FileHandler.writeVeloSHP(xyzvel, xyzerr, xyz0, names, target3, projection)
 
 #----------------------------   Plot Results   --------------------------------
 
-print '\nPLOTTING OUTPUTS'          
+print('\nPLOTTING OUTPUTS')
 
 #Extract uv0, uv1corr, xyz0 and xyz1 locations 
 uv0=[item[1][1] for item in velo]
@@ -271,7 +271,7 @@ for i in range(len(xyz0)):
     
     #Get image name
     imn = Path(imagelist[i]).name
-    print 'Visualising data for ' + str(imn) 
+    print('Visualising data for ' + str(imn))
         
     #Plot uv velocity points on image plane  
     Utilities.plotVeloPX(uvvel[i], uv0[i], uv1corr[i], im, show=True, 
@@ -300,4 +300,4 @@ for i in range(len(xyz0)):
 
     
 #------------------------------------------------------------------------------
-print '\nFinished'
+print('\nFinished')

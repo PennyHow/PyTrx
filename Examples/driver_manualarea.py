@@ -13,7 +13,7 @@ been corrected for image distortion. Previously defined pixel areas can also
 be imported from file (this can be changed by commenting and uncommenting 
 commands in the "Calculate areas" section of this script).
 
-@author: Penny How (p.how@ed.ac.uk)
+@author: Penny How (how@asiaq.gl)
          Nick Hulton
          Lynne Buie
 '''
@@ -179,4 +179,4 @@ for p,i in zip(uvpts,ims):
     
 #------------------------------------------------------------------------------    
     
-print '\n\nFINISHED'
+print('\n\nFINISHED')

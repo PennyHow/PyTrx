@@ -38,7 +38,7 @@ setInvProjVars:             Set the inverse projection variables, based on the
 invproject:                 Inverse project image coordinates (uv) to xyz world 
                             coordinates using inverse projection variables         
 
-@author: Penny How (p.how@ed.ac.uk)
+@author: Penny How (how@asiaq.gl)
          Nick Hulton 
          Lynne Buie       
 '''
@@ -147,7 +147,7 @@ class CamCalib(object):
             
         #Read calibration from file
         if isinstance(args[0],str):
-            print '\nAttempting to read camera calibs from a single file'
+            print('\nAttempting to read camera calibs from a single file')
             args=readMatrixDistortion(args[0])
             args=self.checkMatrix(args)
             if args==None:
@@ -225,8 +225,8 @@ class CamCalib(object):
                         
             
         if failed:
-            print '\nError creating camera calibration object:'
-            print 'Please check calibration specification or files'
+            print('\nError creating camera calibration object' +
+                  '\nPlease check calibration specification or files')
             return None
             
         self._focLen=[self._intrMat[0,0], self._intrMat[1,1]]       
@@ -284,22 +284,23 @@ class CamCalib(object):
         
     def reportCalibData(self):
         '''Self reporter for Camera Calibration object data.'''
-        print '\nDATA FROM CAMERA CALIBRATION OBJECT'
-        print 'Intrinsic Matrix:'
+        print('\nDATA FROM CAMERA CALIBRATION OBJECT')
+        print('Intrinsic Matrix:')
         for row in self._intrMat:
-                print row[0],row[1],row[2]
-        print '\nTangential Correction:'
-        print self._tanCorr[0],self._tanCorr[1]
-        print '\nRadial Correction:'
-        print (self._radCorr[0],self._radCorr[1],self._radCorr[2],
-               self._radCorr[3],self._radCorr[4],self._radCorr[5])
-        print '\nFocal Length:'
-        print self._focLen
-        print '\nCamera Centre:'
-        print self._camCen
+            print(str(row[0]) + str(row[1]) + str(row[2]))
+        print('\nTangential Correction:')
+        print(str(self._tanCorr[0]) + str(self._tanCorr[1]))
+        print('\nRadial Correction:')
+        print(str(self._radCorr[0]) + str(self._radCorr[1]) + 
+              str(self._radCorr[2]) + str(self._radCorr[3]) + 
+              str(self._radCorr[4]) + str(self._radCorr[5]))
+        print('\nFocal Length:')
+        print(str(self._focLen))
+        print('\nCamera Centre:')
+        print(str(self._camCen))
         if self._calibErr != None:
-            print '\nCalibration Error:'
-            print self._calibErr
+            print('\nCalibration Error:')
+            print(str(self._calibErr))
 
 
     def checkMatrix(self, matrix):
@@ -359,7 +360,7 @@ class CamEnv(CamCalib):
     
     def __init__(self, envFile):
         '''Constructor to initiate Camera Environment object.''' 
-        print '\nINITIALISING CAMERA ENVIRONMENT'
+        print('\nINITIALISING CAMERA ENVIRONMENT')
  
         #Read camera environment from text file        
         if isinstance(envFile, str):
@@ -368,7 +369,7 @@ class CamEnv(CamCalib):
     
             #Exit programme if file is invalid
             if params==False:
-                print '\nUnable to define camera environment'
+                print('\nUnable to define camera environment')
                 pass
             
             #Extract input files from camera environment file 
@@ -388,7 +389,7 @@ class CamEnv(CamCalib):
             DEMdensify = envFile[7]
 
         else:
-            print '\nInvalid camera environment data type'
+            print('\nInvalid camera environment data type')
             pass
             
         #Set up object parameters
@@ -416,7 +417,7 @@ class CamEnv(CamCalib):
       
         #Initialise GCPs object for GCP and DEM information
         if (self._GCPpath!=None and self._imagePath!=None):
-            print '\nCreating GCP environment'
+            print('\nCreating GCP environment')
             self._gcp=GCPs(self._DEM, self._GCPpath, self._imagePath)        
         
        
@@ -455,7 +456,7 @@ class CamEnv(CamCalib):
         if lineNo!=None:
             name = self.__getFileDataLine__(lines,lineNo)
         else:
-            print "\nName not supplied in: " + filename              
+            print('\nName not supplied in: ' + str(filename))              
             return False
 
         #Define GCPpath if information is present in .txt file
@@ -463,7 +464,7 @@ class CamEnv(CamCalib):
         if lineNo!=None:
             GCPpath = self.__getFileDataLine__(lines,lineNo)
         else:
-            print "\nGCPpath not supplied in: " + filename              
+            print('\nGCPpath not supplied in: ' + str(filename))              
             GCPpath=None
             
         #Define DEMpath if information is present in .txt file
@@ -471,7 +472,7 @@ class CamEnv(CamCalib):
         if lineNo!=None:
             DEMpath = self.__getFileDataLine__(lines,lineNo)
         else:
-            print "\nDEMpath not supplied in: " + filename              
+            print('\nDEMpath not supplied in: ' + str(filename))              
             return False
             
         #Define imagePath if information is present in .txt file
@@ -479,7 +480,7 @@ class CamEnv(CamCalib):
         if lineNo!=None:
             imagePath = self.__getFileDataLine__(lines,lineNo)
         else:
-            print "\nimagePath not supplied in: " + filename              
+            print('\nimagePath not supplied in: ' + str(filename))              
             return False 
 
         #Define DEM densification specifications (DEMdensify)          
@@ -488,8 +489,9 @@ class CamEnv(CamCalib):
             DEMdensify = self.__getFileDataLine__(lines,lineNo)
             DEMdensify = int(DEMdensify)
         else:
-            print "\nDem densification level not supplied in: " + filename  
-            print "Setting to 1 (No densification)"
+            print('\nDem densification level not supplied in: ' 
+                  + str(filename))  
+            print('Setting to 1 (No densification)')
             DEMdensify=1
 
         #Define calibPath if information is present in .txt file
@@ -503,7 +505,7 @@ class CamEnv(CamCalib):
             if len(calibPath) == 1:
                 calibPath = calibPath[0]              
         else:
-            print "\ncalibPath not supplied in: " + filename              
+            print('\ncalibPath not supplied in: ' + str(filename))             
             return False   
 
         #Define camera location coordinates (coords)
@@ -515,7 +517,7 @@ class CamEnv(CamCalib):
             for f in fields:
                 coords.append(float(f)) 
         else:
-            print "\nCoordinates not supplied in: " + filename              
+            print('\nCoordinates not supplied in: ' + str(filename))              
             return False 
 
         #Define yaw, pitch, roll if information is present in .txt file
@@ -527,7 +529,7 @@ class CamEnv(CamCalib):
             for f in fields:
                 ypr.append(float(f)) 
         else:
-            print "\nYPR not supplied in: " + filename              
+            print('\nYPR not supplied in: ' + str(filename))              
             return False
            
         return name,GCPpath,DEMpath,imagePath,calibPath,coords,ypr,DEMdensify
@@ -604,64 +606,64 @@ class CamEnv(CamCalib):
         '''
         
         #Camera name and location
-        print '\nCAMERA ENVIRONMENT REPORT'
-        print 'Camera Environment name: ',self._name 
-        print 'Camera Location [X,Y,Z]:  ',self._camloc
+        print('\nCAMERA ENVIRONMENT REPORT')
+        print('Camera Environment name: ' + str(self._name)) 
+        print('Camera Location [X,Y,Z]: ' + str(self._camloc))
         
         #Reference image
-        print ('\nReference image used for baseline homography and/or GCP' 
-               'control: ')
-        print self._imagePath
+        print('\nReference image used for baseline homography ' + 
+              'and/or GCP control:')
+        print(str(self._imagePath))
         
         #DEM and densification        
-        print '\nDEM file used for projection:',
-        print self._DEMpath
+        print('\nDEM file used for projection:')
+        print(str(self._DEMpath))
         if self._DEMdensify==1:
-            print 'DEM is used at raw resolution'
+            print('DEM is used at original resolution')
         else:
-            print ('DEM is resampled at '+str(self._DEMdensify) + 
+            print('DEM is resampled at '+ str(self._DEMdensify) + 
                   ' times resolution')
         
         #GCPs        
         if self._GCPpath!=None:
-            print '\nGCP file used to define camera pose:'
-            print self._GCPpath
+            print('\nGCP file used to define camera pose:')
+            print(str(self._GCPpath))
         else:
-            print 'No GCP file defined'
+            print('No GCP file defined')
          
         #Yaw, pitch, roll
         if self._camDirection is None:
-            print '\nCamera pose assumed unset (zero values)'
+            print('\nCamera pose assumed unset (zero values)')
         else:
-            print '\nCamera pose set as [Roll,Pitch,Yaw]: '
-            print self._camDirection
+            print('\nCamera pose set as [Roll,Pitch,Yaw]: ')
+            print(str(self._camDirection))
 
         #Camera calibration (matrix and distortion coefficients)
         if isinstance(self._calibPath[0],list):
             if self._calibPath[0][0][-4:] == '.txt':
-                print '\nCalibration calculated from multiple files:'
-                print self._calibPath
+                print('\nCalibration calculated from multiple files:')
+                print(str(self._calibPath))
 
         elif isinstance(self._calibPath[0],str):
             if self._calibPath[0][-4:] == '.txt':
-                print '\nCalibration calculated from single file:'
-                print self._calibPath
+                print('\nCalibration calculated from single file:')
+                print(str(self._calibPath))
                 
             elif self._calibPath[0][0][-4:] == '.JPG' or '.PNG':
-                print '\nCalibration calculated from raw images:'                      
-                print self._calibPath
+                print('\nCalibration calculated from raw images:')                    
+                print(str(self._calibPath))
                                          
         elif isinstance(self._calibPath[0],np.array):   
-            print '\nCalibration calculated from raw data:' 
-            print self._calibPath
+            print('\nCalibration calculated from raw data:')
+            print(str(self._calibPath))
         
         else:
-            print '\nCalibration undefined'
+            print('\nCalibration undefined')
         
         
         #Report raster DEM details from the DEM class
         if isinstance(self._DEM,ExplicitRaster):
-            print '\nDEM set:'
+            print('\nDEM set:')
             self._DEM.reportDEM()
 
         #Report calibration parameters from CamCalib class
@@ -730,7 +732,7 @@ def calibrateImages(imageFiles, xy, refine=None):
         #Cycle through images, print if chessboard corners have been found 
         #for each image
         imageCount += 1
-        print str(imageCount) + ': ' + str(patternFound) + ' ' + fname
+        print(str(imageCount) + ': ' + str(patternFound) + ' ' + fname)
         
         #If found, append object points to objp array
         if patternFound == True:
@@ -825,7 +827,7 @@ def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg):
     Returns
     invProjVars (list):         Inverse projection coefficients
     '''             
-    print '\nSetting inverse projection coefficients'         
+    print('\nSetting inverse projection coefficients')
 
     if isinstance(dem, list):
         dem=constructDEM(dem[0], dem[1])
@@ -857,7 +859,7 @@ def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg):
     uv0=uv0[:,0:2]
     
     #Set inverse projection variables
-    print '\nInverse projection coefficients defined'
+    print('\nInverse projection coefficients defined')
     invProjVars=[X,Y,Z,uv0]              
     return invProjVars
             

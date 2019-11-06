@@ -13,7 +13,7 @@ individual point displacements and interpolated velocity maps) which have been
 corrected for image distortion and motion in the camera platform (i.e. image
 registration).
 
-@author: Penny How (p.how@ed.ac.uk)
+@author: Penny How (how@asiaq.gl)
          Nick Hulton 
          Lynne Buie
 '''
@@ -103,7 +103,7 @@ uv1corr=[item[1][3] for item in velocities]
 
 #---------------------------  Export data   -----------------------------------
 
-print '\n\nWRITING DATA TO FILE'
+print('\n\nWRITING DATA TO FILE')
 
 #Write out camera calibration info to .txt file
 target1 = '../Examples/camenv_data/calib/KR2_2014_1.txt'
@@ -129,7 +129,7 @@ writeVeloSHP(xyzvel, xyzerr, xyz0, imn, target4, proj)       #Write shapefile
   
 #----------------------------   Plot Results   --------------------------------
 
-print '\n\nPLOTTING DATA'
+print('\n\nPLOTTING DATA')
 
 #Set interpolation method ("nearest"/"cubic"/"linear")
 method='linear' 
@@ -151,23 +151,23 @@ imgset=velo._imageSet
 for i in range(len(imn)-1):
 
     #Get image name and print
-    print '\nVisualising data for ' + str(imn[i]) 
+    print('\nVisualising data for ' + str(imn[i]))
 
     #Plot uv velocity points on image plane   
-    print 'Plotting image plane output'
+    print('Plotting image plane output')
     plotVeloPX(uvvel[i], uv0[i], uv1corr[i], 
                imgset[i].getImageCorr(cameraMatrix, distortP), 
                show=True, save=target4+'uv_'+imn[i])
 
 
     #Plot xyz velocity points on dem  
-    print 'Plotting XYZ output'
+    print('Plotting XYZ output')
     plotVeloXYZ(xyzvel[i], xyz0[i], xyz1[i], 
                 dem, show=True, save=target4+'xyz_'+imn[i])
     
                 
     #Plot interpolation map
-    print 'Plotting interpolation map'
+    print('Plotting interpolation map')
     grid, pointsextent = interpolateHelper(xyzvel[i], xyz0[i], xyz1[i], method)
     plotInterpolate(grid, pointsextent, dem, show=True, 
                     save=target4+'interp_'+imn[i])                        
@@ -179,7 +179,7 @@ for i in range(len(imn)-1):
 #many mapping software, such as ArcGIS and QGIS, and imported to create raster
 #surfaces
 
-print '\n\nWRITING ASCII FILES'
+print('\n\nWRITING ASCII FILES')
 
 #Set destination for file outputs
 target5 = destination + 'asciifiles/'
@@ -196,7 +196,7 @@ for i in range(velo.getLength()-1):
     #Open the fileName file with write permissions
     imn=velo._imageSet[i].getImageName()
     afile = open(target5 + imn + '_interpmap.txt','w')
-    print '\nWriting file: ' + target5 + imn + '_interpmap.txt'
+    print('\nWriting file: ' + str(target5) + str(imn) + '_interpmap.txt')
     
     #Make a list for each raster header variable, with the label and value
     col = ['ncols', str(grid.shape[1])]
@@ -226,4 +226,4 @@ for i in range(velo.getLength()-1):
 
 
 #------------------------------------------------------------------------------
-print '\nFinished'
+print('\nFinished')

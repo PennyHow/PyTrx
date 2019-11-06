@@ -33,7 +33,7 @@ Key standalone functions
 calcVelocity:                   Calculate velocities between an image pair
 calcHomography:                 Calculate homography between an image pair
                                                                
-@author: Penny How (p.how@ed.ac.uk)
+@author: Penny How (how@asiaq.gl)
          Nick Hulton 
          Lynne Buie
 '''
@@ -85,7 +85,7 @@ class Homography(ImageSequence):
             self._invmask = None
         else:
             self._invmask = readMask(self.getImageArrNo(0), invmaskPath)
-            print '\nHomography mask set'
+            print('\nHomography mask set')
 
 
     def calcHomographyPairs(self, winsize=(25,25), back_thresh=1.0, 
@@ -109,7 +109,7 @@ class Homography(ImageSequence):
         mindist:                    Minimum distance between seeded points.                 
         min_features:               Minimum number of seeded points to track.
         ''' 
-        print '\n\nCALCULATING HOMOGRAPHY'
+        print('\n\nCALCULATING HOMOGRAPHY')
         
         #Create empty list for outputs
         homog=[]   
@@ -131,7 +131,8 @@ class Homography(ImageSequence):
             self._imageSet[i].clearImage()
             self._imageSet[i].clearImageArray()
             
-            print '\nProcessing homograpy for images: ',imn0,' and ',imn1
+            print('\nProcessing homograpy for images: ' + str(imn0) + ' and ' 
+                  + str(imn1))
             
             #Get inverse mask and calibration parameters
             invmask = self.getInverseMask()
@@ -212,7 +213,7 @@ class Velocity(ImageSequence):
             self._mask = None
         else:
             self._mask = readMask(self.getImageArrNo(0), maskPath)
-            print '\nVelocity mask set'
+            print('\nVelocity mask set')
 
 
     def calcVelocities(self, winsize=(25,25), back_thresh=1.0, min_features=4,
@@ -269,7 +270,7 @@ class Velocity(ImageSequence):
                                     then an empty list is merely returned.                                 
         '''
            
-        print '\n\nCALCULATING VELOCITIES'
+        print('\n\nCALCULATING VELOCITIES')
         velocity=[]
         
         #Get camera environment 
@@ -307,7 +308,8 @@ class Velocity(ImageSequence):
             imn1=self._imageSet[i+1].getImageName()       
             self._imageSet[i].clearAll()
            
-            print '\nFeature-tracking for images: ',imn0,' and ',imn1
+            print('\nFeature-tracking for images: ' + str(imn0) +' and ' 
+                  + str(imn1))
 
             #Calculate velocities between image pair with homography
             if self._homog is not None:
@@ -418,7 +420,7 @@ def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None,
  
     #Pass empty object if tracking was insufficient
     if points==None:
-        print '\nNo features to undertake velocity measurements'
+        print('\nNo features to undertake velocity measurements')
         return None        
         
     if calib is not None:        
@@ -486,12 +488,12 @@ def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None,
         back_pts_corr=back_pts_corr[good]
         ptserrors=ptserrors[good]
         
-        print (str(dst_pts_corr.shape[0]) + 
-               ' Points remaining after homography correction')
+        print(str(dst_pts_corr.shape[0]) + 
+              ' points remaining after homography correction')
 
     else:
         #Original tracked points assigned if homography not given
-        print 'Homography matrix not supplied. Original tracked points kept'
+        print('Homography matrix not supplied. Original tracked points kept')
         dst_pts_homog=dst_pts_corr
     
     #Calculate pixel velocity
@@ -594,7 +596,7 @@ def calcHomography(img1, img2, mask, correct, method=cv2.RANSAC,
 
     #Pass empty object if tracking insufficient
     if points==None:
-        print '\nNo features to undertake Homography'
+        print('\nNo features to undertake Homography')
         return None
     
     if correct is not None:
@@ -695,8 +697,7 @@ def apply_persp_homographyPts(pts, homog, inverse=False):
             yh=(homog[1][0]*p[0]+homog[1][1]*p[1]+homog[1][2])*div
             hpts.append([xh,yh])
     else:
-        print 'PERPECTIVE INPUT:'
-        print type(pts)
+        print('PERPECTIVE INPUT: ' + str(type(pts)))
         hpts=None
               
         return hpts 
@@ -757,16 +758,16 @@ def featureTrack(i0, iN, p0, winsize, back_thresh, min_features):
     p1=p1[good]
     p0r=p0r[good]
     error=dist[good]
-    print 'Average back-tracking difference: ' + str(np.mean(good))
+    print('Average back-tracking difference: ' + str(np.mean(good)))
 
     #Return None if number of tracked features is under the 
     #min_features threshold
     if p0.shape[0]<min_features:
-        print 'Not enough features successfully tracked.' 
+        print('Not enough features successfully tracked.')
         return None
            
-    print str(tracked)+' features tracked'
-    print str(p0.shape[0]) + ' features remaining after forward-backward error'
+    print(str(tracked) + ' features tracked')
+    print(str(p0.shape[0]) +' features remaining after forward-backward error')
        
     return [p0,p1,p0r], error
 
@@ -799,7 +800,7 @@ def seedCorners(im, mask, maxpoints, quality, mindist, min_features):
             
     #Check if there are enough points to initially track 
     if tracked<min_features:
-        print 'Not enough features found to track.  Found: ',len(p0)
+        print('Not enough features found to track. Found: ' + str(len(p0)))
         return None
     else:
         return p0

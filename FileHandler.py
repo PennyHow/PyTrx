@@ -79,7 +79,7 @@ importLineData:         Function to get xyz and px line data from text files
                         object specified as an input variable. This can be 
                         easily retrieved from the Line class object itself.
                         
-@author: Penny How (p.how@ed.ac.uk)
+@author: Penny How (how@asiaq.gl)
          Nick Hulton 
          Lynne Buie
 '''
@@ -92,6 +92,7 @@ import matplotlib.pyplot as plt
 import scipy.io as sio
 from osgeo import ogr,osr
 import os
+from functools import reduce
 
 #------------------------------------------------------------------------------   
 
@@ -116,10 +117,10 @@ def readMask(img, writeMask=None):
         try:
             myMask = Image.open(writeMask)
             myMask = np.array(myMask)
-            print ('\nMask loaded')
+            print('\nMask loaded')
             return myMask
         except:
-            print '\nMask file not found. Proceeding to manually digitise...'
+            print('\nMask file not found. Proceeding to manually digitise...')
 
     #Plot mask manually on the selected image
     fig=plt.gcf()
@@ -129,7 +130,7 @@ def readMask(img, writeMask=None):
     imgplot.set_cmap('gray')
     x1 = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, 
                     mouse_stop=2)
-    print '\n' + str(len(x1)) + ' points seeded'
+    print('\n' + str(len(x1)) + ' points seeded')
     plt.show()
     plt.close()
     
@@ -155,11 +156,11 @@ def readMask(img, writeMask=None):
     
     #Write to .jpg file    
     if writeMask!=None:
-        print '\nMask plotted: ' + writeMask
+        print('\nMask plotted: ' + str(writeMask))
         try:
             img1.save(writeMask, quality=75)
         except:
-            print '\nFailed to write file: ' + writeMask
+            print('\nFailed to write file: ' + str(writeMask))
         
     return myMask  
 
@@ -192,8 +193,8 @@ def readCalib(fileName, paramList):
         try:
             myFile=open(fileName,'r')
         except:
-            print '\nProblem opening calibration text file: ',fileName
-            print 'No calibration parameters successfully read'
+            print('\nProblem opening calibration text file: ' + str(fileName))
+            print('No calibration parameters successfully read')
             return None
         
         #Read lines in file
@@ -563,7 +564,7 @@ def writeVeloFile(xyzvel, uvvel, homog, imn, fname):
         #Break line in output file
         f.write('\n')
             
-    print '\nVelocity file written:' + fname        
+    print('\nVelocity file written:' + str(fname))        
         
    
 def writeHomogFile(homog, imn, fname):
@@ -661,7 +662,7 @@ def writeHomogFile(homog, imn, fname):
         f.write(str(np.mean(errdist)) + ',' + str(np.mean(homogdist)) + ',' + 
                 str(np.mean(sn)) + '\n')
         
-    print '\nHomography file written' + fname
+    print('\nHomography file written' + str(fname))
 
 
 def writeAreaFile(pxareas, xyzareas, imn, destination):
@@ -834,7 +835,7 @@ def writeVeloSHP(xyzvel, xyzerr, xyz0, imn, fileDirectory, projection=None):
             driver.DeleteDataSource(shp)
         ds = driver.CreateDataSource(shp)
         if ds is None:
-            print 'Could not create file %s' %shp
+            print('Could not create file ' + str(shp))
         
         #Set projection
         if type(projection) is int:
@@ -926,7 +927,7 @@ def writeAreaSHP(xyzpts, imn, fileDirectory, projection=None):
             driver.DeleteDataSource(shp)
         ds = driver.CreateDataSource(shp)
         if ds is None:
-            print 'Could not create file %s' %shp
+            print('Could not create file ' + str(shp))
     
         if type(projection) is int:
             proj = osr.SpatialReference()
@@ -1010,7 +1011,7 @@ def writeLineSHP(xyzpts, imn, fileDirectory, projection=None):
             driver.DeleteDataSource(shp)
         ds = driver.CreateDataSource(shp)
         if ds is None:
-            print 'Could not create file %s' %shp
+            print('Could not create file ' + str(shp))
     
         if type(projection) is int:
             proj = osr.SpatialReference()
@@ -1107,12 +1108,12 @@ def importAreaFile(fname, dimension):
     extent (list):       Pixel areas for polygons          
     '''
     #Read file and detect number of images based on number of lines
-    f=file(fname,'r')      
+    f=open(fname,'r')      
     alllines=[]
     for line in f.readlines():
         if len(line) >= 6:
             alllines.append(line)  #Read lines in file             
-    print '\nDetected coordinates from ' + str(len(alllines)) + ' images'
+    print('\nDetected coordinates from ' + str(len(alllines)) + ' images')
     f.close() 
     
     #Extract strings from lines         
@@ -1165,12 +1166,12 @@ def importLineFile(fname, dimension):
     lines (list):        Line coordinates and lengths
     '''
     #Read file and detect number of images based on number of lines
-    f=file(fname,'r')      
+    f=open(fname,'r')      
     alllines=[]
     for line in f.readlines():
         if len(line) >= 6:
             alllines.append(line)  #Read lines in file             
-    print '\nDetected coordinates from ' + str(len(alllines)) + ' images'
+    print('\nDetected coordinates from ' + str(len(alllines)) + ' images')
     f.close() 
     
     #Extract strings from lines         

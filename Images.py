@@ -37,7 +37,7 @@ Key stand-alone functions
 enhanceImage:                   Change brightness and contrast of image using 
                                 phi and theta variables
     
-@author: Penny How (p.how@ed.ac.uk)
+@author: Penny How (how@asiaq.gl)
          Nick Hulton 
          Lynne Buie
 '''
@@ -50,6 +50,7 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 from datetime import datetime
 from pylab import array, uint8
+from functools import reduce
 import glob
 import imghdr
 import os
@@ -128,7 +129,7 @@ class CamImage(object):
      
     def _checkImage(self, path):
         '''Check that the given image file path is correct.'''
-        print '\nChecking image file ', path
+        print('\nChecking image file ' + str(path))
         
         #Check file path using os package
         exists=os.path.isfile(path) 
@@ -137,14 +138,14 @@ class CamImage(object):
             #Check file type
             ftype=imghdr.what(path)
             if ftype is None:
-                print 'File exists but not image type: ', ftype
+                print('File exists but not image type: ' + str(ftype))
                 return False
             else:
-                print 'File found of image type: ', ftype
+                print('File found of image type: ' + str(ftype))
                 return True
 
         else:           
-            print 'File does not exist: ',path
+            print('File does not exist: ' + str(path))
             return False
 
         
@@ -269,9 +270,9 @@ class CamImage(object):
         
     def reportCamImageData(self):
         '''Report image data (file path, image size and datetime).'''
-        print '\nImage source path: ',self.getImagePath()
-        print 'Image size: ',self.getImageSize()
-        print 'Image datetime: ',self.getImageTime()
+        print('\nImage source path: ' + str(self.getImagePath()))
+        print('Image size: ' + str(self.getImageSize()))
+        print('Image datetime: ' + str(self.getImageTime()))
 
         
     def _readImage(self):
@@ -291,7 +292,7 @@ class CamImage(object):
         if self._equal is True:
             
             #Apply histogram equalisation
-            h = img.convert("L").histogram()
+            h = img.convert('L').histogram()
             lut = []
             for b in range(0, len(h), 256):
                 # step size
@@ -346,7 +347,7 @@ class ImageSequence(object):
                    is True.
     '''
     def __init__(self, imageList, band='L', equal=True):
-        print '\n\nCONSTRUCTING IMAGE SEQUENCE'
+        print('\n\nCONSTRUCTING IMAGE SEQUENCE')
         
         self._band=band
         self._equal=equal
@@ -357,21 +358,21 @@ class ImageSequence(object):
             
             #Construction from list of CamImage objects
             if isinstance(imageList[0],CamImage):
-                print '\nList of camera images assumed in image sequence'
-                print ' Attempting to add all to sequence'
+                print('\nList of camera images assumed in image sequence')
+                print(' Attempting to add all to sequence')
                 self._imageSet = []
                 for item in list:
                     if isinstance(item,CamImage):
                         self._imageSet.append(item)
                     else:
-                        print ('\nWarning non-image item found in image' 
-                                   ' set list specification - item not added')
+                        print('\nWarning non-image item found in image set' 
+                              ' list specification - item not added')
                 return
                 
             #Construction from list containing file name strings                
             elif isinstance(imageList[0],str):               
-                print '\nList of camera images assumed of image sequence'
-                print ' Attempting to add all to sequence'
+                print('\nList of camera images assumed of image sequence')
+                print(' Attempting to add all to sequence')
                 self._loadImageStringSequence(imageList)
                 
             else:                
@@ -381,9 +382,9 @@ class ImageSequence(object):
         
         #Construction from string of file paths
         if isinstance(imageList, str):
-            print ('\nImage directory path assumed. Searching for images.' 
-                   ' Attempting to add all to sequence')
-            print imageList
+            print('\nImage directory path assumed. Searching for images.' + 
+                  ' Attempting to add all to sequence')
+            print(str(imageList))
             self._imageList = sorted(glob.glob(imageList))
 #                                     key=os.path.getmtime)
             self._loadImageStringSequence(self._imageList)
@@ -416,8 +417,8 @@ class ImageSequence(object):
                 self._imageSet.append(im)
                     
             else:
-                print '\nProblem reading image: ',imageStr
-                print 'Image:',imageStr,' not added to sequence'
+                print('\nProblem reading image: ' + str(imageStr))
+                print('Image: ' + str(imageStr) + ' not added to sequence')
 
                 
     def getImages(self):
@@ -490,8 +491,8 @@ def enhanceImage(img, diff, phi, theta):
     
     #If diff variable not assigned then reassign to light
     else:          
-        print '\nInvalid diff variable' 
-        print 'Re-assigning diff variable to "light"'
+        print('\nInvalid diff variable')
+        print('Re-assigning diff variable to "light"')
         img1 = (maxIntensity/phi)*(img/(maxIntensity/theta))**0.5
         img1 = array(img1, dtype = uint8)
     

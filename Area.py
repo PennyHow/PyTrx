@@ -33,7 +33,7 @@ calcAutoArea:                   Automatically detect areas of interest from an
 calcManualArea:                 Manually define areas of interest from an
                                 image pair and return uv and xyz measurements       
                                                                                                                           
-@author: Penny How (p.how@ed.ac.uk)
+@author: Penny How (how@asiaq.gl)
          Nick Hulton 
          Lynne Buie
 '''
@@ -167,7 +167,7 @@ class Area(ImageSequence):
         Returns
         area (list):                XYZ and UV area information
         '''               
-        print '\n\nCOMMENCING AUTOMATED AREA DETECTION' 
+        print('\n\nCOMMENCING AUTOMATED AREA DETECTION')
 
         #Get DEM from camera environment
         dem = self._camEnv.getDEM() 
@@ -368,7 +368,7 @@ class Area(ImageSequence):
             img2 = np.copy(img1)
             
             if 1:                            
-                print '\nVerifying detected areas from ' + imn
+                print('\nVerifying detected areas from ' + str(imn))
                 
                 #Set up empty output list                
                 verf = []
@@ -443,7 +443,7 @@ class Area(ImageSequence):
                 if px > 0:
                     values.append(px)
             pxext = len(values)        
-            print 'Total verified extent: ', pxext  
+            print('Total verified extent: ' + str(pxext))  
 
             #Get xyz coordinates with inverse projection
             if invprojvars is not None:
@@ -456,7 +456,7 @@ class Area(ImageSequence):
                     ogrpol = getOGRArea(proj)                   
                     vxyzarea.append(ogrpol.GetArea())
                     
-                print 'Total verified area: ', str(sum(vxyzarea)), ' m'            
+                print('Total verified area: ' + str(sum(vxyzarea)) + ' m')            
 
             verified.append([[pxext, vpx],[vxyzarea, vxyzpts]])                    
             
@@ -519,9 +519,9 @@ class Area(ImageSequence):
         upper (int):              Upper value of colour range.
         lower (int):              Lower value of colour range.
         '''      
-        print '\nColour range defined from given values:'
-        print 'Upper RBG boundary: ', upper
-        print 'Lower RBG boundary: ', lower
+        print('\nColour range defined from given values:')
+        print('Upper RBG boundary: ', upper)
+        print('Lower RBG boundary: ', lower)
         
         #Assign colour range
         self._colourrange = [upper, lower]
@@ -595,7 +595,7 @@ def calcAutoArea(img, imn, colourrange, hmatrix=None, threshold=None,
     polyimg, line, hier = cv2.findContours(mask, cv2.RETR_EXTERNAL, 
                                            cv2.CHAIN_APPROX_NONE)
     
-    print '\nDetected ' + str(len(line)) + ' regions in ' + imn
+    print('\nDetected ' + str(len(line)) + ' regions in ' + str(imn))
     
     #Append all polygons from the polys list that have more than 
     #a given number of points     
@@ -610,11 +610,11 @@ def calcAutoArea(img, imn, colourrange, hmatrix=None, threshold=None,
             rawpx.sort(key=len)
             rawpx = rawpx[-(threshold):]        
 
-    print 'Kept %d regions' % (len(rawpx))
+    print('Kept ' + str(len(rawpx)) + ' regions')
     
     #Calculate homography-corrected pts if desired
     if hmatrix is not None:
-        print 'Correcting for camera motion'
+        print('Correcting for camera motion')
         pxpts=[]
         for i in rawpx:
             corr = Velocity.apply_persp_homographyPts(i, hmatrix, inverse=True)
@@ -655,7 +655,7 @@ def calcAutoArea(img, imn, colourrange, hmatrix=None, threshold=None,
             ogrpol = getOGRArea(proj)                   
             xyzarea.append(ogrpol.GetArea())
             
-        print 'Total area: ', str(sum(xyzarea)), 'm'
+        print('Total area: ' + str(sum(xyzarea)) + ' m')
                 
         #Return XYZ and pixel areas
         return [[xyzarea, xyzpts], [pxextent, pxpts]]
@@ -696,7 +696,7 @@ def calcManualArea(img, imn, hmatrix=None, pxplot=None, invprojvars=None):
     #Manual input of points from clicking on plot using pyplot.ginput
     rawpx = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, 
                        mouse_pop=3, mouse_stop=2)
-    print '\n' + imn + ': you clicked ' + str(len(rawpx)) + ' points'
+    print('\n' + imn + ': you clicked ' + str(len(rawpx)) + ' points')
     
     #Show plot
     plt.show()
@@ -711,7 +711,7 @@ def calcManualArea(img, imn, hmatrix=None, pxplot=None, invprojvars=None):
     
     #Calculate homography-corrected pts if desired
     if hmatrix is not None:
-        print 'Correcting for camera motion'
+        print('Correcting for camera motion')
         pxpts = Velocity.apply_persp_homographyPts(pxpts, hmatrix, 
                                                    inverse=True)
         
@@ -727,8 +727,8 @@ def calcManualArea(img, imn, hmatrix=None, pxplot=None, invprojvars=None):
     except:
         pxextent = 0
     
-    print ('Total extent: ' + str(pxextent) + 'px (out of ' 
-            + str(img.shape[0]*img.shape[1]) + 'px)')    
+    print('Total extent: ' + str(pxextent) + 'px (out of ' + 
+          str(img.shape[0]*img.shape[1]) + 'px)')    
     
     #Convert pts list to array
     pxpts = np.array(pxpts)           
@@ -744,7 +744,7 @@ def calcManualArea(img, imn, hmatrix=None, pxplot=None, invprojvars=None):
         xyzarea=xyzarea.GetArea()
         
         #Return XYZ and pixel areas
-        print 'Total area: ', str(xyzarea), 'm'
+        print('Total area: ' + str(xyzarea) + ' m')
         return [[[xyzarea], [xyzpts]], [[pxextent], [pxpts]]]
 
     #Return pixel areas only    
@@ -786,7 +786,7 @@ def defineColourrange(img, imn, pxplot=None):
     colours = plt.ginput(n=2, timeout=0, show_clicks=True, mouse_add=1, 
                         mouse_pop=3, mouse_stop=2)
     
-    print '\n' + imn + ': you clicked ', colours
+    print('\n' + imn + ': you clicked ' + colours)
     
     #Show plot
     plt.show()
@@ -810,9 +810,9 @@ def defineColourrange(img, imn, pxplot=None):
         upper_boundary = col2_rbg
         lower_boundary = col1_rbg
     
-    print '\nColour range found from manual selection'
-    print 'Upper RBG boundary: ' + str(upper_boundary)
-    print 'Lower RBG boundary: ' + str(lower_boundary)
+    print('\nColour range found from manual selection')
+    print('Upper RBG boundary: ' + str(upper_boundary))
+    print('Lower RBG boundary: ' + str(lower_boundary))
 
     #Return RBG range
     return [upper_boundary, lower_boundary]

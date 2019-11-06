@@ -37,7 +37,7 @@ plotInterpolate:                Plot the results of the velocity
                                 interpolation process for a particular image 
                                 pair
              
-@author: Penny How (p.how@ed.ac.uk)
+@author: Penny How (how@asiaq.gl)
          Nick Hulton 
          Lynne Buie
 '''
@@ -202,7 +202,7 @@ def plotAreaPX(uv, img, show=True, save=None):
                 xl.append(pt[0])
                 yl.append(pt[1])
             else:
-                print 'Unrecognised point structure for plotting'
+                print('Unrecognised point structure for plotting')
                 pass
             
         ax1.plot(xl, yl, c='#FFFF33', linestyle='-') 
@@ -540,7 +540,7 @@ def interpolateHelper(xyzvel, xyz0, xyz1, method='linear'):
             y1.append(sy)                                #pt0 y values
             y2.append(ey)                                #pt1 y values
         elif np.isnan(v)==True:
-            print '\nNaN value removed for interpolation'
+            print('\nNaN value removed for interpolation')
                               
     #Bound point positions in array for grid construction
     newpts=np.array([x1,y1]).T  
