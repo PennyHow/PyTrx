@@ -1,6 +1,6 @@
 # PyTrx
 PyTrx (short for 'Python Tracking') is a Python object-oriented toolbox created for the purpose of calculating real-world measurements from oblique images and time-lapse image series. Its primary purpose is to obtain velocities, surface areas, and distances from imagery of glacial environments.<br>
-This branch currently serves as construction for PyTrx's compatibility with Python 3, and development of additional functionality.<br>
+<b>This branch currently serves as a construction repository to update PyTrx's compatibility with Python 3, and develop additional functionality.</b><br>
 
 Authors: Penelope How (how@asiaq.gl), Nick Hulton, and Lynne Buie (née Addison)<br>
 
