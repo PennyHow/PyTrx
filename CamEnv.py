@@ -51,6 +51,7 @@ from Images import CamImage
 
 #Import other packages
 from scipy import interpolate
+import string
 import numpy as np
 import cv2
 import glob
@@ -498,7 +499,11 @@ class CamEnv(CamCalib):
         lineNo=key_lines["calibPath"]
         if lineNo!=None:
             calibPath = self.__getFileDataLine__(lines,lineNo)
-            fields = calibPath.translate(None, '[]').split(',')
+            print(calibPath)
+            maps = str.maketrans('[]', None, ' ')
+#            fields = calibPath.translate(maps).split(',')
+            fields = calibPath.translate(maps)
+            print(fields)
             calibPath = []
             for f in fields:
                 calibPath.append(f)
