@@ -548,7 +548,7 @@ def calcSparseVelocity(img1, img2, mask, calib=None, homog=None,
 
 def calcDenseVelocity(img1, img2, mask, calib=None, homog=None, 
                       invprojvars=None, winsize=(25,25), back_thresh=1.0, 
-                      min_features=4, griddistance=100):
+                      min_features=4, griddistance=[100,100]):
     '''Function to calculate the velocity between a pair of images. Points 
     are seeded in the first of these either by a defined grid spacing, or using 
     the Shi-Tomasi algorithm with OpenCV's goodFeaturesToTrack function. 
@@ -602,11 +602,10 @@ def calcDenseVelocity(img1, img2, mask, calib=None, homog=None,
     displacement_tolerance_rel=2.0
     
     #Seed features
-    p0 = seedCorners(img1, mask, griddistance, min_features)
+    p0 = seedGrid(img1, mask, griddistance, min_features)
 
     #Track points between the image pair
-    points, ptserrors = featureTrack(img1, img2, p0, winsize, back_thresh,  
-                                     min_features) 
+    res = cv2.matchTemplate(img,template,method)
  
     #Pass empty object if tracking was insufficient
     if points==None:
