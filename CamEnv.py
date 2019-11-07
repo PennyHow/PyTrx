@@ -1,4 +1,13 @@
 '''
+PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+PyTrx is licensed under a
+Creative Commons Attribution 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+
 PYTRX CAMERA ENVIRONMENT MODULE
 
 This script is part of PyTrx, an object-oriented programme created for the 
@@ -36,11 +45,7 @@ project:                    Project xyz world coordinates into corresponding
 setInvProjVars:             Set the inverse projection variables, based on the 
                             DEM
 invproject:                 Inverse project image coordinates (uv) to xyz world 
-                            coordinates using inverse projection variables         
-
-@author: Penny How (how@asiaq.gl)
-         Nick Hulton 
-         Lynne Buie       
+                            coordinates using inverse projection variables               
 '''
 
 #Import PyTrx packages

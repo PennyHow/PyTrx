@@ -1,4 +1,13 @@
 '''
+PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+PyTrx is licensed under a
+Creative Commons Attribution 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+
 PYTRX EXAMPLE POINT GEORECTIFICATION DRIVER
 
 This script is part of PyTrx, an object-oriented programme created for the 
@@ -11,10 +20,6 @@ georectification functions in PyTrx. These locations are plotted onto the DEM,
 with the colour of each point denoting the style of calving in that particular
 instance. The xyz locations are exported subsequently as a text file (.txt) 
 and as a shape file (.shp).
-
-@author: Penny How (how@asiaq.gl)
-         Nick Hulton
-         Lynne Buie
 '''
 
 #Import packages

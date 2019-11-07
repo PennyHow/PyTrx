@@ -1,4 +1,13 @@
 '''
+PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+PyTrx is licensed under a
+Creative Commons Attribution 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+
 PYTRX FILEHANDLER MODULE
 
 This script is part of PyTrx, an object-oriented programme created for the 
@@ -78,10 +87,6 @@ importLineData:         Function to get xyz and px line data from text files
                         script. All imported data is held in the Line class 
                         object specified as an input variable. This can be 
                         easily retrieved from the Line class object itself.
-                        
-@author: Penny How (how@asiaq.gl)
-         Nick Hulton 
-         Lynne Buie
 '''
 
 #Import packages

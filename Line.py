@@ -1,4 +1,13 @@
 '''
+PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+PyTrx is licensed under a
+Creative Commons Attribution 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+
 PYTRX LINE MODULE
 
 This script is part of PyTrx, an object-oriented programme created for the 
@@ -25,10 +34,6 @@ calcManualLines:                Calculate xyz and uv lines/distances from a
 Key stand-alone functions
 calcManualLine:                 Calculate xyz and uv lines/distances from an 
                                 image
-                                                               
-@author: Penny How (how@asiaq.gl)
-         Nick Hulton 
-         Lynne Buie
 '''
 
 #Import packages

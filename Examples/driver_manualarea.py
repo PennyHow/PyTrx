@@ -1,4 +1,13 @@
 '''
+PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+PyTrx is licensed under a
+Creative Commons Attribution 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+
 PYTRX EXAMPLE MANUAL AREA DRIVER
 
 This script is part of PyTrx, an object-oriented programme created for the 
@@ -12,10 +21,6 @@ through sequential images of the glacier to derive surface areas which have
 been corrected for image distortion. Previously defined pixel areas can also 
 be imported from file (this can be changed by commenting and uncommenting 
 commands in the "Calculate areas" section of this script).
-
-@author: Penny How (how@asiaq.gl)
-         Nick Hulton
-         Lynne Buie
 '''
 
 #Import packages

@@ -1,4 +1,13 @@
 '''
+PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+PyTrx is licensed under a
+Creative Commons Attribution 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+
 PYTRX EXAMPLE VELOCITY DRIVER (EXTENDED VERSION)
 
 This script is part of PyTrx, an object-oriented programme created for the 
@@ -20,10 +29,6 @@ stand-alone functions.
 This script has been included in order to provide the user with a more detailed 
 overview of PyTrx's functionality beyond its object-oriented structure. It also 
 allows flexible intervention and adaptation where needed. 
-
-@author: Penny How (how@asiaq.gl)
-         Nick Hulton 
-         Lynne Buie
 '''
 
 #Import packages

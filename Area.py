@@ -1,4 +1,13 @@
 '''
+PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+PyTrx is licensed under a
+Creative Commons Attribution 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+
 PYTRX AREA MODULE
 
 This script is part of PyTrx, an object-oriented programme created for the 
@@ -31,11 +40,7 @@ Key stand-alone functions
 calcAutoArea:                   Automatically detect areas of interest from an
                                 image pair and return uv and xyz measurements
 calcManualArea:                 Manually define areas of interest from an
-                                image pair and return uv and xyz measurements       
-                                                                                                                          
-@author: Penny How (how@asiaq.gl)
-         Nick Hulton 
-         Lynne Buie
+                                image pair and return uv and xyz measurements                                                                                                                                 
 '''
 
 #Import packages
