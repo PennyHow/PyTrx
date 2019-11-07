@@ -5,8 +5,6 @@ PyTrx (short for 'Python Tracking') is a Python object-oriented toolbox created 
 
 Authors: Penelope How (how@asiaq.gl), Nick Hulton, and Lynne Buie (née Addison)<br>
 
-<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.<br>
-
 <hr>
 
 <h3>PyTrx citations</h3>
@@ -101,3 +99,9 @@ There are other useful software available for terrestrial photogrammetry in glac
 <a href="http://imgraft.glaciology.net/">ImGRAFT</a> - Matlab toolbox for feature-tracking and georectification <br>
 <a href="http://www.mn.uio.no/geo/english/research/projects/icemass/cias/">CIAS</a> - IDL gui for feature-tracking <br>
 <a href="https://www.geosci-model-dev.net/9/307/2016/">PRACTISE</a> - Matlab toolbox for georectification
+
+<hr>
+
+<h3>Copyright</h3>
+
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.
