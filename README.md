@@ -1,10 +1,7 @@
 # PyTrx
-PyTrx (short for 'Python Tracking') is a Python object-oriented toolbox created for the purpose of calculating real-world measurements from oblique images and time-lapse image series. Its primary purpose is to obtain velocities, surface areas, and distances from imagery of glacial environments.<br>
-Authors: Penelope How (how@asiaq.gl), Nick Hulton, and Lynne Buie (née Addison)<br>
-
-<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.<br><br>
-
-<b>This branch currently serves as a construction repository to update PyTrx's compatibility with Python 3, and develop additional functionality.</b><br>
+PyTrx (short for 'Python Tracking') is a Python object-oriented toolbox created for the purpose of calculating real-world measurements from oblique images and time-lapse image series. Its primary purpose is to obtain velocities, surface areas, and distances from imagery of glacial environments. This branch currently serves as a construction repository to update PyTrx's compatibility with Python 3, and develop additional functionality.<br>
+Authors: Penelope How (how@asiaq.gl), Nick Hulton, and Lynne Buie (née Addison)<br><br>
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.<br>
 
 <hr>
 
