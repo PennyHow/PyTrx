@@ -94,7 +94,7 @@ mfeat = 4                       #Minimum number of seeded points to track
 velo=Velocity(camimgs, cameraenvironment, hgout, camvmask, calibFlag=True, 
               band='L', equal=True) 
 
-velocities = velo.calcVelocities(vwinsize, bk, mfeat, [mpt, ql, mdis])
+velocities = velo.calcSparseVelocities(vwinsize, bk, mfeat, [mpt, ql, mdis])
 
 xyzvel=[item[0][0] for item in velocities] 
 xyz0=[item[0][1] for item in velocities]

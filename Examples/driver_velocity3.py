@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
 
@@ -8,7 +9,7 @@ You should have received a copy of the license along with this
 work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
 
 
-PYTRX EXAMPLE VELOCITY DRIVER (EXTENDED VERSION)
+PYTRX EXAMPLE DENSE VELOCITY DRIVER (EXTENDED VERSION)
 
 This script is part of PyTrx, an object-oriented programme created for the 
 purpose of calculating real-world measurements from oblique images and 
@@ -40,8 +41,8 @@ from pathlib import Path
 
 #Import PyTrx packages
 sys.path.append('../')
-from CamEnv import setProjection, calibrateImages
-from Velocity import calcSparseVelocity, calcHomography
+from CamEnv import setProjection
+from Velocity import calcDenseVelocity, calcHomography, seedGrid
 from DEM import load_DEM
 import FileHandler
 import Utilities 
@@ -62,8 +63,7 @@ campose = np.array([4.80926, 0.05768, 0.14914])
 imgFiles = '../Examples/images/KR2_2014_subset/*.JPG'
 
 #Define calibration images and chessboard dimensions (height, width)
-calibPath = '../Examples/camenv_data/calib/KR2_calibimgs/*.JPG'
-chessboard = [6, 9]
+calibPath = '../Examples/camenv_data/calib/KR2_2014_1.txt'
 
 #Load DEM from path
 DEMpath = '../Examples/camenv_data/dem/KR_demsmooth.tif'        
@@ -82,17 +82,17 @@ GCPpath = '../Examples/camenv_data/gcps/KR2_2014.txt'
 print('\nDEFINING DATA OUTPUTS')
 
 #Velocity output
-target1 = '../Examples/results/velocity2/velo_output.csv'
+target1 = '../Examples/results/velocity3/velo_output.csv'
 
 #Homography output
-target2 = '../Examples/results/velocity2/homography.csv'
+target2 = '../Examples/results/velocity3/homography.csv'
 
 #Shapefile output (with WGS84 projection)
-target3 = '../Examples/results/velocity2/shpfiles/'     
+target3 = '../Examples/results/velocity3/shpfiles/'     
 projection = 32633
 
 #Plot outputs
-target4 = '../Examples/results/velocity2/imgfiles/'
+target4 = '../Examples/results/velocity3/imgfiles/'
 interpmethod='linear'                                 #nearest/cubic/linear
 cr1 = [445000, 452000, 8754000, 8760000]              #DEM plot extent   
 
@@ -143,18 +143,14 @@ print('\nLOADING GCPs')
 GCPxyz, GCPuv = FileHandler.readGCPs(GCPpath)
 
 
-print('\nCALIBRATING CAMERA')
-calibimgs = sorted(glob.glob(calibPath))                    #Get imagefiles
-calib, err = calibrateImages(calibimgs, chessboard, 
-                             cv2.CALIB_FIX_PRINCIPAL_POINT)
-
-
-print('\nDEFINING CAMERA PROJECTION')
-matrix=np.transpose(calib[0])                               #Get matrix
-tancorr=calib[1]                                            #Get tangential
-radcorr=calib[2]                                            #Get radial
+print('\nLOAD CALIBRATION')
+calib_out = FileHandler.readMatrixDistortion(calibPath)
+matrix=np.transpose(calib_out[0])                               #Get matrix
+tancorr = calib_out[1]                                      #Get tangential
+radcorr = calib_out[2]                                      #Get radial
 focal = [matrix[0,0], matrix[1,1]]                          #Focal length
 camcen = [matrix[0,2], matrix[1,2]]                         #Principal point 
+
    
 invprojvars = setProjection(dem, camloc, campose, radcorr, tancorr, focal, 
                             camcen, refimagePath) 
@@ -164,21 +160,21 @@ invprojvars = setProjection(dem, camloc, campose, radcorr, tancorr, focal,
 
 print('\nPLOTTING CAMERA ENVIRONMENT INFO')
 
-#Load reference image
-refimg = FileHandler.readImg(refimagePath) 
-imn = Path(refimagePath).name
+##Load reference image
+#refimg = FileHandler.readImg(refimagePath) 
+#imn = Path(refimagePath).name
 
-#Show GCPs
-Utilities.plotGCPs([GCPxyz, GCPuv], refimg, imn, 
-                   dem, camloc, extent=None)          
+##Show GCPs
+#Utilities.plotGCPs([GCPxyz, GCPuv], refimg, imn, 
+#                   dem, camloc, extent=None)          
 
-#Show Prinicpal Point in image
-Utilities.plotPrincipalPoint(camcen, refimg, imn)
+##Show Prinicpal Point in image
+#Utilities.plotPrincipalPoint(camcen, refimg, imn)
 
 #Show corrected and uncorrected image
-distort = np.concatenate((radcorr[0], radcorr[1],           #Compile distorts
-                          tancorr, radcorr[2]))
-Utilities.plotCalib(matrix, distort, refimg, imn)
+distort = np.hstack([radcorr[0][0], radcorr[0][1], tancorr[0][0], 
+                     tancorr[0][1], radcorr[0][2]])
+#Utilities.plotCalib(matrix, distort, refimg, imn)
 
 
 #----------------------   Calculate velocities   ------------------------------
@@ -216,9 +212,10 @@ for i in range(len(imagelist)-1):
                              
     #Calculate velocities between image pair
     print('Calculating velocity...')
-    vl = calcSparseVelocity(im0, im1, vmask, [matrix,distort], [hg[0],hg[3]], 
-                            invprojvars, vwin, vback, vminfeat, [vmax, vqual, 
-                            vmindist])                                                                                                                     
+    s = seedGrid(dem, None, [100,100], 4)
+    vl = calcDenseVelocity(im0, im1, vmask, [matrix,distort], [hg[0],hg[3]], 
+                           invprojvars, vwin, vback, vminfeat, [vmax, vqual, 
+                           vmindist])                                                                                                                     
     
     #Append velocity and homography information
     velo.append(vl)

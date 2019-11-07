@@ -221,8 +221,8 @@ class Velocity(ImageSequence):
             print('\nVelocity mask set')
 
 
-    def calcVelocities(self, winsize=(25,25), back_thresh=1.0, min_features=4,
-                       seedparams=[50000, 0.1, 5.0]):
+    def calcSparseVelocities(self, winsize=(25,25), back_thresh=1.0, 
+                             min_features=4, seedparams=[50000, 0.1, 5.0]):
         '''Function to calculate velocities between succesive image pairs. 
         Image pairs are called from the ImageSequence object. Points are seeded
         in the first of these pairs using the Shi-Tomasi algorithm with 
@@ -318,16 +318,17 @@ class Velocity(ImageSequence):
 
             #Calculate velocities between image pair with homography
             if self._homog is not None:
-                pts=calcVelocity(im0, im1, mask, [mtx,distort], 
-                                 [self._homog[i][0],self._homog[i][3]], 
-                                 invprojvars, winsize, back_thresh, 
-                                 min_features, 
-                                 [seedparams[0], seedparams[1], seedparams[2]])                      
+                pts=calcSparseVelocity(im0, im1, mask, [mtx,distort], 
+                                       [self._homog[i][0], self._homog[i][3]], 
+                                       invprojvars, winsize, back_thresh, 
+                                       min_features, [seedparams[0], 
+                                       seedparams[1], seedparams[2]])                      
             else:
-                pts=calcVelocity(im0, im1, mask, [mtx,distort], 
-                                 [None, None], invprojvars, winsize, 
-                                 back_thresh, min_features, 
-                                 [seedparams[0], seedparams[1], seedparams[2]]) 
+                pts=calcSparseVelocity(im0, im1, mask, [mtx,distort], 
+                                       [None, None], invprojvars, winsize, 
+                                       back_thresh, min_features, 
+                                       [seedparams[0], seedparams[1], 
+                                       seedparams[2]]) 
                                                  
             #Append output
             velocity.append(pts)         
@@ -348,9 +349,9 @@ class Velocity(ImageSequence):
 
 #------------------------------------------------------------------------------    
 
-def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None,
-                 winsize=(25,25), back_thresh=1.0, min_features=4,
-                 seedparams=[50000, 0.1, 5.0]):
+def calcSparseVelocity(img1, img2, mask, calib=None, homog=None, 
+                       invprojvars=None, winsize=(25,25), back_thresh=1.0, 
+                       min_features=4, seedparams=[50000, 0.1, 5.0]):
     '''Function to calculate the velocity between a pair of images. Points 
     are seeded in the first of these either by a defined grid spacing, or using 
     the Shi-Tomasi algorithm with OpenCV's goodFeaturesToTrack function. 
@@ -412,12 +413,8 @@ def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None,
     displacement_tolerance_rel=2.0
     
     #Seed features
-    if len(seedparams)==2:
-        p0 = seedGrid(img1, mask, seedparams)
-    
-    else:
-        p0 = seedCorners(img1, mask, seedparams[0], seedparams[1], 
-                         seedparams[2], min_features)
+    p0 = seedCorners(img1, mask, seedparams[0], seedparams[1], 
+                     seedparams[2], min_features)
     
     #Track points between the image pair
     points, ptserrors = featureTrack(img1, img2, p0, winsize, back_thresh,  
@@ -548,6 +545,194 @@ def calcVelocity(img1, img2, mask, calib=None, homog=None, invprojvars=None,
         return [[xyzvel, xyzs, xyzd, xyzerr], 
                 [pxvel, src_pts_corr, dst_pts_corr, None, ptserrors]]
         
+
+def calcDenseVelocity(img1, img2, mask, calib=None, homog=None, 
+                      invprojvars=None, winsize=(25,25), back_thresh=1.0, 
+                      min_features=4, griddistance=100):
+    '''Function to calculate the velocity between a pair of images. Points 
+    are seeded in the first of these either by a defined grid spacing, or using 
+    the Shi-Tomasi algorithm with OpenCV's goodFeaturesToTrack function. 
+    
+    The Lucas Kanade optical flow algorithm is applied using the OpenCV 
+    function calcOpticalFlowPyrLK to find these tracked points in the 
+    second image. A backward tracking method then tracks back from these to 
+    the original points, checking if this is within a certain distance as a 
+    validation measure.
+    
+    Tracked points are corrected for image distortion and camera platform
+    motion (if needed). The points in the image pair are georectified 
+    subsequently to obtain xyz points.  The georectification functions are 
+    called from the Camera Environment object, and are based on those in
+    ImGRAFT (Messerli and Grinsted, 2015). Velocities are finally derived
+    from these using a simple Pythagoras' theorem method.
+    
+    This function returns the xyz velocities and points, and their 
+    corresponding uv velocities and points in the image plane.
+    
+    Inputs
+    img1 (arr):                 Image 1 in the image pair.
+    img2 (arr):                 Image 2 in the image pair.
+    hmatrix (arr):              Homography matrix.
+    hpts (arr):                 Homography points.
+    back_thesh (int):           Threshold for back-tracking distance (i.e.
+                                the difference between the original seeded
+                                point and the back-tracked point in im0).
+    min_features (int):         Minimum number of seeded points to track.
+    griddistance (list):        Grid spacing in metres, inputted as [x,y] to 
+                                represent horizontal and vertical spacing.
+                 
+    Outputs
+    xyz (list)                  List containing the xyz velocities for each 
+                                point (xyz[0]), the xyz positions for the 
+                                points in the first image (xyz[1]), and the 
+                                xyz positions for the points in the second 
+                                image(xyz[2]). 
+    uv (list):                  List containing the uv velocities for each
+                                point (uv[0], the uv positions for the 
+                                points in the first image (uv[1]), the
+                                uv positions for the points in the second
+                                image (uv[2]), and the corrected uv points 
+                                in the second image if they have been 
+                                calculated using the homography model for
+                                image registration (uv[3]). If the 
+                                corrected points have not been calculated 
+                                then an empty list is merely returned.                                 
+    '''       
+    #Set threshold difference for point tracks
+    displacement_tolerance_rel=2.0
+    
+    #Seed features
+    p0 = seedCorners(img1, mask, griddistance, min_features)
+
+    #Track points between the image pair
+    points, ptserrors = featureTrack(img1, img2, p0, winsize, back_thresh,  
+                                     min_features) 
+ 
+    #Pass empty object if tracking was insufficient
+    if points==None:
+        print('\nNo features to undertake velocity measurements')
+        return None        
+        
+    if calib is not None:        
+        #Calculate optimal camera matrix 
+        size=img1.shape
+        h = size[0]
+        w = size[1]
+        newMat, roi = cv2.getOptimalNewCameraMatrix(calib[0], 
+                                                    calib[1], 
+                                                    (w,h), 1, (w,h))
+        
+        #Correct tracked points for image distortion. The displacement here 
+        #is defined forwards (i.e. the points in image 1 are first 
+        #corrected, followed by those in image 2)      
+        #Correct points in first image 
+        src_pts_corr=cv2.undistortPoints(points[0], 
+                                         calib[0], 
+                                         calib[1],P=newMat)
+        
+        #Correct points in second image                                         
+        dst_pts_corr=cv2.undistortPoints(points[1], 
+                                         calib[0], 
+                                         calib[1],P=newMat)
+        
+        back_pts_corr=cv2.undistortPoints(points[2],
+                                          calib[0],
+                                          calib[1],P=newMat)
+    else:
+        src_pts_corr = points[0]
+        dst_pts_corr = points[1]
+        back_pts_corr = points[2]
+
+    #Calculate homography-corrected pts if desired
+    if homog is not None:
+        
+        #Get homography matrix and homography points
+        hmatrix=homog[0]
+        hpts=homog[1]
+        
+        #Apply perspective homography matrix to tracked points
+        tracked=dst_pts_corr.shape[0]
+        dst_pts_homog = apply_persp_homographyPts(dst_pts_corr,
+                                                  hmatrix,
+                                                  inverse=True)
+        
+        #Calculate difference between points corrected for homography and
+        #those uncorrected for homography
+        dispx=dst_pts_homog[:,0,0]-src_pts_corr[:,0,0]
+        dispy=dst_pts_homog[:,0,1]-src_pts_corr[:,0,1]
+        
+        #Use pythagoras' theorem to obtain distance
+        disp_dist=np.sqrt(dispx*dispx+dispy*dispy)
+        
+        #Determine threshold for good points using a given displacement 
+        #tolerance (defined earlier)
+        xsd=hpts[0][2]
+        ysd=hpts[0][3]
+        sderr=math.sqrt(xsd*xsd+ysd*ysd)
+        good=disp_dist > sderr * displacement_tolerance_rel
+        
+        #Keep good points
+        src_pts_corr=src_pts_corr[good]
+        dst_pts_corr=dst_pts_corr[good]
+        dst_pts_homog=dst_pts_homog[good]
+        back_pts_corr=back_pts_corr[good]
+        ptserrors=ptserrors[good]
+        
+        print(str(dst_pts_corr.shape[0]) + 
+              ' points remaining after homography correction')
+
+    else:
+        #Original tracked points assigned if homography not given
+        print('Homography matrix not supplied. Original tracked points kept')
+        dst_pts_homog=dst_pts_corr
+    
+    #Calculate pixel velocity
+    pxvel=[]       
+    for c,d in zip(src_pts_corr, dst_pts_homog):                        
+        pxvel.append(np.sqrt((d[0][0]-c[0][0])*(d[0][0]-c[0][0])+
+                     (d[0][1]-c[0][1])*(d[0][1]-c[0][1])))
+        
+    #Project good points (original and tracked) to obtain XYZ coordinates
+    if invprojvars is not None:        
+        #Project good points from image0
+        uvs=src_pts_corr[:,0,:]
+        xyzs=projectUV(uvs, invprojvars)
+        
+        #Project good points from image1
+        uvd=dst_pts_homog[:,0,:]
+        xyzd=projectUV(uvd, invprojvars)
+
+        #Project good points from image0 back-tracked
+        uvb=back_pts_corr[:,0,:]
+        xyzb=projectUV(uvb, invprojvars)
+        
+        #Calculate xyz velocity
+        xyzvel=[]
+        for a,b in zip(xyzs, xyzd):                        
+            xyzvel.append(np.sqrt((b[0]-a[0])*(b[0]-a[0])+
+                         (b[1]-a[1])*(b[1]-a[1])))
+        
+        #Calculate xyz error
+        xyzerr=[]
+        for a,b in zip(xyzs, xyzb):
+            xyzerr.append(np.sqrt((b[0]-a[0])*(b[0]-a[0])+
+                         (b[1]-a[1])*(b[1]-a[1])))
+    else:
+        xyzs=None
+        xyzd=None
+        xyzvel=None
+        xyzerr=None
+            
+    #Return real-world point positions (original and tracked points),
+    #and xy pixel positions (original, tracked, and homography-corrected)
+    if homog is not None:
+        return [[xyzvel, xyzs, xyzd, xyzerr], 
+                [pxvel, src_pts_corr, dst_pts_corr, dst_pts_homog, ptserrors]]
+    
+    else:
+        return [[xyzvel, xyzs, xyzd, xyzerr], 
+                [pxvel, src_pts_corr, dst_pts_corr, None, ptserrors]]
+
         
 def calcHomography(img1, img2, mask, correct, method=cv2.RANSAC, 
                    ransacReprojThreshold=5.0, winsize=(25,25), back_thresh=1.0, 
@@ -811,12 +996,12 @@ def seedCorners(im, mask, maxpoints, quality, mindist, min_features):
         return p0
 
 
-def seedGrid(im, mask, griddistance):
+def seedGrid(dem, mask, griddistance, min_features):
     '''Define pixel grid at a specified grid distance, taking into 
     consideration the image size and image mask.
     
     Input variables:
-    im (arr):               Image array
+    dem (ExplicitRaster):   DEM object
     mask (bool):            Boolean denoting image mask
     griddistance (list):    rows, columns
     
@@ -825,10 +1010,13 @@ def seedGrid(im, mask, griddistance):
     '''
     #Define grid as empty list    
     grid=[]
+
+    #Get DEM extent
+    extent = dem.getExtent()
     
     #Define pixel spacings    
-    linx = np.linspace(0,im.shape[1]-1,griddistance[1])
-    liny = np.linspace(0,im.shape[0]-1,griddistance[0])
+    linx = np.linspace(extent[0], extent[1], griddistance[1])
+    liny = np.linspace(extent[2], extent[3], griddistance[0])
 
     #Create mesh
     meshx, meshy = np.meshgrid(linx, liny)  
@@ -837,21 +1025,36 @@ def seedGrid(im, mask, griddistance):
     for a,b in zip(meshx, meshy):
         for c,d in zip(a,b):
             grid.append([[c.astype(np.float32),d.astype(np.float32)]])
-    
-    #Mask grid points with image mask
-    gridmask=[]
-    for i in grid:
-        y=int(i[0][0])
-        x=int(i[0][1])
-        if mask[x][y] == 1:
-            gridmask.append(i)
-        else:
-            pass
-    
-    #Reshape masked grid array
-    gridmask=np.asarray(gridmask).reshape(len(gridmask),1,2)
-
-    #Create image plotting window
-    fig, (ax1,ax2) = plt.subplots(2, figsize=(20,10))
-        
+          
     return grid
+
+    demex=dem.getExtent()
+    xscale=dem.getCols()/(demex[1]-demex[0])
+    yscale=dem.getRows()/(demex[3]-demex[2])
+    xdmin=(demex[0]-demex[0])*xscale
+    xdmax=((demex[1]-demex[0])*xscale)+1
+    ydmin=(demex[2]-demex[2])*yscale
+    ydmax=((demex[3]-demex[2])*yscale)+1
+    demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
+    lims = demred.getExtent() 
+    
+    #Get DEM z values for plotting
+    demred=demred.getZ()
+    
+    #Plot image points    
+    fig, (ax2) = plt.subplots(1,1)
+    ax2.locator_params(axis = 'x', nbins=8)
+    ax2.axis([lims[0],lims[1],lims[2],lims[3]])
+    ax2.imshow(demred, origin='lower', 
+               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
+    ax2.scatter(grid[:,0,0], grid[:,0,1], color='red')
+
+    plt.show()
+    
+    #    plt.close()
+    
+    if len(grid) < min_features: 
+        print('Not enough features found to track. Found: ' + str(len(grid)))
+        return None
+    else:
+        return grid

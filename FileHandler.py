@@ -206,7 +206,7 @@ def readCalib(fileName, paramList):
         lines = []
         for line in myFile.readlines():
             lines.append(line[0:-1]) 
-        
+                
         #Set up a dictionary and input the calibration parameters 
         calib = {}
         for p in paramList:
@@ -281,20 +281,14 @@ def returnData(lines, data):
     for x in data:
                 
         # Find the fields on each line
-        fields = lines[x].strip('[]').split()  
+        fields = lines[x].replace('[','').replace(']','')
+        fields=fields.split()
+        
         d = []
         
+        #Float all values
         for f in fields:
-            
-        #Float value if valid
-            try:
-                d.append(float(f))
-
-        #Sometimes the previous strip function does not remove all brackets
-        #so try again if float fails the first time
-            except:
-                f = f.strip('[]')
-                d.append(float(f))
+            d.append(float(f))
                             
         # Add the fields to the data list
         D.append(d)
