@@ -51,7 +51,6 @@ from Images import CamImage
 
 #Import other packages
 from scipy import interpolate
-import string
 import numpy as np
 import cv2
 import glob
@@ -498,12 +497,8 @@ class CamEnv(CamCalib):
         #Define calibPath if information is present in .txt file
         lineNo=key_lines["calibPath"]
         if lineNo!=None:
-            calibPath = self.__getFileDataLine__(lines,lineNo)
-            print(calibPath)
-            maps = str.maketrans('[]', None, ' ')
-#            fields = calibPath.translate(maps).split(',')
-            fields = calibPath.translate(maps)
-            print(fields)
+            calibPath = self.__getFileDataLine__(lines,lineNo)            
+            fields = calibPath.strip('[]').split(',')
             calibPath = []
             for f in fields:
                 calibPath.append(f)
@@ -517,7 +512,7 @@ class CamEnv(CamCalib):
         lineNo=key_lines["coords"]
         if lineNo!=None:
             coords = self.__getFileDataLine__(lines,lineNo)
-            fields = coords.translate(None, '[]').split()
+            fields = coords.strip('[]').split()    
             coords = []
             for f in fields:
                 coords.append(float(f)) 
@@ -528,8 +523,8 @@ class CamEnv(CamCalib):
         #Define yaw, pitch, roll if information is present in .txt file
         lineNo=key_lines["ypr"]
         if lineNo!=None:
-            ypr = self.__getFileDataLine__(lines,lineNo)
-            fields = ypr.translate(None, '[]').split()
+            ypr = self.__getFileDataLine__(lines,lineNo)           
+            fields = ypr.strip('[]').split()
             ypr = []
             for f in fields:
                 ypr.append(float(f)) 

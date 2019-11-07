@@ -46,7 +46,7 @@ if not os.path.exists(destination):
 #----------------------   Import calving data from file   ---------------------
 
 #Import individual calving event data
-f=file(tu1calving,'r')                              #Read file
+f=open(tu1calving,'r')                              #Read file
 header=f.readline()                                 #Read first line
 h=header.split(',')                                 #Split first line
 for name in h:

@@ -274,14 +274,23 @@ def returnData(lines, data):
     D=[]
     
     for x in data:
-        
+                
         # Find the fields on each line
-        lines[x] = lines[x].translate(None, '[]')
-        fields = lines[x].split()
+        fields = lines[x].strip('[]').split()  
         d = []
+        
         for f in fields:
-            d.append(float(f))
             
+        #Float value if valid
+            try:
+                d.append(float(f))
+
+        #Sometimes the previous strip function does not remove all brackets
+        #so try again if float fails the first time
+            except:
+                f = f.strip('[]')
+                d.append(float(f))
+                            
         # Add the fields to the data list
         D.append(d)
 

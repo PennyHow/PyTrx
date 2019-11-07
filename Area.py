@@ -638,8 +638,8 @@ def calcAutoArea(img, imn, colourrange, hmatrix=None, threshold=None,
         except:
             pxextent = 0
         
-    print ('Total extent: ' + str(sum(pxextent)) + 'px (out of ' 
-            + str(img.shape[0]*img.shape[1]) + 'px)')  
+    print ('Total extent: ' + str(sum(pxextent)) + ' px (out of ' 
+            + str(img.shape[0]*img.shape[1]) + ' px)')  
     
     #Get xyz coordinates with inverse projection
     if invprojvars is not None:
@@ -727,8 +727,8 @@ def calcManualArea(img, imn, hmatrix=None, pxplot=None, invprojvars=None):
     except:
         pxextent = 0
     
-    print('Total extent: ' + str(pxextent) + 'px (out of ' + 
-          str(img.shape[0]*img.shape[1]) + 'px)')    
+    print('Total extent: ' + str(pxextent) + ' px (out of ' + 
+          str(img.shape[0]*img.shape[1]) + ' px)')    
     
     #Convert pts list to array
     pxpts = np.array(pxpts)           
