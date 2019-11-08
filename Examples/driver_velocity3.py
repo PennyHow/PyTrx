@@ -144,7 +144,7 @@ print('\nLOADING GCPs')
 GCPxyz, GCPuv = FileHandler.readGCPs(GCPpath)
 
 
-print('\nLOAD CALIBRATION')
+print('\nLOADING CALIBRATION')
 calib_out = FileHandler.readMatrixDistortion(calibPath)
 matrix=np.transpose(calib_out[0])                               #Get matrix
 tancorr = calib_out[1]                                      #Get tangential
@@ -207,15 +207,16 @@ for i in range(len(imagelist)-1):
     print('\nProcessing images: ' + str(imn0) + ' and ' + str(imn1))
         
     #Calculate homography between image pair
-    print('Calculating homography...')
-    hg = calcHomography(im0, im1, hmask, [matrix,distort], hmethod, hreproj, 
-                        hwin, hback, hminfeat, [hmax, hqual, hmindist])
+#    print('Calculating homography...')
+#    hg = calcHomography(im0, im1, hmask, [matrix,distort], hmethod, hreproj, 
+#                        hwin, hback, hminfeat, [hmax, hqual, hmindist])
                              
     #Calculate velocities between image pair
     print('Calculating velocity...')
     
-    s = seedGrid(dem, None, [100,100], 4)
-    
+   # camloc, camdirection, radial, tangen, foclen, camcen, refimg, xyz
+    s = seedGrid(dem, None, [500,500], 4, [camloc, campose, radcorr, tancorr, focal, camcen, refimagePath])
+   
     demex=dem.getExtent()
     xscale=dem.getCols()/(demex[1]-demex[0])
     yscale=dem.getRows()/(demex[3]-demex[2])
@@ -228,19 +229,25 @@ for i in range(len(imagelist)-1):
     
     #Get DEM z values for plotting
     demred=demred.getZ()
+    x=[]
+    y=[]
     
+    for i in s[:]:
+        x.append(i[0][0])
+        y.append(i[0][1])
+        
     #Plot image points    
     fig, (ax2) = plt.subplots(1,1)
     ax2.locator_params(axis = 'x', nbins=8)
     ax2.axis([lims[0],lims[1],lims[2],lims[3]])
     ax2.imshow(demred, origin='lower', 
                extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
-    ax2.scatter(s[:][:][0], s[:][:][1], color='red')
+    ax2.scatter(x, y, color='red')
 
     plt.show()
     
-    print(s)
-    print(type(s))
+#    print(s)
+#    print(type(s))
 
 #    vl = calcDenseVelocity(im0, im1, vmask, [matrix,distort], [hg[0],hg[3]], 
 #                           invprojvars, vwin, vback, vminfeat, [vmax, vqual, 

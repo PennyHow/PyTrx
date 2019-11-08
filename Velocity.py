@@ -52,7 +52,7 @@ import matplotlib.pyplot as plt
 #Import PyTrx functions and classes
 from FileHandler import readMask
 from Images import ImageSequence
-from CamEnv import projectUV, setProjection
+from CamEnv import projectUV, projectXYZ, setProjection
 
 #------------------------------------------------------------------------------
 class Homography(ImageSequence):
@@ -995,7 +995,7 @@ def seedCorners(im, mask, maxpoints, quality, mindist, min_features):
         return p0
 
 
-def seedGrid(dem, mask, griddistance, min_features):
+def seedGrid(dem, mask, griddistance, min_features, projparams=None):
     '''Define pixel grid at a specified grid distance, taking into 
     consideration the image size and image mask.
     
@@ -1008,31 +1008,44 @@ def seedGrid(dem, mask, griddistance, min_features):
     grid (arr):             Grid point array  
     '''
     #Define grid as empty list    
-    grid=[]
-
+    gridxyz=[]
+    griduv=[]
+    
     #Get DEM extent
     extent = dem.getExtent()
     
-    #Define pixel spacings    
-    linx = np.linspace(extent[0], extent[1], griddistance[1])
-    liny = np.linspace(extent[2], extent[3], griddistance[0])
+    #Define point spacings in dem space
+    samplex = round((extent[1]-extent[0])/griddistance[1])
+    sampley = round((extent[3]-extent[2])/griddistance[0])
+    print(samplex)
+    print(sampley)
+    
+    #Define grid in dem space
+    linx = np.linspace(extent[0], extent[1], samplex)
+    liny = np.linspace(extent[2], extent[3], sampley)
 
+    print(linx)
+    print(liny)
+    
     #Create mesh
     meshx, meshy = np.meshgrid(linx, liny)  
     
     #Merge point coordinates together and reshape array    
     for a,b in zip(meshx, meshy):
         for c,d in zip(a,b):
-            grid.append([[c.astype(np.float32),d.astype(np.float32)]])
-          
-    return grid
+            gridxyz.append([[c.astype(np.float32),d.astype(np.float32)]])
 
-
+    if projparams is not None:
+        griduv,depth,fram = projectXYZ(projparams[0], projparams[1], projparams[2], 
+                                       projparams[3], projparams[4], projparams[5],
+                                       projparams[6], gridxyz)
+        
+    return gridxyz            
+        
     
-    #    plt.close()
-    
-    if len(grid) < min_features: 
-        print('Not enough features found to track. Found: ' + str(len(grid)))
-        return None
-    else:
-        return grid
+#    if len(griduv) < min_features: 
+#        print('Not enough features found to track. Found: ' + str(len(griduv)))
+#        return None
+#    
+#    else:
+#        return gridxyz, griduv
