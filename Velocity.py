@@ -1027,28 +1027,7 @@ def seedGrid(dem, mask, griddistance, min_features):
           
     return grid
 
-    demex=dem.getExtent()
-    xscale=dem.getCols()/(demex[1]-demex[0])
-    yscale=dem.getRows()/(demex[3]-demex[2])
-    xdmin=(demex[0]-demex[0])*xscale
-    xdmax=((demex[1]-demex[0])*xscale)+1
-    ydmin=(demex[2]-demex[2])*yscale
-    ydmax=((demex[3]-demex[2])*yscale)+1
-    demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
-    lims = demred.getExtent() 
-    
-    #Get DEM z values for plotting
-    demred=demred.getZ()
-    
-    #Plot image points    
-    fig, (ax2) = plt.subplots(1,1)
-    ax2.locator_params(axis = 'x', nbins=8)
-    ax2.axis([lims[0],lims[1],lims[2],lims[3]])
-    ax2.imshow(demred, origin='lower', 
-               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
-    ax2.scatter(grid[:,0,0], grid[:,0,1], color='red')
 
-    plt.show()
     
     #    plt.close()
     

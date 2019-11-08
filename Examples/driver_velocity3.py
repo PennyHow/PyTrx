@@ -38,6 +38,7 @@ import numpy as np
 import cv2
 import glob
 from pathlib import Path
+import matplotlib.pyplot as plt
 
 #Import PyTrx packages
 sys.path.append('../')
@@ -212,94 +213,122 @@ for i in range(len(imagelist)-1):
                              
     #Calculate velocities between image pair
     print('Calculating velocity...')
-    s = seedGrid(dem, None, [100,100], 4)
-    vl = calcDenseVelocity(im0, im1, vmask, [matrix,distort], [hg[0],hg[3]], 
-                           invprojvars, vwin, vback, vminfeat, [vmax, vqual, 
-                           vmindist])                                                                                                                     
     
-    #Append velocity and homography information
-    velo.append(vl)
-    homog.append(hg)
+    s = seedGrid(dem, None, [100,100], 4)
+    
+    demex=dem.getExtent()
+    xscale=dem.getCols()/(demex[1]-demex[0])
+    yscale=dem.getRows()/(demex[3]-demex[2])
+    xdmin=(demex[0]-demex[0])*xscale
+    xdmax=((demex[1]-demex[0])*xscale)+1
+    ydmin=(demex[2]-demex[2])*yscale
+    ydmax=((demex[3]-demex[2])*yscale)+1
+    demred=dem.subset(xdmin,xdmax,ydmin,ydmax)
+    lims = demred.getExtent() 
+    
+    #Get DEM z values for plotting
+    demred=demred.getZ()
+    
+    #Plot image points    
+    fig, (ax2) = plt.subplots(1,1)
+    ax2.locator_params(axis = 'x', nbins=8)
+    ax2.axis([lims[0],lims[1],lims[2],lims[3]])
+    ax2.imshow(demred, origin='lower', 
+               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
+    ax2.scatter(s[:][:][0], s[:][:][1], color='red')
+
+    plt.show()
+    
+    print(s)
+    print(type(s))
+
+#    vl = calcDenseVelocity(im0, im1, vmask, [matrix,distort], [hg[0],hg[3]], 
+#                           invprojvars, vwin, vback, vminfeat, [vmax, vqual, 
+#                           vmindist])                                                                                                                     
+#    
+#    #Append velocity and homography information
+#    velo.append(vl)
+#    homog.append(hg)
                        
 
 #---------------------------  Export data   -----------------------------------
 
-print('\nWRITING DATA TO FILE')
-
-#Get all image names
-names=[]
-for i in imagelist:
-    names.append(Path(i).name)
-
-#Extract xyz velocities, uv velocities, and xyz0 locations
-xyzvel=[item[0][0] for item in velo] 
-xyzerr=[item[0][3] for item in velo]
-uvvel=[item[1][0] for item in velo]
-xyz0=[item[0][1] for item in velo]
-
-#Write out velocity data to .csv file
-FileHandler.writeVeloFile(xyzvel, uvvel, homog, names, target1) 
-
-#Write homography data to .csv file
-FileHandler.writeHomogFile(homog, names, target2)
-
-#Write points to shp file                
-FileHandler.writeVeloSHP(xyzvel, xyzerr, xyz0, names, target3, projection)       
-
-
-#----------------------------   Plot Results   --------------------------------
-
-print('\nPLOTTING OUTPUTS')
-
-#Extract uv0, uv1corr, xyz0 and xyz1 locations 
-uv0=[item[1][1] for item in velo]
-uv1corr=[item[1][3] for item in velo]
-uverr=[item[1][4] for item in velo]
-xyz0=[item[0][1] for item in velo]
-xyz1=[item[0][2] for item in velo]
-
-
-#Cycle through data from image pairs   
-for i in range(len(xyz0)):
-    
-    #Get image from sequence
-    im=FileHandler.readImg(imagelist[i], band, equal)
-
-    #Correct image for distortion
-    newMat, roi = cv2.getOptimalNewCameraMatrix(matrix, distort, 
-                                                (im.shape[1],im.shape[0]), 
-                                                1, (im.shape[1],im.shape[0])) 
-    im = cv2.undistort(im1, matrix, distort, newCameraMatrix=newMat)
-    
-    #Get image name
-    imn = Path(imagelist[i]).name
-    print('Visualising data for ' + str(imn))
-        
-    #Plot uv velocity points on image plane  
-    Utilities.plotVeloPX(uvvel[i], uv0[i], uv1corr[i], im, show=True, 
-                         save=target4+'uv_'+imn)
-
-#    Utilities.plotVeloPX(uverr[i], uv0[i], uv1corr[i], im, show=True, 
-#                         save=target4+'uverr_'+imn)
+#print('\nWRITING DATA TO FILE')
+#
+##Get all image names
+#names=[]
+#for i in imagelist:
+#    names.append(Path(i).name)
+#
+##Extract xyz velocities, uv velocities, and xyz0 locations
+#xyzvel=[item[0][0] for item in velo] 
+#xyzerr=[item[0][3] for item in velo]
+#uvvel=[item[1][0] for item in velo]
+#xyz0=[item[0][1] for item in velo]
+#
+##Write out velocity data to .csv file
+#FileHandler.writeVeloFile(xyzvel, uvvel, homog, names, target1) 
+#
+##Write homography data to .csv file
+#FileHandler.writeHomogFile(homog, names, target2)
+#
+##Write points to shp file                
+#FileHandler.writeVeloSHP(xyzvel, xyzerr, xyz0, names, target3, projection)       
+#
+#
+##----------------------------   Plot Results   --------------------------------
+#
+#print('\nPLOTTING OUTPUTS')
+#
+##Extract uv0, uv1corr, xyz0 and xyz1 locations 
+#uv0=[item[1][1] for item in velo]
+#uv1corr=[item[1][3] for item in velo]
+#uverr=[item[1][4] for item in velo]
+#xyz0=[item[0][1] for item in velo]
+#xyz1=[item[0][2] for item in velo]
+#
+#
+##Cycle through data from image pairs   
+#for i in range(len(xyz0)):
 #    
-#    uvsnr=uverr[i]/uvvel[i]
-#    Utilities.plotVeloPX(uvsnr, uv0[i], uv1corr[i], im, show=True, 
-#                         save=target4+'uvsnr_'+imn)    
-
-
-    #Plot xyz velocity points on dem  
-    Utilities.plotVeloXYZ(xyzvel[i], xyz0[i], xyz1[i], dem, show=True, 
-                          save=target4+'xyz_'+imn)
-
-#    Utilities.plotVeloXYZ(xyzerr[i], xyz0[i], xyz1[i], dem, show=True, 
-#                          save=target4+'xyzerr_'+imn)    
-                
-#    #Plot interpolation map
-#    grid, pointsextent = Utilities.interpolateHelper(xyzvel[i], xyz0[i], 
-#                                                     xyz1[i], interpmethod)
-#    Utilities.plotInterpolate(grid, pointsextent, dem, show=True, 
-#                              save=target4+'interp_'+imn)  
-
-    
+#    #Get image from sequence
+#    im=FileHandler.readImg(imagelist[i], band, equal)
+#
+#    #Correct image for distortion
+#    newMat, roi = cv2.getOptimalNewCameraMatrix(matrix, distort, 
+#                                                (im.shape[1],im.shape[0]), 
+#                                                1, (im.shape[1],im.shape[0])) 
+#    im = cv2.undistort(im1, matrix, distort, newCameraMatrix=newMat)
+#    
+#    #Get image name
+#    imn = Path(imagelist[i]).name
+#    print('Visualising data for ' + str(imn))
+#        
+#    #Plot uv velocity points on image plane  
+#    Utilities.plotVeloPX(uvvel[i], uv0[i], uv1corr[i], im, show=True, 
+#                         save=target4+'uv_'+imn)
+#
+##    Utilities.plotVeloPX(uverr[i], uv0[i], uv1corr[i], im, show=True, 
+##                         save=target4+'uverr_'+imn)
+##    
+##    uvsnr=uverr[i]/uvvel[i]
+##    Utilities.plotVeloPX(uvsnr, uv0[i], uv1corr[i], im, show=True, 
+##                         save=target4+'uvsnr_'+imn)    
+#
+#
+#    #Plot xyz velocity points on dem  
+#    Utilities.plotVeloXYZ(xyzvel[i], xyz0[i], xyz1[i], dem, show=True, 
+#                          save=target4+'xyz_'+imn)
+#
+##    Utilities.plotVeloXYZ(xyzerr[i], xyz0[i], xyz1[i], dem, show=True, 
+##                          save=target4+'xyzerr_'+imn)    
+#                
+##    #Plot interpolation map
+##    grid, pointsextent = Utilities.interpolateHelper(xyzvel[i], xyz0[i], 
+##                                                     xyz1[i], interpmethod)
+##    Utilities.plotInterpolate(grid, pointsextent, dem, show=True, 
+##                              save=target4+'interp_'+imn)  
+#
+#    
 #------------------------------------------------------------------------------
 print('\nFinished')
