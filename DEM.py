@@ -95,7 +95,7 @@ class ExplicitRaster(object):
     def getZ(self):
         '''Return height (Z) data of DEM.'''
         return self.getData(2)
-        
+       
      
     def getShape(self):
         '''Return the shape of the DEM data array.'''
@@ -401,7 +401,7 @@ def voxelviewshed(dem, viewpoint):
         f=interpolate.interp1d(xx,yy)
         voxy=np.maximum(voxy,f(voxx))
 
-    #Re-format voolean array
+    #Re-format boolean array
     vis=np.reshape(vis,sz,order='F')
     vis.shape=sz
 

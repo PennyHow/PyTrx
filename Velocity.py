@@ -48,6 +48,7 @@ import numpy as np
 import cv2
 import math
 import matplotlib.pyplot as plt
+from scipy import interpolate
 
 #Import PyTrx functions and classes
 from FileHandler import readMask
@@ -995,7 +996,7 @@ def seedCorners(im, mask, maxpoints, quality, mindist, min_features):
         return p0
 
 
-def seedGrid(dem, mask, griddistance, min_features, projparams=None):
+def seedGrid(dem, mask, griddistance, min_features, invprojvars=None):
     '''Define pixel grid at a specified grid distance, taking into 
     consideration the image size and image mask.
     
@@ -1009,7 +1010,6 @@ def seedGrid(dem, mask, griddistance, min_features, projparams=None):
     '''
     #Define grid as empty list    
     gridxyz=[]
-    griduv=[]
     
     #Get DEM extent
     extent = dem.getExtent()
@@ -1017,30 +1017,20 @@ def seedGrid(dem, mask, griddistance, min_features, projparams=None):
     #Define point spacings in dem space
     samplex = round((extent[1]-extent[0])/griddistance[1])
     sampley = round((extent[3]-extent[2])/griddistance[0])
-    print(samplex)
-    print(sampley)
     
     #Define grid in dem space
     linx = np.linspace(extent[0], extent[1], samplex)
     liny = np.linspace(extent[2], extent[3], sampley)
-
-    print(linx)
-    print(liny)
     
     #Create mesh
     meshx, meshy = np.meshgrid(linx, liny)  
     
-    #Merge point coordinates together and reshape array    
-    for a,b in zip(meshx, meshy):
-        for c,d in zip(a,b):
-            gridxyz.append([[c.astype(np.float32),d.astype(np.float32)]])
-
-    if projparams is not None:
-        griduv,depth,fram = projectXYZ(projparams[0], projparams[1], projparams[2], 
-                                       projparams[3], projparams[4], projparams[5],
-                                       projparams[6], gridxyz)
+#    #Merge point coordinates together and reshape array    
+#    for a,b in zip(meshx, meshy):
+#        for c,d in zip(a,b):
+#            gridxyz.append([[c.astype(np.float32),d.astype(np.float32)]])      
         
-    return gridxyz            
+    return meshx, meshy            
         
     
 #    if len(griduv) < min_features: 

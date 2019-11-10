@@ -675,7 +675,7 @@ class CamEnv(CamCalib):
         self.reportCalibData()
 
 
-def calibrateImages(imageFiles, xy, refine=None):
+def calibrateImages(imageFiles, xy, refine=True):
     '''Function for calibrating a camera from a set of input calibration
     images. Calibration is performed using OpenCV's chessboard calibration 
     functions. Input images (imageFile) need to be of a chessboard with 
@@ -755,39 +755,22 @@ def calibrateImages(imageFiles, xy, refine=None):
             #Draw and display corners
             cv2.drawChessboardCorners(img,(xy[1],xy[0]),corners,
                                       patternFound)
+
+    #Calculate initial camera matrix and distortion
+    err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
+                                                   imgpoints,
+                                                   gray.shape[::-1],
+                                                   None,
+                                                   5)
     
-    #Try OpenCV v3 calibration function
-    try:
-        #Calculate initial camera matrix and distortion
+    #Optimise camera matrix and distortion using fixed principal point
+    if refine is True:
         err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
                                                        imgpoints,
                                                        gray.shape[::-1],
-                                                       None,
-                                                       5)
-        
-        #Optimise camera matrix and distortion using fixed principal point
-        if refine is not None:
-            err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
-                                                           imgpoints,
-                                                           gray.shape[::-1],
-                                                           mtx,
-                                                           5,
-                                                           flags=refine)
-
-    #Else use OpenCV v2 calibration function
-    except:
-        #Calculate initial camera matrix and distortion
-        err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
-                                                       imgpoints,
-                                                       gray.shape[::-1])
-        
-        #Optimise camera matrix and distortion using fixed principal point
-        if refine is not None:        
-            err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
-                                                           imgpoints,
-                                                           gray.shape[::-1],
-                                                           cameraMatrix=mtx,
-                                                           flags=refine)                                                                     
+                                                       mtx,
+                                                       5,
+                                                       flags=refine)                                                                   
 
     #Change matrix structure for compatibility with PyTrx
     mtx = np.array([mtx[0][0],mtx[0][1],0,
@@ -902,6 +885,12 @@ def projectXYZ(camloc, camdirection, radial, tangen, foclen, camcen, refimg,
     ###need to check xyz is an array of the correct size
     ###this does element-wise subtraction on the array columns
     
+    print(xyz)
+    print(type(xyz))
+    print(xyz[0])
+    print(type(xyz[0]))
+    print(xyz.shape)
+    
     #Get camera location
     xyz=xyz-camloc
     
@@ -916,8 +905,7 @@ def projectXYZ(camloc, camdirection, radial, tangen, foclen, camcen, refimg,
     xy=xyz[:,0:2]/xyz[:,2:3]
                 
     if False:
-        #Transposed from ImGRAFT. Have no idea why this line exists 
-        #Need to ask Aslak
+        #Transposed from ImGRAFT
         r2=np.sum(xy*xy,1)                
         r2[r2>4]=4
         
@@ -975,11 +963,11 @@ def projectUV(uv, invprojvars):
     uv,depth,inframe=cam.project(xyz)
     
     Inputs
-    uv:                 Pixel coordinates in image
-    invprojvars:        Inverse projection variables
+    uv (arr):                 Pixel coordinates in image
+    invprojvars (list):       Inverse projection variables
       
     Outputs
-    xyz:                World coordinates 
+    xyz (arr):                World coordinates 
     '''                  
     #Create empty numpy array
     xyz=np.zeros([uv.shape[0],3])
