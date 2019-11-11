@@ -46,9 +46,9 @@ from PIL import Image, ImageDraw
 
 #Import PyTrx packages
 sys.path.append('../')
-from CamEnv import setProjection, projectXYZ
-from Velocity import calcDenseVelocity, calcHomography, seedGrid
-from DEM import load_DEM, voxelviewshed, ExplicitRaster
+from CamEnv import setProjection, projectXYZ, projectUV
+from Velocity import calcDenseVelocity, calcHomography, seedGrid, createMaskFromImg
+from DEM import load_DEM, voxelviewshed, ExplicitRaster, createMaskFromImg
 import FileHandler
 import Utilities 
  
@@ -198,26 +198,26 @@ imn1 = Path(imagelist[0]).name
 
 ##Plot dem mask manually
 demz = dem.getZ()
-#
+
 #fig=plt.gcf()
 #fig.canvas.set_window_title('Click to create mask. Press enter to record' 
 #                            ' points.')
-#imgplot = plt.imshow(demz, origin='upper')
+#imgplot = plt.imshow(im1, origin='upper')
 #imgplot.set_cmap('gray')
-#x1 = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, 
+#maskuv = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, 
 #                mouse_stop=2)
-#print('\n' + str(len(x1)) + ' points seeded')
+#print('\n' + str(len(maskuv)) + ' points seeded')
 #plt.show()
 #plt.close()
 #
 ##Close shape
-#x1.append(x1[0])
+#maskuv.append(maskuv[0])
 #
 ##Generate polygon
 #ring = ogr.Geometry(ogr.wkbLinearRing)
-#for p in x1:
+#for p in maskuv:
 #    ring.AddPoint(p[0],p[1])
-#p=x1[0]
+#p=maskuv[0]
 #ring.AddPoint(p[0],p[1])    
 #poly = ogr.Geometry(ogr.wkbPolygon)
 #poly.AddGeometry(ring)
@@ -227,13 +227,50 @@ demz = dem.getZ()
 #width = dem.getCols()
 #img1 = Image.new('L', (width,height), 0)
 #draw=ImageDraw.Draw(img1)
-#draw.polygon(x1, outline=1, fill=1)
+#draw.polygon(maskuv, outline=1, fill=1)
 #myMask=np.array(img1)
 #
 ##Write to .jpg file    
 #img1.save(vmaskPath, quality=75)
+#
+#maskuv = np.array(maskuv).reshape(-1,2)
+#maskxyz = projectUV(maskuv, invprojvars)
+#
+##Generate polygon
+#ring = ogr.Geometry(ogr.wkbLinearRing)
+#for p in maskxyz:
+#    ring.AddPoint(p[0],p[1])
+#p=maskxyz[0]
+#ring.AddPoint(p[0],p[1])    
+#poly = ogr.Geometry(ogr.wkbPolygon)
+#poly.AddGeometry(ring)
+# 
+##Rasterize polygon using PIL
+#height = dem.getRows()
+#width = dem.getCols()
+#img1 = Image.new('L', (width,height), 0)
+#draw=ImageDraw.Draw(img1)
+#draw.polygon(maskxyz, outline=1, fill=1)
+#myMask=np.array(img1)
+#
+##Plot image points    
+#fig, (ax1, ax2) = plt.subplots(1,2)
+#
+#ax1.imshow(im1, cmap='gray')
+#ax1.scatter(maskuv[:,0], maskuv[:,1], color='red')
+#
+#lims = dem.getExtent() 
+#ax2.locator_params(axis = 'x', nbins=8)
+#ax2.axis([lims[0],lims[1],lims[2],lims[3]])
+#ax2.imshow(demz, origin='lower', 
+#           extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
+#ax2.scatter(maskxyz[:,0], maskxyz[:,1], color='red')
+#
+#plt.show()
 
-myMask = FileHandler.readMask(None, writeMask=vmaskPath)
+imgmask, demmask = createMaskFromImg(dem, im1, invprojvars, imMaskPath=None, 
+                                     demMaskPath=None)
+
 
 
 #Create empty output variables
@@ -271,7 +308,7 @@ for i in range(len(imagelist)-1):
     demy_uniq = demy_uniq.reshape(demy_uniq.shape[0],-1)
     
 
-    mz = ma.masked_array(demz, np.logical_not(myMask))
+    mz = ma.masked_array(demz, np.logical_not(demmask))
     mz = mz.filled(np.nan) 
     
     griddistance=[500,500]
@@ -297,6 +334,7 @@ for i in range(len(imagelist)-1):
     meshx2 = []
     meshy2 = []
     meshz2 = []
+    
     for a,b in zip(meshx.flatten(), meshy.flatten()):
 
         both1 = (np.abs(demx_uniq-a)).argmin()
@@ -306,16 +344,16 @@ for i in range(len(imagelist)-1):
         
 #        print('Found in x: ' + str(both1))
 #        print('Found in y: ' + str(both2))
-        try:
-            if np.isnan(mz[both1,both2]) == False:
-                np.array([a,b,mz[both1,both2]])
-                meshx2.append(a)
-                meshy2.append(b)
-                meshz2.append(mz[both1,both2])
-                print('Z value at ' + str(both1) + ' and ' + str(both2) + ': ' + str(mz[both1,both2]))
 
-        except:
-            pass
+        if np.isnan(mz[both2,both1]) == False:
+            np.array([a,b,mz[both2,both1]])
+            meshx2.append(a)
+            meshy2.append(b)
+            meshz2.append(mz[both2,both1])
+            print('Z value at ' + str(both1) + ' and ' + str(both2) + ': ' + str(mz[both2,both1]))
+
+#        except:
+#            pass
 
       
     

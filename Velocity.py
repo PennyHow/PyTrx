@@ -49,6 +49,8 @@ import cv2
 import math
 import matplotlib.pyplot as plt
 from scipy import interpolate
+from PIL import Image, ImageDraw
+import ogr
 
 #Import PyTrx functions and classes
 from FileHandler import readMask
@@ -1039,3 +1041,93 @@ def seedGrid(dem, mask, griddistance, min_features, invprojvars=None):
 #    
 #    else:
 #        return gridxyz, griduv
+
+def createMaskFromImg(dem, image, invprojvars, imMaskPath=None, 
+                      demMaskPath=None):
+    '''Generate DEM mask from image mask. Coordinates from the image mask are
+    projected using CamEnv's projectXYZ function. The mask can subsequently be
+    used to mask the DEM, where masked regions of the DEM are reassigned to 
+    NaN using Numpy's ma.mask function.
+    Inputs
+    dem (ExplicitRaster):       Input DEM object.
+    immask (list):              List containing image mask points.
+    invprojvars (list):         Inverse projection variables.
+    
+    Output
+    maskdem ():   Boolean visibility matrix (which is the same 
+                                size as dem)
+    '''    
+    fig=plt.gcf()
+    fig.canvas.set_window_title('Click to create mask. Press enter to record' 
+                                ' points.')
+    imgplot = plt.imshow(image, origin='upper')
+    imgplot.set_cmap('gray')
+    maskuv = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, 
+                    mouse_stop=2)
+    print('\n' + str(len(maskuv)) + ' points seeded')
+    plt.show()
+    plt.close()
+    
+    #Close shape
+    maskuv.append(maskuv[0])
+    
+    #Generate polygon
+    ring = ogr.Geometry(ogr.wkbLinearRing)
+    for p in maskuv:
+        ring.AddPoint(p[0],p[1])
+    p=maskuv[0]
+    ring.AddPoint(p[0],p[1])    
+    poly = ogr.Geometry(ogr.wkbPolygon)
+    poly.AddGeometry(ring)
+     
+    #Rasterize polygon using PIL
+    height = dem.getRows()
+    width = dem.getCols()
+    img1 = Image.new('L', (width,height), 0)
+    draw=ImageDraw.Draw(img1)
+    draw.polygon(maskuv, outline=1, fill=1)
+    imgMask=np.array(img1)
+    
+    #Write to .jpg file
+    if imMaskPath is not None:    
+        img1.save(imMaskPath, quality=75)
+    
+    #Prepare uv points for projection
+    maskuv = np.array(maskuv).reshape(-1,2)
+    
+    #Project to XYZ
+    maskxyz = projectUV(maskuv, invprojvars)
+    
+    #Generate polygon
+    ring = ogr.Geometry(ogr.wkbLinearRing)
+    for p in maskxyz:
+        ring.AddPoint(p[0],p[1])
+    p=maskxyz[0]
+    ring.AddPoint(p[0],p[1])    
+    poly = ogr.Geometry(ogr.wkbPolygon)
+    poly.AddGeometry(ring)
+     
+    #Rasterize polygon using PIL
+    height = dem.getRows()
+    width = dem.getCols()
+    img1 = Image.new('L', (width,height), 0)
+    draw=ImageDraw.Draw(img1)
+    draw.polygon(maskxyz, outline=1, fill=1)
+    demMask = np.array(img1)
+    
+#    #Plot image points    
+#    fig, (ax1, ax2) = plt.subplots(1,2)
+#    
+#    ax1.imshow(im1, cmap='gray')
+#    ax1.scatter(maskuv[:,0], maskuv[:,1], color='red')
+#    
+#    lims = dem.getExtent() 
+#    ax2.locator_params(axis = 'x', nbins=8)
+#    ax2.axis([lims[0],lims[1],lims[2],lims[3]])
+#    ax2.imshow(demz, origin='lower', 
+#               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
+#    ax2.scatter(maskxyz[:,0], maskxyz[:,1], color='red')
+#    
+#    plt.show()
+    
+    return imgMask, demMask

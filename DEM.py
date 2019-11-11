@@ -34,12 +34,15 @@ voxelviewshed:                  Calculate a viewshed over a DEM from a given
 
 #Import packages
 import numpy as np
+from PIL import Image, ImageDraw
+import ogr
 import scipy.io as sio
 import gdal
 import math
 from scipy import interpolate
 from gdalconst import GA_ReadOnly 
 import struct
+import matplotlib.pyplot as plt
 from scipy.interpolate import RectBivariateSpline
 
 #------------------------------------------------------------------------------
@@ -95,8 +98,22 @@ class ExplicitRaster(object):
     def getZ(self):
         '''Return height (Z) data of DEM.'''
         return self.getData(2)
-       
-     
+            
+        
+    def getZcoord(self, x, y):
+        '''Return height (Z) at given XY coordinate in DEM.'''
+        
+        rowcoords = self.getData(0)[0,:]    
+        colcoords = self.getData(1)[:,0]
+        
+        demz = self.getZ()
+      
+        xcoord = (np.abs(rowcoords-x)).argmin()
+        ycoord = (np.abs(colcoords-y)).argmin()
+
+        return demz[ycoord,xcoord]
+            
+            
     def getShape(self):
         '''Return the shape of the DEM data array.'''
         return self._data[0].shape
@@ -408,7 +425,7 @@ def voxelviewshed(dem, viewpoint):
     #Return boolean array
     return vis
 
-
+   
 #------------------------------------------------------------------------------
 
 #if __name__ == "__main__":   

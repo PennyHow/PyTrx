@@ -885,12 +885,6 @@ def projectXYZ(camloc, camdirection, radial, tangen, foclen, camcen, refimg,
     ###need to check xyz is an array of the correct size
     ###this does element-wise subtraction on the array columns
     
-    print(xyz)
-    print(type(xyz))
-    print(xyz[0])
-    print(type(xyz[0]))
-    print(xyz.shape)
-    
     #Get camera location
     xyz=xyz-camloc
     
