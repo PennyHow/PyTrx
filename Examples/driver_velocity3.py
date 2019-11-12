@@ -49,7 +49,7 @@ from matplotlib import path
 #Import PyTrx packages
 sys.path.append('../')
 from CamEnv import setProjection, projectXYZ, projectUV
-from Velocity import calcDenseVelocity, calcHomography, seedGrid, createMaskFromImg
+from Velocity import calcDenseVelocity, calcHomography, seedGrid, readDEMmask
 from DEM import load_DEM, voxelviewshed, ExplicitRaster
 import FileHandler
 import Utilities 
@@ -76,7 +76,7 @@ calibPath = '../Examples/camenv_data/calib/KR2_2014_1.txt'
 DEMpath = '../Examples/camenv_data/dem/KR_demsmooth.tif'        
 
 #Define masks for velocity and homography point generation
-vmaskPath = '../Examples/camenv_data/masks/KR2_2014_demmask.jpg'       
+vmaskPath = None       
 #hmaskPath = '../Examples/camenv_data/invmasks/KR2_2014_inv.jpg'    
 
 #Define reference image (where GCPs have been defined)
@@ -195,97 +195,10 @@ imagelist = sorted(glob.glob(imgFiles))
 im1 = FileHandler.readImg(imagelist[0], band, equal)
 imn1 = Path(imagelist[0]).name
 
-
-
-
-##Plot dem mask manually
+#Make DEM mask
 demz = dem.getZ()
 
-fig=plt.gcf()
-fig.canvas.set_window_title('Click to create mask. Press enter to record' 
-                            ' points.')
-imgplot = plt.imshow(im1, origin='upper')
-imgplot.set_cmap('gray')
-maskuv = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, 
-                mouse_stop=2)
-print('\n' + str(len(maskuv)) + ' points seeded')
-plt.show()
-plt.close()
-
-#Close shape
-maskuv.append(maskuv[0])
-
-#Generate polygon
-ring = ogr.Geometry(ogr.wkbLinearRing)
-for p in maskuv:
-    ring.AddPoint(p[0],p[1])
-p=maskuv[0]
-ring.AddPoint(p[0],p[1])    
-poly = ogr.Geometry(ogr.wkbPolygon)
-poly.AddGeometry(ring)
- 
-#Rasterize polygon using PIL
-height = im1.shape[0]
-width = im1.shape[1]
-img1 = Image.new('L', (width,height), 0)
-draw=ImageDraw.Draw(img1)
-draw.polygon(maskuv, outline=1, fill=1)
-myUVMask=np.array(img1)
-
-#Write to .jpg file    
-img1.save(vmaskPath, quality=75)
-
-maskuv = np.array(maskuv).reshape(-1,2)
-maskxyz = projectUV(maskuv, invprojvars)
-maskxy = np.column_stack([maskxyz[:,0],maskxyz[:,1]]) 
-#
-##Rasterize polygon using PIL
-#demz_empty = np.zeros((demz.shape[0], demz.shape[1]), dtype=int)
-#img1 = Image.fromarray(demz_empty, mode='L')
-#draw=ImageDraw.Draw(img1)
-#draw.polygon(maskxy, outline=1, fill=1)
-#demmask=np.array(img1)
-
-
-
-demx = dem.getData(0)    
-demx_uniq = demx[0,:]
-demx_uniq = demx_uniq.reshape(demx_uniq.shape[0],-1)
-
-demy = dem.getData(1)
-demy_uniq = demy[:,0] 
-demy_uniq = demy_uniq.reshape(demy_uniq.shape[0],-1)
-
-x, y = np.meshgrid(demx_uniq, demy_uniq)
-x, y = x.flatten(), y.flatten()
-
-points = np.vstack((x,y)).T
-
-poly = path.Path(maskxy)
-demmask = poly.contains_points(points)
-demmask = demmask.reshape((demy_uniq.shape[0], demx_uniq.shape[0]))
-
-
-#Plot image points    
-fig, (ax1, ax2, ax3) = plt.subplots(1,3)
-lims = dem.getExtent()
-ax1.axis([lims[0],lims[1],lims[2],lims[3]])    
-ax1.imshow(demz, origin='lower',
-           extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
-ax1.plot(maskxyz[:,0], maskxyz[:,1], color='red')
-
-ax2.axis([lims[0],lims[1],lims[2],lims[3]]) 
-ax2.imshow(img1, origin='lower')
-ax2.plot(maskxyz[:,0], maskxyz[:,1], color='red')
-
-ax3.imshow(demmask, origin='lower')
-
-plt.show()
-
-#imgmask, maskxyz = createMaskFromImg(dem, im1, invprojvars, imMaskPath=None, 
-#                                     demMaskPath=None)
-
-
+demmask = readDEMmask(dem, im1, invprojvars, vmaskPath)
 
 #Create empty output variables
 velo = []                                     
@@ -312,138 +225,142 @@ for i in range(len(imagelist)-1):
                              
     #Calculate velocities between image pair
     print('Calculating velocity...')
+    griddistance = [500,500]
+    projvars = [camloc, campose, radcorr, tancorr, focal, camcen, im1]
+    xyz, uv = seedGrid(dem, griddistance, projvars, min_features=4, mask=demmask)
 
-    demx = dem.getData(0)    
-    demx_uniq = demx[0,:]
-    demx_uniq = demx_uniq.reshape(demx_uniq.shape[0],-1)
-    
-    demy = dem.getData(1)
-    demy_uniq = demy[:,0]    
-    demy_uniq = demy_uniq.reshape(demy_uniq.shape[0],-1)
-    
-
-    mz = ma.masked_array(demz, np.logical_not(demmask))
-    mz = mz.filled(np.nan) 
-    
-   
-    griddistance=[500,500]
-    
-    #Define grid as empty list    
-    gridxyz=[]
-    
-    #Get DEM extent
-    extent = dem.getExtent()
-    
-    #Define point spacings in dem space
-    samplex = round((extent[1]-extent[0])/griddistance[0])
-    sampley = round((extent[3]-extent[2])/griddistance[1])
-    
-    #Define grid in dem space
-    linx = np.linspace(extent[0], extent[1], samplex)
-    liny = np.linspace(extent[2], extent[3], sampley)
-    
-    #Create mesh
-    meshx, meshy = np.meshgrid(linx, liny) 
-    
-    #Get Z values for mesh grid
-    meshx2 = []
-    meshy2 = []
-    meshz2 = []
-    
-    for a,b in zip(meshx.flatten(), meshy.flatten()):
-
-        both1 = (np.abs(demx_uniq-a)).argmin()
-        both2 = (np.abs(demy_uniq-b)).argmin()
-#        both1 = np.where(demx_uniq==a)
-#        both2 = np.where(demy_uniq==b)
-        
-#        print('Found in x: ' + str(both1))
-#        print('Found in y: ' + str(both2))
-
-        if np.isnan(mz[both2,both1]) == False:
-            np.array([a,b,mz[both2,both1]])
-            meshx2.append(a)
-            meshy2.append(b)
-            meshz2.append(mz[both2,both1])
-            print('Z value at ' + str(both1) + ' and ' + str(both2) + ': ' + str(mz[both2,both1]))
-
-#        except:
-#            pass
-
-      
-    
-    
-#    meshxy = np.array([meshx, meshy])
-#    meshxmsk = ma.masked_array(meshx, np.logical_not(myMask))     
-#    meshymsk = ma.masked_array(meshy, np.logical_not(myMask))  
-    
-#    gridx,gridy = seedGrid(dem, None, [500,500], 4, [camloc, campose, radcorr, tancorr, focal, camcen, refimagePath])
-    
-#    X = gridx.flatten()
-#    Y = gridy.flatten()
-#
-#    demx = dem.getData(0)
-#    demxflat = demx.flatten()
+#    demx = dem.getData(0)    
+#    demx_uniq = demx[0,:]
+#    demx_uniq = demx_uniq.reshape(demx_uniq.shape[0],-1)
+#    
 #    demy = dem.getData(1)
-#    demyflat = demy.flatten()
-#    demz = dem.getZ()
-#    demzflat = demz.flatten()
+#    demy_uniq = demy[:,0]    
+#    demy_uniq = demy_uniq.reshape(demy_uniq.shape[0],-1)
 #    
-#    Z=[]
-#    for a,b in zip(X,Y):
 #
-#        print(a)
-#        print(b)      
-#        
-##        both1 = np.where(demxflat==a)          
-##        both2 = np.where(demyflat==b)
-#
-#        both1 = (np.abs(demx-a)).argmin()
-#        both2 = (np.abs(demy-b)).argmin()
+#    mz = ma.masked_array(demz, np.logical_not(demmask))
+#    mz = mz.filled(np.nan) 
 #    
-#        print(both1)
-#        print(both2)
+#   
+#    griddistance=[500,500]
+#    
+#    #Define grid as empty list    
+#    gridxyz=[]
+#    
+#    #Get DEM extent
+#    extent = dem.getExtent()
+#    
+#    #Define point spacings in dem space
+#    samplex = round((extent[1]-extent[0])/griddistance[0])
+#    sampley = round((extent[3]-extent[2])/griddistance[1])
+#    
+#    #Define grid in dem space
+#    linx = np.linspace(extent[0], extent[1], samplex)
+#    liny = np.linspace(extent[2], extent[3], sampley)
+#    
+#    #Create mesh
+#    meshx, meshy = np.meshgrid(linx, liny) 
+#    
+#    #Get Z values for mesh grid
+#    meshx2 = []
+#    meshy2 = []
+#    meshz2 = []
+#    
+#    for a,b in zip(meshx.flatten(), meshy.flatten()):
 #
-#        indx = np.intersect1d(both1, both2)
-#        indx = int(indx)
+#        both1 = (np.abs(demx_uniq-a)).argmin()
+#        both2 = (np.abs(demy_uniq-b)).argmin()
+##        both1 = np.where(demx_uniq==a)
+##        both2 = np.where(demy_uniq==b)
 #        
-#        print(indx)
-##        idxa = (np.abs(demx - a)).argmin()
-##        idxb = (np.abs(demy - b)).argmin()
-##        print(idxa)
-##        print(idxb)
-#        Z.append(demzflat[indx])
-#        
-    xyz=np.column_stack([meshx2,meshy2,meshz2])
+##        print('Found in x: ' + str(both1))
+##        print('Found in y: ' + str(both2))
+#
+#        if np.isnan(mz[both2,both1]) == False:
+#            np.array([a,b,mz[both2,both1]])
+#            meshx2.append(a)
+#            meshy2.append(b)
+#            meshz2.append(mz[both2,both1])
+#            print('Z value at ' + str(both1) + ' and ' + str(both2) + ': ' + str(mz[both2,both1]))
+#
+##        except:
+##            pass
+#
+#      
+#    
+#    
+##    meshxy = np.array([meshx, meshy])
+##    meshxmsk = ma.masked_array(meshx, np.logical_not(myMask))     
+##    meshymsk = ma.masked_array(meshy, np.logical_not(myMask))  
+#    
+##    gridx,gridy = seedGrid(dem, None, [500,500], 4, [camloc, campose, radcorr, tancorr, focal, camcen, refimagePath])
+#    
+##    X = gridx.flatten()
+##    Y = gridy.flatten()
+##
+##    demx = dem.getData(0)
+##    demxflat = demx.flatten()
+##    demy = dem.getData(1)
+##    demyflat = demy.flatten()
+##    demz = dem.getZ()
+##    demzflat = demz.flatten()
+##    
+##    Z=[]
+##    for a,b in zip(X,Y):
+##
+##        print(a)
+##        print(b)      
+##        
+###        both1 = np.where(demxflat==a)          
+###        both2 = np.where(demyflat==b)
+##
+##        both1 = (np.abs(demx-a)).argmin()
+##        both2 = (np.abs(demy-b)).argmin()
+##    
+##        print(both1)
+##        print(both2)
+##
+##        indx = np.intersect1d(both1, both2)
+##        indx = int(indx)
+##        
+##        print(indx)
+###        idxa = (np.abs(demx - a)).argmin()
+###        idxb = (np.abs(demy - b)).argmin()
+###        print(idxa)
+###        print(idxb)
+##        Z.append(demzflat[indx])
+##        
+#    xyz=np.column_stack([meshx2,meshy2,meshz2])
+#
+#    uv,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, focal, camcen, im1, xyz)        
+#
+##    #Plot image points    
+##    fig, (ax1, ax2, ax3) = plt.subplots(1,3)
+##    lims = dem.getExtent()
+##    
+##    ax1.axis([lims[0],lims[1],lims[2],lims[3]])    
+##    ax1.imshow(demz, origin='lower',
+##               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
+##    ax1.scatter(meshx.flatten(), meshy.flatten(), color='red')
+##     
+##    ax2.locator_params(axis = 'x', nbins=8)
+##    ax2.axis([lims[0],lims[1],lims[2],lims[3]])
+##    ax2.imshow(mz, origin='lower', 
+##               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
+##    ax2.scatter(meshx2, meshy2, color='red')
+##
+##    ax3.imshow(im1, cmap='gray')
+##    ax3.scatter(uv[:,0], uv[:,1], color='red')
+##    plt.show()
 
-    uv,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, focal, camcen, im1, xyz)        
-
-#    #Plot image points    
-#    fig, (ax1, ax2, ax3) = plt.subplots(1,3)
-#    lims = dem.getExtent()
-#    
+#    fig, (ax1) = plt.subplots(1,1)
+#    lims = dem.getExtent()    
 #    ax1.axis([lims[0],lims[1],lims[2],lims[3]])    
-#    ax1.imshow(demz, origin='lower',
-#               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
-#    ax1.scatter(meshx.flatten(), meshy.flatten(), color='red')
-#     
-#    ax2.locator_params(axis = 'x', nbins=8)
-#    ax2.axis([lims[0],lims[1],lims[2],lims[3]])
-#    ax2.imshow(mz, origin='lower', 
-#               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
-#    ax2.scatter(meshx2, meshy2, color='red')
-#
-#    ax3.imshow(im1, cmap='gray')
-#    ax3.scatter(uv[:,0], uv[:,1], color='red')
-#    plt.show()
-
-    fig, (ax1) = plt.subplots(1,1)
-    lims = dem.getExtent()    
-    ax1.axis([lims[0],lims[1],lims[2],lims[3]])    
-    ax1.imshow(mz, origin='lower',
-               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray') 
-    ax1.scatter(meshx2, meshy2, color='red')
-    plt.show()    
+#    ax1.imshow(mz, origin='lower',
+#               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray') 
+#    ax1.scatter(meshx2, meshy2, color='red')
+#    plt.show()  
+    
 #    #Create empty numpy array
 #    griduv=np.zeros([475,2])
 #    griduv[::]=float('NaN')

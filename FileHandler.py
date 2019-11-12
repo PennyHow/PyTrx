@@ -122,7 +122,7 @@ def readMask(img, writeMask=None):
         try:
             myMask = Image.open(writeMask)
             myMask = np.array(myMask)
-            print('\nMask loaded')
+            print('\nImage mask loaded')
             return myMask
         except:
             print('\nMask file not found. Proceeding to manually digitise...')
