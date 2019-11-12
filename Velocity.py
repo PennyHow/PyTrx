@@ -1081,8 +1081,8 @@ def createMaskFromImg(dem, image, invprojvars, imMaskPath=None,
     poly.AddGeometry(ring)
      
     #Rasterize polygon using PIL
-    height = dem.getRows()
-    width = dem.getCols()
+    height = image.shape[0]
+    width = image.shape[1]
     img1 = Image.new('L', (width,height), 0)
     draw=ImageDraw.Draw(img1)
     draw.polygon(maskuv, outline=1, fill=1)

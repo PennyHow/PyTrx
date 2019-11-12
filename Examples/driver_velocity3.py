@@ -43,12 +43,14 @@ from scipy import interpolate
 import numpy.ma as ma
 import ogr
 from PIL import Image, ImageDraw
+from matplotlib import cm
+from matplotlib import path
 
 #Import PyTrx packages
 sys.path.append('../')
 from CamEnv import setProjection, projectXYZ, projectUV
 from Velocity import calcDenseVelocity, calcHomography, seedGrid, createMaskFromImg
-from DEM import load_DEM, voxelviewshed, ExplicitRaster, createMaskFromImg
+from DEM import load_DEM, voxelviewshed, ExplicitRaster
 import FileHandler
 import Utilities 
  
@@ -199,77 +201,89 @@ imn1 = Path(imagelist[0]).name
 ##Plot dem mask manually
 demz = dem.getZ()
 
-#fig=plt.gcf()
-#fig.canvas.set_window_title('Click to create mask. Press enter to record' 
-#                            ' points.')
-#imgplot = plt.imshow(im1, origin='upper')
-#imgplot.set_cmap('gray')
-#maskuv = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, 
-#                mouse_stop=2)
-#print('\n' + str(len(maskuv)) + ' points seeded')
-#plt.show()
-#plt.close()
-#
-##Close shape
-#maskuv.append(maskuv[0])
-#
-##Generate polygon
-#ring = ogr.Geometry(ogr.wkbLinearRing)
-#for p in maskuv:
-#    ring.AddPoint(p[0],p[1])
-#p=maskuv[0]
-#ring.AddPoint(p[0],p[1])    
-#poly = ogr.Geometry(ogr.wkbPolygon)
-#poly.AddGeometry(ring)
-# 
-##Rasterize polygon using PIL
-#height = dem.getRows()
-#width = dem.getCols()
-#img1 = Image.new('L', (width,height), 0)
-#draw=ImageDraw.Draw(img1)
-#draw.polygon(maskuv, outline=1, fill=1)
-#myMask=np.array(img1)
-#
-##Write to .jpg file    
-#img1.save(vmaskPath, quality=75)
-#
-#maskuv = np.array(maskuv).reshape(-1,2)
-#maskxyz = projectUV(maskuv, invprojvars)
-#
-##Generate polygon
-#ring = ogr.Geometry(ogr.wkbLinearRing)
-#for p in maskxyz:
-#    ring.AddPoint(p[0],p[1])
-#p=maskxyz[0]
-#ring.AddPoint(p[0],p[1])    
-#poly = ogr.Geometry(ogr.wkbPolygon)
-#poly.AddGeometry(ring)
-# 
-##Rasterize polygon using PIL
-#height = dem.getRows()
-#width = dem.getCols()
-#img1 = Image.new('L', (width,height), 0)
-#draw=ImageDraw.Draw(img1)
-#draw.polygon(maskxyz, outline=1, fill=1)
-#myMask=np.array(img1)
-#
-##Plot image points    
-#fig, (ax1, ax2) = plt.subplots(1,2)
-#
-#ax1.imshow(im1, cmap='gray')
-#ax1.scatter(maskuv[:,0], maskuv[:,1], color='red')
-#
-#lims = dem.getExtent() 
-#ax2.locator_params(axis = 'x', nbins=8)
-#ax2.axis([lims[0],lims[1],lims[2],lims[3]])
-#ax2.imshow(demz, origin='lower', 
-#           extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
-#ax2.scatter(maskxyz[:,0], maskxyz[:,1], color='red')
-#
-#plt.show()
+fig=plt.gcf()
+fig.canvas.set_window_title('Click to create mask. Press enter to record' 
+                            ' points.')
+imgplot = plt.imshow(im1, origin='upper')
+imgplot.set_cmap('gray')
+maskuv = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, 
+                mouse_stop=2)
+print('\n' + str(len(maskuv)) + ' points seeded')
+plt.show()
+plt.close()
 
-imgmask, demmask = createMaskFromImg(dem, im1, invprojvars, imMaskPath=None, 
-                                     demMaskPath=None)
+#Close shape
+maskuv.append(maskuv[0])
+
+#Generate polygon
+ring = ogr.Geometry(ogr.wkbLinearRing)
+for p in maskuv:
+    ring.AddPoint(p[0],p[1])
+p=maskuv[0]
+ring.AddPoint(p[0],p[1])    
+poly = ogr.Geometry(ogr.wkbPolygon)
+poly.AddGeometry(ring)
+ 
+#Rasterize polygon using PIL
+height = im1.shape[0]
+width = im1.shape[1]
+img1 = Image.new('L', (width,height), 0)
+draw=ImageDraw.Draw(img1)
+draw.polygon(maskuv, outline=1, fill=1)
+myUVMask=np.array(img1)
+
+#Write to .jpg file    
+img1.save(vmaskPath, quality=75)
+
+maskuv = np.array(maskuv).reshape(-1,2)
+maskxyz = projectUV(maskuv, invprojvars)
+maskxy = np.column_stack([maskxyz[:,0],maskxyz[:,1]]) 
+#
+##Rasterize polygon using PIL
+#demz_empty = np.zeros((demz.shape[0], demz.shape[1]), dtype=int)
+#img1 = Image.fromarray(demz_empty, mode='L')
+#draw=ImageDraw.Draw(img1)
+#draw.polygon(maskxy, outline=1, fill=1)
+#demmask=np.array(img1)
+
+
+
+demx = dem.getData(0)    
+demx_uniq = demx[0,:]
+demx_uniq = demx_uniq.reshape(demx_uniq.shape[0],-1)
+
+demy = dem.getData(1)
+demy_uniq = demy[:,0] 
+demy_uniq = demy_uniq.reshape(demy_uniq.shape[0],-1)
+
+x, y = np.meshgrid(demx_uniq, demy_uniq)
+x, y = x.flatten(), y.flatten()
+
+points = np.vstack((x,y)).T
+
+poly = path.Path(maskxy)
+demmask = poly.contains_points(points)
+demmask = demmask.reshape((demy_uniq.shape[0], demx_uniq.shape[0]))
+
+
+#Plot image points    
+fig, (ax1, ax2, ax3) = plt.subplots(1,3)
+lims = dem.getExtent()
+ax1.axis([lims[0],lims[1],lims[2],lims[3]])    
+ax1.imshow(demz, origin='lower',
+           extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
+ax1.plot(maskxyz[:,0], maskxyz[:,1], color='red')
+
+ax2.axis([lims[0],lims[1],lims[2],lims[3]]) 
+ax2.imshow(img1, origin='lower')
+ax2.plot(maskxyz[:,0], maskxyz[:,1], color='red')
+
+ax3.imshow(demmask, origin='lower')
+
+plt.show()
+
+#imgmask, maskxyz = createMaskFromImg(dem, im1, invprojvars, imMaskPath=None, 
+#                                     demMaskPath=None)
 
 
 
@@ -311,6 +325,7 @@ for i in range(len(imagelist)-1):
     mz = ma.masked_array(demz, np.logical_not(demmask))
     mz = mz.filled(np.nan) 
     
+   
     griddistance=[500,500]
     
     #Define grid as empty list    
@@ -403,24 +418,32 @@ for i in range(len(imagelist)-1):
 
     uv,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, focal, camcen, im1, xyz)        
 
-    #Plot image points    
-    fig, (ax1, ax2, ax3) = plt.subplots(1,3)
-    lims = dem.getExtent()
-    ax1.axis([lims[0],lims[1],lims[2],lims[3]])    
-    ax1.imshow(demz, origin='lower',
-               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
-    ax1.scatter(meshx.flatten(), meshy.flatten(), color='red')
-     
-    ax2.locator_params(axis = 'x', nbins=8)
-    ax2.axis([lims[0],lims[1],lims[2],lims[3]])
-    ax2.imshow(mz, origin='lower', 
-               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
-    ax2.scatter(meshx2, meshy2, color='red')
+#    #Plot image points    
+#    fig, (ax1, ax2, ax3) = plt.subplots(1,3)
+#    lims = dem.getExtent()
+#    
+#    ax1.axis([lims[0],lims[1],lims[2],lims[3]])    
+#    ax1.imshow(demz, origin='lower',
+#               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
+#    ax1.scatter(meshx.flatten(), meshy.flatten(), color='red')
+#     
+#    ax2.locator_params(axis = 'x', nbins=8)
+#    ax2.axis([lims[0],lims[1],lims[2],lims[3]])
+#    ax2.imshow(mz, origin='lower', 
+#               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
+#    ax2.scatter(meshx2, meshy2, color='red')
+#
+#    ax3.imshow(im1, cmap='gray')
+#    ax3.scatter(uv[:,0], uv[:,1], color='red')
+#    plt.show()
 
-    ax3.imshow(im1, cmap='gray')
-    ax3.scatter(uv[:,0], uv[:,1], color='red')
-    plt.show()
-    
+    fig, (ax1) = plt.subplots(1,1)
+    lims = dem.getExtent()    
+    ax1.axis([lims[0],lims[1],lims[2],lims[3]])    
+    ax1.imshow(mz, origin='lower',
+               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray') 
+    ax1.scatter(meshx2, meshy2, color='red')
+    plt.show()    
 #    #Create empty numpy array
 #    griduv=np.zeros([475,2])
 #    griduv[::]=float('NaN')
