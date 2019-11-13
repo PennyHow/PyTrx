@@ -280,7 +280,7 @@ class Velocity(ImageSequence):
                                     then an empty list is merely returned.                                 
         '''
            
-        print('\n\nCALCULATING VELOCITIES')
+        print('\n\nCALCULATING SPARSE VELOCITIES')
         velocity=[]
         
         #Get camera environment 
@@ -334,6 +334,128 @@ class Velocity(ImageSequence):
                                        back_thresh, min_features, 
                                        [seedparams[0], seedparams[1], 
                                        seedparams[2]]) 
+                                                 
+            #Append output
+            velocity.append(pts)         
+        
+        #Return XYZ and UV velocity information
+        return velocity
+
+
+    def calcDenseVelocities(self, griddistance, method='cv2.TM_CCORR_NORMED', 
+                            templatesize=10, searchsize=30, back_thresh=1.0, 
+                            min_features=4):
+        '''Function to calculate velocities between succesive image pairs. 
+        Image pairs are called from the ImageSequence object. Points are seeded
+        in the first of these pairs using the Shi-Tomasi algorithm with 
+        OpenCV's goodFeaturesToTrack function. 
+        
+        The Lucas Kanade optical flow algorithm is applied using the OpenCV 
+        function calcOpticalFlowPyrLK to find these tracked points in the 
+        second image of each image pair. A backward tracking method then tracks 
+        back from these to the first image in the pair, checking if this is 
+        within a certain distance as a validation measure.
+        
+        Tracked points are corrected for image distortion and camera platform
+        motion (if needed). The points in each image pair are georectified 
+        subsequently to obtain xyz points. The georectification functions are 
+        called from the Camera Environment object, and are based on those in
+        ImGRAFT (Messerli and Grinsted, 2015). Velocities are finally derived 
+        from these using a simple Pythagoras' theorem method.
+        
+        This function returns the xyz velocities and points from each image 
+        pair, and their corresponding uv velocities and points in the image 
+        plane.
+        
+        Inputs
+        homography:                 Flag to denote whether homography should
+                                    be calculated and images should be 
+                                    corrected for image registration.
+        back_thesh:                 Threshold for back-tracking distance (i.e.
+                                    the difference between the original seeded
+                                    point and the back-tracked point in im0).
+        maxpoints:                  Maximum number of points to seed in im0
+        quality:                    Corner feature quality.
+        mindist:                    Minimum distance between seeded points.                 
+        min_features:               Minimum number of seeded points to track.
+        
+        Outputs
+        xyz:                        List containing the xyz velocities for each 
+                                    point (xyz[0]), the xyz positions for the 
+                                    points in the first image (xyz[1]), and the 
+                                    xyz positions for the points in the second 
+                                    image(xyz[2]). 
+        uv:                         List containing the uv velocities for each
+                                    point (uv[0], the uv positions for the 
+                                    points in the first image (uv[1]), the
+                                    uv positions for the points in the second
+                                    image (uv[2]), and the corrected uv points 
+                                    in the second image if they have been 
+                                    calculated using the homography model for
+                                    image registration (uv[3]). If the 
+                                    corrected points have not been calculated 
+                                    then an empty list is merely returned.                                 
+        '''
+           
+        print('\n\nCALCULATING DENSE VELOCITIES')
+        velocity=[]
+        
+        #Get camera environment 
+        camenv = self.getCamEnv()
+        
+        #Get DEM from camera environment
+        dem = camenv.getDEM() 
+
+        #Get projection and inverse projection variables through camera info
+        projvars = [camenv._camloc, camenv._camDirection, camenv._radCorr, 
+                    camenv._tanCorr, camenv._focLen, camenv._camCen, 
+                    camenv._refImage]
+               
+        invprojvars = setProjection(dem, camenv._camloc, camenv._camDirection, 
+                                    camenv._radCorr, camenv._tanCorr, 
+                                    camenv._focLen, camenv._camCen, 
+                                    camenv._refImage) 
+        
+        #Get camera matrix and distortion parameters for calibration
+        mtx=self._camEnv.getCamMatrixCV2()
+        distort=self._camEnv.getDistortCoeffsCV2()
+        
+        #Get mask
+        mask=self.getMask()
+        
+        #Get first image (image0) file path and array data for initial tracking
+        imn1=self._imageSet[0].getImageName()
+        im1=self._imageSet[0].getImageArray()
+        
+        #Cycle through image pairs (numbered from 0)
+        for i in range(self.getLength()-1):
+
+            #Re-assign first image in image pair
+            im0=im1
+            imn0=imn1
+                            
+            #Get second image in image pair (and subsequently clear memory)
+            im1=self._imageSet[i+1].getImageArray()
+            imn1=self._imageSet[i+1].getImageName()       
+            self._imageSet[i].clearAll()
+           
+            print('\nFeature-tracking for images: ' + str(imn0) +' and ' 
+                  + str(imn1))
+
+            #Calculate velocities between image pair with homography
+            if self._homog is not None:
+                pts=calcDenseVelocity(im0, im1, griddistance, method,
+                                      templatesize, searchsize,
+                                      mask, [mtx,distort], 
+                                      [self._homog[i][0], self._homog[i][3]], 
+                                      [dem, projvars, invprojvars], 
+                                      back_thresh, min_features)                      
+            else:
+                pts=calcDenseVelocity(im0, im1, griddistance, method,
+                                      templatesize, searchsize,
+                                      mask, [mtx,distort], [None, None], 
+                                      [dem, projvars, invprojvars], 
+                                      back_thresh, min_features) 
                                                  
             #Append output
             velocity.append(pts)         
@@ -551,9 +673,9 @@ def calcSparseVelocity(img1, img2, mask, calib=None, homog=None,
                 [pxvel, src_pts_corr, dst_pts_corr, None, ptserrors]]
         
 
-def calcDenseVelocity(img1, img2, mask, calib=None, homog=None, 
-                      invprojvars=None, winsize=(25,25), back_thresh=1.0, 
-                      min_features=4, griddistance=[100,100]):
+def calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
+                      searchsize, mask, calib=None, homog=None, campars=None, 
+                      back_thresh=1.0, min_features=4):
     '''Function to calculate the velocity between a pair of images. Points 
     are seeded in the first of these either by a defined grid spacing, or using 
     the Shi-Tomasi algorithm with OpenCV's goodFeaturesToTrack function. 
@@ -577,6 +699,19 @@ def calcDenseVelocity(img1, img2, mask, calib=None, homog=None,
     Inputs
     img1 (arr):                 Image 1 in the image pair.
     img2 (arr):                 Image 2 in the image pair.
+    mask (arr):
+    campars (list):             List containing information for transforming
+                                between the image plane and 3D scene:
+                                1. DEM (ExplicitRaster object);
+                                2. Projection parameters (camera location, 
+                                camera post, radial distortion coefficients, 
+                                tangential distortion coefficients, 
+                                focal length, camera centre, and reference 
+                                image)
+                                3. Inverse projection parameters (coordinate
+                                system  3D scene - X, Y, Z, uv0)         
+ 
+    #[dem, projvars, invprojvars]
     hmatrix (arr):              Homography matrix.
     hpts (arr):                 Homography points.
     back_thesh (int):           Threshold for back-tracking distance (i.e.
@@ -606,20 +741,24 @@ def calcDenseVelocity(img1, img2, mask, calib=None, homog=None,
     #Set threshold difference for point tracks
     displacement_tolerance_rel=2.0
     
-    #Seed features
-    p0 = seedGrid(img1, mask, griddistance, min_features)
-
-    #Track points between the image pair
-    res = cv2.matchTemplate(img,template,method)
+    xyz0, uv0 = seedGrid(campars[0], griddistance, campars[1], min_features, 
+                         mask)
+    
+    if method != 'opticalflow':
+        pts, ptserrors = templateMatch(im0, im1, uv0, templatesize, searchsize, 
+                                       min_features, method)       
+    else:                            
+        pts, ptserrors = featureTrack(im0, im1, uv0, (searchsize,searchsize), 
+                                      back_thresh, min_features)
  
     #Pass empty object if tracking was insufficient
-    if points==None:
+    if pts==None:
         print('\nNo features to undertake velocity measurements')
         return None        
         
     if calib is not None:        
         #Calculate optimal camera matrix 
-        size=img1.shape
+        size=im0.shape
         h = size[0]
         w = size[1]
         newMat, roi = cv2.getOptimalNewCameraMatrix(calib[0], 
@@ -630,22 +769,26 @@ def calcDenseVelocity(img1, img2, mask, calib=None, homog=None,
         #is defined forwards (i.e. the points in image 1 are first 
         #corrected, followed by those in image 2)      
         #Correct points in first image 
-        src_pts_corr=cv2.undistortPoints(points[0], 
+        src_pts_corr=cv2.undistortPoints(pts[0], 
                                          calib[0], 
                                          calib[1],P=newMat)
         
         #Correct points in second image                                         
-        dst_pts_corr=cv2.undistortPoints(points[1], 
+        dst_pts_corr=cv2.undistortPoints(pts[1], 
                                          calib[0], 
                                          calib[1],P=newMat)
         
-        back_pts_corr=cv2.undistortPoints(points[2],
-                                          calib[0],
-                                          calib[1],P=newMat)
+        if pts[2] != None:
+            back_pts_corr=cv2.undistortPoints(pts[2],
+                                              calib[0],
+                                              calib[1],P=newMat)
+        else:
+            back_pts_corr = None
+            
     else:
-        src_pts_corr = points[0]
-        dst_pts_corr = points[1]
-        back_pts_corr = points[2]
+        src_pts_corr = pts[0]
+        dst_pts_corr = pts[1]
+        back_pts_corr = pts[2]
 
     #Calculate homography-corrected pts if desired
     if homog is not None:
@@ -679,8 +822,9 @@ def calcDenseVelocity(img1, img2, mask, calib=None, homog=None,
         src_pts_corr=src_pts_corr[good]
         dst_pts_corr=dst_pts_corr[good]
         dst_pts_homog=dst_pts_homog[good]
-        back_pts_corr=back_pts_corr[good]
-        ptserrors=ptserrors[good]
+        if back_pts_corr != None:
+            back_pts_corr=back_pts_corr[good]
+        ptserrors=ptserrors[good]            
         
         print(str(dst_pts_corr.shape[0]) + 
               ' points remaining after homography correction')
@@ -696,20 +840,24 @@ def calcDenseVelocity(img1, img2, mask, calib=None, homog=None,
         pxvel.append(np.sqrt((d[0][0]-c[0][0])*(d[0][0]-c[0][0])+
                      (d[0][1]-c[0][1])*(d[0][1]-c[0][1])))
         
-    #Project good points (original and tracked) to obtain XYZ coordinates
-    if invprojvars is not None:        
+    #Project good points (original and tracked) to obtain XYZ coordinates    
+    if campars[2] is not None:
+        
         #Project good points from image0
         uvs=src_pts_corr[:,0,:]
-        xyzs=projectUV(uvs, invprojvars)
+        xyzs=projectUV(uvs, campars[2])
         
         #Project good points from image1
         uvd=dst_pts_homog[:,0,:]
-        xyzd=projectUV(uvd, invprojvars)
+        xyzd=projectUV(uvd, campars[2])
 
         #Project good points from image0 back-tracked
-        uvb=back_pts_corr[:,0,:]
-        xyzb=projectUV(uvb, invprojvars)
-        
+        if back_pts_corr != None:
+            uvb=back_pts_corr[:,0,:]
+            xyzb=projectUV(uvb, campars[2])
+        else:
+            xyzb=None
+            
         #Calculate xyz velocity
         xyzvel=[]
         for a,b in zip(xyzs, xyzd):                        
@@ -717,10 +865,14 @@ def calcDenseVelocity(img1, img2, mask, calib=None, homog=None,
                          (b[1]-a[1])*(b[1]-a[1])))
         
         #Calculate xyz error
-        xyzerr=[]
-        for a,b in zip(xyzs, xyzb):
-            xyzerr.append(np.sqrt((b[0]-a[0])*(b[0]-a[0])+
-                         (b[1]-a[1])*(b[1]-a[1])))
+        if method == 'opticalflow':
+            xyzerr=[]
+            for a,b in zip(xyzs, xyzb):
+                xyzerr.append(np.sqrt((b[0]-a[0])*(b[0]-a[0])+
+                             (b[1]-a[1])*(b[1]-a[1])))
+        else:
+            xyzerr=None
+            
     else:
         xyzs=None
         xyzd=None
@@ -966,6 +1118,96 @@ def featureTrack(i0, iN, p0, winsize, back_thresh, min_features):
     return [p0,p1,p0r], error
 
 
+def templateMatch(im0, im1, uv0, templatesize, searchsize, 
+                  min_features, method):
+        
+        avercorr=[]
+        pu2=[]
+        pv2=[]        
+        
+        #Get rows one by one
+        for u,v in zip(uv0[:,:,0], uv0[:,:,1]):
+             
+            #Get template and search scene
+            template = im0[int(v-(templatesize/2)):int(v+(templatesize/2)), 
+                          int(u-(templatesize/2)):int(u+(templatesize/2))]
+            search = im1[int(v-(searchsize/2)):int(v+(searchsize/2)), 
+                        int(u-(searchsize/2)):int(u+(searchsize/2))]       
+                   
+            #Change array values from float64 to uint8
+            template = template.astype(np.uint8)
+            search = search.astype(np.uint8)
+                          
+            #Define method string as mapping object
+            meth=eval(method)
+                       
+    #        try:
+            #Try and match template in imageB 
+            try:
+                resz = cv2.matchTemplate(search, template, meth)
+            except:
+                resz=None
+            
+            if resz.all() is not None:
+                                    
+                #Create XY grid for correlation result 
+                resx = np.arange(0, resz.shape[1], 1)
+                resy = np.arange(0, resz.shape[0], 1)                    
+                resx,resy = np.meshgrid(resx, resy, sparse=True)
+                                                        
+                #Create bicubic interpolation grid                                                                            
+                interp = interpolate.interp2d(resx, resy, resz, 
+                                              kind='cubic')                    
+                
+                #Create new sub-pixel XY grid to interpolate across
+                subpx = 0.01
+                newx = np.arange(0, resz.shape[1], subpx)
+                newy = np.arange(0, resz.shape[0], subpx)
+                        
+                #Interpolate 
+                resz = interp(newx, newy)
+                                                        
+                #Get correlation values and coordinate locations        
+                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(resz)
+                                                                                            
+                #If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take min
+                if method == 'cv2.TM_SQDIFF':                            
+                    location = min_loc
+                elif method == 'cv2.TM_SQDIFF_NORMED':
+                    location = min_loc
+                    
+                #Else, take maximum correlation and location
+                else:                 
+                    location = max_loc
+                                    
+                #Calculate tracked point location                    
+                loc_x = ((u - ((resz.shape[1]*subpx)/2)) + 
+                        (location[0]*subpx))
+                loc_y = ((v - ((resz.shape[1]*subpx)/2) + 
+                        (location[1]*subpx)))                            
+                #ASSUMPTION: the origin of the template window is the same 
+                #as the origin of the correlation array (i.e. resz)                        
+                        
+        
+                #Retain correlation and location            
+                avercorr.append(np.mean(resz))
+                pu2.append(loc_x)
+                pv2.append(loc_y)
+        
+        uv1 = np.column_stack([pu2, pv2])            
+        uv1 = np.array(uv1, dtype='float32').reshape((-1,1,2))
+        avercorr = np.array(avercorr, dtype='float32').reshape((-1,1,1))
+        
+        if uv1.shape[0]<min_features:
+            print('Not enough features successfully tracked.')
+            return None, None
+        else:
+            print('Average template correlation: ' + str(np.mean(avercorr)))               
+            print(str(uv1.shape[0]) + ' templates tracked')
+                       
+            return [uv0, uv1, None], avercorr
+
+
 def seedCorners(im, mask, maxpoints, quality, mindist, min_features):
     '''Function to seed corner features using the Shi-Tomasi corner feature 
     detection method in OpenCV's goodFeaturesToTrack function. 
@@ -1000,7 +1242,7 @@ def seedCorners(im, mask, maxpoints, quality, mindist, min_features):
         return p0
 
 
-def seedGrid(dem, griddistance, projvars, min_features=4, mask=None):
+def seedGrid(dem, griddistance, projvars, min_features, mask):
     '''Define pixel grid at a specified grid distance, taking into 
     consideration the image size and image mask.
     
@@ -1063,22 +1305,33 @@ def seedGrid(dem, griddistance, projvars, min_features=4, mask=None):
     uv,depth,inframe = projectXYZ(projvars[0], projvars[1], projvars[2], 
                                   projvars[3], projvars[4], projvars[5], 
                                   projvars[6], xyz)
-        
+    
+    uv = np.array(uv, dtype='float32').reshape((-1,1,2))  
+    
     return xyz, uv
 
 def readDEMmask(dem, img, invprojvars, demMaskPath=None):
-    '''Generate DEM mask from image mask. Coordinates from the image mask are
-    projected using CamEnv's projectXYZ function. The mask can subsequently be
-    used to mask the DEM, where masked regions of the DEM are reassigned to 
+    '''Read/generate DEM mask for subsequent grid generation. If a valid 
+    filename is given then the DEM mask is loaded from file. If the filename
+    does not exist, then the mask is defined. To define the DEM mask, a mask is
+    first defined in the image plane (using point and click, facilitated 
+    through Matplotlib Pyplot's ginput function), and then projected to the 
+    DEM scene using CamEnv's projectXYZ function. For the projection to work,
+    the invprojvars need to be valid X,Y,Z,uv0 parameters, as generated in 
+    CamEnv's setProjection function. The mask is saved to file if a filepath is
+    given. This DEM mask can be used for dense feature-tracking/template 
+    matching, where masked regions of the DEM are reassigned to 
     NaN using Numpy's ma.mask function.
-    Inputs
-    dem (ExplicitRaster):       Input DEM object.
-    immask (list):              List containing image mask points.
-    invprojvars (list):         Inverse projection variables.
     
-    Output
-    maskdem ():   Boolean visibility matrix (which is the same 
-                                size as dem)
+    Input variables:
+    dem (ExplicitRaster):       Input DEM object.
+    img (arr):                  List containing image mask points.
+    invprojvars (list):         Inverse projection variables.
+    demMaskPath (str):          Path to outputted mask file.
+    
+    Returns
+    demMask (arr):              Boolean visibility matrix (which is the same 
+                                size as the dem)
     '''    
     #Check if a mask already exists, if not enter digitising
     if demMaskPath!=None:
@@ -1088,7 +1341,7 @@ def readDEMmask(dem, img, invprojvars, demMaskPath=None):
             print('\nDEM mask loaded')
             return demMask
         except:
-            print('\nMask file not found. Proceeding to manually digitise...')
+            print('\nDEM mask file not found. Proceeding to manually digitise...')
     
     fig=plt.gcf()
     fig.canvas.set_window_title('Click to create mask. Press enter to record' 
@@ -1128,7 +1381,7 @@ def readDEMmask(dem, img, invprojvars, demMaskPath=None):
     if demMaskPath != None:
         try:
             plt.imsave(demMaskPath, demMask)
-            print('\nSaved mask to: ' + str(demMaskPath))
+            print('\nSaved DEM mask to: ' + str(demMaskPath))
         except:
             print('\nFailed to write file: ' + str(demMaskPath))
         

@@ -49,7 +49,7 @@ from matplotlib import path
 #Import PyTrx packages
 sys.path.append('../')
 from CamEnv import setProjection, projectXYZ, projectUV
-from Velocity import calcDenseVelocity, calcHomography, seedGrid, readDEMmask
+from Velocity import calcDenseVelocity, calcHomography, templateMatch, seedGrid, readDEMmask, featureTrack
 from DEM import load_DEM, voxelviewshed, ExplicitRaster
 import FileHandler
 import Utilities 
@@ -77,7 +77,7 @@ DEMpath = '../Examples/camenv_data/dem/KR_demsmooth.tif'
 
 #Define masks for velocity and homography point generation
 vmaskPath = None       
-#hmaskPath = '../Examples/camenv_data/invmasks/KR2_2014_inv.jpg'    
+hmaskPath = '../Examples/camenv_data/invmasks/KR2_2014_inv.jpg'    
 
 #Define reference image (where GCPs have been defined)
 refimagePath = '../Examples/camenv_data/refimages/KR2_2014.JPG'
@@ -136,11 +136,6 @@ hminfeat = 4                        #Minimum number of seeded points to track
 
 #----------------------   Set up camera environment   -------------------------
 
-print('\nLOADING MASKS')
-#vmask = FileHandler.readMask(None, vmaskPath)
-#hmask = FileHandler.readMask(None, hmaskPath)
-
-
 print('\nLOADING DEM')
 dem = load_DEM(DEMpath)
 dem=dem.densify(DEMdensify)
@@ -152,15 +147,37 @@ GCPxyz, GCPuv = FileHandler.readGCPs(GCPpath)
 
 print('\nLOADING CALIBRATION')
 calib_out = FileHandler.readMatrixDistortion(calibPath)
-matrix=np.transpose(calib_out[0])                               #Get matrix
+matrix=np.transpose(calib_out[0])                           #Get matrix
 tancorr = calib_out[1]                                      #Get tangential
 radcorr = calib_out[2]                                      #Get radial
 focal = [matrix[0,0], matrix[1,1]]                          #Focal length
-camcen = [matrix[0,2], matrix[1,2]]                         #Principal point 
+camcen = [matrix[0,2], matrix[1,2]]                         #Principal point
+ 
+distort = np.hstack([radcorr[0][0], radcorr[0][1],          #Compile distortion
+                     tancorr[0][0], tancorr[0][1],          #parameters
+                     radcorr[0][2]])
 
-   
-invprojvars = setProjection(dem, camloc, campose, radcorr, tancorr, focal, 
+
+print('\nCOMPILING TRANSFORMATION PARAMETERS')
+projvars = [camloc, campose, radcorr, tancorr,              #Projection params
+            focal, camcen, refimagePath]  
+ 
+invprojvars = setProjection(dem, camloc, campose,           #Inverse projection
+                            radcorr, tancorr, focal,        #params
                             camcen, refimagePath) 
+
+campars = [dem, projvars, invprojvars]                      #Compiled parameters
+
+
+print('\nLOADING IMAGE FILES')
+imagelist = sorted(glob.glob(imgFiles))
+im1 = FileHandler.readImg(imagelist[0], band, equal)
+imn1 = Path(imagelist[0]).name
+
+
+print('\nLOADING MASKS')
+demmask = readDEMmask(dem, im1, invprojvars, vmaskPath)
+hmask = FileHandler.readMask(None, hmaskPath)
 
 
 #--------------------   Plot camera environment info   ------------------------
@@ -179,26 +196,14 @@ print('\nPLOTTING CAMERA ENVIRONMENT INFO')
 #Utilities.plotPrincipalPoint(camcen, refimg, imn)
 
 #Show corrected and uncorrected image
-distort = np.hstack([radcorr[0][0], radcorr[0][1], tancorr[0][0], 
-                     tancorr[0][1], radcorr[0][2]])
+
 #Utilities.plotCalib(matrix, distort, refimg, imn)
+
 
 
 #----------------------   Calculate velocities   ------------------------------
 
 print('\nCALCULATING VELOCITIES')
-
-#Get list of images
-imagelist = sorted(glob.glob(imgFiles))
-
-#Get first image in sequence and name
-im1 = FileHandler.readImg(imagelist[0], band, equal)
-imn1 = Path(imagelist[0]).name
-
-#Make DEM mask
-demz = dem.getZ()
-
-demmask = readDEMmask(dem, im1, invprojvars, vmaskPath)
 
 #Create empty output variables
 velo = []                                     
@@ -219,228 +224,28 @@ for i in range(len(imagelist)-1):
     print('\nProcessing images: ' + str(imn0) + ' and ' + str(imn1))
         
     #Calculate homography between image pair
-#    print('Calculating homography...')
-#    hg = calcHomography(im0, im1, hmask, [matrix,distort], hmethod, hreproj, 
-#                        hwin, hback, hminfeat, [hmax, hqual, hmindist])
+    print('Calculating homography...')
+    hg = calcHomography(im0, im1, hmask, [matrix,distort], hmethod, hreproj, 
+                        hwin, hback, hminfeat, [hmax, hqual, hmindist])
+    
+    homog.append(hg)
                              
     #Calculate velocities between image pair
     print('Calculating velocity...')
-    griddistance = [100,100]
-    projvars = [camloc, campose, radcorr, tancorr, focal, camcen, im0]
-    xyz, uv0 = seedGrid(dem, griddistance, projvars, min_features=4, mask=demmask)
     
-    #Create count for successful and failed tracking attempts
-    success = 0
-    fail = 0
-
-    templatesize = 10
-    searchsize=50
-    
-    method='opticalflow'
-#    method='cv2.TM_CCORR_NORMED'  
-    supersample=0.01
+    griddistance = [500,500]
+    templatesize=10
+    searchsize=30    
+#    method='opticalflow'
+    method='cv2.TM_CCORR_NORMED'  
     threshold=2.0
+    min_features=4.0
 
-    if method != 'opticalflow':
-        
-        maxcorr=[]
-        avercorr=[]
-        pu2=[]
-        pv2=[]        
-        
-        #Get rows one by one
-        for u,v in zip(uv0[:,0], uv0[:,1]):
-             
-            #Get template and search scene
-            template = im0[int(v-(templatesize/2)):int(v+(templatesize/2)), 
-                          int(u-(templatesize/2)):int(u+(templatesize/2))]
-            search = im1[int(v-(searchsize/2)):int(v+(searchsize/2)), 
-                        int(u-(searchsize/2)):int(u+(searchsize/2))]       
-                   
-            #Change array values from float64 to uint8
-            template = template.astype(np.uint8)
-            search = search.astype(np.uint8)
-                          
-            #Define method string as mapping object
-            meth=eval(method)
-                       
-    #        try:
-            #Try and match template in imageB 
-            try:
-                resz = cv2.matchTemplate(search, template, meth)
-            except:
-                print('Matching error')
-                resz=None
-            
-            if resz.all() is not None:
-                
-                #Perform subpixel analysis if flag is True
-                if supersample is not None:
-                                        
-                    #Create XY grid for correlation result 
-                    resx = np.arange(0, resz.shape[1], 1)
-                    resy = np.arange(0, resz.shape[0], 1)                    
-                    resx,resy = np.meshgrid(resx, resy, sparse=True)
-                                                            
-                    #Create bicubic interpolation grid                                                                            
-                    interp = interpolate.interp2d(resx, resy, resz, 
-                                                  kind='cubic')                    
-                    
-                    #Create new XY grid to interpolate across
-                    newx = np.arange(0, resz.shape[1], supersample)
-                    newy = np.arange(0, resz.shape[0], supersample)
-                            
-                    #Interpolate 
-                    resz = interp(newx, newy)
-                                                            
-                    #Get correlation values and coordinate locations        
-                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(resz)
-                                                                                                
-                    #If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take min
-                    if method == 'cv2.TM_SQDIFF':                            
-                        location = min_loc
-                        valm = min_val
-                    elif method == 'cv2.TM_SQDIFF_NORMED':
-                        location = min_loc
-                        valm = min_val
-                        
-                    #Else, take maximum correlation and location
-                    else:                 
-                        location = max_loc
-                        valm = max_val
-                                        
-                    #Calculate tracked point location                    
-                    loc_x = ((u - ((resz.shape[1]*supersample)/2)) + 
-                            (location[0]*supersample))
-                    loc_y = ((v - ((resz.shape[1]*supersample)/2) + 
-                            (location[1]*supersample)))                            
-                    #ASSUMPTION: the origin of the template window is the same 
-                    #as the origin of the correlation array (i.e. resz)                        
-                        
-                #If supersampling has not be specified
-                else:
-                    #Get correlation values and coordinate locations        
-                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(resz)
-                                                                            
-                    #If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take min
-                    if method == 'cv2.TM_SQDIFF':                            
-                        location = min_loc
-                        valm = min_val
-                    elif method == 'cv2.TM_SQDIFF_NORMED':
-                        location = min_loc
-                        valm = min_val
-                    else:
-                        location = max_loc
-                        valm = max_val                         
-        
-                    #Calculate tracked point location
-                    loc_x = (u - (resz.shape[1]/2)) + (location[0])
-                    loc_y = (v - (resz.shape[1]/2)) + (location[1])
-        
-                #Retain correlation and location            
-                maxcorr.append(valm)
-                avercorr.append(np.mean(resz))
-                pu2.append(loc_x)
-                pv2.append(loc_y)
-                
-                #Revise success count
-                success = success+1                 
-               
-        fig, (ax1) = plt.subplots(1,1)         
-        ax1.imshow(im0, origin='upper', cmap='gray')
-        ax1.scatter(uv0[:,0], uv0[:,1], color='red')
-        ax1.scatter(pu2, pv2, color='blue')
-        plt.show()
-        
-        print('\nTemplate matching completed')
-        print(str(success) + ' templates successfully matched')
-       
-    else:                     
-        #Create empty lists for matching results
-        error = []
-        pu2 = []
-        pv2 = []
-        
-        #Create count for successful and failed tracking attempts
-        success = 0
-        fail = 0
-        
-    
-        #Optical Flow set-up parameters
-        lk_params = dict( winSize  = (searchsize,searchsize),
-                          maxLevel = 2,
-                          criteria = (cv2.TERM_CRITERIA_EPS | 
-                                      cv2.TERM_CRITERIA_COUNT, 10, 0.03))    
-                        
-        #Rearrange pu, pv as 3d array in preparation for tracking 
-        puv = [] 
-        for u,v in zip(uv0[:,0], uv0[:,1]):
-            puv.append(u)
-            puv.append(v)
-                
-        puv = np.array(puv,dtype='float32').reshape((-1,1,2))
-        
-        #Track forward from Scene A to Scene B
-        uv1, s1, err1  = cv2.calcOpticalFlowPyrLK(im0, im1, puv, None, 
-                                                  **lk_params)     
-    
-        #Track backwards from Scene B to Scene A
-        uv0r, s0, err0  = cv2.calcOpticalFlowPyrLK(im1, im0, uv1, None, 
-                                                  **lk_params) 
-    
-        #Loop through track index    
-        for i in range(len(s1)):
-    
-            #If tracking was successful            
-            if s1[i][0] == 1:
-                            
-                #Find difference between the two points from Scene A                        
-                diff=(puv[i]-uv0r[i])*(puv[i]-uv0r[i])
-                diff=np.sqrt(diff[:,0]+diff[:,1])           
-                
-                #Filter by distance between the two point from Scene A
-                if diff < threshold:
-                    error.append(diff[0])
-                    pu2.append(uv1[i][0][0])
-                    pv2.append(uv1[i][0][1])
-                    success = success+1
-                
-                #Else, append None
-                else:                               
-                    error.append(None)
-                    pu2.append(None)
-                    pv2.append(None)                
-                    fail = fail+1
-    
-            #Else, append None
-            else:
-                error.append(None)
-                pu2.append(None)
-                pv2.append(None)                
-                fail = fail+1 
-                                                                                 
-        print('\nTemplate matching completed')
-        print(str(success) + ' templates successfully matched')
-        print(str(fail) + ' templates failed to match')
+    vl = calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
+                           searchsize, demmask, [matrix,distort], 
+                           [hg[0],hg[3]], campars, threshold, min_features)   
 
-        fig, (ax1) = plt.subplots(1,1)         
-        ax1.imshow(im0, origin='upper', cmap='gray')
-        ax1.scatter(uv0[:,0], uv0[:,1], color='red')
-        ax1.scatter(pu2, pv2, color='blue')
-        plt.show()
-           
-#        #Restructure results into 2d arrays        
-#        error = np.array(error).reshape(pu.shape[0], pu.shape[1])
-#        pu2 = np.array(pu2).reshape(pu.shape[0], pu.shape[1])
-#        pv2 = np.array(pv2).reshape(pu.shape[0], pu.shape[1])
-    
-
-
-#    vl = calcDenseVelocity(im0, im1, vmask, [matrix,distort], [hg[0],hg[3]], 
-#                           invprojvars, vwin, vback, vminfeat, [vmax, vqual, 
-#                           vmindist])                                                                                                                     
-
-                       
+    velo.append(vl)             
 
 #---------------------------  Export data   -----------------------------------
 
@@ -451,11 +256,11 @@ for i in range(len(imagelist)-1):
 #for i in imagelist:
 #    names.append(Path(i).name)
 #
-##Extract xyz velocities, uv velocities, and xyz0 locations
-#xyzvel=[item[0][0] for item in velo] 
-#xyzerr=[item[0][3] for item in velo]
-#uvvel=[item[1][0] for item in velo]
-#xyz0=[item[0][1] for item in velo]
+#Extract xyz velocities, uv velocities, and xyz0 locations
+xyzvel=[item[0][0] for item in velo] 
+xyzerr=[item[0][3] for item in velo]
+uvvel=[item[1][0] for item in velo]
+xyz0=[item[0][1] for item in velo]
 #
 ##Write out velocity data to .csv file
 #FileHandler.writeVeloFile(xyzvel, uvvel, homog, names, target1) 
@@ -467,59 +272,59 @@ for i in range(len(imagelist)-1):
 #FileHandler.writeVeloSHP(xyzvel, xyzerr, xyz0, names, target3, projection)       
 #
 #
-##----------------------------   Plot Results   --------------------------------
-#
-#print('\nPLOTTING OUTPUTS')
-#
-##Extract uv0, uv1corr, xyz0 and xyz1 locations 
-#uv0=[item[1][1] for item in velo]
-#uv1corr=[item[1][3] for item in velo]
-#uverr=[item[1][4] for item in velo]
-#xyz0=[item[0][1] for item in velo]
-#xyz1=[item[0][2] for item in velo]
-#
-#
-##Cycle through data from image pairs   
-#for i in range(len(xyz0)):
+#----------------------------   Plot Results   --------------------------------
+
+print('\nPLOTTING OUTPUTS')
+
+#Extract uv0, uv1corr, xyz0 and xyz1 locations 
+uv0=[item[1][1] for item in velo]
+uv1corr=[item[1][3] for item in velo]
+uverr=[item[1][4] for item in velo]
+xyz0=[item[0][1] for item in velo]
+xyz1=[item[0][2] for item in velo]
+
+
+#Cycle through data from image pairs   
+for i in range(len(xyz0)):
+    
+    #Get image from sequence
+    im=FileHandler.readImg(imagelist[i], band, equal)
+
+    #Correct image for distortion
+    newMat, roi = cv2.getOptimalNewCameraMatrix(matrix, distort, 
+                                                (im.shape[1],im.shape[0]), 
+                                                1, (im.shape[1],im.shape[0])) 
+    im = cv2.undistort(im1, matrix, distort, newCameraMatrix=newMat)
+    
+    #Get image name
+    imn = Path(imagelist[i]).name
+    print('Visualising data for ' + str(imn))
+        
+    #Plot uv velocity points on image plane  
+    Utilities.plotVeloPX(uvvel[i], uv0[i], uv1corr[i], im, show=True, 
+                         save=None)
+
+#    Utilities.plotVeloPX(uverr[i], uv0[i], uv1corr[i], im, show=True, 
+#                         save=target4+'uverr_'+imn)
 #    
-#    #Get image from sequence
-#    im=FileHandler.readImg(imagelist[i], band, equal)
-#
-#    #Correct image for distortion
-#    newMat, roi = cv2.getOptimalNewCameraMatrix(matrix, distort, 
-#                                                (im.shape[1],im.shape[0]), 
-#                                                1, (im.shape[1],im.shape[0])) 
-#    im = cv2.undistort(im1, matrix, distort, newCameraMatrix=newMat)
-#    
-#    #Get image name
-#    imn = Path(imagelist[i]).name
-#    print('Visualising data for ' + str(imn))
-#        
-#    #Plot uv velocity points on image plane  
-#    Utilities.plotVeloPX(uvvel[i], uv0[i], uv1corr[i], im, show=True, 
-#                         save=target4+'uv_'+imn)
-#
-##    Utilities.plotVeloPX(uverr[i], uv0[i], uv1corr[i], im, show=True, 
-##                         save=target4+'uverr_'+imn)
-##    
-##    uvsnr=uverr[i]/uvvel[i]
-##    Utilities.plotVeloPX(uvsnr, uv0[i], uv1corr[i], im, show=True, 
-##                         save=target4+'uvsnr_'+imn)    
-#
-#
-#    #Plot xyz velocity points on dem  
-#    Utilities.plotVeloXYZ(xyzvel[i], xyz0[i], xyz1[i], dem, show=True, 
-#                          save=target4+'xyz_'+imn)
-#
-##    Utilities.plotVeloXYZ(xyzerr[i], xyz0[i], xyz1[i], dem, show=True, 
-##                          save=target4+'xyzerr_'+imn)    
-#                
-##    #Plot interpolation map
-##    grid, pointsextent = Utilities.interpolateHelper(xyzvel[i], xyz0[i], 
-##                                                     xyz1[i], interpmethod)
-##    Utilities.plotInterpolate(grid, pointsextent, dem, show=True, 
-##                              save=target4+'interp_'+imn)  
-#
-#    
+#    uvsnr=uverr[i]/uvvel[i]
+#    Utilities.plotVeloPX(uvsnr, uv0[i], uv1corr[i], im, show=True, 
+#                         save=target4+'uvsnr_'+imn)    
+
+
+    #Plot xyz velocity points on dem  
+    Utilities.plotVeloXYZ(xyzvel[i], xyz0[i], xyz1[i], dem, show=True, 
+                          save=None)
+
+#    Utilities.plotVeloXYZ(xyzerr[i], xyz0[i], xyz1[i], dem, show=True, 
+#                          save=target4+'xyzerr_'+imn)    
+                
+#    #Plot interpolation map
+#    grid, pointsextent = Utilities.interpolateHelper(xyzvel[i], xyz0[i], 
+#                                                     xyz1[i], interpmethod)
+#    Utilities.plotInterpolate(grid, pointsextent, dem, show=True, 
+#                              save=target4+'interp_'+imn)  
+
+    
 #------------------------------------------------------------------------------
 print('\nFinished')
