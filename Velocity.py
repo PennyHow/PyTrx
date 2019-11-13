@@ -1057,28 +1057,13 @@ def seedGrid(dem, griddistance, projvars, min_features=4, mask=None):
             meshx2.append(a)
             meshy2.append(b)
             meshz2.append(demz[indx_y,indx_x])
-            print('Z value at ' + str(indx_x) + ' and ' + str(indx_y) 
-                  + ': ' + str(demz[indx_y,indx_x]))
-
 
     xyz=np.column_stack([meshx2,meshy2,meshz2])
 
     uv,depth,inframe = projectXYZ(projvars[0], projvars[1], projvars[2], 
                                   projvars[3], projvars[4], projvars[5], 
                                   projvars[6], xyz)
-#            camloc, campose, radcorr, tancorr, focal, camcen, im1, xyz)        
-
-    fig, (ax1, ax2) = plt.subplots(1,2)
-    lims = dem.getExtent()    
-    ax1.axis([lims[0],lims[1],lims[2],lims[3]])    
-    ax1.imshow(demz, origin='lower',
-               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray') 
-    ax1.scatter(meshx2, meshy2, color='red')
-    
-    ax2.imshow(projvars[6], cmap='gray')
-    ax2.scatter(uv[:,0], uv[:,1], color='red')   
-    plt.show()  
-    
+        
     return xyz, uv
 
 def readDEMmask(dem, img, invprojvars, demMaskPath=None):
@@ -1146,16 +1131,5 @@ def readDEMmask(dem, img, invprojvars, demMaskPath=None):
             print('\nSaved mask to: ' + str(demMaskPath))
         except:
             print('\nFailed to write file: ' + str(demMaskPath))
-    
-    #Plot image points    
-    fig, (ax1) = plt.subplots(1)
-    demz = dem.getZ()  
-    lims = dem.getExtent()
-    ax1.axis([lims[0],lims[1],lims[2],lims[3]])    
-    ax1.imshow(demz, origin='lower',
-               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
-    ax1.plot(xyz[:,0], xyz[:,1], color='red')
-        
-    plt.show()
         
     return demMask

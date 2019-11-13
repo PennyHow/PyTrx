@@ -225,171 +225,221 @@ for i in range(len(imagelist)-1):
                              
     #Calculate velocities between image pair
     print('Calculating velocity...')
-    griddistance = [500,500]
-    projvars = [camloc, campose, radcorr, tancorr, focal, camcen, im1]
-    xyz, uv = seedGrid(dem, griddistance, projvars, min_features=4, mask=demmask)
-
-#    demx = dem.getData(0)    
-#    demx_uniq = demx[0,:]
-#    demx_uniq = demx_uniq.reshape(demx_uniq.shape[0],-1)
-#    
-#    demy = dem.getData(1)
-#    demy_uniq = demy[:,0]    
-#    demy_uniq = demy_uniq.reshape(demy_uniq.shape[0],-1)
-#    
-#
-#    mz = ma.masked_array(demz, np.logical_not(demmask))
-#    mz = mz.filled(np.nan) 
-#    
-#   
-#    griddistance=[500,500]
-#    
-#    #Define grid as empty list    
-#    gridxyz=[]
-#    
-#    #Get DEM extent
-#    extent = dem.getExtent()
-#    
-#    #Define point spacings in dem space
-#    samplex = round((extent[1]-extent[0])/griddistance[0])
-#    sampley = round((extent[3]-extent[2])/griddistance[1])
-#    
-#    #Define grid in dem space
-#    linx = np.linspace(extent[0], extent[1], samplex)
-#    liny = np.linspace(extent[2], extent[3], sampley)
-#    
-#    #Create mesh
-#    meshx, meshy = np.meshgrid(linx, liny) 
-#    
-#    #Get Z values for mesh grid
-#    meshx2 = []
-#    meshy2 = []
-#    meshz2 = []
-#    
-#    for a,b in zip(meshx.flatten(), meshy.flatten()):
-#
-#        both1 = (np.abs(demx_uniq-a)).argmin()
-#        both2 = (np.abs(demy_uniq-b)).argmin()
-##        both1 = np.where(demx_uniq==a)
-##        both2 = np.where(demy_uniq==b)
-#        
-##        print('Found in x: ' + str(both1))
-##        print('Found in y: ' + str(both2))
-#
-#        if np.isnan(mz[both2,both1]) == False:
-#            np.array([a,b,mz[both2,both1]])
-#            meshx2.append(a)
-#            meshy2.append(b)
-#            meshz2.append(mz[both2,both1])
-#            print('Z value at ' + str(both1) + ' and ' + str(both2) + ': ' + str(mz[both2,both1]))
-#
-##        except:
-##            pass
-#
-#      
-#    
-#    
-##    meshxy = np.array([meshx, meshy])
-##    meshxmsk = ma.masked_array(meshx, np.logical_not(myMask))     
-##    meshymsk = ma.masked_array(meshy, np.logical_not(myMask))  
-#    
-##    gridx,gridy = seedGrid(dem, None, [500,500], 4, [camloc, campose, radcorr, tancorr, focal, camcen, refimagePath])
-#    
-##    X = gridx.flatten()
-##    Y = gridy.flatten()
-##
-##    demx = dem.getData(0)
-##    demxflat = demx.flatten()
-##    demy = dem.getData(1)
-##    demyflat = demy.flatten()
-##    demz = dem.getZ()
-##    demzflat = demz.flatten()
-##    
-##    Z=[]
-##    for a,b in zip(X,Y):
-##
-##        print(a)
-##        print(b)      
-##        
-###        both1 = np.where(demxflat==a)          
-###        both2 = np.where(demyflat==b)
-##
-##        both1 = (np.abs(demx-a)).argmin()
-##        both2 = (np.abs(demy-b)).argmin()
-##    
-##        print(both1)
-##        print(both2)
-##
-##        indx = np.intersect1d(both1, both2)
-##        indx = int(indx)
-##        
-##        print(indx)
-###        idxa = (np.abs(demx - a)).argmin()
-###        idxb = (np.abs(demy - b)).argmin()
-###        print(idxa)
-###        print(idxb)
-##        Z.append(demzflat[indx])
-##        
-#    xyz=np.column_stack([meshx2,meshy2,meshz2])
-#
-#    uv,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, focal, camcen, im1, xyz)        
-#
-##    #Plot image points    
-##    fig, (ax1, ax2, ax3) = plt.subplots(1,3)
-##    lims = dem.getExtent()
-##    
-##    ax1.axis([lims[0],lims[1],lims[2],lims[3]])    
-##    ax1.imshow(demz, origin='lower',
-##               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
-##    ax1.scatter(meshx.flatten(), meshy.flatten(), color='red')
-##     
-##    ax2.locator_params(axis = 'x', nbins=8)
-##    ax2.axis([lims[0],lims[1],lims[2],lims[3]])
-##    ax2.imshow(mz, origin='lower', 
-##               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray')
-##    ax2.scatter(meshx2, meshy2, color='red')
-##
-##    ax3.imshow(im1, cmap='gray')
-##    ax3.scatter(uv[:,0], uv[:,1], color='red')
-##    plt.show()
-
-#    fig, (ax1) = plt.subplots(1,1)
-#    lims = dem.getExtent()    
-#    ax1.axis([lims[0],lims[1],lims[2],lims[3]])    
-#    ax1.imshow(mz, origin='lower',
-#               extent=[lims[0],lims[1],lims[2],lims[3]], cmap='gray') 
-#    ax1.scatter(meshx2, meshy2, color='red')
-#    plt.show()  
+    griddistance = [100,100]
+    projvars = [camloc, campose, radcorr, tancorr, focal, camcen, im0]
+    xyz, uv0 = seedGrid(dem, griddistance, projvars, min_features=4, mask=demmask)
     
-#    #Create empty numpy array
-#    griduv=np.zeros([475,2])
-#    griduv[::]=float('NaN')
-    
-#    #Get XYZ real world coordinates and corresponding uv coordinates
-#    X=invprojvars[0]
-#    Y=invprojvars[1]
-#    Z=invprojvars[2]
-#    uv0=invprojvars[3]
-#    
-#    XYZ = np.column_stack([X,Y,Z])
-#    uv0_u = uv0[:,0]
-#    uv0_v = uv0[:,1]
-    
-#    #Snap uv and xyz grids together
-#    u=interpolate.griddata(XYZ, uv0_u, (gridx, gridy), method='linear')
-#    v=interpolate.griddata(XYZ, uv0_v, (gridx, gridy), method='linear')
+    #Create count for successful and failed tracking attempts
+    success = 0
+    fail = 0
 
+    templatesize = 10
+    searchsize=50
+    
+    method='opticalflow'
+#    method='cv2.TM_CCORR_NORMED'  
+    supersample=0.01
+    threshold=2.0
+
+    if method != 'opticalflow':
         
-#    print(s)
-#    print(type(s))
+        maxcorr=[]
+        avercorr=[]
+        pu2=[]
+        pv2=[]        
+        
+        #Get rows one by one
+        for u,v in zip(uv0[:,0], uv0[:,1]):
+             
+            #Get template and search scene
+            template = im0[int(v-(templatesize/2)):int(v+(templatesize/2)), 
+                          int(u-(templatesize/2)):int(u+(templatesize/2))]
+            search = im1[int(v-(searchsize/2)):int(v+(searchsize/2)), 
+                        int(u-(searchsize/2)):int(u+(searchsize/2))]       
+                   
+            #Change array values from float64 to uint8
+            template = template.astype(np.uint8)
+            search = search.astype(np.uint8)
+                          
+            #Define method string as mapping object
+            meth=eval(method)
+                       
+    #        try:
+            #Try and match template in imageB 
+            try:
+                resz = cv2.matchTemplate(search, template, meth)
+            except:
+                print('Matching error')
+                resz=None
+            
+            if resz.all() is not None:
+                
+                #Perform subpixel analysis if flag is True
+                if supersample is not None:
+                                        
+                    #Create XY grid for correlation result 
+                    resx = np.arange(0, resz.shape[1], 1)
+                    resy = np.arange(0, resz.shape[0], 1)                    
+                    resx,resy = np.meshgrid(resx, resy, sparse=True)
+                                                            
+                    #Create bicubic interpolation grid                                                                            
+                    interp = interpolate.interp2d(resx, resy, resz, 
+                                                  kind='cubic')                    
+                    
+                    #Create new XY grid to interpolate across
+                    newx = np.arange(0, resz.shape[1], supersample)
+                    newy = np.arange(0, resz.shape[0], supersample)
+                            
+                    #Interpolate 
+                    resz = interp(newx, newy)
+                                                            
+                    #Get correlation values and coordinate locations        
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(resz)
+                                                                                                
+                    #If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take min
+                    if method == 'cv2.TM_SQDIFF':                            
+                        location = min_loc
+                        valm = min_val
+                    elif method == 'cv2.TM_SQDIFF_NORMED':
+                        location = min_loc
+                        valm = min_val
+                        
+                    #Else, take maximum correlation and location
+                    else:                 
+                        location = max_loc
+                        valm = max_val
+                                        
+                    #Calculate tracked point location                    
+                    loc_x = ((u - ((resz.shape[1]*supersample)/2)) + 
+                            (location[0]*supersample))
+                    loc_y = ((v - ((resz.shape[1]*supersample)/2) + 
+                            (location[1]*supersample)))                            
+                    #ASSUMPTION: the origin of the template window is the same 
+                    #as the origin of the correlation array (i.e. resz)                        
+                        
+                #If supersampling has not be specified
+                else:
+                    #Get correlation values and coordinate locations        
+                    min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(resz)
+                                                                            
+                    #If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take min
+                    if method == 'cv2.TM_SQDIFF':                            
+                        location = min_loc
+                        valm = min_val
+                    elif method == 'cv2.TM_SQDIFF_NORMED':
+                        location = min_loc
+                        valm = min_val
+                    else:
+                        location = max_loc
+                        valm = max_val                         
+        
+                    #Calculate tracked point location
+                    loc_x = (u - (resz.shape[1]/2)) + (location[0])
+                    loc_y = (v - (resz.shape[1]/2)) + (location[1])
+        
+                #Retain correlation and location            
+                maxcorr.append(valm)
+                avercorr.append(np.mean(resz))
+                pu2.append(loc_x)
+                pv2.append(loc_y)
+                
+                #Revise success count
+                success = success+1                 
+               
+        fig, (ax1) = plt.subplots(1,1)         
+        ax1.imshow(im0, origin='upper', cmap='gray')
+        ax1.scatter(uv0[:,0], uv0[:,1], color='red')
+        ax1.scatter(pu2, pv2, color='blue')
+        plt.show()
+        
+        print('\nTemplate matching completed')
+        print(str(success) + ' templates successfully matched')
+       
+    else:                     
+        #Create empty lists for matching results
+        error = []
+        pu2 = []
+        pv2 = []
+        
+        #Create count for successful and failed tracking attempts
+        success = 0
+        fail = 0
+        
+    
+        #Optical Flow set-up parameters
+        lk_params = dict( winSize  = (searchsize,searchsize),
+                          maxLevel = 2,
+                          criteria = (cv2.TERM_CRITERIA_EPS | 
+                                      cv2.TERM_CRITERIA_COUNT, 10, 0.03))    
+                        
+        #Rearrange pu, pv as 3d array in preparation for tracking 
+        puv = [] 
+        for u,v in zip(uv0[:,0], uv0[:,1]):
+            puv.append(u)
+            puv.append(v)
+                
+        puv = np.array(puv,dtype='float32').reshape((-1,1,2))
+        
+        #Track forward from Scene A to Scene B
+        uv1, s1, err1  = cv2.calcOpticalFlowPyrLK(im0, im1, puv, None, 
+                                                  **lk_params)     
+    
+        #Track backwards from Scene B to Scene A
+        uv0r, s0, err0  = cv2.calcOpticalFlowPyrLK(im1, im0, uv1, None, 
+                                                  **lk_params) 
+    
+        #Loop through track index    
+        for i in range(len(s1)):
+    
+            #If tracking was successful            
+            if s1[i][0] == 1:
+                            
+                #Find difference between the two points from Scene A                        
+                diff=(puv[i]-uv0r[i])*(puv[i]-uv0r[i])
+                diff=np.sqrt(diff[:,0]+diff[:,1])           
+                
+                #Filter by distance between the two point from Scene A
+                if diff < threshold:
+                    error.append(diff[0])
+                    pu2.append(uv1[i][0][0])
+                    pv2.append(uv1[i][0][1])
+                    success = success+1
+                
+                #Else, append None
+                else:                               
+                    error.append(None)
+                    pu2.append(None)
+                    pv2.append(None)                
+                    fail = fail+1
+    
+            #Else, append None
+            else:
+                error.append(None)
+                pu2.append(None)
+                pv2.append(None)                
+                fail = fail+1 
+                                                                                 
+        print('\nTemplate matching completed')
+        print(str(success) + ' templates successfully matched')
+        print(str(fail) + ' templates failed to match')
+
+        fig, (ax1) = plt.subplots(1,1)         
+        ax1.imshow(im0, origin='upper', cmap='gray')
+        ax1.scatter(uv0[:,0], uv0[:,1], color='red')
+        ax1.scatter(pu2, pv2, color='blue')
+        plt.show()
+           
+#        #Restructure results into 2d arrays        
+#        error = np.array(error).reshape(pu.shape[0], pu.shape[1])
+#        pu2 = np.array(pu2).reshape(pu.shape[0], pu.shape[1])
+#        pv2 = np.array(pv2).reshape(pu.shape[0], pu.shape[1])
+    
+
 
 #    vl = calcDenseVelocity(im0, im1, vmask, [matrix,distort], [hg[0],hg[3]], 
 #                           invprojvars, vwin, vback, vminfeat, [vmax, vqual, 
 #                           vmindist])                                                                                                                     
-#    
-#    #Append velocity and homography information
-#    velo.append(vl)
-#    homog.append(hg)
+
                        
 
 #---------------------------  Export data   -----------------------------------
