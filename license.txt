@@ -1,3 +1,8 @@
+PYTRX (C) by Penelope How, Nicholas R. Hulton and Lynne Buie
+LICENSE FILE
+
+=======================================================================
+
 Attribution 4.0 International
 
 =======================================================================

@@ -675,7 +675,7 @@ class CamEnv(CamCalib):
         self.reportCalibData()
 
 
-def calibrateImages(imageFiles, xy, refine=True):
+def calibrateImages(imageFiles, xy, refine=None):
     '''Function for calibrating a camera from a set of input calibration
     images. Calibration is performed using OpenCV's chessboard calibration 
     functions. Input images (imageFile) need to be of a chessboard with 
@@ -764,7 +764,7 @@ def calibrateImages(imageFiles, xy, refine=True):
                                                    5)
     
     #Optimise camera matrix and distortion using fixed principal point
-    if refine is True:
+    if refine != None:
         err,mtx,dist,rvecs,tvecs = cv2.calibrateCamera(objpoints,
                                                        imgpoints,
                                                        gray.shape[::-1],

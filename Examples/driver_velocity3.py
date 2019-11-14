@@ -70,13 +70,13 @@ campose = np.array([4.80926, 0.05768, 0.14914])
 imgFiles = '../Examples/images/KR2_2014_subset/*.JPG'
 
 #Define calibration images and chessboard dimensions (height, width)
-calibPath = '../Examples/camenv_data/calib/KR2_2014_1.txt'
+calibPath = '../Examples/camenv_data/calib/KR1_2014_1.txt'
 
 #Load DEM from path
 DEMpath = '../Examples/camenv_data/dem/KR_demsmooth.tif'        
 
 #Define masks for velocity and homography point generation
-vmaskPath = None       
+vmaskPath = '../Examples/camenv_data/masks/KR2_2014_dem_vmask.jpg'      
 hmaskPath = '../Examples/camenv_data/invmasks/KR2_2014_inv.jpg'    
 
 #Define reference image (where GCPs have been defined)
@@ -129,7 +129,7 @@ hreproj = 5.0                       #Maximum allowed reprojection error
 hback = 0.5                         #Back-tracking threshold
 herr = True                         #Calculate tracking error?
 hmax = 50000                        #Maximum number of points to seed
-hqual = 0.1                         #Corner quality for seeding
+hqual = 0.5                         #Corner quality for seeding
 hmindist = 5.0                      #Minimum distance between seeded points
 hminfeat = 4                        #Minimum number of seeded points to track
 

@@ -145,8 +145,8 @@ GCPxyz, GCPuv = FileHandler.readGCPs(GCPpath)
 
 print('\nCALIBRATING CAMERA')
 calibimgs = sorted(glob.glob(calibPath))                    #Get imagefiles
-calib, err = calibrateImages(calibimgs, chessboard, 
-                             cv2.CALIB_FIX_PRINCIPAL_POINT)
+calib, err = calibrateImages(calibimgs, chessboard) 
+#                             cv2.CALIB_FIX_PRINCIPAL_POINT)
 
 
 print('\nDEFINING CAMERA PROJECTION')

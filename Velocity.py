@@ -676,15 +676,10 @@ def calcSparseVelocity(img1, img2, mask, calib=None, homog=None,
 def calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
                       searchsize, mask, calib=None, homog=None, campars=None, 
                       back_thresh=1.0, min_features=4):
-    '''Function to calculate the velocity between a pair of images. Points 
-    are seeded in the first of these either by a defined grid spacing, or using 
-    the Shi-Tomasi algorithm with OpenCV's goodFeaturesToTrack function. 
-    
-    The Lucas Kanade optical flow algorithm is applied using the OpenCV 
-    function calcOpticalFlowPyrLK to find these tracked points in the 
-    second image. A backward tracking method then tracks back from these to 
-    the original points, checking if this is within a certain distance as a 
-    validation measure.
+    '''Function to calculate the velocity between a pair of images using 
+    a gridded template matching approach. Gridded points are defined by grid 
+    distance, which are then used to either generate templates for matching
+    or tracked using the Lucas Kanade optical flow algorithm.
     
     Tracked points are corrected for image distortion and camera platform
     motion (if needed). The points in the image pair are georectified 
@@ -697,9 +692,24 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
     corresponding uv velocities and points in the image plane.
     
     Inputs
-    img1 (arr):                 Image 1 in the image pair.
-    img2 (arr):                 Image 2 in the image pair.
-    mask (arr):
+    im0 (arr):                  Image 1 in the image pair.
+    im1 (arr):                  Image 2 in the image pair.
+    griddistance (list):        Grid spacing, defined by two values. 
+                                representing pixel row and column spacing.
+    method (str/int):           Method for matching:
+                                'opticalflow': Lucas Kanade Optical Flow.
+                                cv2.TM_CCOEFF: Cross-coefficient.
+                                cv2.TM_CCOEFF_NORMED: Normalised cross-coeff.
+                                cv2.TM_CCORR - Cross correlation.
+                                cv2.TM_CCORR_NORMED - Normalised cross-corr.
+                                cv2.TM_SQDIFF - Square difference.
+                                cv2.TM_SQDIFF_NORMED - Normalised square diff.
+    templatesize (int):         Template window size in im0 for matching.
+    searchsize (int):           Search window size in im1 for matching.                 
+    mask (arr):                 Mask array for masking DEM.
+    calib (list):               Calibration parameters.
+    homog (list):               Homography parameters, hmatrix (arr) and hpts
+                                (arr).
     campars (list):             List containing information for transforming
                                 between the image plane and 3D scene:
                                 1. DEM (ExplicitRaster object);
@@ -710,16 +720,10 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
                                 image)
                                 3. Inverse projection parameters (coordinate
                                 system  3D scene - X, Y, Z, uv0)         
- 
-    #[dem, projvars, invprojvars]
-    hmatrix (arr):              Homography matrix.
-    hpts (arr):                 Homography points.
     back_thesh (int):           Threshold for back-tracking distance (i.e.
                                 the difference between the original seeded
                                 point and the back-tracked point in im0).
     min_features (int):         Minimum number of seeded points to track.
-    griddistance (list):        Grid spacing in metres, inputted as [x,y] to 
-                                represent horizontal and vertical spacing.
                  
     Outputs
     xyz (list)                  List containing the xyz velocities for each 
@@ -741,8 +745,7 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
     #Set threshold difference for point tracks
     displacement_tolerance_rel=2.0
     
-    xyz0, uv0 = seedGrid(campars[0], griddistance, campars[1], min_features, 
-                         mask)
+    xyz0, uv0 = seedGrid(campars[0], griddistance, campars[1], mask)
     
     if method != 'opticalflow':
         pts, ptserrors = templateMatch(im0, im1, uv0, templatesize, searchsize, 
@@ -1118,94 +1121,129 @@ def featureTrack(i0, iN, p0, winsize, back_thresh, min_features):
     return [p0,p1,p0r], error
 
 
-def templateMatch(im0, im1, uv0, templatesize, searchsize, 
-                  min_features, method):
-        
-        avercorr=[]
-        pu2=[]
-        pv2=[]        
-        
-        #Get rows one by one
-        for u,v in zip(uv0[:,:,0], uv0[:,:,1]):
-             
-            #Get template and search scene
-            template = im0[int(v-(templatesize/2)):int(v+(templatesize/2)), 
-                          int(u-(templatesize/2)):int(u+(templatesize/2))]
-            search = im1[int(v-(searchsize/2)):int(v+(searchsize/2)), 
-                        int(u-(searchsize/2)):int(u+(searchsize/2))]       
+def templateMatch(im0, im1, uv0, templatesize, searchsize, min_features=4, 
+                  method=cv2.TM_CCORR_NORMED):
+    '''Function to template match between two images. Templates in the first
+    image (im0) are generated from a given set of points (uv0) and matched to 
+    the search window in image 2 (im1). There are a series of methods that can
+    be used for matching, in adherence with those offered with OpenCV's 
+    matchTemplate function. After matching, the origin point of each matched 
+    template in image 2 is returned, along with the average correlation in 
+    each template.
+    
+    Variables
+    im0 (arr):                   Image 1 in the image pair.
+    im1 (arr):                   Image 2 in the image pair.
+    uv0 (tuple):                 Grid points for image 1.
+    templatesize (int):          Pixel dimensions of the template size, given
+                                 as a single value (i.e. each template is a 
+                                 square) 
+    searchsize(int):             Pixel dimensions of the search size, given as 
+                                 a single value (i.e. each search window is a 
+                                 square) 
+    min_features (int):          Minimum number of point tracks to return
+    method (int):                Method of correlation:
+                                 cv2.TM_CCOEFF: Cross-coefficient
+                                 cv2.TM_CCOEFF_NORMED: Normalised cross-coeff
+                                 cv2.TM_CCORR - Cross correlation
+                                 cv2.TM_CCORR_NORMED - Normalised cross-corr
+                                 cv2.TM_SQDIFF - Square difference
+                                 cv2.TM_SQDIFF_NORMED - Normalised square diff
+    
+    Returns
+    p1 (arr):                   Point coordinates for points tracked to image 2
+    p0r (arr):                  Point coordinates for points back-tracked
+                                from image 2 to image 1
+    error (arr):                SNR measurements for the corresponding tracked 
+                                point. The signal is the magnitude of the 
+                                displacement from p0 to p1, and the noise is 
+                                the magnitude of the displacement from p0r to 
+                                p0
+    '''
+    #Create empty outputs
+    avercorr=[]
+    pu2=[]
+    pv2=[]        
+    
+    #Iterate through points
+    for u,v in zip(uv0[:,:,0], uv0[:,:,1]):
+         
+        #Get template and search window for point
+        template = im0[int(v-(templatesize/2)):int(v+(templatesize/2)), 
+                      int(u-(templatesize/2)):int(u+(templatesize/2))]
+        search = im1[int(v-(searchsize/2)):int(v+(searchsize/2)), 
+                    int(u-(searchsize/2)):int(u+(searchsize/2))]       
+               
+        #Change array values from float64 to uint8
+        template = template.astype(np.uint8)
+        search = search.astype(np.uint8)
+                      
+        #Define method string as mapping object
+        meth=eval(method)
                    
-            #Change array values from float64 to uint8
-            template = template.astype(np.uint8)
-            search = search.astype(np.uint8)
-                          
-            #Define method string as mapping object
-            meth=eval(method)
-                       
-    #        try:
-            #Try and match template in imageB 
-            try:
-                resz = cv2.matchTemplate(search, template, meth)
-            except:
-                resz=None
+        #Attempt to match template in imageB 
+        try:
+            resz = cv2.matchTemplate(search, template, meth)
+        except:
+            resz=None
+        
+        if resz.all() is not None:
+                                
+            #Create UV meshgrid for correlation result 
+            resx = np.arange(0, resz.shape[1], 1)
+            resy = np.arange(0, resz.shape[0], 1)                    
+            resx,resy = np.meshgrid(resx, resy, sparse=True)
+                                                    
+            #Create bicubic interpolation grid                                                                            
+            interp = interpolate.interp2d(resx, resy, resz, kind='cubic')                    
             
-            if resz.all() is not None:
-                                    
-                #Create XY grid for correlation result 
-                resx = np.arange(0, resz.shape[1], 1)
-                resy = np.arange(0, resz.shape[0], 1)                    
-                resx,resy = np.meshgrid(resx, resy, sparse=True)
-                                                        
-                #Create bicubic interpolation grid                                                                            
-                interp = interpolate.interp2d(resx, resy, resz, 
-                                              kind='cubic')                    
-                
-                #Create new sub-pixel XY grid to interpolate across
-                subpx = 0.01
-                newx = np.arange(0, resz.shape[1], subpx)
-                newy = np.arange(0, resz.shape[0], subpx)
-                        
-                #Interpolate 
-                resz = interp(newx, newy)
-                                                        
-                #Get correlation values and coordinate locations        
-                min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(resz)
-                                                                                            
-                #If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take min
-                if method == 'cv2.TM_SQDIFF':                            
-                    location = min_loc
-                elif method == 'cv2.TM_SQDIFF_NORMED':
-                    location = min_loc
+            #Create sub-pixel UV grid to interpolate across
+            subpx = 0.01
+            newx = np.arange(0, resz.shape[1], subpx)
+            newy = np.arange(0, resz.shape[0], subpx)
                     
-                #Else, take maximum correlation and location
-                else:                 
-                    location = max_loc
-                                    
-                #Calculate tracked point location                    
-                loc_x = ((u - ((resz.shape[1]*subpx)/2)) + 
-                        (location[0]*subpx))
-                loc_y = ((v - ((resz.shape[1]*subpx)/2) + 
-                        (location[1]*subpx)))                            
-                #ASSUMPTION: the origin of the template window is the same 
-                #as the origin of the correlation array (i.e. resz)                        
-                        
-        
-                #Retain correlation and location            
-                avercorr.append(np.mean(resz))
-                pu2.append(loc_x)
-                pv2.append(loc_y)
-        
-        uv1 = np.column_stack([pu2, pv2])            
-        uv1 = np.array(uv1, dtype='float32').reshape((-1,1,2))
-        avercorr = np.array(avercorr, dtype='float32').reshape((-1,1,1))
-        
-        if uv1.shape[0]<min_features:
-            print('Not enough features successfully tracked.')
-            return None, None
-        else:
-            print('Average template correlation: ' + str(np.mean(avercorr)))               
-            print(str(uv1.shape[0]) + ' templates tracked')
-                       
-            return [uv0, uv1, None], avercorr
+            #Interpolate new correlation grid
+            resz = interp(newx, newy)
+                                                    
+            #Get correlation values and coordinate locations        
+            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(resz)
+                                                                                        
+            #If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum 
+            #location
+            if method == 'cv2.TM_SQDIFF':                            
+                location = min_loc
+            elif method == 'cv2.TM_SQDIFF_NORMED':
+                location = min_loc
+                
+            #Else, take maximum location
+            else:                 
+                location = max_loc
+                                
+            #Calculate tracked point location, assuming the origin of the 
+            #template window is the same as the origin of the correlation array                    
+            loc_x = ((u - ((resz.shape[1]*subpx)/2)) + 
+                    (location[0]*subpx))
+            loc_y = ((v - ((resz.shape[1]*subpx)/2) + 
+                    (location[1]*subpx)))                            
+    
+            #Retain correlation and location            
+            avercorr.append(np.mean(resz))
+            pu2.append(loc_x)
+            pv2.append(loc_y)
+    
+    #Reshape all points and average correlations in 3D arrays
+    uv1 = np.column_stack([pu2, pv2])            
+    uv1 = np.array(uv1, dtype='float32').reshape((-1,1,2))
+    avercorr = np.array(avercorr, dtype='float32').reshape((-1,1,1))
+    
+    #Return none if not enough templates were matched, else return all
+    if uv1.shape[0]<min_features:
+        print('Not enough templates successfully matched.')
+        return None, None
+    else:
+        print('Average template correlation: ' + str(np.mean(avercorr)))               
+        print(str(uv1.shape[0]) + ' templates tracked')
+        return [uv0, uv1, None], avercorr
 
 
 def seedCorners(im, mask, maxpoints, quality, mindist, min_features):
@@ -1242,21 +1280,27 @@ def seedCorners(im, mask, maxpoints, quality, mindist, min_features):
         return p0
 
 
-def seedGrid(dem, griddistance, projvars, min_features, mask):
+def seedGrid(dem, griddistance, projvars, mask):
     '''Define pixel grid at a specified grid distance, taking into 
     consideration the image size and image mask.
     
     Input variables:
-    dem (ExplicitRaster):   DEM object
+    dem (ExplicitRaster):   DEM object.
+    griddistance (list):    The row and column spacing of the grid.
+    projvars (list):        Projection variables (camera location, camera pose,
+                            radial distortion coefficients, tangential 
+                            distortion coefficients, focal length, principal
+                            point, reference image path).
     mask (bool):            Boolean denoting image mask
-    griddistance (list):    rows, columns
     
     Returns:
-    grid (arr):             Grid point array  
+    xyz (arr):              Grid point array in DEM space
+    uv (arr):               Grid points in 
     '''
-    
+    #Get DEM z values
     demz = dem.getZ()
 
+    #Get mask and fill masked demz values with NaN values
     if mask is not None:
         demz = ma.masked_array(demz, np.logical_not(mask))
         demz = demz.filled(np.nan) 
@@ -1272,13 +1316,13 @@ def seedGrid(dem, griddistance, projvars, min_features, mask):
     linx = np.linspace(extent[0], extent[1], samplex)
     liny = np.linspace(extent[2], extent[3], sampley)
     
-    #Create mesh
+    #Create mesh of grid points
     meshx, meshy = np.meshgrid(linx, liny) 
-        
+    
+    #Get unique DEM row and column values   
     demx = dem.getData(0)    
     demx_uniq = demx[0,:]
-    demx_uniq = demx_uniq.reshape(demx_uniq.shape[0],-1)
-    
+    demx_uniq = demx_uniq.reshape(demx_uniq.shape[0],-1)    
     demy = dem.getData(1)
     demy_uniq = demy[:,0]    
     demy_uniq = demy_uniq.reshape(demy_uniq.shape[0],-1)
@@ -1287,25 +1331,29 @@ def seedGrid(dem, griddistance, projvars, min_features, mask):
     meshx2 = []
     meshy2 = []
     meshz2 = []
-    
+
+    #Go through all positions in mesh grid    
     for a,b in zip(meshx.flatten(), meshy.flatten()):
 
+        #Find mesh grid point in DEM and return indexes
         indx_x = (np.abs(demx_uniq-a)).argmin()
         indx_y = (np.abs(demy_uniq-b)).argmin()
 
-
+        #Append Z value if not NaN (i.e. masked out in DEM)
         if np.isnan(demz[indx_y,indx_x]) == False:
-            np.array([a,b,demz[indx_y,indx_x]])
             meshx2.append(a)
             meshy2.append(b)
             meshz2.append(demz[indx_y,indx_x])
-
+    
+    #Compile grid X, Y, Z components together
     xyz=np.column_stack([meshx2,meshy2,meshz2])
 
+    #Project xyz grid to image plane
     uv,depth,inframe = projectXYZ(projvars[0], projvars[1], projvars[2], 
                                   projvars[3], projvars[4], projvars[5], 
                                   projvars[6], xyz)
     
+    #Reshape UV array, 
     uv = np.array(uv, dtype='float32').reshape((-1,1,2))  
     
     return xyz, uv
@@ -1326,14 +1374,14 @@ def readDEMmask(dem, img, invprojvars, demMaskPath=None):
     Input variables:
     dem (ExplicitRaster):       Input DEM object.
     img (arr):                  List containing image mask points.
-    invprojvars (list):         Inverse projection variables.
+    invprojvars (list):         Inverse projection variables (X,Y,Z,uv0).
     demMaskPath (str):          Path to outputted mask file.
     
     Returns
     demMask (arr):              Boolean visibility matrix (which is the same 
                                 size as the dem)
     '''    
-    #Check if a mask already exists, if not enter digitising
+    #Check if a DEM mask already exists, if not enter digitising
     if demMaskPath!=None:
         try:
             demMask = Image.open(demMaskPath)
@@ -1343,11 +1391,14 @@ def readDEMmask(dem, img, invprojvars, demMaskPath=None):
         except:
             print('\nDEM mask file not found. Proceeding to manually digitise...')
     
+    #Open image in figure plot 
     fig=plt.gcf()
     fig.canvas.set_window_title('Click to create mask. Press enter to record' 
                                 ' points.')
     imgplot = plt.imshow(img, origin='upper')
     imgplot.set_cmap('gray')
+    
+    #Initiate interactive point and click
     uv = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, 
                     mouse_stop=2)
     print('\n' + str(len(uv)) + ' points seeded')
@@ -1357,30 +1408,33 @@ def readDEMmask(dem, img, invprojvars, demMaskPath=None):
     #Close shape
     uv.append(uv[0])
     
+    #Reshape array and project to DEM    
     uv = np.array(uv).reshape(-1,2)
     xyz = projectUV(uv, invprojvars)
     xyz = np.column_stack([xyz[:,0], xyz[:,1]]) 
     
+    #Get unique row and column data from DEM
     demx = dem.getData(0)    
     demx_uniq = demx[0,:]
-    demx_uniq = demx_uniq.reshape(demx_uniq.shape[0],-1)
-    
+    demx_uniq = demx_uniq.reshape(demx_uniq.shape[0],-1)    
     demy = dem.getData(1)
     demy_uniq = demy[:,0] 
     demy_uniq = demy_uniq.reshape(demy_uniq.shape[0],-1)
     
+    #Create meshgrid of DEM XY coordinates
     x, y = np.meshgrid(demx_uniq, demy_uniq)
     x, y = x.flatten(), y.flatten()
-    
     points = np.vstack((x,y)).T
     
+    #Overlay mask onto meshgrid and reshape as DEM
     poly = path.Path(xyz)
     demMask = poly.contains_points(points)
     demMask = demMask.reshape((demy_uniq.shape[0], demx_uniq.shape[0]))
     
+    #Save mask to file if file path is specified
     if demMaskPath != None:
         try:
-            plt.imsave(demMaskPath, demMask)
+            Image.fromarray(demMask).convert('L').save(demMaskPath)
             print('\nSaved DEM mask to: ' + str(demMaskPath))
         except:
             print('\nFailed to write file: ' + str(demMaskPath))
