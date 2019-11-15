@@ -38,18 +38,11 @@ import numpy as np
 import cv2
 import glob
 from pathlib import Path
-import matplotlib.pyplot as plt
-from scipy import interpolate
-import numpy.ma as ma
-import ogr
-from PIL import Image, ImageDraw
-from matplotlib import cm
-from matplotlib import path
 
 #Import PyTrx packages
 sys.path.append('../')
 from CamEnv import setProjection, projectXYZ, projectUV
-from Velocity import calcDenseVelocity, calcHomography, templateMatch, seedGrid, readDEMmask, featureTrack
+from Velocity import calcSparseHomography, calcDenseVelocity, templateMatch, seedGrid, readDEMmask, featureTrack
 from DEM import load_DEM, voxelviewshed, ExplicitRaster
 import FileHandler
 import Utilities 
@@ -225,8 +218,8 @@ for i in range(len(imagelist)-1):
         
     #Calculate homography between image pair
     print('Calculating homography...')
-    hg = calcHomography(im0, im1, hmask, [matrix,distort], hmethod, hreproj, 
-                        hwin, hback, hminfeat, [hmax, hqual, hmindist])
+    hg = calcSparseHomography(im0, im1, hmask, [matrix,distort], hmethod, hreproj, 
+                              hwin, hback, hminfeat, [hmax, hqual, hmindist])
     
     homog.append(hg)
                              
@@ -241,10 +234,12 @@ for i in range(len(imagelist)-1):
     threshold=2.0
     min_features=4.0
 
-    vl = calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
-                           searchsize, demmask, [matrix,distort], 
-                           [hg[0],hg[3]], campars, threshold, min_features)   
+#    vl = calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
+#                           searchsize, demmask, [matrix,distort], 
+#                           [hg[0],hg[3]], campars, threshold)   
 
+    vl = calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
+                           searchsize, demmask, None, None, campars, threshold)  
     velo.append(vl)             
 
 #---------------------------  Export data   -----------------------------------
@@ -278,7 +273,7 @@ print('\nPLOTTING OUTPUTS')
 
 #Extract uv0, uv1corr, xyz0 and xyz1 locations 
 uv0=[item[1][1] for item in velo]
-uv1corr=[item[1][3] for item in velo]
+uv1corr=[item[1][2] for item in velo]
 uverr=[item[1][4] for item in velo]
 xyz0=[item[0][1] for item in velo]
 xyz1=[item[0][2] for item in velo]

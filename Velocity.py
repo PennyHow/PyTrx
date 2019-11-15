@@ -98,8 +98,8 @@ class Homography(ImageSequence):
             print('\nHomography mask set')
 
 
-    def calcHomographyPairs(self, winsize=(25,25), back_thresh=1.0, 
-                            min_features=4, seedparams=[50000, 0.1, 5.0]):
+    def calcHomographies(self, winsize=(25,25), back_thresh=1.0, 
+                         min_features=4, seedparams=[50000, 0.1, 5.0]):
         '''Function to generate a homography model through a sequence of 
         images, and perform for image registration. Points that are assumed 
         to be static in the image plane are tracked between image pairs, and 
@@ -150,15 +150,15 @@ class Homography(ImageSequence):
             distortP=self._camEnv.getDistortCoeffsCV2()
                
             #Calculate homography and errors from image pair
-            hg=calcHomography(im0, im1, invmask, [cameraMatrix, distortP], 
-                              method=cv2.RANSAC,
-                              ransacReprojThreshold=5.0,
-                              winsize=winsize,
-                              back_thresh=back_thresh,
-                              min_features=min_features,
-                              seedparams=[seedparams[0],
-                                          seedparams[1],
-                                          seedparams[2]])
+            hg=calcSparseHomography(im0, im1, invmask, [cameraMatrix, distortP], 
+                                    method=cv2.RANSAC,
+                                    ransacReprojThreshold=5.0,
+                                    winsize=winsize,
+                                    back_thresh=back_thresh,
+                                    min_features=min_features,
+                                    seedparams=[seedparams[0],
+                                               seedparams[1],
+                                               seedparams[2]])
         
             #Assign homography information as object attributes
             homog.append(hg)
@@ -226,8 +226,7 @@ class Velocity(ImageSequence):
             print('\nVelocity mask set')
 
 
-    def calcSparseVelocities(self, winsize=(25,25), back_thresh=1.0, 
-                             min_features=4, seedparams=[50000, 0.1, 5.0]):
+    def calcVelocities(self, params):
         '''Function to calculate velocities between succesive image pairs. 
         Image pairs are called from the ImageSequence object. Points are seeded
         in the first of these pairs using the Shi-Tomasi algorithm with 
@@ -250,45 +249,73 @@ class Velocity(ImageSequence):
         pair, and their corresponding uv velocities and points in the image 
         plane.
         
-        Inputs
-        homography:                 Flag to denote whether homography should
-                                    be calculated and images should be 
-                                    corrected for image registration.
-        back_thesh:                 Threshold for back-tracking distance (i.e.
-                                    the difference between the original seeded
-                                    point and the back-tracked point in im0).
-        maxpoints:                  Maximum number of points to seed in im0
-        quality:                    Corner feature quality.
-        mindist:                    Minimum distance between seeded points.                 
-        min_features:               Minimum number of seeded points to track.
+        Args
+        params (list):              List that defines the parameters for 
+                                    deriving velocity:
+                                        
+                                    Method: 'sparse' or 'dense' (str).
+                                    
+                                    Seed parameters: either containing the 
+                                    corner parameters for the sparse method 
+                                    - max. number of corners (int), quality 
+                                    (int), and min. distance (int). Or the grid 
+                                    spacing (list) for the dense method.
+                                    
+                                    Tracking parameters: either containing the
+                                    sparse method parameters -
+                                    window size (tuple), backtracking threshold 
+                                    (int) and minimum tracked features (int).
+                                    Or the dense method parameters - tracking 
+                                    method (int), template size (int), search
+                                    window size (int), and minimum tracked 
+                                    features (int)
         
-        Outputs
-        xyz:                        List containing the xyz velocities for each 
-                                    point (xyz[0]), the xyz positions for the 
-                                    points in the first image (xyz[1]), and the 
-                                    xyz positions for the points in the second 
-                                    image(xyz[2]). 
-        uv:                         List containing the uv velocities for each
-                                    point (uv[0], the uv positions for the 
-                                    points in the first image (uv[1]), the
-                                    uv positions for the points in the second
-                                    image (uv[2]), and the corrected uv points 
-                                    in the second image if they have been 
-                                    calculated using the homography model for
-                                    image registration (uv[3]). If the 
-                                    corrected points have not been calculated 
-                                    then an empty list is merely returned.                                 
+        Returns
+        velocity (list):            List containing the xyz and uv velocities. 
+                                    The first element holds the xyz velocity 
+                                    for each point (xyz[0]), the xyz positions 
+                                    for the points in the first image (xyz[1]), 
+                                    and the xyz positions for the points in the 
+                                    second image(xyz[2]). The second element 
+                                    contains the uv velocities for each point 
+                                    (uv[0], the uv positions for the points in 
+                                    the first image (uv[1]), the uv positions 
+                                    for the points in the second image (uv[2]), 
+                                    and the corrected uv points in the second 
+                                    image if they have been calculated using 
+                                    the homography model for image registration 
+                                    (uv[3]). If the corrected points have not 
+                                    been calculated then an empty list is 
+                                    merely returned. 
+                                    
+        Input example:
+        For sparse velocities: 
+        velocity = calcVelocities(params=['sparse', 
+                                          seedparams=[50000, 0.1, 5.0], 
+                                          trackparams=[(25,25), back_thresh=1.0, 
+                                          min_features=4]])
+        For dense velocities:
+        velocity = calcVelocities(params=['dense', 
+                                          seedparams=[100,100], 
+                                          trackparams=['cv2.TM_CCORR_NORMED', 
+                                          templatesize=10, searchsize=30, 
+                                          back_thresh=1.0, min_features=4]])
         '''
            
-        print('\n\nCALCULATING SPARSE VELOCITIES')
+        print('\n\nCALCULATING VELOCITIES')
         velocity=[]
-        
+
         #Get camera environment 
         camenv = self.getCamEnv()
         
         #Get DEM from camera environment
         dem = camenv.getDEM() 
 
+        #Get projection and inverse projection variables through camera info
+        projvars = [camenv._camloc, camenv._camDirection, camenv._radCorr, 
+                    camenv._tanCorr, camenv._focLen, camenv._camCen, 
+                    camenv._refImage]
+        
         #Get inverse projection variables through camera info               
         invprojvars = setProjection(dem, camenv._camloc, camenv._camDirection, 
                                     camenv._radCorr, camenv._tanCorr, 
@@ -319,150 +346,49 @@ class Velocity(ImageSequence):
             self._imageSet[i].clearAll()
            
             print('\nFeature-tracking for images: ' + str(imn0) +' and ' 
-                  + str(imn1))
+                  + str(imn1))        
 
             #Calculate velocities between image pair with homography
             if self._homog is not None:
-                pts=calcSparseVelocity(im0, im1, mask, [mtx,distort], 
-                                       [self._homog[i][0], self._homog[i][3]], 
-                                       invprojvars, winsize, back_thresh, 
-                                       min_features, [seedparams[0], 
-                                       seedparams[1], seedparams[2]])                      
+                if params[0]=='sparse':
+                    pts=calcSparseVelocity(im0, im1, mask, [mtx,distort], 
+                                           [self._homog[i][0], 
+                                           self._homog[i][3]], 
+                                           invprojvars, params[2][0], 
+                                           params[2][1], params[2][2], 
+                                           [params[1][0], params[1][1], 
+                                           params[1][2]]) 
+                    
+                elif params[0]=='dense':
+                    pts=calcDenseVelocity(im0, im1, params[1], params[2][0],
+                                          params[2][1], params[2][2],
+                                          mask, [mtx,distort], 
+                                          [self._homog[i][0], 
+                                          self._homog[i][3]], [dem, projvars, 
+                                          invprojvars], params[2][3], 
+                                          params[2][4])
+                       
             else:
-                pts=calcSparseVelocity(im0, im1, mask, [mtx,distort], 
-                                       [None, None], invprojvars, winsize, 
-                                       back_thresh, min_features, 
-                                       [seedparams[0], seedparams[1], 
-                                       seedparams[2]]) 
+                if params[0]=='sparse':
+                    pts=calcSparseVelocity(im0, im1, mask, [mtx,distort], 
+                                           [None, None], invprojvars, 
+                                           params[2][0], params[2][1], 
+                                           params[2][2], [params[1][0], 
+                                           params[1][1], params[1][2]])
+                        
+                elif params[0]=='dense':
+                    pts=calcDenseVelocity(im0, im1, params[1], params[2][0],
+                                          params[2][1], params[2][2],
+                                          mask, [mtx,distort], [None, None], 
+                                          [dem, projvars, invprojvars], 
+                                          params[2][3], params[2][4])                     
                                                  
             #Append output
             velocity.append(pts)         
         
         #Return XYZ and UV velocity information
         return velocity
-
-
-    def calcDenseVelocities(self, griddistance, method='cv2.TM_CCORR_NORMED', 
-                            templatesize=10, searchsize=30, back_thresh=1.0, 
-                            min_features=4):
-        '''Function to calculate velocities between succesive image pairs. 
-        Image pairs are called from the ImageSequence object. Points are seeded
-        in the first of these pairs using the Shi-Tomasi algorithm with 
-        OpenCV's goodFeaturesToTrack function. 
-        
-        The Lucas Kanade optical flow algorithm is applied using the OpenCV 
-        function calcOpticalFlowPyrLK to find these tracked points in the 
-        second image of each image pair. A backward tracking method then tracks 
-        back from these to the first image in the pair, checking if this is 
-        within a certain distance as a validation measure.
-        
-        Tracked points are corrected for image distortion and camera platform
-        motion (if needed). The points in each image pair are georectified 
-        subsequently to obtain xyz points. The georectification functions are 
-        called from the Camera Environment object, and are based on those in
-        ImGRAFT (Messerli and Grinsted, 2015). Velocities are finally derived 
-        from these using a simple Pythagoras' theorem method.
-        
-        This function returns the xyz velocities and points from each image 
-        pair, and their corresponding uv velocities and points in the image 
-        plane.
-        
-        Inputs
-        homography:                 Flag to denote whether homography should
-                                    be calculated and images should be 
-                                    corrected for image registration.
-        back_thesh:                 Threshold for back-tracking distance (i.e.
-                                    the difference between the original seeded
-                                    point and the back-tracked point in im0).
-        maxpoints:                  Maximum number of points to seed in im0
-        quality:                    Corner feature quality.
-        mindist:                    Minimum distance between seeded points.                 
-        min_features:               Minimum number of seeded points to track.
-        
-        Outputs
-        xyz:                        List containing the xyz velocities for each 
-                                    point (xyz[0]), the xyz positions for the 
-                                    points in the first image (xyz[1]), and the 
-                                    xyz positions for the points in the second 
-                                    image(xyz[2]). 
-        uv:                         List containing the uv velocities for each
-                                    point (uv[0], the uv positions for the 
-                                    points in the first image (uv[1]), the
-                                    uv positions for the points in the second
-                                    image (uv[2]), and the corrected uv points 
-                                    in the second image if they have been 
-                                    calculated using the homography model for
-                                    image registration (uv[3]). If the 
-                                    corrected points have not been calculated 
-                                    then an empty list is merely returned.                                 
-        '''
-           
-        print('\n\nCALCULATING DENSE VELOCITIES')
-        velocity=[]
-        
-        #Get camera environment 
-        camenv = self.getCamEnv()
-        
-        #Get DEM from camera environment
-        dem = camenv.getDEM() 
-
-        #Get projection and inverse projection variables through camera info
-        projvars = [camenv._camloc, camenv._camDirection, camenv._radCorr, 
-                    camenv._tanCorr, camenv._focLen, camenv._camCen, 
-                    camenv._refImage]
-               
-        invprojvars = setProjection(dem, camenv._camloc, camenv._camDirection, 
-                                    camenv._radCorr, camenv._tanCorr, 
-                                    camenv._focLen, camenv._camCen, 
-                                    camenv._refImage) 
-        
-        #Get camera matrix and distortion parameters for calibration
-        mtx=self._camEnv.getCamMatrixCV2()
-        distort=self._camEnv.getDistortCoeffsCV2()
-        
-        #Get mask
-        mask=self.getMask()
-        
-        #Get first image (image0) file path and array data for initial tracking
-        imn1=self._imageSet[0].getImageName()
-        im1=self._imageSet[0].getImageArray()
-        
-        #Cycle through image pairs (numbered from 0)
-        for i in range(self.getLength()-1):
-
-            #Re-assign first image in image pair
-            im0=im1
-            imn0=imn1
-                            
-            #Get second image in image pair (and subsequently clear memory)
-            im1=self._imageSet[i+1].getImageArray()
-            imn1=self._imageSet[i+1].getImageName()       
-            self._imageSet[i].clearAll()
-           
-            print('\nFeature-tracking for images: ' + str(imn0) +' and ' 
-                  + str(imn1))
-
-            #Calculate velocities between image pair with homography
-            if self._homog is not None:
-                pts=calcDenseVelocity(im0, im1, griddistance, method,
-                                      templatesize, searchsize,
-                                      mask, [mtx,distort], 
-                                      [self._homog[i][0], self._homog[i][3]], 
-                                      [dem, projvars, invprojvars], 
-                                      back_thresh, min_features)                      
-            else:
-                pts=calcDenseVelocity(im0, im1, griddistance, method,
-                                      templatesize, searchsize,
-                                      mask, [mtx,distort], [None, None], 
-                                      [dem, projvars, invprojvars], 
-                                      back_thresh, min_features) 
-                                                 
-            #Append output
-            velocity.append(pts)         
-        
-        #Return XYZ and UV velocity information
-        return velocity
-        
+       
         
     def getMask(self):
         '''Return image mask.'''
@@ -499,7 +425,7 @@ def calcSparseVelocity(img1, img2, mask, calib=None, homog=None,
     This function returns the xyz velocities and points, and their 
     corresponding uv velocities and points in the image plane.
     
-    Inputs
+    Args
     img1 (arr):                 Image 1 in the image pair.
     img2 (arr):                 Image 2 in the image pair.
     hmatrix (arr):              Homography matrix.
@@ -519,7 +445,7 @@ def calcSparseVelocity(img1, img2, mask, calib=None, homog=None,
                                 spacing; inputted as a list containing the 
                                 horizontal and vertical grid spacing.
                  
-    Outputs
+    Returns
     xyz (list)                  List containing the xyz velocities for each 
                                 point (xyz[0]), the xyz positions for the 
                                 points in the first image (xyz[1]), and the 
@@ -565,18 +491,13 @@ def calcSparseVelocity(img1, img2, mask, calib=None, homog=None,
         #is defined forwards (i.e. the points in image 1 are first 
         #corrected, followed by those in image 2)      
         #Correct points in first image 
-        src_pts_corr=cv2.undistortPoints(points[0], 
-                                         calib[0], 
-                                         calib[1],P=newMat)
+        src_pts_corr=cv2.undistortPoints(points[0],calib[0],calib[1],P=newMat)
         
         #Correct points in second image                                         
-        dst_pts_corr=cv2.undistortPoints(points[1], 
-                                         calib[0], 
-                                         calib[1],P=newMat)
+        dst_pts_corr=cv2.undistortPoints(points[1],calib[0],calib[1],P=newMat)
         
-        back_pts_corr=cv2.undistortPoints(points[2],
-                                          calib[0],
-                                          calib[1],P=newMat)
+        back_pts_corr=cv2.undistortPoints(points[2],calib[0],calib[1],P=newMat)
+
     else:
         src_pts_corr = points[0]
         dst_pts_corr = points[1]
@@ -590,9 +511,7 @@ def calcSparseVelocity(img1, img2, mask, calib=None, homog=None,
         hpts=homog[1]
         
         #Apply perspective homography matrix to tracked points
-        tracked=dst_pts_corr.shape[0]
-        dst_pts_homog = apply_persp_homographyPts(dst_pts_corr,
-                                                  hmatrix,
+        dst_pts_homog = apply_persp_homographyPts(dst_pts_corr, hmatrix,
                                                   inverse=True)
         
         #Calculate difference between points corrected for homography and
@@ -745,11 +664,15 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
     #Set threshold difference for point tracks
     displacement_tolerance_rel=2.0
     
+    #Seed point grid
     xyz0, uv0 = seedGrid(campars[0], griddistance, campars[1], mask)
     
+    #Template match if method flag is not optical flow
     if method != 'opticalflow':
         pts, ptserrors = templateMatch(im0, im1, uv0, templatesize, searchsize, 
-                                       min_features, method)       
+                                       min_features, method)
+        
+    #Optical Flow method if method flag is optical flow
     else:                            
         pts, ptserrors = featureTrack(im0, im1, uv0, (searchsize,searchsize), 
                                       back_thresh, min_features)
@@ -758,8 +681,10 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
     if pts==None:
         print('\nNo features to undertake velocity measurements')
         return None        
+    
+    #Correct point tracks for camera distortion    
+    if calib is not None: 
         
-    if calib is not None:        
         #Calculate optimal camera matrix 
         size=im0.shape
         h = size[0]
@@ -781,13 +706,15 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
                                          calib[0], 
                                          calib[1],P=newMat)
         
+        #Correct back-tracked points in first image, if calculated
         if pts[2] != None:
             back_pts_corr=cv2.undistortPoints(pts[2],
                                               calib[0],
                                               calib[1],P=newMat)
         else:
             back_pts_corr = None
-            
+    
+    #Return uncorrected points if calibration not given        
     else:
         src_pts_corr = pts[0]
         dst_pts_corr = pts[1]
@@ -801,7 +728,6 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
         hpts=homog[1]
         
         #Apply perspective homography matrix to tracked points
-        tracked=dst_pts_corr.shape[0]
         dst_pts_homog = apply_persp_homographyPts(dst_pts_corr,
                                                   hmatrix,
                                                   inverse=True)
@@ -843,7 +769,8 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
         pxvel.append(np.sqrt((d[0][0]-c[0][0])*(d[0][0]-c[0][0])+
                      (d[0][1]-c[0][1])*(d[0][1]-c[0][1])))
         
-    #Project good points (original and tracked) to obtain XYZ coordinates    
+    #Project good points (original, tracked and back-tracked) to obtain XYZ 
+    #coordinates    
     if campars[2] is not None:
         
         #Project good points from image0
@@ -894,8 +821,8 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
 
         
 def calcHomography(img1, img2, mask, correct, method=cv2.RANSAC, 
-                   ransacReprojThreshold=5.0, winsize=(25,25), back_thresh=1.0, 
-                   min_features=4, seedparams=[50000, 0.1, 5.0]):
+                   ransacReprojThreshold=5.0, winsize=(25,25), 
+                   back_thresh=1.0, min_features=4, seedparams=[50000, 0.1, 5.0]):
     '''Function to supplement correction for movement in the camera 
     platform given an image pair (i.e. image registration). Returns the 
     homography representing tracked image movement, and the tracked 
@@ -934,15 +861,23 @@ def calcHomography(img1, img2, mask, correct, method=cv2.RANSAC,
                                 homography matrix and the equivalent 
                                 tracked points
     ''' 
+#    [img, img2, homogparams=[method, ransacReprojThreshold], seedingparams=
+#     [method, mask, correct, seedingparams], trackingparams=[trackingparams]]
     
-    #Seed corner features
-    p0 = seedCorners(img1, mask, seedparams[0], seedparams[1], seedparams[2], 
-                     min_features)
+    #If tracking method defined as sparse
+    if trackingparams[0]=='sparse':
         
-    #Feature track between images
-    points, ptserrors = featureTrack(img1, img2, p0, winsize, back_thresh, 
-                                      min_features) 
+        #Seed corner features
+        p0 = seedCorners(img1, mask, seedparams[0], seedparams[1], seedparams[2], 
+                         min_features)
+            
+        #Feature track between images
+        points, ptserrors = featureTrack(img1, img2, p0, winsize, back_thresh, 
+                                          min_features) 
 
+    #If tracking method defined as dense
+    elif trackingparams[1]=='dense':
+        
     #Pass empty object if tracking insufficient
     if points==None:
         print('\nNo features to undertake Homography')
