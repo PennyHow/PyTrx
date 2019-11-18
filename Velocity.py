@@ -98,8 +98,8 @@ class Homography(ImageSequence):
             print('\nHomography mask set')
 
 
-    def calcHomographies(self, winsize=(25,25), back_thresh=1.0, 
-                         min_features=4, seedparams=[50000, 0.1, 5.0]):
+    def calcHomographies(self, params, homogmethod=cv2.RANSAC, 
+                         ransacReprojThreshold=5.0):
         '''Function to generate a homography model through a sequence of 
         images, and perform for image registration. Points that are assumed 
         to be static in the image plane are tracked between image pairs, and 
@@ -110,18 +110,50 @@ class Homography(ImageSequence):
         in subsequent velocity functions, such as calcVelocities and
         calcVelocity.
         
-        Inputs
-        back_thesh:                 Threshold for back-tracking distance (i.e.
-                                    the difference between the original seeded
-                                    point and the back-tracked point in im0).
-        maxpoints:                  Maximum number of points to seed in im0
-        quality:                    Corner feature quality.
-        mindist:                    Minimum distance between seeded points.                 
-        min_features:               Minimum number of seeded points to track.
+        Args
+        params (list):              List that defines the parameters for 
+                                    point matching:
+                                        
+                                    Method: 'sparse' or 'dense' (str).
+                                    
+                                    Seed parameters: either containing the 
+                                    corner parameters for the sparse method 
+                                    - max. number of corners (int), quality 
+                                    (int), and min. distance (int). Or the grid 
+                                    spacing (list) for the dense method.
+                                    
+                                    Tracking parameters: either containing the
+                                    sparse method parameters -
+                                    window size (tuple), backtracking threshold 
+                                    (int) and minimum tracked features (int).
+                                    Or the dense method parameters - tracking 
+                                    method (int), template size (int), search
+                                    window size (int), backtracking threshold 
+                                    (int), and minimum tracked features (int).
+        homogmethod (int):          Method used to calculate homography model,
+                                    which plugs into the OpenCV function
+                                    cv2.findHomography: 
+                                    cv2.RANSAC: RANSAC-based robust method.
+                                    cv2.LEAST_MEDIAN: Least-Median robust 
+                                    0: a regular method using all the points.                                   
+        ransacReprojThreshold (int):Maximum allowed reprojection error.                                    
+        
+        Returns
+        homog (list):               List of homography information for all 
+                                    image pairs in sequence.
+        
+        Input example:
+        For sparse homographies:
+        homog = Homography.calcHomographies([['sparse'], [50000, 0.1, 5], 
+                                             [(25,25), 1.0, 4]])
+        
+        For dense homographies:
+        homog = Homography.calcHomographies([['dense'], [100,100], 
+                                             [cv2.TM_CCORR_NORMED, 50, 100, 
+                                             1.0, 4]])
         ''' 
         print('\n\nCALCULATING HOMOGRAPHY')
-        
-        #Create empty list for outputs
+
         homog=[]   
         
         #Get first image (image0) path and array data
@@ -148,17 +180,35 @@ class Homography(ImageSequence):
             invmask = self.getInverseMask()
             cameraMatrix=self._camEnv.getCamMatrixCV2()
             distortP=self._camEnv.getDistortCoeffsCV2()
-               
-            #Calculate homography and errors from image pair
-            hg=calcSparseHomography(im0, im1, invmask, [cameraMatrix, distortP], 
-                                    method=cv2.RANSAC,
-                                    ransacReprojThreshold=5.0,
-                                    winsize=winsize,
-                                    back_thresh=back_thresh,
-                                    min_features=min_features,
-                                    seedparams=[seedparams[0],
-                                               seedparams[1],
-                                               seedparams[2]])
+            
+            if params[0]=='sparse':
+                
+                #Calculate homography from corners 
+                hg=calcSparseHomography(im0, im1, invmask, [cameraMatrix, distortP], 
+                                        homogmethod, ransacReprojThreshold,
+                                        params[2][0], params[2][1],
+                                        params[2][2], [params[1][0],
+                                        params[1][1], params[1][2]])
+                
+            elif params[0]=='dense':
+                
+                #Get camera environment 
+                camenv = self.getCamEnv()
+                
+                #Get DEM from camera environment
+                dem = camenv.getDEM() 
+        
+                #Get projection and inverse projection variables through camera info
+                projvars = [camenv._camloc, camenv._camDirection, camenv._radCorr, 
+                            camenv._tanCorr, camenv._focLen, camenv._camCen, 
+                            camenv._refImage]
+        
+                #Calculate homography from grid
+                hg=calcDenseHomography(im0, im1, invmask, 
+                                       [cameraMatrix, distortP], params[1], 
+                                       params[2][1], params[2][2], dem, projvars, 
+                                       params[2][0], homogmethod, 
+                                       ransacReprojThreshold, params[2][3])
         
             #Assign homography information as object attributes
             homog.append(hg)
@@ -268,7 +318,7 @@ class Velocity(ImageSequence):
                                     Or the dense method parameters - tracking 
                                     method (int), template size (int), search
                                     window size (int), and minimum tracked 
-                                    features (int)
+                                    features (int).
         
         Returns
         velocity (list):            List containing the xyz and uv velocities. 
@@ -290,16 +340,11 @@ class Velocity(ImageSequence):
                                     
         Input example:
         For sparse velocities: 
-        velocity = calcVelocities(params=['sparse', 
-                                          seedparams=[50000, 0.1, 5.0], 
-                                          trackparams=[(25,25), back_thresh=1.0, 
-                                          min_features=4]])
+        velocity = Velocity.calcVelocities([['sparse'], [50000, 0.1, 5.0], 
+                                          [(25,25), 1.0, 4]])
         For dense velocities:
-        velocity = calcVelocities(params=['dense', 
-                                          seedparams=[100,100], 
-                                          trackparams=['cv2.TM_CCORR_NORMED', 
-                                          templatesize=10, searchsize=30, 
-                                          back_thresh=1.0, min_features=4]])
+        velocity = Velocity.calcVelocities([['dense'],[100,100],
+                                            ['cv2.TM_CCORR_NORMED', 50, 100, 4]])
         '''
            
         print('\n\nCALCULATING VELOCITIES')
@@ -365,8 +410,7 @@ class Velocity(ImageSequence):
                                           mask, [mtx,distort], 
                                           [self._homog[i][0], 
                                           self._homog[i][3]], [dem, projvars, 
-                                          invprojvars], params[2][3], 
-                                          params[2][4])
+                                          invprojvars], params[2][3])
                        
             else:
                 if params[0]=='sparse':
@@ -381,7 +425,7 @@ class Velocity(ImageSequence):
                                           params[2][1], params[2][2],
                                           mask, [mtx,distort], [None, None], 
                                           [dem, projvars, invprojvars], 
-                                          params[2][3], params[2][4])                     
+                                          params[2][3])                     
                                                  
             #Append output
             velocity.append(pts)         
@@ -594,7 +638,7 @@ def calcSparseVelocity(img1, img2, mask, calib=None, homog=None,
 
 def calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
                       searchsize, mask, calib=None, homog=None, campars=None, 
-                      back_thresh=1.0, min_features=4):
+                      min_features=4):
     '''Function to calculate the velocity between a pair of images using 
     a gridded template matching approach. Gridded points are defined by grid 
     distance, which are then used to either generate templates for matching
@@ -616,7 +660,6 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
     griddistance (list):        Grid spacing, defined by two values. 
                                 representing pixel row and column spacing.
     method (str/int):           Method for matching:
-                                'opticalflow': Lucas Kanade Optical Flow.
                                 cv2.TM_CCOEFF: Cross-coefficient.
                                 cv2.TM_CCOEFF_NORMED: Normalised cross-coeff.
                                 cv2.TM_CCORR - Cross correlation.
@@ -639,9 +682,6 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
                                 image)
                                 3. Inverse projection parameters (coordinate
                                 system  3D scene - X, Y, Z, uv0)         
-    back_thesh (int):           Threshold for back-tracking distance (i.e.
-                                the difference between the original seeded
-                                point and the back-tracked point in im0).
     min_features (int):         Minimum number of seeded points to track.
                  
     Outputs
@@ -668,14 +708,8 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
     xyz0, uv0 = seedGrid(campars[0], griddistance, campars[1], mask)
     
     #Template match if method flag is not optical flow
-    if method != 'opticalflow':
-        pts, ptserrors = templateMatch(im0, im1, uv0, templatesize, searchsize, 
+    pts, ptserrors = templateMatch(im0, im1, uv0, templatesize, searchsize, 
                                        min_features, method)
-        
-    #Optical Flow method if method flag is optical flow
-    else:                            
-        pts, ptserrors = featureTrack(im0, im1, uv0, (searchsize,searchsize), 
-                                      back_thresh, min_features)
  
     #Pass empty object if tracking was insufficient
     if pts==None:
@@ -705,20 +739,11 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
         dst_pts_corr=cv2.undistortPoints(pts[1], 
                                          calib[0], 
                                          calib[1],P=newMat)
-        
-        #Correct back-tracked points in first image, if calculated
-        if pts[2] != None:
-            back_pts_corr=cv2.undistortPoints(pts[2],
-                                              calib[0],
-                                              calib[1],P=newMat)
-        else:
-            back_pts_corr = None
     
     #Return uncorrected points if calibration not given        
     else:
         src_pts_corr = pts[0]
         dst_pts_corr = pts[1]
-        back_pts_corr = pts[2]
 
     #Calculate homography-corrected pts if desired
     if homog is not None:
@@ -751,8 +776,6 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
         src_pts_corr=src_pts_corr[good]
         dst_pts_corr=dst_pts_corr[good]
         dst_pts_homog=dst_pts_homog[good]
-        if back_pts_corr != None:
-            back_pts_corr=back_pts_corr[good]
         ptserrors=ptserrors[good]            
         
         print(str(dst_pts_corr.shape[0]) + 
@@ -780,28 +803,12 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
         #Project good points from image1
         uvd=dst_pts_homog[:,0,:]
         xyzd=projectUV(uvd, campars[2])
-
-        #Project good points from image0 back-tracked
-        if back_pts_corr != None:
-            uvb=back_pts_corr[:,0,:]
-            xyzb=projectUV(uvb, campars[2])
-        else:
-            xyzb=None
             
         #Calculate xyz velocity
         xyzvel=[]
         for a,b in zip(xyzs, xyzd):                        
             xyzvel.append(np.sqrt((b[0]-a[0])*(b[0]-a[0])+
                          (b[1]-a[1])*(b[1]-a[1])))
-        
-        #Calculate xyz error
-        if method == 'opticalflow':
-            xyzerr=[]
-            for a,b in zip(xyzs, xyzb):
-                xyzerr.append(np.sqrt((b[0]-a[0])*(b[0]-a[0])+
-                             (b[1]-a[1])*(b[1]-a[1])))
-        else:
-            xyzerr=None
             
     else:
         xyzs=None
@@ -812,71 +819,62 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
     #Return real-world point positions (original and tracked points),
     #and xy pixel positions (original, tracked, and homography-corrected)
     if homog is not None:
-        return [[xyzvel, xyzs, xyzd, xyzerr], 
+        return [[xyzvel, xyzs, xyzd], 
                 [pxvel, src_pts_corr, dst_pts_corr, dst_pts_homog, ptserrors]]
     
     else:
-        return [[xyzvel, xyzs, xyzd, xyzerr], 
+        return [[xyzvel, xyzs, xyzd], 
                 [pxvel, src_pts_corr, dst_pts_corr, None, ptserrors]]
 
         
-def calcHomography(img1, img2, mask, correct, method=cv2.RANSAC, 
-                   ransacReprojThreshold=5.0, winsize=(25,25), 
-                   back_thresh=1.0, min_features=4, seedparams=[50000, 0.1, 5.0]):
+def calcSparseHomography(img1, img2, mask, correct, method=cv2.RANSAC, 
+                         ransacReprojThreshold=5.0, winsize=(25,25), 
+                         back_thresh=1.0, min_features=4, 
+                         seedparams=[50000, 0.1, 5.0]):
     '''Function to supplement correction for movement in the camera 
     platform given an image pair (i.e. image registration). Returns the 
     homography representing tracked image movement, and the tracked 
     features from each image.
     
-    Inputs
-    img1:                       Image 1 in the image pair.
-    img2:                       Image 2 in the image pair.
-    method:                     Method used to calculate homography model,
+    Args
+    img1 (arr):                 Image 1 in the image pair.
+    img2 (arr):                 Image 2 in the image pair.
+    method (int):               Method used to calculate homography model,
                                 which plugs into the OpenCV function
                                 cv2.findHomography: 
                                 cv2.RANSAC: RANSAC-based robust method.
                                 cv2.LEAST_MEDIAN: Least-Median robust 
                                 0: a regular method using all the points.                                   
-    ransacReprjThreshold:       Maximum allowed reprojection error.
-    back_thesh:                 Threshold for back-tracking distance (i.e.
+    ransacReprojThreshold (int):Maximum allowed reprojection error.
+    back_thesh (int):           Threshold for back-tracking distance (i.e.
                                 the difference between the original seeded
                                 point and the back-tracked point in im0).
-    maxpoints:                  Maximum number of points to seed in im0
-    quality:                    Corner feature quality.
-    mindist:                    Minimum distance between seeded points.
-    calcHomogError:             Flag to denote whether homography errors
-                                should be calculated.                 
-    min_features:               Minimum number of seeded points to track.
-    
-    Outputs
-    homogMatrix:                The calculated homographic shift for the 
+    min_features (int):         Minimum number of seeded points to track.
+    seedparams (list):          Corner feature generation parameters - maximum 
+                                number of points to seed in im0, corner feature 
+                                quality, and minimum distance between corner 
+                                points.
+                    
+    Returns
+    homogMatrix (arr):          The calculated homographic shift for the 
                                 image pair (homogMatrix).
     src_pts_corr,
     dst_pts_corr,
-    homog_pts:                  The original, tracked and back-tracked 
+    homog_pts (arr):            The original, tracked and back-tracked 
                                 homography points.  
-    ptserror:                   Difference between the original homography 
+    ptserror (list):            Difference between the original homography 
                                 points and the back-tracked points.
-    homogerror:                 Difference between the interpolated 
+    homogerror (list):          Difference between the interpolated 
                                 homography matrix and the equivalent 
                                 tracked points
-    ''' 
-#    [img, img2, homogparams=[method, ransacReprojThreshold], seedingparams=
-#     [method, mask, correct, seedingparams], trackingparams=[trackingparams]]
-    
-    #If tracking method defined as sparse
-    if trackingparams[0]=='sparse':
+    '''           
+    #Seed corner features
+    p0 = seedCorners(img1, mask, seedparams[0], seedparams[1], seedparams[2], 
+                     min_features)
         
-        #Seed corner features
-        p0 = seedCorners(img1, mask, seedparams[0], seedparams[1], seedparams[2], 
-                         min_features)
-            
-        #Feature track between images
-        points, ptserrors = featureTrack(img1, img2, p0, winsize, back_thresh, 
-                                          min_features) 
-
-    #If tracking method defined as dense
-    elif trackingparams[1]=='dense':
+    #Feature track between images
+    points, ptserrors = featureTrack(img1, img2, p0, winsize, back_thresh, 
+                                      min_features) 
         
     #Pass empty object if tracking insufficient
     if points==None:
@@ -935,6 +933,117 @@ def calcHomography(img1, img2, mask, correct, method=cv2.RANSAC,
     return (homogMatrix, [src_pts_corr,dst_pts_corr,homog_pts], ptserrors, 
             homogerrors)
 
+
+def calcDenseHomography(img1, img2, mask, correct, griddistance, templatesize, 
+                        searchsize, dem, projvars, trackmethod=cv2.TM_CCORR_NORMED, 
+                        homogmethod=cv2.RANSAC, ransacReprojThreshold=5.0, 
+                        min_features=4):
+    '''Function to supplement correction for movement in the camera 
+    platform given an image pair (i.e. image registration). Returns the 
+    homography representing tracked image movement, and the tracked 
+    features from each image.
+    
+    Inputs
+    img1:                       Image 1 in the image pair.
+    img2:                       Image 2 in the image pair.
+    method:                     Method used to calculate homography model,
+                                which plugs into the OpenCV function
+                                cv2.findHomography: 
+                                cv2.RANSAC: RANSAC-based robust method.
+                                cv2.LEAST_MEDIAN: Least-Median robust 
+                                0: a regular method using all the points.                                   
+    ransacReprjThreshold:       Maximum allowed reprojection error.
+    back_thesh:                 Threshold for back-tracking distance (i.e.
+                                the difference between the original seeded
+                                point and the back-tracked point in im0).
+    maxpoints:                  Maximum number of points to seed in im0
+    quality:                    Corner feature quality.
+    mindist:                    Minimum distance between seeded points.
+    calcHomogError:             Flag to denote whether homography errors
+                                should be calculated.                 
+    min_features:               Minimum number of seeded points to track.
+    
+    Outputs
+    homogMatrix:                The calculated homographic shift for the 
+                                image pair (homogMatrix).
+    src_pts_corr,
+    dst_pts_corr,
+    homog_pts:                  The original, tracked and back-tracked 
+                                homography points.  
+    ptserror:                   Difference between the original homography 
+                                points and the back-tracked points.
+    homogerror:                 Difference between the interpolated 
+                                homography matrix and the equivalent 
+                                tracked points
+    '''     
+#                      im0, im1, griddistance, method, templatesize, 
+#                      searchsize, mask, calib=None, homog=None, campars=None, 
+#                      back_thresh=1.0, min_features=4
+     
+    #Generate grid for tracking
+    xyz0, uv0 = seedGrid(dem, griddistance, projvars, mask)
+            
+    #Template match between images
+    points, ptserrors = templateMatch(img1, img2, uv0, templatesize, searchsize, 
+                                      min_features, trackmethod)
+        
+    #Pass empty object if tracking insufficient
+    if points==None:
+        print('\nNo features to undertake Homography')
+        return None
+    
+    if correct is not None:
+        
+        #Calculate optimal camera matrix 
+        size=img1.shape
+        h = size[0]
+        w = size[1]
+        newMat, roi = cv2.getOptimalNewCameraMatrix(correct[0], 
+                                                    correct[1], 
+                                                    (w,h), 1, (w,h))
+               
+        #Correct tracked points for image distortion. The homgraphy here is 
+        #defined forwards (i.e. the points in image 1 are first corrected, 
+        #followed by those in image 2)        
+        #Correct points in first image  
+        src_pts_corr=cv2.undistortPoints(points[0], 
+                                         correct[0], 
+                                         correct[1],P=newMat)
+        
+        #Correct tracked points in second image
+        dst_pts_corr=cv2.undistortPoints(points[1], 
+                                         correct[0], 
+                                         correct[1],P=newMat) 
+    else:
+        src_pts_corr = points[0]
+        dst_pts_corr = points[1]
+    
+    #Find the homography between the two sets of corrected points
+    homogMatrix, mask = cv2.findHomography(src_pts_corr, dst_pts_corr, 
+                                           homogmethod, ransacReprojThreshold)
+    
+    #Calculate homography error
+    #Apply global homography to source points
+    homog_pts = apply_persp_homographyPts(src_pts_corr, homogMatrix, False)          
+
+    #Calculate offsets between tracked points and the modelled points 
+    #using the global homography
+    xd=dst_pts_corr[:,0,0]-homog_pts[:,0,0]
+    yd=dst_pts_corr[:,0,1]-homog_pts[:,0,1]
+    
+    #Calculate mean magnitude and standard deviations of the model 
+    #homography (i.e. actual point errors)          
+    xmean=np.mean(xd)       
+    ymean=np.mean(yd)       #Mean should approximate to zero
+    xsd=np.std(xd)          
+    ysd=np.std(yd)          #SD indicates overall scale of error
+
+    #Compile all error measures    
+    homogerrors=([xmean,ymean,xsd,ysd],[xd,yd])
+                
+    return (homogMatrix, [src_pts_corr,dst_pts_corr,homog_pts], ptserrors, 
+            homogerrors)
+    
 
 def apply_persp_homographyPts(pts, homog, inverse=False):        
     '''Funtion to apply a perspective homography to a sequence of 2D 

@@ -42,7 +42,7 @@ from pathlib import Path
 #Import PyTrx packages
 sys.path.append('../')
 from CamEnv import setProjection, projectXYZ, projectUV
-from Velocity import calcSparseHomography, calcDenseVelocity, templateMatch, seedGrid, readDEMmask, featureTrack
+from Velocity import calcDenseHomography, calcSparseHomography, calcDenseVelocity, templateMatch, seedGrid, readDEMmask, featureTrack
 from DEM import load_DEM, voxelviewshed, ExplicitRaster
 import FileHandler
 import Utilities 
@@ -70,7 +70,7 @@ DEMpath = '../Examples/camenv_data/dem/KR_demsmooth.tif'
 
 #Define masks for velocity and homography point generation
 vmaskPath = '../Examples/camenv_data/masks/KR2_2014_dem_vmask.jpg'      
-hmaskPath = '../Examples/camenv_data/invmasks/KR2_2014_inv.jpg'    
+hmaskPath = '../Examples/camenv_data/invmasks/KR2_2014_dem_inv.jpg'    
 
 #Define reference image (where GCPs have been defined)
 refimagePath = '../Examples/camenv_data/refimages/KR2_2014.JPG'
@@ -169,9 +169,9 @@ imn1 = Path(imagelist[0]).name
 
 
 print('\nLOADING MASKS')
-demmask = readDEMmask(dem, im1, invprojvars, vmaskPath)
-hmask = FileHandler.readMask(None, hmaskPath)
-
+vmask = readDEMmask(dem, im1, invprojvars, vmaskPath)
+#hmask = FileHandler.readMask(None, hmaskPath)
+hmask = readDEMmask(dem, im1, invprojvars, hmaskPath)
 
 #--------------------   Plot camera environment info   ------------------------
 
@@ -216,30 +216,40 @@ for i in range(len(imagelist)-1):
     
     print('\nProcessing images: ' + str(imn0) + ' and ' + str(imn1))
         
-    #Calculate homography between image pair
-    print('Calculating homography...')
-    hg = calcSparseHomography(im0, im1, hmask, [matrix,distort], hmethod, hreproj, 
-                              hwin, hback, hminfeat, [hmax, hqual, hmindist])
+#    #Calculate homography between image pair
+#    print('Calculating homography...')
+#    hg = calcSparseHomography(im0, im1, hmask, [matrix,distort], hmethod, hreproj, 
+#                              hwin, hback, hminfeat, [hmax, hqual, hmindist])
+
+    hgrid = [100,100]
+    htemp=30
+    hsearch=100    
+    trmethod='cv2.TM_CCORR_NORMED' 
+    homogmeth=cv2.RANSAC
+    reproj=5.0
+    hmin=4.0
     
+    hg = calcDenseHomography(im0, im1, hmask, [matrix,distort], hgrid, htemp, 
+                             hsearch, dem, projvars, trmethod, 
+                             homogmeth, reproj, hmin)    
     homog.append(hg)
                              
     #Calculate velocities between image pair
     print('Calculating velocity...')
     
     griddistance = [500,500]
-    templatesize=10
-    searchsize=30    
-#    method='opticalflow'
+    templatesize=30
+    searchsize=100    
     method='cv2.TM_CCORR_NORMED'  
     threshold=2.0
     min_features=4.0
 
-#    vl = calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
-#                           searchsize, demmask, [matrix,distort], 
-#                           [hg[0],hg[3]], campars, threshold)   
-
     vl = calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
-                           searchsize, demmask, None, None, campars, threshold)  
+                           searchsize, vmask, [matrix,distort], 
+                           [hg[0],hg[3]], campars, threshold)   
+
+#    vl = calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
+#                           searchsize, demmask, None, None, campars, threshold)  
     velo.append(vl)             
 
 #---------------------------  Export data   -----------------------------------
