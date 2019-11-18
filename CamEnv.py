@@ -888,8 +888,13 @@ def projectXYZ(camloc, camdirection, radial, tangen, foclen, camcen, refimg,
     #Get camera location
     xyz=xyz-camloc
     
-    #Get camera rotation matrix
-    Rprime=np.transpose(getR(camdirection))
+    #Get camera rotation matrix from pose 
+    if camdirection.ndim == 1:
+        Rprime=np.transpose(getRotation(camdirection))
+    
+    #Assign Rprime if camdirection variable is already a rotation matrix
+    elif camdirection.ndim == 2:
+        Rprime = camdirection
     
     #Multiply matrix
     xyz=np.dot(xyz,Rprime)
@@ -983,7 +988,7 @@ def projectUV(uv, invprojvars):
     return xyz
 
 
-def getR(camDirection):
+def getRotation(camDirection):
     '''Calculates camera rotation matrix calculated from view 
     direction.
     
@@ -991,20 +996,21 @@ def getR(camDirection):
     camDirection (arr):         Camera pose [yaw,pitch,roll]
     
     Returns
-    value (arr):                Rotation matrix'''
+    value (arr):                Rotation matrix
+    '''
 
     C = np.cos(camDirection) 
     S = np.sin(camDirection)
                 
     p=[S[2]*S[1]*C[0]-C[2]*S[0] , S[2]*S[1]*S[0] + C[2]*C[0] , S[2]*C[1]]
-    q=[ C[2]*S[1]*C[0] + S[2]*S[0], C[2]*S[1]*S[0] - S[2]*C[0],C[2]*C[1]]
-    r=[ C[1]*C[0] , C[1]*S[0] , -S[1]]
+    q=[C[2]*S[1]*C[0] + S[2]*S[0], C[2]*S[1]*S[0] - S[2]*C[0],C[2]*C[1]]
+    r=[C[1]*C[0] , C[1]*S[0] , -S[1]]
         
     value = np.array([p,q,r])
     value[0:2,:]=-value[0:2,:]
 
     return value
-     
+   
         
 #------------------------------------------------------------------------------
 

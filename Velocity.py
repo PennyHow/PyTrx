@@ -514,7 +514,7 @@ def calcSparseVelocity(img1, img2, mask, calib=None, homog=None,
                      seedparams[2], min_features)
     
     #Track points between the image pair
-    points, ptserrors = featureTrack(img1, img2, p0, winsize, back_thresh,  
+    points, ptserrors = opticalMatch(img1, img2, p0, winsize, back_thresh,  
                                      min_features) 
  
     #Pass empty object if tracking was insufficient
@@ -814,7 +814,6 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
         xyzs=None
         xyzd=None
         xyzvel=None
-        xyzerr=None
             
     #Return real-world point positions (original and tracked points),
     #and xy pixel positions (original, tracked, and homography-corrected)
@@ -873,8 +872,8 @@ def calcSparseHomography(img1, img2, mask, correct, method=cv2.RANSAC,
                      min_features)
         
     #Feature track between images
-    points, ptserrors = featureTrack(img1, img2, p0, winsize, back_thresh, 
-                                      min_features) 
+    points, ptserrors = opticalMatch(img1, img2, p0, winsize, back_thresh, 
+                                     min_features) 
         
     #Pass empty object if tracking insufficient
     if points==None:
@@ -1096,9 +1095,9 @@ def apply_persp_homographyPts(pts, homog, inverse=False):
         return hpts 
         
 
-def featureTrack(i0, iN, p0, winsize, back_thresh, min_features):
-    '''Function to feature track between two masked images. The Lucas Kanade 
-    optical flow algorithm is applied using the OpenCV function 
+def opticalMatch(i0, iN, p0, winsize, back_thresh, min_features):
+    '''Function to match between two masked images using Optical Flow. The 
+    Lucas Kanade optical flow algorithm is applied using the OpenCV function 
     calcOpticalFlowPyrLK to find these tracked points in the second image. A 
     backward tracking then tracks back from these to the original points, 
     checking if this is within a given number of pixels as a validation 

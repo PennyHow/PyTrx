@@ -37,13 +37,16 @@ import sys
 import numpy as np
 import cv2
 import glob
+import cv2
+import math
+import matplotlib.pyplot as plt
 from pathlib import Path
 
 #Import PyTrx packages
 sys.path.append('../')
-from CamEnv import setProjection, projectXYZ, projectUV
-from Velocity import calcDenseHomography, calcSparseHomography, calcDenseVelocity, templateMatch, seedGrid, readDEMmask, featureTrack
-from DEM import load_DEM, voxelviewshed, ExplicitRaster
+from CamEnv import setProjection, projectXYZ, getRotation
+from Velocity import calcDenseHomography, calcSparseHomography, calcDenseVelocity, readDEMmask
+from DEM import load_DEM
 import FileHandler
 import Utilities 
  
@@ -70,7 +73,7 @@ DEMpath = '../Examples/camenv_data/dem/KR_demsmooth.tif'
 
 #Define masks for velocity and homography point generation
 vmaskPath = '../Examples/camenv_data/masks/KR2_2014_dem_vmask.jpg'      
-hmaskPath = '../Examples/camenv_data/invmasks/KR2_2014_dem_inv.jpg'    
+hmaskPath = '../Examples/camenv_data/invmasks/KR2_2014_inv.jpg'    
 
 #Define reference image (where GCPs have been defined)
 refimagePath = '../Examples/camenv_data/refimages/KR2_2014.JPG'
@@ -151,6 +154,32 @@ distort = np.hstack([radcorr[0][0], radcorr[0][1],          #Compile distortion
                      radcorr[0][2]])
 
 
+print('\nLOADING IMAGE FILES')
+imagelist = sorted(glob.glob(imgFiles))
+im1 = FileHandler.readImg(imagelist[0], band, equal)
+imn1 = Path(imagelist[0]).name
+
+
+print('\nOPTIMISING CAMERA ENVIRONMENT')
+GCPxyz1 = np.array(GCPxyz, dtype=np.float32)
+GCPuv1 = np.array(GCPuv, dtype=np.float32)
+rvec1 = getRotation(campose)
+tvec1 = np.zeros((3,1))
+flag=cv2.SOLVEPNP_ITERATIVE
+
+#retval, rvec2, tvec2= cv2.solvePnP(GCPxyz1, GCPuv1, matrix, distort, None, 
+#                                   None, flags=flag)
+
+retval, rvec2, tvec2, inliers = cv2.solvePnPRansac(GCPxyz1, GCPuv1, matrix, distort)
+
+rvec3 = cv2.Rodrigues(rvec2)[0]
+
+#https://scipy-cookbook.readthedocs.io/items/bundle_adjustment.html
+
+print('Original YPR: ' + str(rvec1))
+print('Optimised rotation vector: ' +str(rvec3))
+
+
 print('\nCOMPILING TRANSFORMATION PARAMETERS')
 projvars = [camloc, campose, radcorr, tancorr,              #Projection params
             focal, camcen, refimagePath]  
@@ -162,16 +191,52 @@ invprojvars = setProjection(dem, camloc, campose,           #Inverse projection
 campars = [dem, projvars, invprojvars]                      #Compiled parameters
 
 
-print('\nLOADING IMAGE FILES')
-imagelist = sorted(glob.glob(imgFiles))
-im1 = FileHandler.readImg(imagelist[0], band, equal)
-imn1 = Path(imagelist[0]).name
+GCPxyz_proj1,depth,inframe = projectXYZ(projvars[0], projvars[1], projvars[2], projvars[3],
+                                        projvars[4], projvars[5], projvars[6], GCPxyz)
+
+GCPxyz_proj2,depth,inframe = projectXYZ(projvars[0], rvec3, projvars[2], projvars[3],
+                                        projvars[4], projvars[5], projvars[6], GCPxyz)
+
+RMSE1=[]
+RMSE2=[]
+
+for i in range(len(GCPxyz_proj1)):
+    RMSE1.append(np.sqrt((GCPxyz_proj1[i][0]-GCPuv[i][0])*
+                        (GCPxyz_proj1[i][0]-GCPuv[i][0])+
+                        (GCPxyz_proj1[i][1]-GCPuv[i][1])*
+                        (GCPxyz_proj1[i][1]-GCPuv[i][1])))
+    
+for i in range(len(GCPxyz_proj2)):
+    RMSE2.append(np.sqrt((GCPxyz_proj2[i][0]-GCPuv[i][0])*
+                        (GCPxyz_proj2[i][0]-GCPuv[i][0])+
+                        (GCPxyz_proj2[i][1]-GCPuv[i][1])*
+                        (GCPxyz_proj2[i][1]-GCPuv[i][1])))
+
+print('Average px difference between XYZ and original projected UV points: ' + str(np.mean(RMSE1)))
+print('Average px difference between XYZ and refined projected UV points: ' + str(np.mean(RMSE2)))
+    
+fig, (ax1) = plt.subplots(1)
+plt.imshow(im1, cmap='gray')
+plt.scatter(GCPuv[:,0], GCPuv[:,1], color='red')
+plt.scatter(GCPxyz_proj1[:,0], GCPxyz_proj1[:,1], color='blue')
+plt.scatter(GCPxyz_proj2[:,0], GCPxyz_proj2[:,1], color='green')
+plt.show()
+
+sys.exit(1)
+
+
+
+
 
 
 print('\nLOADING MASKS')
+print('Defining velocity mask')
 vmask = readDEMmask(dem, im1, invprojvars, vmaskPath)
-#hmask = FileHandler.readMask(None, hmaskPath)
-hmask = readDEMmask(dem, im1, invprojvars, hmaskPath)
+
+print('Defining homography mask')
+hmask = FileHandler.readMask(None, hmaskPath)
+#hmask = readDEMmask(dem, im1, invprojvars, hmaskPath)
+
 
 #--------------------   Plot camera environment info   ------------------------
 
@@ -217,21 +282,21 @@ for i in range(len(imagelist)-1):
     print('\nProcessing images: ' + str(imn0) + ' and ' + str(imn1))
         
 #    #Calculate homography between image pair
-#    print('Calculating homography...')
-#    hg = calcSparseHomography(im0, im1, hmask, [matrix,distort], hmethod, hreproj, 
-#                              hwin, hback, hminfeat, [hmax, hqual, hmindist])
-
-    hgrid = [100,100]
-    htemp=30
-    hsearch=100    
-    trmethod='cv2.TM_CCORR_NORMED' 
-    homogmeth=cv2.RANSAC
-    reproj=5.0
-    hmin=4.0
+    print('Calculating homography...')
+#    hgrid = [100,100]
+#    htemp=30
+#    hsearch=100    
+#    trmethod='cv2.TM_CCORR_NORMED' 
+#    homogmeth=cv2.RANSAC
+#    reproj=5.0
+#    hmin=4.0
+#    hg = calcDenseHomography(im0, im1, hmask, [matrix,distort], hgrid, htemp, 
+#                             hsearch, dem, projvars, trmethod, 
+#                             homogmeth, reproj, hmin)   
     
-    hg = calcDenseHomography(im0, im1, hmask, [matrix,distort], hgrid, htemp, 
-                             hsearch, dem, projvars, trmethod, 
-                             homogmeth, reproj, hmin)    
+
+    hg = calcSparseHomography(im0, im1, hmask, [matrix,distort], hmethod, hreproj, 
+                              hwin, hback, hminfeat, [hmax, hqual, hmindist])
     homog.append(hg)
                              
     #Calculate velocities between image pair
@@ -254,27 +319,27 @@ for i in range(len(imagelist)-1):
 
 #---------------------------  Export data   -----------------------------------
 
-#print('\nWRITING DATA TO FILE')
-#
-##Get all image names
-#names=[]
-#for i in imagelist:
-#    names.append(Path(i).name)
-#
+print('\nWRITING DATA TO FILE')
+
+#Get all image names
+names=[]
+for i in imagelist:
+    names.append(Path(i).name)
+
 #Extract xyz velocities, uv velocities, and xyz0 locations
 xyzvel=[item[0][0] for item in velo] 
 xyzerr=[item[0][3] for item in velo]
 uvvel=[item[1][0] for item in velo]
 xyz0=[item[0][1] for item in velo]
-#
-##Write out velocity data to .csv file
-#FileHandler.writeVeloFile(xyzvel, uvvel, homog, names, target1) 
-#
-##Write homography data to .csv file
-#FileHandler.writeHomogFile(homog, names, target2)
-#
-##Write points to shp file                
-#FileHandler.writeVeloSHP(xyzvel, xyzerr, xyz0, names, target3, projection)       
+
+#Write out velocity data to .csv file
+FileHandler.writeVeloFile(xyzvel, uvvel, homog, names, target1) 
+
+#Write homography data to .csv file
+FileHandler.writeHomogFile(homog, names, target2)
+
+#Write points to shp file                
+FileHandler.writeVeloSHP(xyzvel, xyzerr, xyz0, names, target3, projection)       
 #
 #
 #----------------------------   Plot Results   --------------------------------
