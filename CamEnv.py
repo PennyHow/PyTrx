@@ -1011,7 +1011,31 @@ def getRotation(camDirection):
 
     return value
    
-        
+
+def computeResiduals(campose, camloc, radcorr, tancorr, focal, camcen, 
+                     refimagePath, GCPxyz, GCPuv):
+    '''Calculates the difference between original UV point positions and 
+    projected UV point positions. This can be used to assess the quality of the
+    camera environment's projection, and for optimising the camera parameters.
+    
+    Args
+    
+    Returns
+    residual (arr):             Pixel differences between UV and projected UV
+                                points.
+    '''
+    
+    GCPxyz_proj,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
+                                           focal, camcen, refimagePath, GCPxyz)   
+    residual=[]
+    for i in range(len(GCPxyz_proj)):
+        residual.append(np.sqrt((GCPxyz_proj[i][0]-GCPuv[i][0])*
+                                (GCPxyz_proj[i][0]-GCPuv[i][0])+
+                                (GCPxyz_proj[i][1]-GCPuv[i][1])*
+                                (GCPxyz_proj[i][1]-GCPuv[i][1])))  
+    residual = np.array(residual)
+
+    return residual        
 #------------------------------------------------------------------------------
 
 #if __name__ == "__main__":   

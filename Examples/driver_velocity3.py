@@ -196,8 +196,24 @@ campars = [dem, projvars, invprojvars]                      #Compiled parameters
 
 
 print('\nBEGINNING OPTIMISATION')
-def computeResiduals(campose, camloc, radcorr, tancorr, focal, camcen, 
-                     refimagePath, GCPxyz, GCPuv):    
+def computeResiduals(params, stable, GCPuv, refimagePath, optimise='YPR'):
+    
+    if optimise == 'YPR':
+        campose = params      
+        camloc, radcorr, tancorr, focal, camcen, GCPxyz = stable
+        
+    elif optimise == 'ALL':
+        camloc = params[0:3]
+        campose = params[3:6]
+        radcorr = params[6:9]
+        tancorr = params[9:11]
+        focal = params[11:13]
+        camcen = params[13:15]
+        GCPxyz = np.array(params[15:]).reshape(-1, 3)
+
+    else:       
+        camloc, campose, radcorr, tancorr, focal, camcen, GCPxyz = stable
+            
     GCPxyz_proj,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
                                            focal, camcen, refimagePath, GCPxyz)   
     residual=[]
@@ -208,13 +224,24 @@ def computeResiduals(campose, camloc, radcorr, tancorr, focal, camcen,
                                 (GCPxyz_proj[i][1]-GCPuv[i][1])))  
     residual = np.array(residual)
 
-#    print('Average px difference between original UV points and projected ' + 
-#              'UV points: ' + str(np.mean(residual)))
     return residual
 
+#args = {'campose' : campose, 'camloc' : camloc, 'radcorr' : radcorr, 
+#        'tancorr' : tancorr, 'focal' : focal, 'GCPxyz' : GCPxyz}
+#
+#kwargs = {'refimagePath': refimagePath, 'GCPuv' : GCPuv}
 
-res0 = computeResiduals(campose, camloc, radcorr, tancorr, focal, camcen, 
-                        refimagePath, GCPxyz, GCPuv)
+
+#camloc, campose, radcorr, tancorr, focal, camcen, GCPxyz
+
+params = np.concatenate((camloc, campose, radcorr.flatten(), tancorr.flatten(), np.array(focal), np.array(camcen), GCPxyz.flatten()))
+print(params)
+others = None
+optimise='ALL'
+res0 = computeResiduals(params, others, GCPuv, refimagePath, optimise)
+
+
+
 
 GCPxyz_proj1,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
                                        focal, camcen, refimagePath, GCPxyz)
@@ -222,10 +249,11 @@ GCPxyz_proj1,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr,
 print('Original residuals: ' + str(np.mean(res0)))
 
 
+    
+        
 t0 = time.time()
-res = least_squares(computeResiduals, campose, method='lm', ftol=1e-08, 
-                    args=(camloc, radcorr, tancorr, focal, camcen, 
-                    refimagePath, GCPxyz, GCPuv))
+res = least_squares(computeResiduals, params, method='trf', ftol=1e-08, 
+                    args=(others, GCPuv, refimagePath, optimise))
 
 t1 = time.time()
 print("Optimization took {0:.0f} seconds".format(t1 - t0))
