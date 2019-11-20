@@ -39,6 +39,9 @@ import cv2
 import glob
 import cv2
 import math
+import time
+from scipy.sparse import lil_matrix
+from scipy.optimize import least_squares
 import matplotlib.pyplot as plt
 from pathlib import Path
 
@@ -174,10 +177,11 @@ retval, rvec2, tvec2, inliers = cv2.solvePnPRansac(GCPxyz1, GCPuv1, matrix, dist
 
 rvec3 = cv2.Rodrigues(rvec2)[0]
 
-#https://scipy-cookbook.readthedocs.io/items/bundle_adjustment.html
 
-print('Original YPR: ' + str(rvec1))
-print('Optimised rotation vector: ' +str(rvec3))
+
+
+        
+#https://scipy-cookbook.readthedocs.io/items/bundle_adjustment.html
 
 
 print('\nCOMPILING TRANSFORMATION PARAMETERS')
@@ -191,43 +195,61 @@ invprojvars = setProjection(dem, camloc, campose,           #Inverse projection
 campars = [dem, projvars, invprojvars]                      #Compiled parameters
 
 
-GCPxyz_proj1,depth,inframe = projectXYZ(projvars[0], projvars[1], projvars[2], projvars[3],
-                                        projvars[4], projvars[5], projvars[6], GCPxyz)
+print('\nBEGINNING OPTIMISATION')
+def computeResiduals(campose, camloc, radcorr, tancorr, focal, camcen, 
+                     refimagePath, GCPxyz, GCPuv):    
+    GCPxyz_proj,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
+                                           focal, camcen, refimagePath, GCPxyz)   
+    residual=[]
+    for i in range(len(GCPxyz_proj)):
+        residual.append(np.sqrt((GCPxyz_proj[i][0]-GCPuv[i][0])*
+                                (GCPxyz_proj[i][0]-GCPuv[i][0])+
+                                (GCPxyz_proj[i][1]-GCPuv[i][1])*
+                                (GCPxyz_proj[i][1]-GCPuv[i][1])))  
+    residual = np.array(residual)
 
-GCPxyz_proj2,depth,inframe = projectXYZ(projvars[0], rvec3, projvars[2], projvars[3],
-                                        projvars[4], projvars[5], projvars[6], GCPxyz)
+#    print('Average px difference between original UV points and projected ' + 
+#              'UV points: ' + str(np.mean(residual)))
+    return residual
 
-RMSE1=[]
-RMSE2=[]
 
-for i in range(len(GCPxyz_proj1)):
-    RMSE1.append(np.sqrt((GCPxyz_proj1[i][0]-GCPuv[i][0])*
-                        (GCPxyz_proj1[i][0]-GCPuv[i][0])+
-                        (GCPxyz_proj1[i][1]-GCPuv[i][1])*
-                        (GCPxyz_proj1[i][1]-GCPuv[i][1])))
-    
+res0 = computeResiduals(campose, camloc, radcorr, tancorr, focal, camcen, 
+                        refimagePath, GCPxyz, GCPuv)
+
+GCPxyz_proj1,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
+                                       focal, camcen, refimagePath, GCPxyz)
+
+print('Original residuals: ' + str(np.mean(res0)))
+
+
+t0 = time.time()
+res = least_squares(computeResiduals, campose, method='lm', ftol=1e-08, 
+                    args=(camloc, radcorr, tancorr, focal, camcen, 
+                    refimagePath, GCPxyz, GCPuv))
+
+t1 = time.time()
+print("Optimization took {0:.0f} seconds".format(t1 - t0))
+
+GCPxyz_proj2,depth,inframe = projectXYZ(camloc, res.x, radcorr, tancorr, 
+                                       focal, camcen, refimagePath, GCPxyz)   
+
+residual=[]
 for i in range(len(GCPxyz_proj2)):
-    RMSE2.append(np.sqrt((GCPxyz_proj2[i][0]-GCPuv[i][0])*
-                        (GCPxyz_proj2[i][0]-GCPuv[i][0])+
-                        (GCPxyz_proj2[i][1]-GCPuv[i][1])*
-                        (GCPxyz_proj2[i][1]-GCPuv[i][1])))
-
-print('Average px difference between XYZ and original projected UV points: ' + str(np.mean(RMSE1)))
-print('Average px difference between XYZ and refined projected UV points: ' + str(np.mean(RMSE2)))
+    residual.append(np.sqrt((GCPxyz_proj2[i][0]-GCPuv[i][0])*
+                            (GCPxyz_proj2[i][0]-GCPuv[i][0])+
+                            (GCPxyz_proj2[i][1]-GCPuv[i][1])*
+                            (GCPxyz_proj2[i][1]-GCPuv[i][1])))
     
+print('Average px difference between original UV points and projected ' + 
+          'UV points: ' + str(np.mean(residual)))
+
+
 fig, (ax1) = plt.subplots(1)
 plt.imshow(im1, cmap='gray')
 plt.scatter(GCPuv[:,0], GCPuv[:,1], color='red')
-plt.scatter(GCPxyz_proj1[:,0], GCPxyz_proj1[:,1], color='blue')
-plt.scatter(GCPxyz_proj2[:,0], GCPxyz_proj2[:,1], color='green')
+plt.scatter(GCPxyz_proj1[:,0], GCPxyz_proj1[:,1], color='green')
+plt.scatter(GCPxyz_proj2[:,0], GCPxyz_proj2[:,1], color='blue')
 plt.show()
-
-sys.exit(1)
-
-
-
-
-
 
 print('\nLOADING MASKS')
 print('Defining velocity mask')
