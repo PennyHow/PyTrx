@@ -297,8 +297,8 @@ def optimiseCamera(optimise, camloc, campose, radcorr, tancorr, focal, camcen,
                                (GCPxyz_proj1[i][1]-GCPuv[i][1])*
                                (GCPxyz_proj1[i][1]-GCPuv[i][1])))
     
-        print('Original residuals (average): ' + str(np.mean(res0)))        
-        print('Optimised residuals (average): ' + str(np.mean(res1)))
+        print('Original px residuals (average): ' + str(np.mean(res0)))        
+        print('Optimised px residuals (average): ' + str(np.mean(res1)))
         
         if show == True:
             fig, (ax1) = plt.subplots(1)
