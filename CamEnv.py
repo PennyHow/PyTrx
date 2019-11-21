@@ -49,13 +49,14 @@ invproject:                 Inverse project image coordinates (uv) to xyz world
 '''
 
 #Import PyTrx packages
-from FileHandler import readImg, readMatrixDistortion, readGCPs
-from Utilities import plotGCPs, plotPrincipalPoint, plotCalib
+from Utilities import plotGCPs, plotCalib, plotResiduals, plotPrincipalPoint
+from FileHandler import readImg, readGCPs, readMatrixDistortion 
 from DEM import ExplicitRaster,load_DEM,voxelviewshed
 from Images import CamImage
 
 #Import other packages
 from scipy import interpolate
+from scipy import optimize
 import numpy as np
 import cv2
 import glob
@@ -988,6 +989,156 @@ def projectUV(uv, invprojvars):
     return xyz
 
 
+def optimiseCamera(optimise, projvars, GCPxyz, GCPuv, optmethod='trf', 
+                   show=False):
+    '''Optimise camera parameters using the pixel differences between a set
+    of image GCPs and projected XYZ GCPs. The optimisation routine adopts the
+    least_square function in scipy's optimize tools, using either the Trust 
+    Region Reflective algorithm, the dogleg algorithm or the 
+    Levenberg-Marquardt algorithm to refine a set group of projection 
+    parameters - camera pose only, the internal camera parameters (i.e. radial 
+    distortion, tangential distortion, focal length, principal point), the 
+    external camera parameters (i.e. camera location, camera pose), or all 
+    projection parameters (i.e. camera location, camera pose, radial 
+    distortion, tangential distortion, focal length, principal point).
+    
+    Trust Region Reflective algorithm: Generally a robust method, ideal for 
+                                       solving many variables (default).
+    Dogleg algorithm:                  Ideal for solving few variables. 
+    Levenberg-Margquardt algorithm:    The most efficient method, ideal for 
+                                       solving few variables.
+
+    Pixel differences between a set of image GCPs and projected XYZ GCPs are
+    calculated and refined within the optimisation function, performing 
+    iterations until an optimum solution is reached. A new set of optimised 
+    projection parameters are returned.
+    
+    Args
+    optimise (str):             Flag denoting which variables will be 
+                                optimised:
+                                YPR: Camera pose only.
+                                INT: Internal camera parameters.
+                                EXT: External camera parameters.
+                                ALL: All projection parameters.
+    projvars (list):            Projection parameters [camera location, camera
+                                pose, radial distortion, tangential distortion,
+                                focal length, principal point, reference image]
+    GCPxyz (arr):               XYZ positions for GCPs, as shape (m, 3).
+    GCPuv (arr):                UV positions for GCPs, as shape (m, 2).
+    optmethod (str):            Optimisation method:
+                                'trf': Trust Region Reflective algorithm.
+                                'dogbox': dogleg algorithm.
+                                'lm': Levenberg-Marquardt algorithm.
+    show (bool):                Flag denoting whether plot of residuals should
+                                be shown. 
+                                
+    Returns
+    projvars (list):            Optimised projection parameters. If 
+                                optimisation fails then None is returned.    
+    '''    
+    #Get projectiion parameters from projvars
+    camloc, campose, radcorr, tancorr, focal, camcen, refimg = projvars
+
+    #Compute GCP residuals with original camera info
+    stable = [camloc, campose, radcorr, tancorr, focal, camcen]    
+    res0 = computeResiduals(None, stable, GCPxyz, GCPuv, refimg, 
+                            optimise=None)
+    GCPxyz_proj0,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
+                                           focal, camcen, refimg, GCPxyz)
+    
+    #Get variables for optimising    
+    if optimise=='YPR':
+        params = campose
+        stable = [camloc, radcorr, tancorr, focal, camcen]
+        print('Commencing optimisation of YPR')        
+    elif optimise=='INT':
+        params = np.concatenate((radcorr.flatten(), tancorr.flatten(), 
+                                 np.array(focal), np.array(camcen)))
+        stable = [camloc, campose]
+        print('Commencing optimisation of internal camera parameters')    
+    elif optimise == 'EXT':
+        params = np.concatenate((camloc, campose))
+        stable = [radcorr, tancorr, focal, camcen]
+        print('Commencing optimisation of external camera parameters')    
+    else:
+        optimise='ALL'
+        params = np.concatenate((camloc, campose, radcorr.flatten(), 
+                                 tancorr.flatten(), np.array(focal), 
+                                 np.array(camcen)))               
+        stable=None
+        print('Commencing optimisation of all projection parameters')
+     
+    #Optimise, passing through the computeResiduals function for iterating
+    out = optimize.least_squares(computeResiduals, params, method=optmethod, 
+                                 verbose=2, 
+                                 args=(stable, GCPxyz, GCPuv, refimg, optimise))  
+
+    #If optimisation was sucessful
+    if out.success is True:
+        print('Optimisation successful')
+        
+        #Retrieve optimised parameters
+        if optimise=='YPR':
+            campose = out.x
+        elif optimise == 'INT':
+            radcorr = out.x[0:3].reshape(1,3)
+            tancorr = out.x[3:5].reshape(1,2)
+            focal = list(out.x[5:7])
+            camcen = list(out.x[7:9])        
+        elif optimise == 'EXT':
+            camloc = out.x[0:3]
+            campose = out.x[3:6]           
+        else:
+            camloc = out.x[0:3]
+            campose = out.x[3:6]
+            radcorr = out.x[6:9].reshape(1,3)
+            tancorr = out.x[9:11].reshape(1,2)
+            focal = list(out.x[11:13])
+            camcen = list(out.x[13:15]) 
+        
+        #Calculate projected GCPs with new projection parameters
+        GCPxyz_proj1, depth, inframe = projectXYZ(camloc, campose, radcorr, 
+                                                  tancorr, focal, camcen, 
+                                                  refimg, GCPxyz)   
+     
+        #Calculate new residuals
+        res1=[]
+        for i in range(len(GCPxyz_proj1)):
+            res1.append(np.sqrt((GCPxyz_proj1[i][0]-GCPuv[i][0])*
+                               (GCPxyz_proj1[i][0]-GCPuv[i][0])+
+                               (GCPxyz_proj1[i][1]-GCPuv[i][1])*
+                               (GCPxyz_proj1[i][1]-GCPuv[i][1])))
+        print('Original px residuals (average): ' + str(np.mean(res0)))        
+        print('Optimised px residuals (average): ' + str(np.mean(res1)))
+        
+        #Compile new projection parameter list
+        projvars1 = [camloc, campose, radcorr, tancorr, focal, camcen, 
+                     refimg]
+        
+        #If plotting flag is set to True
+        if show == True:
+            
+            #Get reference image
+            if isinstance(refimg, str):
+                refimg=readImg(refimg)
+                ims=refimg.shape
+            elif isinstance(refimg, np.ndarray):
+                ims=refimg.shape
+            else:
+                ims=refimg.getImageSize()
+            
+            #Plot GCPs using Utilities.plotResiduals function 
+            plotResiduals(refimg, ims, GCPuv, GCPxyz_proj0, GCPxyz_proj1)
+        
+        #Return new projection parameters list        
+        return projvars1
+
+    #If optimisation failed, print statement and return none
+    else:
+        print('Optimisation failed')
+        return None     
+    
+
 def getRotation(camDirection):
     '''Calculates camera rotation matrix calculated from view 
     direction.
@@ -1012,30 +1163,76 @@ def getRotation(camDirection):
     return value
    
 
-def computeResiduals(campose, camloc, radcorr, tancorr, focal, camcen, 
-                     refimagePath, GCPxyz, GCPuv):
-    '''Calculates the difference between original UV point positions and 
-    projected UV point positions. This can be used to assess the quality of the
-    camera environment's projection, and for optimising the camera parameters.
+def computeResiduals(params, stable, GCPxyz, GCPuv, refimg, 
+                     optimise='YPR'):
+    '''Function for computing the pixel difference between GCP image points
+    and GCP projected XYZ points. This function is used in the optimisation 
+    function (optimiseCamera), with parameters for optimising defined in the
+    first variable and stable parameters defined in the second. If no 
+    optimisable parameters are given and the optimise flag is set to None then 
+    residuals are computed for the original parameters (i.e. no optimisation).
     
     Args
+    params (arr):               Optimisable parameters, given as a 1-D array
+                                of shape (m, ).
+    stable (list):              Stable parameters that will not be optimised.
+    GCPxyz (arr):               GCPs in scene space (x,y,z).
+    GCPuv (arr):                GCPs in image space (u,v).
+    refimg (CamImage/str/arr):  Reference image, given as a CamImage object, 
+                                file path string, or image array.
+    optimise (str):             String denoting the optimisation type:
+                                YPR: optimise camera pose only.
+                                INT: optimise internal camera parameters.
+                                EXT: optimise external camera parameters.
+                                ALL: optimise all camera parameters.
     
     Returns
-    residual (arr):             Pixel differences between UV and projected UV
-                                points.
+    residual (arr):             Pixel difference between UV and projected XYZ
+                                position of each GCP.
     '''
     
+    #Assign optimisable and stable parameters depending on optimise flag
+    if optimise == 'YPR':
+        campose = params      
+        camloc, radcorr, tancorr, focal, camcen = stable
+            
+    elif optimise == 'INT':
+        radcorr = params[1:3]
+        tancorr = params[3:5]
+        focal = params[5:7]
+        camcen = params[7:9]
+        camloc, campose = stable 
+    
+    elif optimise == 'EXT':
+        camloc = params[0:3]
+        campose = params[3:6]
+        radcorr, tancorr, focal, camcen = stable        
+
+    elif optimise == 'ALL':
+        camloc = params[0:3]
+        campose = params[3:6]
+        radcorr = params[6:9]
+        tancorr = params[9:11]
+        focal = params[11:13]
+        camcen = params[13:15]
+        
+    else:       
+        camloc, campose, radcorr, tancorr, focal, camcen = stable
+    
+    #Project XYZ points to UV space       
     GCPxyz_proj,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
-                                           focal, camcen, refimagePath, GCPxyz)   
+                                           focal, camcen, refimg, GCPxyz)
+    
+    #Compute residuals using pythag theorem (i.e. pixel difference between pts)
     residual=[]
     for i in range(len(GCPxyz_proj)):
-        residual.append(np.sqrt((GCPxyz_proj[i][0]-GCPuv[i][0])*
-                                (GCPxyz_proj[i][0]-GCPuv[i][0])+
-                                (GCPxyz_proj[i][1]-GCPuv[i][1])*
-                                (GCPxyz_proj[i][1]-GCPuv[i][1])))  
+        residual.append(np.sqrt((GCPxyz_proj[i][0]-GCPuv[i][0])**2 + 
+                                (GCPxyz_proj[i][1]-GCPuv[i][1])**2))  
     residual = np.array(residual)
 
-    return residual        
+    #Return all residuals
+    return residual
+ 
 #------------------------------------------------------------------------------
 
 #if __name__ == "__main__":   

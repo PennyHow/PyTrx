@@ -47,7 +47,7 @@ from pathlib import Path
 
 #Import PyTrx packages
 sys.path.append('../')
-from CamEnv import setProjection, projectXYZ, getRotation
+from CamEnv import setProjection, projectXYZ, getRotation, optimiseCamera
 from Velocity import calcDenseHomography, calcSparseHomography, calcDenseVelocity, readDEMmask
 from DEM import load_DEM
 import FileHandler
@@ -146,16 +146,12 @@ GCPxyz, GCPuv = FileHandler.readGCPs(GCPpath)
 
 print('\nLOADING CALIBRATION')
 calib_out = FileHandler.readMatrixDistortion(calibPath)
-matrix=np.transpose(calib_out[0])                           #Get matrix
+matrix1=np.transpose(calib_out[0])                           #Get matrix
 tancorr = calib_out[1]                                      #Get tangential
 radcorr = calib_out[2]                                      #Get radial
-focal = [matrix[0,0], matrix[1,1]]                          #Focal length
-camcen = [matrix[0,2], matrix[1,2]]                         #Principal point
+focal = [matrix1[0,0], matrix1[1,1]]                          #Focal length
+camcen = [matrix1[0,2], matrix1[1,2]]                         #Principal point
  
-distort = np.hstack([radcorr[0][0], radcorr[0][1],          #Compile distortion
-                     tancorr[0][0], tancorr[0][1],          #parameters
-                     radcorr[0][2]])
-
 
 print('\nLOADING IMAGE FILES')
 imagelist = sorted(glob.glob(imgFiles))
@@ -164,162 +160,31 @@ imn1 = Path(imagelist[0]).name
 
 
 print('\nOPTIMISING CAMERA ENVIRONMENT')
-GCPxyz1 = np.array(GCPxyz, dtype=np.float32)
-GCPuv1 = np.array(GCPuv, dtype=np.float32)
-rvec1 = getRotation(campose)
-tvec1 = np.zeros((3,1))
-flag=cv2.SOLVEPNP_ITERATIVE
-
-#retval, rvec2, tvec2= cv2.solvePnP(GCPxyz1, GCPuv1, matrix, distort, None, 
-#                                   None, flags=flag)
-
-retval, rvec2, tvec2, inliers = cv2.solvePnPRansac(GCPxyz1, GCPuv1, matrix, distort)
-
-rvec3 = cv2.Rodrigues(rvec2)[0]
-
-
-
-
-        
-#https://scipy-cookbook.readthedocs.io/items/bundle_adjustment.html
+projvars = [camloc, campose, radcorr, tancorr, focal, camcen, refimagePath] 
+new_projvars = optimiseCamera('YPR', projvars, GCPxyz, GCPuv, optmethod='trf', 
+                              show=True)
 
 
 print('\nCOMPILING TRANSFORMATION PARAMETERS')
-projvars = [camloc, campose, radcorr, tancorr,              #Projection params
-            focal, camcen, refimagePath]  
+camloc1, campose1, radcorr1, tancorr1, focal1, camcen1, refimagePath = new_projvars
+
+matrix2 = np.array([focal1[0], 0, camcen[0], 0, focal1[1], 
+                   camcen[1], 0, 0, 1]).reshape(3,3)
+
+distort = np.hstack([radcorr1[0][0], radcorr1[0][1],          #Compile distortion
+                     tancorr1[0][0], tancorr1[0][1],          #parameters
+                     radcorr1[0][2]])
+
+invprojvars = setProjection(dem, camloc, campose, 
+                            radcorr, tancorr, focal, 
+                            camcen, refimagePath)          #Inverse projection
  
-invprojvars = setProjection(dem, camloc, campose,           #Inverse projection
-                            radcorr, tancorr, focal,        #params
-                            camcen, refimagePath) 
+new_invprojvars = setProjection(dem, camloc1, campose1, 
+                            radcorr1, tancorr1, focal1, 
+                            camcen1, refimagePath)          #Inverse projection
 
-campars = [dem, projvars, invprojvars]                      #Compiled parameters
+campars = [dem, new_projvars, new_invprojvars]                 #Compiled parameters
 
-
-print('\nBEGINNING OPTIMISATION')
-def computeResiduals(params, stable, GCPuv, refimagePath, optimise='YPR'):
-    
-    if optimise == 'YPR':
-        campose = params      
-        camloc, radcorr, tancorr, focal, camcen, GCPxyz = stable
-        
-    elif optimise == 'CAM':
-        camloc = params[0:3]
-        campose = params[3:6]
-        radcorr = params[6:9]
-        tancorr = params[9:11]
-        focal = params[11:13]
-        camcen = params[13:15]
-        GCPxyz = stable        
-        
-    elif optimise == 'ALL':
-        camloc = params[0:3]
-        campose = params[3:6]
-        radcorr = params[6:9]
-        tancorr = params[9:11]
-        focal = params[11:13]
-        camcen = params[13:15]
-        GCPxyz = np.array(params[15:]).reshape(-1, 3)
-
-    else:       
-        camloc, campose, radcorr, tancorr, focal, camcen, GCPxyz = stable
-            
-    GCPxyz_proj,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
-                                           focal, camcen, refimagePath, GCPxyz)
-    residual=[]
-    for i in range(len(GCPxyz_proj)):
-        residual.append(np.sqrt((GCPxyz_proj[i][0]-GCPuv[i][0])*
-                                (GCPxyz_proj[i][0]-GCPuv[i][0])+
-                                (GCPxyz_proj[i][1]-GCPuv[i][1])*
-                                (GCPxyz_proj[i][1]-GCPuv[i][1])))  
-    residual = np.array(residual)
-
-    return residual
-
-def optimiseCamera(optimise, camloc, campose, radcorr, tancorr, focal, camcen, 
-                   GCPxyz, GCPuv, refimagePath, show=False):
-
-    #Compute GCP residuals with original camera info
-    stable = [camloc, campose, radcorr, tancorr, focal, camcen, GCPxyz]    
-    res0 = computeResiduals(None, stable, GCPuv, refimagePath, optimise=None)
-    GCPxyz_proj0,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
-                                           focal, camcen, refimagePath, GCPxyz)
-
-    if optimise=='YPR':
-        params = campose
-        stable = [camloc, radcorr, tancorr, focal, camcen, GCPxyz]
-    
-    elif optimise=='CAM':
-        params = np.concatenate((camloc, campose, radcorr.flatten(), 
-                                 tancorr.flatten(), np.array(focal), 
-                                 np.array(camcen)))
-        stable = GCPxyz        
-        
-    elif optimise=='ALL':
-        params = np.concatenate((camloc, campose, radcorr.flatten(), 
-                                 tancorr.flatten(), np.array(focal), 
-                                 np.array(camcen), GCPxyz.flatten()))
-        stable=None
-        
-            
-    print('Beginning optimisation...')
-    out = least_squares(computeResiduals, params, method='trf', ftol=1e-08, 
-                        verbose=2, args=(stable, GCPuv, refimagePath, optimise))
-
-    if optimise=='YPR':
-        campose = out.x
-        
-    elif optimise=='CAM':
-        camloc = out.x[0:3]
-        campose = out.x[3:6]
-        radcorr = out.x[6:9]
-        tancorr = out.x[9:11]
-        focal = out.x[11:13]
-        camcen = out.x[13:15]  
-        
-    elif optimise=='ALL':       
-        camloc = out.x[0:3]
-        campose = out.x[3:6]
-        radcorr = out.x[6:9]
-        tancorr = out.x[9:11]
-        focal = out.x[11:13]
-        camcen = out.x[13:15]
-        GCPxyz = out.x[15:].reshape(-1, 3)
-
-    if out.success is True:
-        print('Optimisation successful')
-        GCPxyz_proj1,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
-                                           focal, camcen, refimagePath, GCPxyz)   
-    
-        res1=[]
-        for i in range(len(GCPxyz_proj1)):
-            res1.append(np.sqrt((GCPxyz_proj1[i][0]-GCPuv[i][0])*
-                               (GCPxyz_proj1[i][0]-GCPuv[i][0])+
-                               (GCPxyz_proj1[i][1]-GCPuv[i][1])*
-                               (GCPxyz_proj1[i][1]-GCPuv[i][1])))
-    
-        print('Original px residuals (average): ' + str(np.mean(res0)))        
-        print('Optimised px residuals (average): ' + str(np.mean(res1)))
-        
-        if show == True:
-            fig, (ax1) = plt.subplots(1)
-            ax1.imshow(im1, cmap='gray')
-            ax1.scatter(GCPuv[:,0], GCPuv[:,1], color='red', label='UV')
-            ax1.scatter(GCPxyz_proj0[:,0], GCPxyz_proj0[:,1], color='green', label='Original XYZ')
-            ax1.scatter(GCPxyz_proj1[:,0], GCPxyz_proj1[:,1], color='blue', label='Optimised XYZ')
-            ax1.legend()
-            plt.show()
-        
-    else:
-        print('Optimisation failed')
-
-
-
-#    return camloc, campose, radcorr, tancorr, focal, camcen, GCPxyz, GCPuv, refimagePath
-
-optimiseCamera('CAM', camloc, campose, radcorr, tancorr, focal, camcen, 
-                GCPxyz, GCPuv, refimagePath, show=True)
-
-sys.exit(1)
 
 print('\nLOADING MASKS')
 print('Defining velocity mask')
@@ -347,7 +212,7 @@ print('\nPLOTTING CAMERA ENVIRONMENT INFO')
 
 #Show corrected and uncorrected image
 
-#Utilities.plotCalib(matrix, distort, refimg, imn)
+#Utilities.plotCalib(matrix2, distort, refimg, imn)
 
 
 
@@ -382,12 +247,12 @@ for i in range(len(imagelist)-1):
 #    homogmeth=cv2.RANSAC
 #    reproj=5.0
 #    hmin=4.0
-#    hg = calcDenseHomography(im0, im1, hmask, [matrix,distort], hgrid, htemp, 
+#    hg = calcDenseHomography(im0, im1, hmask, [matrix2,distort], hgrid, htemp, 
 #                             hsearch, dem, projvars, trmethod, 
 #                             homogmeth, reproj, hmin)   
     
 
-    hg = calcSparseHomography(im0, im1, hmask, [matrix,distort], hmethod, hreproj, 
+    hg = calcSparseHomography(im0, im1, hmask, [matrix2,distort], hmethod, hreproj, 
                               hwin, hback, hminfeat, [hmax, hqual, hmindist])
     homog.append(hg)
                              
@@ -402,7 +267,7 @@ for i in range(len(imagelist)-1):
     min_features=4.0
 
     vl = calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
-                           searchsize, vmask, [matrix,distort], 
+                           searchsize, vmask, [matrix2,distort], 
                            [hg[0],hg[3]], campars, threshold)   
 
 #    vl = calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
@@ -453,10 +318,10 @@ for i in range(len(xyz0)):
     im=FileHandler.readImg(imagelist[i], band, equal)
 
     #Correct image for distortion
-    newMat, roi = cv2.getOptimalNewCameraMatrix(matrix, distort, 
+    newMat, roi = cv2.getOptimalNewCameraMatrix(matrix2, distort, 
                                                 (im.shape[1],im.shape[0]), 
                                                 1, (im.shape[1],im.shape[0])) 
-    im = cv2.undistort(im1, matrix, distort, newCameraMatrix=newMat)
+    im = cv2.undistort(im1, matrix2, distort, newCameraMatrix=newMat)
     
     #Get image name
     imn = Path(imagelist[i]).name

@@ -163,8 +163,35 @@ def plotCalib(matrix, distortion, img, imn):
     ax2.axis([0,w,h,0])    
     plt.show()
 #    plt.close()
+
+
+def plotResiduals(img, ims, gcp1, gcp2, gcp3):
+    '''Function to plot sets of points to show offsets. This is 
+    commonly used for inspecting differences between image GCPs and projected 
+    GCPs, e.g. within the optimiseCamera function in CamEnv.
+    '''
+    #Plot image                
+    fig, (ax1) = plt.subplots(1)
+    ax1.axis([0,ims[1],ims[0],0])
+    ax1.imshow(img, cmap='gray')
+    
+    #Plot UV GCPs
+    ax1.scatter(gcp1[:,0], gcp1[:,1], color='red', marker='+', 
+                label='UV')
+    
+    #Plot projected XYZ GCPs
+    ax1.scatter(gcp2[:,0], gcp2[:,1], color='green', 
+                marker='+', label='Projected XYZ (original)')
+
+    #Plot optimised XYZ GCPs if given
+    ax1.scatter(gcp3[:,0], gcp3[:,1], color='blue', 
+                marker='+', label='Projected XYZ (optimised)')
+    
+    #Add legend and show plot
+    ax1.legend()
+    plt.show()        
         
-        
+    
 def plotAreaPX(uv, img, show=True, save=None):
     '''Plot figure with image overlayed with pixel features (either areas or 
     line features).
