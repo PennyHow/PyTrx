@@ -202,6 +202,15 @@ def computeResiduals(params, stable, GCPuv, refimagePath, optimise='YPR'):
         campose = params      
         camloc, radcorr, tancorr, focal, camcen, GCPxyz = stable
         
+    elif optimise == 'CAM':
+        camloc = params[0:3]
+        campose = params[3:6]
+        radcorr = params[6:9]
+        tancorr = params[9:11]
+        focal = params[11:13]
+        camcen = params[13:15]
+        GCPxyz = stable        
+        
     elif optimise == 'ALL':
         camloc = params[0:3]
         campose = params[3:6]
@@ -215,7 +224,7 @@ def computeResiduals(params, stable, GCPuv, refimagePath, optimise='YPR'):
         camloc, campose, radcorr, tancorr, focal, camcen, GCPxyz = stable
             
     GCPxyz_proj,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
-                                           focal, camcen, refimagePath, GCPxyz)   
+                                           focal, camcen, refimagePath, GCPxyz)
     residual=[]
     for i in range(len(GCPxyz_proj)):
         residual.append(np.sqrt((GCPxyz_proj[i][0]-GCPuv[i][0])*
@@ -226,58 +235,91 @@ def computeResiduals(params, stable, GCPuv, refimagePath, optimise='YPR'):
 
     return residual
 
-#args = {'campose' : campose, 'camloc' : camloc, 'radcorr' : radcorr, 
-#        'tancorr' : tancorr, 'focal' : focal, 'GCPxyz' : GCPxyz}
-#
-#kwargs = {'refimagePath': refimagePath, 'GCPuv' : GCPuv}
+def optimiseCamera(optimise, camloc, campose, radcorr, tancorr, focal, camcen, 
+                   GCPxyz, GCPuv, refimagePath, show=False):
 
+    #Compute GCP residuals with original camera info
+    stable = [camloc, campose, radcorr, tancorr, focal, camcen, GCPxyz]    
+    res0 = computeResiduals(None, stable, GCPuv, refimagePath, optimise=None)
+    GCPxyz_proj0,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
+                                           focal, camcen, refimagePath, GCPxyz)
 
-#camloc, campose, radcorr, tancorr, focal, camcen, GCPxyz
-
-params = np.concatenate((camloc, campose, radcorr.flatten(), tancorr.flatten(), np.array(focal), np.array(camcen), GCPxyz.flatten()))
-print(params)
-others = None
-optimise='ALL'
-res0 = computeResiduals(params, others, GCPuv, refimagePath, optimise)
-
-
-
-
-GCPxyz_proj1,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
-                                       focal, camcen, refimagePath, GCPxyz)
-
-print('Original residuals: ' + str(np.mean(res0)))
-
-
+    if optimise=='YPR':
+        params = campose
+        stable = [camloc, radcorr, tancorr, focal, camcen, GCPxyz]
     
+    elif optimise=='CAM':
+        params = np.concatenate((camloc, campose, radcorr.flatten(), 
+                                 tancorr.flatten(), np.array(focal), 
+                                 np.array(camcen)))
+        stable = GCPxyz        
         
-t0 = time.time()
-res = least_squares(computeResiduals, params, method='trf', ftol=1e-08, 
-                    args=(others, GCPuv, refimagePath, optimise))
+    elif optimise=='ALL':
+        params = np.concatenate((camloc, campose, radcorr.flatten(), 
+                                 tancorr.flatten(), np.array(focal), 
+                                 np.array(camcen), GCPxyz.flatten()))
+        stable=None
+        
+            
+    print('Beginning optimisation...')
+    out = least_squares(computeResiduals, params, method='trf', ftol=1e-08, 
+                        verbose=2, args=(stable, GCPuv, refimagePath, optimise))
 
-t1 = time.time()
-print("Optimization took {0:.0f} seconds".format(t1 - t0))
+    if optimise=='YPR':
+        campose = out.x
+        
+    elif optimise=='CAM':
+        camloc = out.x[0:3]
+        campose = out.x[3:6]
+        radcorr = out.x[6:9]
+        tancorr = out.x[9:11]
+        focal = out.x[11:13]
+        camcen = out.x[13:15]  
+        
+    elif optimise=='ALL':       
+        camloc = out.x[0:3]
+        campose = out.x[3:6]
+        radcorr = out.x[6:9]
+        tancorr = out.x[9:11]
+        focal = out.x[11:13]
+        camcen = out.x[13:15]
+        GCPxyz = out.x[15:].reshape(-1, 3)
 
-GCPxyz_proj2,depth,inframe = projectXYZ(camloc, res.x, radcorr, tancorr, 
-                                       focal, camcen, refimagePath, GCPxyz)   
-
-residual=[]
-for i in range(len(GCPxyz_proj2)):
-    residual.append(np.sqrt((GCPxyz_proj2[i][0]-GCPuv[i][0])*
-                            (GCPxyz_proj2[i][0]-GCPuv[i][0])+
-                            (GCPxyz_proj2[i][1]-GCPuv[i][1])*
-                            (GCPxyz_proj2[i][1]-GCPuv[i][1])))
+    if out.success is True:
+        print('Optimisation successful')
+        GCPxyz_proj1,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
+                                           focal, camcen, refimagePath, GCPxyz)   
     
-print('Average px difference between original UV points and projected ' + 
-          'UV points: ' + str(np.mean(residual)))
+        res1=[]
+        for i in range(len(GCPxyz_proj1)):
+            res1.append(np.sqrt((GCPxyz_proj1[i][0]-GCPuv[i][0])*
+                               (GCPxyz_proj1[i][0]-GCPuv[i][0])+
+                               (GCPxyz_proj1[i][1]-GCPuv[i][1])*
+                               (GCPxyz_proj1[i][1]-GCPuv[i][1])))
+    
+        print('Original residuals (average): ' + str(np.mean(res0)))        
+        print('Optimised residuals (average): ' + str(np.mean(res1)))
+        
+        if show == True:
+            fig, (ax1) = plt.subplots(1)
+            ax1.imshow(im1, cmap='gray')
+            ax1.scatter(GCPuv[:,0], GCPuv[:,1], color='red', label='UV')
+            ax1.scatter(GCPxyz_proj0[:,0], GCPxyz_proj0[:,1], color='green', label='Original XYZ')
+            ax1.scatter(GCPxyz_proj1[:,0], GCPxyz_proj1[:,1], color='blue', label='Optimised XYZ')
+            ax1.legend()
+            plt.show()
+        
+    else:
+        print('Optimisation failed')
 
 
-fig, (ax1) = plt.subplots(1)
-plt.imshow(im1, cmap='gray')
-plt.scatter(GCPuv[:,0], GCPuv[:,1], color='red')
-plt.scatter(GCPxyz_proj1[:,0], GCPxyz_proj1[:,1], color='green')
-plt.scatter(GCPxyz_proj2[:,0], GCPxyz_proj2[:,1], color='blue')
-plt.show()
+
+#    return camloc, campose, radcorr, tancorr, focal, camcen, GCPxyz, GCPuv, refimagePath
+
+optimiseCamera('CAM', camloc, campose, radcorr, tancorr, focal, camcen, 
+                GCPxyz, GCPuv, refimagePath, show=True)
+
+sys.exit(1)
 
 print('\nLOADING MASKS')
 print('Defining velocity mask')
