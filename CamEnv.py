@@ -540,6 +540,20 @@ class CamEnv(CamCalib):
            
         return name,GCPpath,DEMpath,imagePath,calibPath,coords,ypr,DEMdensify
 
+
+    def optimiseCamEnv(self, optimise, optmethod='trf', show=False):
+        '''Optimise camera environment.'''
+        #Get GCPs
+        xyz, uv = self._gcp.getGCPs()
+
+        #Get camera environment parameters
+        projvars = [self._camloc, self._camDirection, self._radCorr, 
+                    self._tanCorr, self._focLen, self._camCen, self._refImage]       
+        projvars = optimiseCamera(optimise, projvars, xyz, uv, 
+                                  optmethod=optmethod, show=show)
+        
+        
+
     
     def __getFileDataLine__(self,lines,lineNo):
         '''Return a data line from the Camera Environment Specification file.'''
@@ -549,8 +563,8 @@ class CamEnv(CamCalib):
     def getRefImageSize(self):
         '''Return the dimensions of the reference image.'''
         return self._refImage.getImageSize()
-
-
+      
+        
     def getDEM(self):
         '''Return DEM as ExplicitRaster type.'''
         if self._DEM is None:
@@ -832,7 +846,6 @@ def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg):
     visible=voxelviewshed(dem, camloc)
 #    self._visible=visible
 #        Z=Z/visible
-
 
     #Snap image plane to DEM extent
     XYZ=np.column_stack([X[visible[:]],Y[visible[:]],Z[visible[:]]])
