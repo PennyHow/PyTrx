@@ -1,0 +1,8 @@
+name: pytrx_env
+channels:
+  - defaults
+dependencies:
+  - gdal=2.3.2=py37h2924dbc_0
+  - opencv=3.4.2=py37h6fd60c2_1
+prefix: /home/penhow/anaconda3/envs/pytrx37
+
