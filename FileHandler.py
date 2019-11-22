@@ -833,7 +833,8 @@ def writeVeloSHP(xyzvel, xyzerr, xyz0, imn, fileDirectory, projection=None):
         
         #Get velocity, pt and image name for time step
         vel = xyzvel[i]
-        err = xyzerr[i]
+        if xyzerr != None:
+            err = xyzerr[i]
         pt0 = xyz0[i]            
         im = imn[i] 
         
@@ -867,29 +868,49 @@ def writeVeloSHP(xyzvel, xyzerr, xyz0, imn, fileDirectory, projection=None):
         x0 = pt0[:,0]
         y0 = pt0[:,1]
         
-        #Create point features with data attributes in layer           
-        for v,e,x,y in zip(vel, err, x0, y0):
-            count=1
-        
-            #Create feature    
-            feature = ogr.Feature(layer.GetLayerDefn())
-        
-            #Create feature attributes    
-            feature.SetField('id', count)
-            feature.SetField('velocity', v)
-            feature.SetField('error', e)
-            feature.SetField('snr', e/v)
+        #Create point features with data attributes in layer
+        if xyzerr != None:
+            for v,e,x,y in zip(vel, err, x0, y0):
+                count=1
             
-            #Create feature location
-            wkt = "POINT(%f %f)" %  (float(x) , float(y))
-            point = ogr.CreateGeometryFromWkt(wkt)
-            feature.SetGeometry(point)
-            layer.CreateFeature(feature)
-        
-            #Free up data space
-            feature.Destroy()                       
-            count=count+1
-
+                #Create feature    
+                feature = ogr.Feature(layer.GetLayerDefn())
+            
+                #Create feature attributes    
+                feature.SetField('id', count)
+                feature.SetField('velocity', v)
+                feature.SetField('error', e)
+                feature.SetField('snr', e/v)
+                
+                #Create feature location
+                wkt = "POINT(%f %f)" %  (float(x) , float(y))
+                point = ogr.CreateGeometryFromWkt(wkt)
+                feature.SetGeometry(point)
+                layer.CreateFeature(feature)
+            
+                #Free up data space
+                feature.Destroy()                       
+                count=count+1
+        else:
+            for v,x,y in zip(vel, x0, y0):
+                count=1
+            
+                #Create feature    
+                feature = ogr.Feature(layer.GetLayerDefn())
+            
+                #Create feature attributes    
+                feature.SetField('id', count)
+                feature.SetField('velocity', v)
+                
+                #Create feature location
+                wkt = "POINT(%f %f)" %  (float(x) , float(y))
+                point = ogr.CreateGeometryFromWkt(wkt)
+                feature.SetGeometry(point)
+                layer.CreateFeature(feature)
+            
+                #Free up data space
+                feature.Destroy()                       
+                count=count+1
         #Free up data space                          
         ds.Destroy()
         

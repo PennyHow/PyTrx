@@ -58,12 +58,11 @@ camloc = np.array([447948.820, 8759457.100, 407.092])
 #campose = np.array([4.80926, 0.05768, 0.14914]) 
 campose = np.array([4.80926, 0.05768, 0.14914]) 
 
-
 #Define image folder and image file type for velocity tracking
 imgFiles = '../Examples/images/KR2_2014_subset/*.JPG'
 
 #Define calibration images and chessboard dimensions (height, width)
-calibPath = '../Examples/camenv_data/calib/KR1_2014_1.txt'
+calibPath = '../Examples/camenv_data/calib/KR2_2014_2.txt'
 
 #Load DEM from path
 DEMpath = '../Examples/camenv_data/dem/KR_demsmooth.tif'        
@@ -100,7 +99,7 @@ cr1 = [445000, 452000, 8754000, 8760000]              #DEM plot extent
 DEMdensify = 2                      #DEM densification factor (for smoothing)
 
 #Optimisation parameters
-optparams = 'INT'                   #Parameters to optimise
+optparams = 'YPR'                   #Parameters to optimise
 optmethod = 'trf'                   #Optimisation method
 
 #Image enhancement paramaters
@@ -116,8 +115,8 @@ vmindist = 5.0                      #Minimum distance between points
 
 #Dense velocity parameters
 vgrid = [100,100]                   #Dense matching grid distance
-vtemplate=30                        #Template size
-vsearch=150                         #Search window size
+vtemplate=10                        #Template size
+vsearch=100                         #Search window size
 vmethod='cv2.TM_CCORR_NORMED'       #Method for template matching
 
 #General velocity parameters
@@ -131,7 +130,7 @@ hreproj = 5.0                       #Maximum allowed reprojection error
 hback = 0.5                         #Back-tracking threshold
 herr = True                         #Calculate tracking error?
 hmax = 50000                        #Maximum number of points to seed
-hqual = 0.2                         #Corner quality for seeding
+hqual = 0.1                         #Corner quality for seeding
 hmindist = 5.0                      #Minimum distance between seeded points
 hminfeat = 4                        #Minimum number of seeded points to track
 
@@ -201,11 +200,7 @@ print('\nPLOTTING CAMERA ENVIRONMENT INFO')
 
 #Load reference image
 refimg = FileHandler.readImg(refimagePath) 
-imn = Path(refimagePath).name
-
-#Show GCPs
-Utilities.plotGCPs([GCPxyz, GCPuv], refimg, imn, 
-                   dem, camloc, extent=None)          
+imn = Path(refimagePath).name    
 
 #Show Prinicpal Point in image
 Utilities.plotPrincipalPoint(camcen1, refimg, imn)
@@ -267,7 +262,7 @@ print('\nWRITING DATA TO FILE')
 #Get all image names
 names=[]
 for i in imagelist:
-    names.append(Path(i).name)
+    names.append(str(Path(i).name).split('.JPG')[0])
 
 #Extract xyz velocities, uv velocities, and xyz0 locations
 xyzvel1=[item[0][0] for item in velo1] 

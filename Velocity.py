@@ -506,7 +506,7 @@ def calcSparseVelocity(img1, img2, mask, calib=None, homog=None,
                                 corrected points have not been calculated 
                                 then an empty list is merely returned.                                 
     '''       
-    #Set threshold difference for point tracks
+    #Set threshold difference for homography correction
     displacement_tolerance_rel=2.0
     
     #Seed features
@@ -706,6 +706,8 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
     
     #Seed point grid
     xyz0, uv0 = seedGrid(campars[0], griddistance, campars[1], mask)
+    
+    print(str(uv0.shape[0]) + ' templates generated')
     
     #Template match if method flag is not optical flow
     pts, ptserrors = templateMatch(im0, im1, uv0, templatesize, searchsize, 
@@ -1059,7 +1061,8 @@ def apply_persp_homographyPts(pts, homog, inverse=False):
     
     Returns
     hpts (arr):                 Corrected point positions
-    '''         
+    '''
+    #If input is array         
     if isinstance(pts,np.ndarray):
         n=pts.shape[0]
         hpts=np.zeros(pts.shape)
@@ -1073,10 +1076,10 @@ def apply_persp_homographyPts(pts, homog, inverse=False):
             hpts[i][0][0]=((homog[0][0]*pts[i][0][0] + 
                            homog[0][1]*pts[i][0][1] + homog[0][2])*div)
             hpts[i][0][1]=((homog[1][0]*pts[i][0][0] + 
-                            homog[1][1]*pts[i][0][1] + homog[1][2])*div)
-                          
+                            homog[1][1]*pts[i][0][1] + homog[1][2])*div)                          
         return hpts 
-       
+    
+    #If input is as list
     elif isinstance(pts, list):
         hpts=[]
                
@@ -1088,6 +1091,10 @@ def apply_persp_homographyPts(pts, homog, inverse=False):
             xh=(homog[0][0]*p[0]+homog[0][1]*p[1]+homog[0][2])*div
             yh=(homog[1][0]*p[0]+homog[1][1]*p[1]+homog[1][2])*div
             hpts.append([xh,yh])
+        
+        return hpts
+    
+    #If input is incompatible
     else:
         print('PERPECTIVE INPUT: ' + str(type(pts)))
         hpts=None
