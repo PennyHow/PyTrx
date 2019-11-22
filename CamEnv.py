@@ -542,17 +542,31 @@ class CamEnv(CamCalib):
 
 
     def optimiseCamEnv(self, optimise, optmethod='trf', show=False):
-        '''Optimise camera environment.'''
+        '''Optimise projection variables in the camera environment. The precise 
+        parameters to optimise are defined by the optimise variable:
+        YPR: Optimise camera pose only
+        EXT: Optimise external camera parameters
+        INT: Optimise internal camera parameters
+        LOC: Optimise all parameters except camera location
+        ALL: Optimise all projection parameters.
+        '''
         #Get GCPs
         xyz, uv = self._gcp.getGCPs()
 
         #Get camera environment parameters
         projvars = [self._camloc, self._camDirection, self._radCorr, 
-                    self._tanCorr, self._focLen, self._camCen, self._refImage]       
-        projvars = optimiseCamera(optimise, projvars, xyz, uv, 
-                                  optmethod=optmethod, show=show)
+                    self._tanCorr, self._focLen, self._camCen, self._refImage]
         
+        opt_projvars = optimiseCamera(optimise, projvars, xyz, uv, 
+                                      optmethod=optmethod, show=show)
         
+        self._camloc = opt_projvars[0] 
+        self._camDirection = opt_projvars[1] 
+        self._radCorr = opt_projvars[2] 
+        self._tanCorr = opt_projvars[3]
+        self._focLen = opt_projvars[4] 
+        self._camCen = opt_projvars[5] 
+        self._refImage = opt_projvars[6]
 
     
     def __getFileDataLine__(self,lines,lineNo):
@@ -844,8 +858,6 @@ def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg):
     
     #Define visible extent of the DEM from the location of the camera
     visible=voxelviewshed(dem, camloc)
-#    self._visible=visible
-#        Z=Z/visible
 
     #Snap image plane to DEM extent
     XYZ=np.column_stack([X[visible[:]],Y[visible[:]],Z[visible[:]]])
@@ -1032,6 +1044,7 @@ def optimiseCamera(optimise, projvars, GCPxyz, GCPuv, optmethod='trf',
                                 YPR: Camera pose only.
                                 INT: Internal camera parameters.
                                 EXT: External camera parameters.
+                                LOC: All parameters except camera location.
                                 ALL: All projection parameters.
     projvars (list):            Projection parameters [camera location, camera
                                 pose, radial distortion, tangential distortion,
@@ -1072,7 +1085,14 @@ def optimiseCamera(optimise, projvars, GCPxyz, GCPuv, optmethod='trf',
     elif optimise == 'EXT':
         params = np.concatenate((camloc, campose))
         stable = [radcorr, tancorr, focal, camcen]
-        print('Commencing optimisation of external camera parameters')    
+        print('Commencing optimisation of external camera parameters')
+    elif optimise == 'LOC':
+        params = np.concatenate((campose, radcorr.flatten(), 
+                                 tancorr.flatten(), np.array(focal), 
+                                 np.array(camcen)))
+        stable = camloc
+        print('Commencing optimisation of all projection parameters except ' +
+              'camera location')
     else:
         optimise='ALL'
         params = np.concatenate((camloc, campose, radcorr.flatten(), 
@@ -1100,7 +1120,13 @@ def optimiseCamera(optimise, projvars, GCPxyz, GCPuv, optmethod='trf',
             camcen = list(out.x[7:9])        
         elif optimise == 'EXT':
             camloc = out.x[0:3]
-            campose = out.x[3:6]           
+            campose = out.x[3:6] 
+        elif optimise == 'LOC':
+            campose = out.x[0:3]
+            radcorr = out.x[3:6].reshape(1,3)
+            tancorr = out.x[6:8].reshape(1,2)
+            focal = list(out.x[8:10])
+            camcen = list(out.x[10:12])             
         else:
             camloc = out.x[0:3]
             campose = out.x[3:6]
@@ -1197,6 +1223,8 @@ def computeResiduals(params, stable, GCPxyz, GCPuv, refimg,
                                 YPR: optimise camera pose only.
                                 INT: optimise internal camera parameters.
                                 EXT: optimise external camera parameters.
+                                LOC: optimise all parameters except camera
+                                     location.
                                 ALL: optimise all camera parameters.
     
     Returns
@@ -1219,7 +1247,15 @@ def computeResiduals(params, stable, GCPxyz, GCPuv, refimg,
     elif optimise == 'EXT':
         camloc = params[0:3]
         campose = params[3:6]
-        radcorr, tancorr, focal, camcen = stable        
+        radcorr, tancorr, focal, camcen = stable 
+        
+    elif optimise == 'LOC':
+        campose = params[0:3]
+        radcorr = params[3:6]
+        tancorr = params[6:8]
+        focal = params[8:10]
+        camcen = params[10:12] 
+        camloc = stable
 
     elif optimise == 'ALL':
         camloc = params[0:3]

@@ -34,22 +34,16 @@ allows flexible intervention and adaptation where needed.
 
 #Import packages
 import sys
-import numpy as np
 import cv2
 import glob
-import cv2
-import math
-import time
-from scipy.sparse import lil_matrix
-from scipy.optimize import least_squares
-import matplotlib.pyplot as plt
+import numpy as np
 from pathlib import Path
 
 #Import PyTrx packages
 sys.path.append('../')
-from CamEnv import setProjection, projectXYZ, getRotation, optimiseCamera
-from Velocity import calcDenseHomography, calcSparseHomography, calcDenseVelocity, readDEMmask
+from CamEnv import setProjection, optimiseCamera
 from DEM import load_DEM
+import Velocity
 import FileHandler
 import Utilities 
  
@@ -75,7 +69,8 @@ calibPath = '../Examples/camenv_data/calib/KR1_2014_1.txt'
 DEMpath = '../Examples/camenv_data/dem/KR_demsmooth.tif'        
 
 #Define masks for velocity and homography point generation
-vmaskPath = '../Examples/camenv_data/masks/KR2_2014_dem_vmask.jpg'      
+vmaskPath_s = '../Examples/camenv_data/masks/KR2_2014_vmask.jpg'
+vmaskPath_d = '../Examples/camenv_data/masks/KR2_2014_dem_vmask.jpg'      
 hmaskPath = '../Examples/camenv_data/invmasks/KR2_2014_inv.jpg'    
 
 #Define reference image (where GCPs have been defined)
@@ -87,18 +82,14 @@ GCPpath = '../Examples/camenv_data/gcps/KR2_2014.txt'
 
 print('\nDEFINING DATA OUTPUTS')
 
-#Velocity output
-target1 = '../Examples/results/velocity3/velo_output.csv'
-
-#Homography output
-target2 = '../Examples/results/velocity3/homography.csv'
-
 #Shapefile output (with WGS84 projection)
-target3 = '../Examples/results/velocity3/shpfiles/'     
+target1 = '../Examples/results/velocity3/shpfiles_sparse/'
+target2 = '../Examples/results/velocity3/shpfiles_dense/'     
 projection = 32633
 
 #Plot outputs
-target4 = '../Examples/results/velocity3/imgfiles/'
+target3 = '../Examples/results/velocity3/imgfiles_sparse/'
+target4 = '../Examples/results/velocity4/imgfiles_dense/'
 interpmethod='linear'                                 #nearest/cubic/linear
 cr1 = [445000, 452000, 8754000, 8760000]              #DEM plot extent   
 
@@ -108,18 +99,30 @@ cr1 = [445000, 452000, 8754000, 8760000]              #DEM plot extent
 #DEM parameters 
 DEMdensify = 2                      #DEM densification factor (for smoothing)
 
+#Optimisation parameters
+optparams = 'INT'                   #Parameters to optimise
+optmethod = 'trf'                   #Optimisation method
+
 #Image enhancement paramaters
 band = 'L'                          #Image band extraction (R, B, G, or L)
 equal = True                        #Histogram equalisation?
 
-#Velocity parameters
-vwin = (25,25)                      #Tracking window size
+#Sparse velocity parameters
+vwin = (25,25)                      #Sparse corner matching window size
 vback = 1.0                         #Back-tracking threshold  
-vmax = 50000                        #Maximum number of points to seed
+vmax = 50000                        #Maximum number of corners to seed
 vqual = 0.1                         #Corner quality for seeding
-vmindist = 5.0                      #Minimum distance between seeded points
-vminfeat = 4                        #Minimum number of seeded points to track
-                           
+vmindist = 5.0                      #Minimum distance between points
+
+#Dense velocity parameters
+vgrid = [100,100]                   #Dense matching grid distance
+vtemplate=30                        #Template size
+vsearch=150                         #Search window size
+vmethod='cv2.TM_CCORR_NORMED'       #Method for template matching
+
+#General velocity parameters
+vminfeat = 1                        #Minimum number of points to track
+                         
 #Homography parameters
 hwin = (25,25)                      #Stable pt tracking window size
 hmethod = cv2.RANSAC                #Homography calculation method 
@@ -128,7 +131,7 @@ hreproj = 5.0                       #Maximum allowed reprojection error
 hback = 0.5                         #Back-tracking threshold
 herr = True                         #Calculate tracking error?
 hmax = 50000                        #Maximum number of points to seed
-hqual = 0.5                         #Corner quality for seeding
+hqual = 0.2                         #Corner quality for seeding
 hmindist = 5.0                      #Minimum distance between seeded points
 hminfeat = 4                        #Minimum number of seeded points to track
 
@@ -146,11 +149,11 @@ GCPxyz, GCPuv = FileHandler.readGCPs(GCPpath)
 
 print('\nLOADING CALIBRATION')
 calib_out = FileHandler.readMatrixDistortion(calibPath)
-matrix1=np.transpose(calib_out[0])                           #Get matrix
-tancorr = calib_out[1]                                      #Get tangential
-radcorr = calib_out[2]                                      #Get radial
-focal = [matrix1[0,0], matrix1[1,1]]                          #Focal length
-camcen = [matrix1[0,2], matrix1[1,2]]                         #Principal point
+matrix=np.transpose(calib_out[0])                          
+tancorr = calib_out[1]                                     
+radcorr = calib_out[2]                                      
+focal = [matrix[0,0], matrix[1,1]]                          
+camcen = [matrix[0,2], matrix[1,2]]                         
  
 
 print('\nLOADING IMAGE FILES')
@@ -161,34 +164,31 @@ imn1 = Path(imagelist[0]).name
 
 print('\nOPTIMISING CAMERA ENVIRONMENT')
 projvars = [camloc, campose, radcorr, tancorr, focal, camcen, refimagePath] 
-new_projvars = optimiseCamera('YPR', projvars, GCPxyz, GCPuv, optmethod='trf', 
-                              show=True)
+new_projvars = optimiseCamera(optparams, projvars, GCPxyz, GCPuv, 
+                              optmethod=optmethod, show=True)
 
 
 print('\nCOMPILING TRANSFORMATION PARAMETERS')
 camloc1, campose1, radcorr1, tancorr1, focal1, camcen1, refimagePath = new_projvars
 
-matrix2 = np.array([focal1[0], 0, camcen[0], 0, focal1[1], 
+matrix1 = np.array([focal1[0], 0, camcen[0], 0, focal1[1], 
                    camcen[1], 0, 0, 1]).reshape(3,3)
 
-distort = np.hstack([radcorr1[0][0], radcorr1[0][1],          #Compile distortion
-                     tancorr1[0][0], tancorr1[0][1],          #parameters
+distort = np.hstack([radcorr1[0][0], radcorr1[0][1],          
+                     tancorr1[0][0], tancorr1[0][1],          
                      radcorr1[0][2]])
-
-invprojvars = setProjection(dem, camloc, campose, 
-                            radcorr, tancorr, focal, 
-                            camcen, refimagePath)          #Inverse projection
  
 new_invprojvars = setProjection(dem, camloc1, campose1, 
                             radcorr1, tancorr1, focal1, 
-                            camcen1, refimagePath)          #Inverse projection
+                            camcen1, refimagePath)
 
-campars = [dem, new_projvars, new_invprojvars]                 #Compiled parameters
+campars = [dem, new_projvars, new_invprojvars]                 
 
 
 print('\nLOADING MASKS')
 print('Defining velocity mask')
-vmask = readDEMmask(dem, im1, invprojvars, vmaskPath)
+vmask1 = FileHandler.readMask(None, vmaskPath_s)
+vmask2 = Velocity.readDEMmask(dem, im1, new_invprojvars, vmaskPath_d)
 
 print('Defining homography mask')
 hmask = FileHandler.readMask(None, hmaskPath)
@@ -199,20 +199,19 @@ hmask = FileHandler.readMask(None, hmaskPath)
 
 print('\nPLOTTING CAMERA ENVIRONMENT INFO')
 
-##Load reference image
-#refimg = FileHandler.readImg(refimagePath) 
-#imn = Path(refimagePath).name
+#Load reference image
+refimg = FileHandler.readImg(refimagePath) 
+imn = Path(refimagePath).name
 
-##Show GCPs
-#Utilities.plotGCPs([GCPxyz, GCPuv], refimg, imn, 
-#                   dem, camloc, extent=None)          
+#Show GCPs
+Utilities.plotGCPs([GCPxyz, GCPuv], refimg, imn, 
+                   dem, camloc, extent=None)          
 
-##Show Prinicpal Point in image
-#Utilities.plotPrincipalPoint(camcen, refimg, imn)
+#Show Prinicpal Point in image
+Utilities.plotPrincipalPoint(camcen1, refimg, imn)
 
 #Show corrected and uncorrected image
-
-#Utilities.plotCalib(matrix2, distort, refimg, imn)
+Utilities.plotCalib(matrix1, distort, refimg, imn)
 
 
 
@@ -221,7 +220,8 @@ print('\nPLOTTING CAMERA ENVIRONMENT INFO')
 print('\nCALCULATING VELOCITIES')
 
 #Create empty output variables
-velo = []                                     
+velo1 = [] 
+velo2 = []                                    
 homog = []
 
 #Cycle through image pairs (numbered from 0)
@@ -240,39 +240,25 @@ for i in range(len(imagelist)-1):
         
 #    #Calculate homography between image pair
     print('Calculating homography...')
-#    hgrid = [100,100]
-#    htemp=30
-#    hsearch=100    
-#    trmethod='cv2.TM_CCORR_NORMED' 
-#    homogmeth=cv2.RANSAC
-#    reproj=5.0
-#    hmin=4.0
-#    hg = calcDenseHomography(im0, im1, hmask, [matrix2,distort], hgrid, htemp, 
-#                             hsearch, dem, projvars, trmethod, 
-#                             homogmeth, reproj, hmin)   
-    
 
-    hg = calcSparseHomography(im0, im1, hmask, [matrix2,distort], hmethod, hreproj, 
-                              hwin, hback, hminfeat, [hmax, hqual, hmindist])
+    hg = Velocity.calcSparseHomography(im0, im1, hmask, [matrix1,distort], 
+                                       hmethod, hreproj, hwin, hback, hminfeat, 
+                                       [hmax, hqual, hmindist])
     homog.append(hg)
                              
     #Calculate velocities between image pair
-    print('Calculating velocity...')
+    print('Calculating sparse velocities...')
+    vl1 = Velocity.calcSparseVelocity(im0, im1, vmask1, [matrix1,distort], 
+                                      [hg[0],hg[3]], new_invprojvars, vwin, 
+                                      vback, vminfeat, [vmax,vqual,vmindist])
     
-    griddistance = [500,500]
-    templatesize=30
-    searchsize=100    
-    method='cv2.TM_CCORR_NORMED'  
-    threshold=2.0
-    min_features=4.0
-
-    vl = calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
-                           searchsize, vmask, [matrix2,distort], 
-                           [hg[0],hg[3]], campars, threshold)   
-
-#    vl = calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
-#                           searchsize, demmask, None, None, campars, threshold)  
-    velo.append(vl)             
+    print('Calculating dense velocities...')    
+    vl2 = Velocity.calcDenseVelocity(im0, im1, vgrid, vmethod, vtemplate, 
+                                     vsearch, vmask2, [matrix1,distort], 
+                                     [hg[0],hg[3]], campars, vminfeat)   
+ 
+    velo1.append(vl1) 
+    velo2.append(vl2)            
 
 #---------------------------  Export data   -----------------------------------
 
@@ -284,74 +270,64 @@ for i in imagelist:
     names.append(Path(i).name)
 
 #Extract xyz velocities, uv velocities, and xyz0 locations
-xyzvel=[item[0][0] for item in velo] 
-xyzerr=[item[0][3] for item in velo]
-uvvel=[item[1][0] for item in velo]
-xyz0=[item[0][1] for item in velo]
+xyzvel1=[item[0][0] for item in velo1] 
+xyzerr1=[item[0][3] for item in velo1]
+uvvel1=[item[1][0] for item in velo1]
+xyz01=[item[0][1] for item in velo1]
 
-#Write out velocity data to .csv file
-FileHandler.writeVeloFile(xyzvel, uvvel, homog, names, target1) 
+xyzvel2=[item[0][0] for item in velo2] 
+uvvel2=[item[1][0] for item in velo2]
+xyz02=[item[0][1] for item in velo2]
 
-#Write homography data to .csv file
-FileHandler.writeHomogFile(homog, names, target2)
 
 #Write points to shp file                
-FileHandler.writeVeloSHP(xyzvel, xyzerr, xyz0, names, target3, projection)       
-#
-#
+FileHandler.writeVeloSHP(xyzvel1, xyzerr1, xyz01, names, target1, projection)       
+FileHandler.writeVeloSHP(xyzvel2, None, xyz02, names, target2, projection)
+
 #----------------------------   Plot Results   --------------------------------
 
 print('\nPLOTTING OUTPUTS')
 
 #Extract uv0, uv1corr, xyz0 and xyz1 locations 
-uv0=[item[1][1] for item in velo]
-uv1corr=[item[1][2] for item in velo]
-uverr=[item[1][4] for item in velo]
-xyz0=[item[0][1] for item in velo]
-xyz1=[item[0][2] for item in velo]
+uv01=[item[1][1] for item in velo1]
+uv1corr1=[item[1][2] for item in velo1]
+uverr1=[item[1][4] for item in velo1]
+xyz01=[item[0][1] for item in velo1]
+xyz11=[item[0][2] for item in velo1]
 
+uv02=[item[1][1] for item in velo2]
+uv1corr2=[item[1][2] for item in velo2]
+uverr2=[item[1][4] for item in velo2]
+xyz02=[item[0][1] for item in velo2]
+xyz12=[item[0][2] for item in velo2]
 
 #Cycle through data from image pairs   
-for i in range(len(xyz0)):
+for i in range(len(xyz01)):
     
     #Get image from sequence
     im=FileHandler.readImg(imagelist[i], band, equal)
 
     #Correct image for distortion
-    newMat, roi = cv2.getOptimalNewCameraMatrix(matrix2, distort, 
+    newMat, roi = cv2.getOptimalNewCameraMatrix(matrix1, distort, 
                                                 (im.shape[1],im.shape[0]), 
                                                 1, (im.shape[1],im.shape[0])) 
-    im = cv2.undistort(im1, matrix2, distort, newCameraMatrix=newMat)
+    im = cv2.undistort(im1, matrix1, distort, newCameraMatrix=newMat)
     
     #Get image name
     imn = Path(imagelist[i]).name
     print('Visualising data for ' + str(imn))
         
     #Plot uv velocity points on image plane  
-    Utilities.plotVeloPX(uvvel[i], uv0[i], uv1corr[i], im, show=True, 
+    Utilities.plotVeloPX(uvvel1[i], uv01[i], uv1corr1[i], im, show=True, 
                          save=None)
-
-#    Utilities.plotVeloPX(uverr[i], uv0[i], uv1corr[i], im, show=True, 
-#                         save=target4+'uverr_'+imn)
-#    
-#    uvsnr=uverr[i]/uvvel[i]
-#    Utilities.plotVeloPX(uvsnr, uv0[i], uv1corr[i], im, show=True, 
-#                         save=target4+'uvsnr_'+imn)    
-
+    Utilities.plotVeloPX(uvvel2[i], uv02[i], uv1corr2[i], im, show=True, 
+                         save=None) 
 
     #Plot xyz velocity points on dem  
-    Utilities.plotVeloXYZ(xyzvel[i], xyz0[i], xyz1[i], dem, show=True, 
+    Utilities.plotVeloXYZ(xyzvel1[i], xyz01[i], xyz11[i], dem, show=True, 
                           save=None)
-
-#    Utilities.plotVeloXYZ(xyzerr[i], xyz0[i], xyz1[i], dem, show=True, 
-#                          save=target4+'xyzerr_'+imn)    
-                
-#    #Plot interpolation map
-#    grid, pointsextent = Utilities.interpolateHelper(xyzvel[i], xyz0[i], 
-#                                                     xyz1[i], interpmethod)
-#    Utilities.plotInterpolate(grid, pointsextent, dem, show=True, 
-#                              save=target4+'interp_'+imn)  
-
+    Utilities.plotVeloXYZ(xyzvel2[i], xyz02[i], xyz12[i], dem, show=True, 
+                          save=None)
     
 #------------------------------------------------------------------------------
 print('\nFinished')
