@@ -69,7 +69,7 @@ DEMpath = '../Examples/camenv_data/dem/KR_demsmooth.tif'
 
 #Define masks for velocity and homography point generation
 vmaskPath_s = '../Examples/camenv_data/masks/KR2_2014_vmask.jpg'
-vmaskPath_d = '../Examples/camenv_data/masks/KR2_2014_dem_vmask.jpg'      
+vmaskPath_d = None#../Examples/camenv_data/masks/KR2_2014_dem_vmask.jpg'      
 hmaskPath = '../Examples/camenv_data/invmasks/KR2_2014_inv.jpg'    
 
 #Define reference image (where GCPs have been defined)
@@ -162,9 +162,9 @@ imn1 = Path(imagelist[0]).name
 
 
 print('\nOPTIMISING CAMERA ENVIRONMENT')
-projvars = [camloc, campose, radcorr, tancorr, focal, camcen, refimagePath] 
-new_projvars = optimiseCamera(optparams, projvars, GCPxyz, GCPuv, 
-                              optmethod=optmethod, show=True)
+new_projvars = [camloc, campose, radcorr, tancorr, focal, camcen, refimagePath] 
+#new_projvars = optimiseCamera(optparams, projvars, GCPxyz, GCPuv, 
+#                              optmethod=optmethod, show=True)
 
 
 print('\nCOMPILING TRANSFORMATION PARAMETERS')
@@ -241,18 +241,18 @@ for i in range(len(imagelist)-1):
                                        [hmax, hqual, hmindist])
     homog.append(hg)
                              
-    #Calculate velocities between image pair
-    print('Calculating sparse velocities...')
-    vl1 = Velocity.calcSparseVelocity(im0, im1, vmask1, [matrix1,distort], 
-                                      [hg[0],hg[3]], new_invprojvars, vwin, 
-                                      vback, vminfeat, [vmax,vqual,vmindist])
+#    #Calculate velocities between image pair
+#    print('Calculating sparse velocities...')
+#    vl1 = Velocity.calcSparseVelocity(im0, im1, vmask1, [matrix1,distort], 
+#                                      [hg[0],hg[3]], new_invprojvars, vwin, 
+#                                      vback, vminfeat, [vmax,vqual,vmindist])
     
     print('Calculating dense velocities...')    
     vl2 = Velocity.calcDenseVelocity(im0, im1, vgrid, vmethod, vtemplate, 
                                      vsearch, vmask2, [matrix1,distort], 
                                      [hg[0],hg[3]], campars, vminfeat)   
  
-    velo1.append(vl1) 
+#    velo1.append(vl1) 
     velo2.append(vl2)            
 
 #---------------------------  Export data   -----------------------------------
@@ -264,11 +264,11 @@ names=[]
 for i in imagelist:
     names.append(str(Path(i).name).split('.JPG')[0])
 
-#Extract xyz velocities, uv velocities, and xyz0 locations
-xyzvel1=[item[0][0] for item in velo1] 
-xyzerr1=[item[0][3] for item in velo1]
-uvvel1=[item[1][0] for item in velo1]
-xyz01=[item[0][1] for item in velo1]
+##Extract xyz velocities, uv velocities, and xyz0 locations
+#xyzvel1=[item[0][0] for item in velo1] 
+#xyzerr1=[item[0][3] for item in velo1]
+#uvvel1=[item[1][0] for item in velo1]
+#xyz01=[item[0][1] for item in velo1]
 
 xyzvel2=[item[0][0] for item in velo2] 
 uvvel2=[item[1][0] for item in velo2]
@@ -276,19 +276,19 @@ xyz02=[item[0][1] for item in velo2]
 
 
 #Write points to shp file                
-FileHandler.writeVeloSHP(xyzvel1, xyzerr1, xyz01, names, target1, projection)       
+#FileHandler.writeVeloSHP(xyzvel1, xyzerr1, xyz01, names, target1, projection)       
 FileHandler.writeVeloSHP(xyzvel2, None, xyz02, names, target2, projection)
 
 #----------------------------   Plot Results   --------------------------------
 
 print('\nPLOTTING OUTPUTS')
 
-#Extract uv0, uv1corr, xyz0 and xyz1 locations 
-uv01=[item[1][1] for item in velo1]
-uv1corr1=[item[1][2] for item in velo1]
-uverr1=[item[1][4] for item in velo1]
-xyz01=[item[0][1] for item in velo1]
-xyz11=[item[0][2] for item in velo1]
+##Extract uv0, uv1corr, xyz0 and xyz1 locations 
+#uv01=[item[1][1] for item in velo1]
+#uv1corr1=[item[1][2] for item in velo1]
+#uverr1=[item[1][4] for item in velo1]
+#xyz01=[item[0][1] for item in velo1]
+#xyz11=[item[0][2] for item in velo1]
 
 uv02=[item[1][1] for item in velo2]
 uv1corr2=[item[1][2] for item in velo2]
@@ -297,7 +297,7 @@ xyz02=[item[0][1] for item in velo2]
 xyz12=[item[0][2] for item in velo2]
 
 #Cycle through data from image pairs   
-for i in range(len(xyz01)):
+for i in range(len(xyz02)):
     
     #Get image from sequence
     im=FileHandler.readImg(imagelist[i], band, equal)
@@ -313,14 +313,14 @@ for i in range(len(xyz01)):
     print('Visualising data for ' + str(imn))
         
     #Plot uv velocity points on image plane  
-    Utilities.plotVeloPX(uvvel1[i], uv01[i], uv1corr1[i], im, show=True, 
-                         save=None)
+#    Utilities.plotVeloPX(uvvel1[i], uv01[i], uv1corr1[i], im, show=True, 
+#                         save=None)
     Utilities.plotVeloPX(uvvel2[i], uv02[i], uv1corr2[i], im, show=True, 
                          save=None) 
 
     #Plot xyz velocity points on dem  
-    Utilities.plotVeloXYZ(xyzvel1[i], xyz01[i], xyz11[i], dem, show=True, 
-                          save=None)
+#    Utilities.plotVeloXYZ(xyzvel1[i], xyz01[i], xyz11[i], dem, show=True, 
+#                          save=None)
     Utilities.plotVeloXYZ(xyzvel2[i], xyz02[i], xyz12[i], dem, show=True, 
                           save=None)
     
