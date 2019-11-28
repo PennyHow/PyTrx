@@ -208,7 +208,8 @@ class Homography(ImageSequence):
                                        [cameraMatrix, distortP], params[1], 
                                        params[2][1], params[2][2], dem, projvars, 
                                        params[2][0], homogmethod, 
-                                       ransacReprojThreshold, params[2][3])
+                                       ransacReprojThreshold, params[2][3],
+                                       params[2][4])
         
             #Assign homography information as object attributes
             homog.append(hg)
@@ -317,7 +318,8 @@ class Velocity(ImageSequence):
                                     (int) and minimum tracked features (int).
                                     Or the dense method parameters - tracking 
                                     method (int), template size (int), search
-                                    window size (int), and minimum tracked 
+                                    window size (int), correlation threshold 
+                                    (int), and minimum tracked 
                                     features (int).
         
         Returns
@@ -410,7 +412,8 @@ class Velocity(ImageSequence):
                                           mask, [mtx,distort], 
                                           [self._homog[i][0], 
                                           self._homog[i][3]], [dem, projvars, 
-                                          invprojvars], params[2][3])
+                                          invprojvars], params[2][3],
+                                          params[2][4])
                        
             else:
                 if params[0]=='sparse':
@@ -425,7 +428,7 @@ class Velocity(ImageSequence):
                                           params[2][1], params[2][2],
                                           mask, [mtx,distort], [None, None], 
                                           [dem, projvars, invprojvars], 
-                                          params[2][3])                     
+                                          params[2][3], params[2][4])                     
                                                  
             #Append output
             velocity.append(pts)         
@@ -638,7 +641,7 @@ def calcSparseVelocity(img1, img2, mask, calib=None, homog=None,
 
 def calcDenseVelocity(im0, im1, griddistance, method, templatesize, 
                       searchsize, mask, calib=None, homog=None, campars=None, 
-                      min_features=4):
+                      threshold= 0.8, min_features=4):
     '''Function to calculate the velocity between a pair of images using 
     a gridded template matching approach. Gridded points are defined by grid 
     distance, which are then used to either generate templates for matching
@@ -711,7 +714,7 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
     
     #Template match if method flag is not optical flow
     pts, ptserrors = templateMatch(im0, im1, uv0, templatesize, searchsize, 
-                                       min_features, method)
+                                   threshold, min_features, method)
  
     #Pass empty object if tracking was insufficient
     if pts==None:
@@ -938,7 +941,7 @@ def calcSparseHomography(img1, img2, mask, correct, method=cv2.RANSAC,
 def calcDenseHomography(img1, img2, mask, correct, griddistance, templatesize, 
                         searchsize, dem, projvars, trackmethod=cv2.TM_CCORR_NORMED, 
                         homogmethod=cv2.RANSAC, ransacReprojThreshold=5.0, 
-                        min_features=4):
+                        threshold=0.8, min_features=4):
     '''Function to supplement correction for movement in the camera 
     platform given an image pair (i.e. image registration). Returns the 
     homography representing tracked image movement, and the tracked 
@@ -986,7 +989,7 @@ def calcDenseHomography(img1, img2, mask, correct, griddistance, templatesize,
             
     #Template match between images
     points, ptserrors = templateMatch(img1, img2, uv0, templatesize, searchsize, 
-                                      min_features, trackmethod)
+                                      threshold, min_features, trackmethod)
         
     #Pass empty object if tracking insufficient
     if points==None:
@@ -1171,8 +1174,8 @@ def opticalMatch(i0, iN, p0, winsize, back_thresh, min_features):
     return [p0,p1,p0r], error
 
 
-def templateMatch(im0, im1, uv0, templatesize, searchsize, min_features=4, 
-                  method=cv2.TM_CCORR_NORMED):
+def templateMatch(im0, im1, uv0, templatesize, searchsize, threshold=0.8,
+                  min_features=4, method=cv2.TM_CCORR_NORMED):
     '''Function to template match between two images. Templates in the first
     image (im0) are generated from a given set of points (uv0) and matched to 
     the search window in image 2 (im1). There are a series of methods that can
@@ -1212,6 +1215,8 @@ def templateMatch(im0, im1, uv0, templatesize, searchsize, min_features=4,
     '''
     #Create empty outputs
     avercorr=[]
+    pu1=[]
+    pv1=[]
     pu2=[]
     pv2=[]        
     
@@ -1231,57 +1236,64 @@ def templateMatch(im0, im1, uv0, templatesize, searchsize, min_features=4,
         #Define method string as mapping object
         meth=eval(method)
                    
-        #Attempt to match template in imageB 
+        #Attempt to match template in imageA to search window in imageB 
         try:
             resz = cv2.matchTemplate(search, template, meth)
         except:
-            resz=None
+            print('NOT TRACKED')
+            continue    
+                                        
+        #Create UV meshgrid for correlation result 
+        resx = np.arange(0, resz.shape[1], 1)
+        resy = np.arange(0, resz.shape[0], 1)                    
+        resx,resy = np.meshgrid(resx, resy, sparse=True)
+                                                
+        #Create bicubic interpolation grid                                                                            
+        interp = interpolate.interp2d(resx, resy, resz, kind='cubic')                    
         
-        if resz.all() is not None:
-                                
-            #Create UV meshgrid for correlation result 
-            resx = np.arange(0, resz.shape[1], 1)
-            resy = np.arange(0, resz.shape[0], 1)                    
-            resx,resy = np.meshgrid(resx, resy, sparse=True)
-                                                    
-            #Create bicubic interpolation grid                                                                            
-            interp = interpolate.interp2d(resx, resy, resz, kind='cubic')                    
-            
-            #Create sub-pixel UV grid to interpolate across
-            subpx = 0.01
-            newx = np.arange(0, resz.shape[1], subpx)
-            newy = np.arange(0, resz.shape[0], subpx)
-                    
-            #Interpolate new correlation grid
-            resz = interp(newx, newy)
-                                                    
-            #Get correlation values and coordinate locations        
-            min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(resz)
-                                                                                        
-            #If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum 
-            #location
-            if method == 'cv2.TM_SQDIFF':                            
-                location = min_loc
-            elif method == 'cv2.TM_SQDIFF_NORMED':
-                location = min_loc
+        #Create sub-pixel UV grid to interpolate across
+        subpx = 0.01
+        newx = np.arange(0, resz.shape[1], subpx)
+        newy = np.arange(0, resz.shape[0], subpx)
                 
-            #Else, take maximum location
-            else:                 
-                location = max_loc
-                                
+        #Interpolate new correlation grid
+        resz = interp(newx, newy)
+                                                
+        #Get correlation values and coordinate locations        
+        min_val, max_val, min_loc, max_loc = cv2.minMaxLoc(resz)
+
+        #If the method is TM_SQDIFF or TM_SQDIFF_NORMED, take minimum 
+        #location
+        if method == 'cv2.TM_SQDIFF':                            
+            location = min_loc
+        elif method == 'cv2.TM_SQDIFF_NORMED':
+            location = min_loc
+            
+        #Else, take maximum location
+        else:                 
+            location = max_loc
+         
+        #Retain point if mean correlation value is above threshold
+        if np.mean(resz) > threshold:
+            
             #Calculate tracked point location, assuming the origin of the 
             #template window is the same as the origin of the correlation array                    
             loc_x = ((u - ((resz.shape[1]*subpx)/2)) + 
                     (location[0]*subpx))
             loc_y = ((v - ((resz.shape[1]*subpx)/2) + 
                     (location[1]*subpx)))                            
-    
+        
             #Retain correlation and location            
             avercorr.append(np.mean(resz))
+            pu1.append(u)
+            pv1.append(v)
             pu2.append(loc_x)
             pv2.append(loc_y)
-    
+            
+            
     #Reshape all points and average correlations in 3D arrays
+    uv0t = np.column_stack([pu1,pv1])
+    uv0t = np.array(uv0t, dtype='float32').reshape((-1,1,2))    
     uv1 = np.column_stack([pu2, pv2])            
     uv1 = np.array(uv1, dtype='float32').reshape((-1,1,2))
     avercorr = np.array(avercorr, dtype='float32').reshape((-1,1,1))
@@ -1293,7 +1305,7 @@ def templateMatch(im0, im1, uv0, templatesize, searchsize, min_features=4,
     else:
         print('Average template correlation: ' + str(np.mean(avercorr)))               
         print(str(uv1.shape[0]) + ' templates tracked')
-        return [uv0, uv1, None], avercorr
+        return [uv0t, uv1, None], avercorr
 
 
 def seedCorners(im, mask, maxpoints, quality, mindist, min_features):

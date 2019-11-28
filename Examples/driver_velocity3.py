@@ -59,7 +59,7 @@ camloc = np.array([447948.820, 8759457.100, 407.092])
 campose = np.array([4.80926, 0.05768, 0.14914]) 
 
 #Define image folder and image file type for velocity tracking
-imgFiles = '../Examples/images/KR2_2014_subset/*.JPG'
+imgFiles = 'D:/PhD/pytrx_paper/raw_imgs/potential_for_tracking/2daysequence/*.JPG'
 
 #Define calibration images and chessboard dimensions (height, width)
 calibPath = '../Examples/camenv_data/calib/KR2_2014_2.txt'
@@ -69,7 +69,7 @@ DEMpath = '../Examples/camenv_data/dem/KR_demsmooth.tif'
 
 #Define masks for velocity and homography point generation
 vmaskPath_s = '../Examples/camenv_data/masks/KR2_2014_vmask.jpg'
-vmaskPath_d = None#../Examples/camenv_data/masks/KR2_2014_dem_vmask.jpg'      
+vmaskPath_d = '../Examples/camenv_data/masks/KR2_2014_dem_vmask.jpg'      
 hmaskPath = '../Examples/camenv_data/invmasks/KR2_2014_inv.jpg'    
 
 #Define reference image (where GCPs have been defined)
@@ -82,13 +82,13 @@ GCPpath = '../Examples/camenv_data/gcps/KR2_2014.txt'
 print('\nDEFINING DATA OUTPUTS')
 
 #Shapefile output (with WGS84 projection)
-target1 = '../Examples/results/velocity3/shpfiles_sparse/'
-target2 = '../Examples/results/velocity3/shpfiles_dense/'     
+target1 = 'D:/PhD/pytrx_paper/results/sparse_allimgs'
+target2 = 'D:/PhD/pytrx_paper/results/dense_2day/'     
 projection = 32633
 
 #Plot outputs
-target3 = '../Examples/results/velocity3/imgfiles_sparse/'
-target4 = '../Examples/results/velocity4/imgfiles_dense/'
+target3 = 'D:/PhD/pytrx_paper/results/sparse_allimgs'
+target4 = 'D:/PhD/pytrx_paper/results/dense_2day/'
 interpmethod='linear'                                 #nearest/cubic/linear
 cr1 = [445000, 452000, 8754000, 8760000]              #DEM plot extent   
 
@@ -114,10 +114,11 @@ vqual = 0.1                         #Corner quality for seeding
 vmindist = 5.0                      #Minimum distance between points
 
 #Dense velocity parameters
-vgrid = [100,100]                   #Dense matching grid distance
+vgrid = [50,50]                     #Dense matching grid distance
 vtemplate=10                        #Template size
-vsearch=100                         #Search window size
+vsearch=50                          #Search window size
 vmethod='cv2.TM_CCORR_NORMED'       #Method for template matching
+vthres=0.8                          #Threshold average template correlation
 
 #General velocity parameters
 vminfeat = 1                        #Minimum number of points to track
@@ -250,7 +251,7 @@ for i in range(len(imagelist)-1):
     print('Calculating dense velocities...')    
     vl2 = Velocity.calcDenseVelocity(im0, im1, vgrid, vmethod, vtemplate, 
                                      vsearch, vmask2, [matrix1,distort], 
-                                     [hg[0],hg[3]], campars, vminfeat)   
+                                     [hg[0],hg[3]], campars, vthres, vminfeat)   
  
 #    velo1.append(vl1) 
     velo2.append(vl2)            
