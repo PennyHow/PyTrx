@@ -65,7 +65,8 @@ imgFiles = 'D:/PhD/pytrx_paper/raw_imgs/potential_for_tracking/2daysequence/*.JP
 calibPath = '../Examples/camenv_data/calib/KR2_2014_2.txt'
 
 #Load DEM from path
-DEMpath = '../Examples/camenv_data/dem/KR_demsmooth.tif'        
+DEMpath = '../Examples/camenv_data/dem/KR_arcticdem_20140512.tif'        
+#DEMpath = '../Examples/camenv_data/dem/KR_demsmooth.tif'
 
 #Define masks for velocity and homography point generation
 vmaskPath_s = '../Examples/camenv_data/masks/KR2_2014_vmask.jpg'
@@ -76,19 +77,19 @@ hmaskPath = '../Examples/camenv_data/invmasks/KR2_2014_inv.jpg'
 refimagePath = '../Examples/camenv_data/refimages/KR2_2014.JPG'
 
 #Define GCPs (world coordinates and corresponding image coordinates)
-GCPpath = '../Examples/camenv_data/gcps/KR2_2014.txt'
-
+#GCPpath = '../Examples/camenv_data/gcps/KR2_2014.txt'
+GCPpath = '../Examples/camenv_data/gcps/KR2_2014_arcticdem20140512.txt'
 
 print('\nDEFINING DATA OUTPUTS')
 
 #Shapefile output (with WGS84 projection)
 target1 = 'D:/PhD/pytrx_paper/results/sparse_allimgs'
-target2 = 'D:/PhD/pytrx_paper/results/dense_2day/'     
+target2 = 'D:/PhD/pytrx_paper/results/dense_2day_arcticDEM140512/'     
 projection = 32633
 
 #Plot outputs
 target3 = 'D:/PhD/pytrx_paper/results/sparse_allimgs'
-target4 = 'D:/PhD/pytrx_paper/results/dense_2day/'
+target4 = 'D:/PhD/pytrx_paper/results/dense_2day_arcticDEM140512/'
 interpmethod='linear'                                 #nearest/cubic/linear
 cr1 = [445000, 452000, 8754000, 8760000]              #DEM plot extent   
 
@@ -192,7 +193,7 @@ vmask2 = Velocity.readDEMmask(dem, im1, new_invprojvars, vmaskPath_d)
 
 print('Defining homography mask')
 hmask = FileHandler.readMask(None, hmaskPath)
-#hmask = readDEMmask(dem, im1, invprojvars, hmaskPath)
+#hmask = Velocity.readDEMmask(dem, im1, new_invprojvars, hmaskPath)
 
 
 #--------------------   Plot camera environment info   ------------------------
@@ -209,7 +210,11 @@ Utilities.plotPrincipalPoint(camcen1, refimg, imn)
 #Show corrected and uncorrected image
 Utilities.plotCalib(matrix1, distort, refimg, imn)
 
+#Show GCPs
+Utilities.plotGCPs([GCPxyz, GCPuv], refimg, imn, 
+                   dem, camloc, extent=None)    
 
+sys.exit(1)
 
 #----------------------   Calculate velocities   ------------------------------
 

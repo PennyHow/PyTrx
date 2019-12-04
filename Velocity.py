@@ -1240,7 +1240,6 @@ def templateMatch(im0, im1, uv0, templatesize, searchsize, threshold=0.8,
         try:
             resz = cv2.matchTemplate(search, template, meth)
         except:
-            print('NOT TRACKED')
             continue    
                                         
         #Create UV meshgrid for correlation result 

@@ -827,7 +827,8 @@ def constructDEM(dempath, densefactor):
     return dem
 
             
-def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg):
+def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg,
+                  viewshed=True):
     '''Set the inverse projection variables.
     
     Args
@@ -840,6 +841,8 @@ def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg):
     camcen (arr):               Camera principal point
     refimg (arr):               Reference image (function only uses the image 
                                 dimensions)
+    viewshed (bool):            Flag to denote if viewshed from camera should
+                                be determined before projection
     
     Returns
     invProjVars (list):         Inverse projection coefficients
@@ -857,8 +860,15 @@ def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg):
         Z=dem.getData(2)
     
     #Define visible extent of the DEM from the location of the camera
-    visible=voxelviewshed(dem, camloc)
-
+    if viewshed is True:
+        visible=voxelviewshed(dem, camloc)
+        XYZ=np.column_stack([X[visible[:]],Y[visible[:]],Z[visible[:]]])
+    else:
+        X=np.ravel(X)
+        Y=np.ravel(Y)
+        Z=np.ravel(Z)
+        XYZ=np.column_stack([X,Y,Z])
+        
     #Snap image plane to DEM extent
     XYZ=np.column_stack([X[visible[:]],Y[visible[:]],Z[visible[:]]])
     uv0,dummy,inframe=projectXYZ(camloc, camdir, radial, tangen, foclen, 

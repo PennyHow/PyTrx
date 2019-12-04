@@ -76,8 +76,8 @@ homog = Homography(camimgs, cameraenvironment, caminvmask, calibFlag=True,
                 band='L', equal=True)
 
 #Calculate homography
-hgout = homog.calcHomographyPairs(hgwinsize, hgback, hgminf, 
-                                  [hgmax, hgqual, hgmind])
+hgout = homog.calcHomographies(hgwinsize, hgback, hgminf, 
+                               [hgmax, hgqual, hgmind])
 
 
 #----------------------   Calculate velocities   ------------------------------
