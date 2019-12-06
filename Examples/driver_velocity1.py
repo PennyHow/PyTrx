@@ -64,7 +64,8 @@ cameraenvironment.showCalib()
 #----------------------   Calculate homography   ------------------------------
 
 #Set homography parameters
-hgwinsize=(25,25)                 #Tracking window size
+hmethod='sparse'                 #Method
+hgwinsize=(25,25)               #Tracking window size
 hgback=1.0                      #Back-tracking threshold
 hgmax=50000                     #Maximum number of points to seed
 hgqual=0.1                      #Corner quality for seeding
@@ -76,14 +77,15 @@ homog = Homography(camimgs, cameraenvironment, caminvmask, calibFlag=True,
                 band='L', equal=True)
 
 #Calculate homography
-hgout = homog.calcHomographies(hgwinsize, hgback, hgminf, 
-                               [hgmax, hgqual, hgmind])
+hgout = homog.calcHomographies([hmethod, [hgmax, hgqual, hgmind], [hgwinsize, 
+                                hgback, hgminf]])
 
-
+    
 #----------------------   Calculate velocities   ------------------------------
 
 #Set velocity parameters
-vwinsize=(25,25)                 #Tracking window size
+vmethod='sparse'                 #Method
+vwinsize=(25,25)                #Tracking window size
 bk = 1.0                        #Back-tracking threshold  
 mpt = 50000                     #Maximum number of points to seed
 ql = 0.1                        #Corner quality for seeding
@@ -94,8 +96,9 @@ mfeat = 4                       #Minimum number of seeded points to track
 velo=Velocity(camimgs, cameraenvironment, hgout, camvmask, calibFlag=True, 
               band='L', equal=True) 
 
-velocities = velo.calcSparseVelocities(vwinsize, bk, mfeat, [mpt, ql, mdis])
-
+velocities = velo.calcVelocities([vmethod, [mpt, ql, mdis], [vwinsize, bk, 
+                                  mfeat]])                                   
+                                    
 xyzvel=[item[0][0] for item in velocities] 
 xyz0=[item[0][1] for item in velocities]
 xyz1=[item[0][2] for item in velocities]
