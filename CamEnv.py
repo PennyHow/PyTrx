@@ -55,6 +55,7 @@ from DEM import ExplicitRaster,load_DEM,voxelviewshed
 from Images import CamImage
 
 #Import other packages
+import matplotlib.pyplot as plt
 from scipy import interpolate
 from scipy import optimize
 import numpy as np
@@ -1077,7 +1078,7 @@ def optimiseCamera(optimise, projvars, GCPxyz, GCPuv, optmethod='trf',
 
     #Compute GCP residuals with original camera info
     stable = [camloc, campose, radcorr, tancorr, focal, camcen]    
-    res0 = computeResiduals(None, stable, GCPxyz, GCPuv, refimg, 
+    res0 = computeResidualsUV(None, stable, GCPxyz, GCPuv, refimg, 
                             optimise=None)
     GCPxyz_proj0,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
                                            focal, camcen, refimg, GCPxyz)
@@ -1105,7 +1106,7 @@ def optimiseCamera(optimise, projvars, GCPxyz, GCPuv, optmethod='trf',
         print('Commencing optimisation of all projection parameters')
      
     #Optimise, passing through the computeResiduals function for iterating
-    out = optimize.least_squares(computeResiduals, params, method=optmethod, 
+    out = optimize.least_squares(computeResidualsUV, params, method=optmethod, 
                                  verbose=2, 
                                  args=(stable, GCPxyz, GCPuv, refimg, optimise))  
 
@@ -1197,10 +1198,74 @@ def getRotation(camDirection):
     value[0:2,:]=-value[0:2,:]
 
     return value
+
+
+def computeResidualsXYZ(invprojvars, GCPxyz, GCPuv, dem):
+    '''Function for computing the pixel difference between GCP image points
+    and GCP projected XYZ points. This function is used in the optimisation 
+    function (optimiseCamera), with parameters for optimising defined in the
+    first variable and stable parameters defined in the second. If no 
+    optimisable parameters are given and the optimise flag is set to None then 
+    residuals are computed for the original parameters (i.e. no optimisation).
+    
+    Args
+    params (arr):               Optimisable parameters, given as a 1-D array
+                                of shape (m, ).
+    stable (list):              Stable parameters that will not be optimised.
+    GCPxyz (arr):               GCPs in scene space (x,y,z).
+    GCPuv (arr):                GCPs in image space (u,v).
+    refimg (CamImage/str/arr):  Reference image, given as a CamImage object, 
+                                file path string, or image array.
+    optimise (str):             String denoting the optimisation type:
+                                YPR: optimise camera pose only.
+                                INT: optimise internal camera parameters.
+                                EXT: optimise external camera parameters.
+                                LOC: optimise all parameters except camera
+                                     location.
+                                ALL: optimise all camera parameters.
+    
+    Returns
+    residual (arr):             Pixel difference between UV and projected XYZ
+                                position of each GCP.
+    '''
+    GCPxyz_proj = projectUV(GCPuv, invprojvars)  
+        
+    #Compute residuals using pythag theorem (i.e. pixel difference between pts)
+    residual=[]
+    for i in range(len(GCPxyz_proj)):
+        residual.append(np.sqrt((GCPxyz_proj[i][0]-GCPxyz[i][0])**2 + 
+                                (GCPxyz_proj[i][1]-GCPxyz[i][1])**2))  
+    residual = np.array(residual)
+    
+    print('Average residual: ' + str(np.mean(residual)) + ' m')
+
+    fig, (ax1) = plt.subplots(1, figsize=(20,10))
+          
+    #Plot DEM and set cmap
+    demextent = dem.getExtent()
+    demz = dem.getZ()  
+    implot = ax1.imshow(demz, origin='lower', extent=demextent)
+    implot.set_cmap('gray')
+    ax1.axis([demextent[0], demextent[1],demextent[2], demextent[3]])
+    
+    #Plot UV GCPs
+    ax1.scatter(GCPxyz[:,0], GCPxyz[:,1], color='red', marker='+', 
+                label='XYZ')
+    
+    #Plot projected XYZ GCPs
+    ax1.scatter(GCPxyz_proj[:,0], GCPxyz_proj[:,1], color='blue', 
+                marker='+', label='Projected UV')
+    
+    #Add legend and show plot
+    ax1.legend()
+    plt.show() 
+        
+    #Return all residuals
+    return residual
    
 
-def computeResiduals(params, stable, GCPxyz, GCPuv, refimg, 
-                     optimise='YPR'):
+def computeResidualsUV(params, stable, GCPxyz, GCPuv, refimg, 
+                       optimise='YPR'):
     '''Function for computing the pixel difference between GCP image points
     and GCP projected XYZ points. This function is used in the optimisation 
     function (optimiseCamera), with parameters for optimising defined in the

@@ -41,7 +41,7 @@ from pathlib import Path
 
 #Import PyTrx packages
 sys.path.append('../')
-from CamEnv import setProjection, optimiseCamera
+from CamEnv import setProjection, optimiseCamera, computeResidualsXYZ
 from DEM import load_DEM
 import Velocity
 import FileHandler
@@ -59,14 +59,14 @@ camloc = np.array([447948.820, 8759457.100, 407.092])
 campose = np.array([4.80926, 0.05768, 0.14914]) 
 
 #Define image folder and image file type for velocity tracking
-imgFiles = 'D:/PhD/pytrx_paper/raw_imgs/potential_for_tracking/2daysequence/*.JPG'
+imgFiles = '../Examples/images/KR2_2014_subset/*.JPG'
 
 #Define calibration images and chessboard dimensions (height, width)
 calibPath = '../Examples/camenv_data/calib/KR2_2014_2.txt'
 
 #Load DEM from path
-DEMpath = '../Examples/camenv_data/dem/KR_arcticdem_20140512.tif'        
-#DEMpath = '../Examples/camenv_data/dem/KR_demsmooth.tif'
+#DEMpath = '../Examples/camenv_data/dem/KR_arcticdem_20140512.tif'        
+DEMpath = '../Examples/camenv_data/dem/KR_demsmooth.tif'
 
 #Define masks for velocity and homography point generation
 vmaskPath_s = '../Examples/camenv_data/masks/KR2_2014_vmask.jpg'
@@ -77,21 +77,15 @@ hmaskPath = '../Examples/camenv_data/invmasks/KR2_2014_inv.jpg'
 refimagePath = '../Examples/camenv_data/refimages/KR2_2014.JPG'
 
 #Define GCPs (world coordinates and corresponding image coordinates)
-#GCPpath = '../Examples/camenv_data/gcps/KR2_2014.txt'
-GCPpath = '../Examples/camenv_data/gcps/KR2_2014_arcticdem20140512.txt'
+GCPpath = '../Examples/camenv_data/gcps/KR2_2014_modify.txt'
+#GCPpath = '../Examples/camenv_data/gcps/KR2_2014_arcticdem20140512.txt'
 
 print('\nDEFINING DATA OUTPUTS')
 
 #Shapefile output (with WGS84 projection)
-target1 = 'D:/PhD/pytrx_paper/results/sparse_allimgs'
-target2 = 'D:/PhD/pytrx_paper/results/dense_2day_arcticDEM140512/'     
+target1 = '../Examples/results/velocity3/shpfiles_sparse/' 
+target2 = '../Examples/results/velocity3/shpfiles_dense/'
 projection = 32633
-
-#Plot outputs
-target3 = 'D:/PhD/pytrx_paper/results/sparse_allimgs'
-target4 = 'D:/PhD/pytrx_paper/results/dense_2day_arcticDEM140512/'
-interpmethod='linear'                                 #nearest/cubic/linear
-cr1 = [445000, 452000, 8754000, 8760000]              #DEM plot extent   
 
 
 #--------------------------   Define parameters   -----------------------------
@@ -141,7 +135,7 @@ hminfeat = 4                        #Minimum number of seeded points to track
 
 print('\nLOADING DEM')
 dem = load_DEM(DEMpath)
-dem=dem.densify(DEMdensify)
+dem = dem.densify(DEMdensify)
 
 
 print('\nLOADING GCPs')
@@ -185,6 +179,9 @@ new_invprojvars = setProjection(dem, camloc1, campose1,
 
 campars = [dem, new_projvars, new_invprojvars]                 
 
+residuals = computeResidualsXYZ(new_invprojvars, GCPxyz, GCPuv, dem)
+
+sys.exit(1)
 
 print('\nLOADING MASKS')
 print('Defining velocity mask')
@@ -193,7 +190,6 @@ vmask2 = Velocity.readDEMmask(dem, im1, new_invprojvars, vmaskPath_d)
 
 print('Defining homography mask')
 hmask = FileHandler.readMask(None, hmaskPath)
-#hmask = Velocity.readDEMmask(dem, im1, new_invprojvars, hmaskPath)
 
 
 #--------------------   Plot camera environment info   ------------------------
@@ -214,7 +210,6 @@ Utilities.plotCalib(matrix1, distort, refimg, imn)
 Utilities.plotGCPs([GCPxyz, GCPuv], refimg, imn, 
                    dem, camloc, extent=None)    
 
-sys.exit(1)
 
 #----------------------   Calculate velocities   ------------------------------
 
@@ -239,7 +234,7 @@ for i in range(len(imagelist)-1):
     
     print('\nProcessing images: ' + str(imn0) + ' and ' + str(imn1))
         
-#    #Calculate homography between image pair
+    #Calculate homography between image pair
     print('Calculating homography...')
 
     hg = Velocity.calcSparseHomography(im0, im1, hmask, [matrix1,distort], 
@@ -247,18 +242,18 @@ for i in range(len(imagelist)-1):
                                        [hmax, hqual, hmindist])
     homog.append(hg)
                              
-#    #Calculate velocities between image pair
-#    print('Calculating sparse velocities...')
-#    vl1 = Velocity.calcSparseVelocity(im0, im1, vmask1, [matrix1,distort], 
-#                                      [hg[0],hg[3]], new_invprojvars, vwin, 
-#                                      vback, vminfeat, [vmax,vqual,vmindist])
+    #Calculate velocities between image pair
+    print('Calculating sparse velocities...')
+    vl1 = Velocity.calcSparseVelocity(im0, im1, vmask1, [matrix1,distort], 
+                                      [hg[0],hg[3]], new_invprojvars, vwin, 
+                                      vback, vminfeat, [vmax,vqual,vmindist])
     
     print('Calculating dense velocities...')    
     vl2 = Velocity.calcDenseVelocity(im0, im1, vgrid, vmethod, vtemplate, 
                                      vsearch, vmask2, [matrix1,distort], 
                                      [hg[0],hg[3]], campars, vthres, vminfeat)   
  
-#    velo1.append(vl1) 
+    velo1.append(vl1) 
     velo2.append(vl2)            
 
 #---------------------------  Export data   -----------------------------------
@@ -270,65 +265,22 @@ names=[]
 for i in imagelist:
     names.append(str(Path(i).name).split('.JPG')[0])
 
-##Extract xyz velocities, uv velocities, and xyz0 locations
-#xyzvel1=[item[0][0] for item in velo1] 
-#xyzerr1=[item[0][3] for item in velo1]
-#uvvel1=[item[1][0] for item in velo1]
-#xyz01=[item[0][1] for item in velo1]
+#Extract xyz velocities, uv velocities, and xyz0 locations
+xyzvel1=[item[0][0] for item in velo1] 
+xyzerr1=[item[0][3] for item in velo1]
+uvvel1=[item[1][0] for item in velo1]
+xyz01=[item[0][1] for item in velo1]
 
 xyzvel2=[item[0][0] for item in velo2] 
+xyzerr2=[item[1][4] for item in velo2]
 uvvel2=[item[1][0] for item in velo2]
 xyz02=[item[0][1] for item in velo2]
 
+xyzerr2 = xyzerr2[0].flatten()
 
 #Write points to shp file                
-#FileHandler.writeVeloSHP(xyzvel1, xyzerr1, xyz01, names, target1, projection)       
-FileHandler.writeVeloSHP(xyzvel2, None, xyz02, names, target2, projection)
-
-#----------------------------   Plot Results   --------------------------------
-
-print('\nPLOTTING OUTPUTS')
-
-##Extract uv0, uv1corr, xyz0 and xyz1 locations 
-#uv01=[item[1][1] for item in velo1]
-#uv1corr1=[item[1][2] for item in velo1]
-#uverr1=[item[1][4] for item in velo1]
-#xyz01=[item[0][1] for item in velo1]
-#xyz11=[item[0][2] for item in velo1]
-
-uv02=[item[1][1] for item in velo2]
-uv1corr2=[item[1][2] for item in velo2]
-uverr2=[item[1][4] for item in velo2]
-xyz02=[item[0][1] for item in velo2]
-xyz12=[item[0][2] for item in velo2]
-
-#Cycle through data from image pairs   
-for i in range(len(xyz02)):
-    
-    #Get image from sequence
-    im=FileHandler.readImg(imagelist[i], band, equal)
-
-    #Correct image for distortion
-    newMat, roi = cv2.getOptimalNewCameraMatrix(matrix1, distort, 
-                                                (im.shape[1],im.shape[0]), 
-                                                1, (im.shape[1],im.shape[0])) 
-    im = cv2.undistort(im1, matrix1, distort, newCameraMatrix=newMat)
-    
-    #Get image name
-    imn = Path(imagelist[i]).name
-    print('Visualising data for ' + str(imn))
-        
-    #Plot uv velocity points on image plane  
-#    Utilities.plotVeloPX(uvvel1[i], uv01[i], uv1corr1[i], im, show=True, 
-#                         save=None)
-    Utilities.plotVeloPX(uvvel2[i], uv02[i], uv1corr2[i], im, show=True, 
-                         save=None) 
-
-    #Plot xyz velocity points on dem  
-#    Utilities.plotVeloXYZ(xyzvel1[i], xyz01[i], xyz11[i], dem, show=True, 
-#                          save=None)
-    Utilities.plotVeloXYZ(xyzvel2[i], xyz02[i], xyz12[i], dem, show=True, 
-                          save=None)
+FileHandler.writeVeloSHP(xyzvel1, xyzerr1, xyz01, names, target1, projection)       
+FileHandler.writeVeloSHP(xyzvel2, xyzerr2, xyz02, names, target2, projection)
     
 #------------------------------------------------------------------------------
 print('\nFinished')

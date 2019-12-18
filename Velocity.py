@@ -1295,7 +1295,7 @@ def templateMatch(im0, im1, uv0, templatesize, searchsize, threshold=0.8,
     uv0t = np.array(uv0t, dtype='float32').reshape((-1,1,2))    
     uv1 = np.column_stack([pu2, pv2])            
     uv1 = np.array(uv1, dtype='float32').reshape((-1,1,2))
-    avercorr = np.array(avercorr, dtype='float32').reshape((-1,1,1))
+    avercorr = np.array(avercorr, dtype='float64')
     
     #Return none if not enough templates were matched, else return all
     if uv1.shape[0]<min_features:
