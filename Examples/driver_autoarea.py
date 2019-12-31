@@ -52,35 +52,45 @@ if not os.path.exists(destination):
     os.makedirs(destination)
 
 
-#--------------------   Create camera and area objects   ----------------------
+#-------------   Create and optimise camera environment object   --------------
 
 #Define camera environment
 cameraenvironment = CamEnv(camdata)
 
+#Set camera optimisation parameters
+optparams = 'YPR'               #Flag to denote which parameters to optimise: 
+                                #YPR=camera pose; INT=intrinsic camera model; 
+                                #EXT=extrinsic camera model; ALL=all camera 
+                                #parameters
+optmethod = 'trf'               #Optimisation method: trf=Trust Region 
+                                #Reflective algorithm; dogbox=dogleg algorithm;
+                                #lm=Levenberg-Marquardt algorithm
+
+#Optimise camera                                
+cameraenvironment.optimiseCamEnv(optparams, optmethod='trf', show=True)
+
 #Report camera data and show corrected image
 cameraenvironment.reportCamData()
-#cameraenvironment.showGCPs()
-#cameraenvironment.showPrincipalPoint()
-#cameraenvironment.showCalib()
-
+cameraenvironment.showGCPs()
+cameraenvironment.showPrincipalPoint()
+cameraenvironment.showCalib()
+cameraenvironment.showResiduals()
 
 #---------------------   Calculate homography   -------------------------------
 
 #Set homography parameters
-hgwinsize=(25,25)               #Tracking window size
-hgback=1.0                      #Back-tracking threshold
-hgmax=50000                     #Maximum number of points to seed
-hgqual=0.1                      #Corner quality for seeding
-hgmind=5.0                      #Minimum distance between seeded points
-hgminf=4                        #Minimum number of seeded points to track
+hgmethod='sparse'               #Sparse/dense homography method
+hgseed = [50000, 0.1, 5.0]      #Seeding parameters (max. pts, quality, min. 
+                                #distance)
+hgtrack = [(25,25), 1.0, 4]     #Tracking parameters (window size, backtracking 
+                                #threshold, min. number of pts)
 
 #Set up Homography object
 homog = Homography(camimgs, cameraenvironment, caminvmask, calibFlag=True, 
                    band='L', equal=True)
 
 #Calculate homography
-hg = homog.calcHomographyPairs(hgwinsize, hgback, hgminf, 
-                               [hgmax, hgqual, hgmind])         
+hg = homog.calcHomographies([hgmethod, hgseed, hgtrack])        
 homogmatrix = [item[0] for item in hg]
 
 

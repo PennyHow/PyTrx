@@ -255,15 +255,12 @@ class CamCalib(object):
     def getDistortCoeffsCV2(self):
         '''Return radial and tangential distortion coefficients.'''
         #Returns certain number of values depending on number of coefficients
-        #inputted         
-        if self._radCorr[3]!=0.0:
-            return np.append(np.append(self._radCorr[0:2],self._tanCorr),
-                             self._radCorr[2:])
-        elif self._radCorr[2]!=0.0:
-            return np.append(np.append(self._radCorr[0:2],self._tanCorr),
-                             self._radCorr[2:3])
+        #inputted  
+        if len(self._radCorr)==2:
+            return np.append(self._radCorr[0:2], self._tanCorr)
         else:
-            return np.append(self._radCorr[0:2],self._tanCorr)
+            return np.append(np.append(self._radCorr[0:2], self._tanCorr),
+                             self._radCorr[2:])
 
         
     def getCamMatrixCV2(self):
@@ -296,11 +293,9 @@ class CamCalib(object):
         for row in self._intrMat:
             print(str(row[0]) + str(row[1]) + str(row[2]))
         print('\nTangential Correction:')
-        print(str(self._tanCorr[0]) + str(self._tanCorr[1]))
+        print(str(self._tanCorr))
         print('\nRadial Correction:')
-        print(str(self._radCorr[0]) + str(self._radCorr[1]) + 
-              str(self._radCorr[2]) + str(self._radCorr[3]) + 
-              str(self._radCorr[4]) + str(self._radCorr[5]))
+        print(str(self._radCorr))
         print('\nFocal Length:')
         print(str(self._focLen))
         print('\nCamera Centre:')
@@ -548,7 +543,6 @@ class CamEnv(CamCalib):
         YPR: Optimise camera pose only
         EXT: Optimise external camera parameters
         INT: Optimise internal camera parameters
-        LOC: Optimise all parameters except camera location
         ALL: Optimise all projection parameters.
         '''
         #Get GCPs
@@ -559,7 +553,7 @@ class CamEnv(CamCalib):
                     self._tanCorr, self._focLen, self._camCen, self._refImage]
         
         opt_projvars = optimiseCamera(optimise, projvars, xyz, uv, 
-                                      optmethod=optmethod, show=show)
+                                      optmethod, show)
         
         self._camloc = opt_projvars[0] 
         self._camDirection = opt_projvars[1] 
@@ -627,6 +621,22 @@ class CamEnv(CamCalib):
         plotCalib(matrix, distort, img, imn)       
 
 
+    def showResiduals(self):
+        '''Show positions of xyz GCPs and projected GCPs, and residual 
+        differences between their positions. This can be used as a measure of
+        a error in the georectification of measurements.'''        
+        xyz, uv = self._gcp.getGCPs()               #Get GCPs
+        dem = self.getDEM()                         #Get DEM
+
+        #Set inverse projection parameters
+        invprojvars = setProjection(dem, self._camloc, self._camDirection, 
+                                    self._radCorr, self._tanCorr, self._focLen, 
+                                    self._camCen, self._refImage)
+        
+        #Compute residuals
+        computeResidualsXYZ(invprojvars, xyz, uv, dem)
+
+
     def reportCamData(self):
         '''Reporter for testing that the relevant data has been successfully 
         imported. Testing for:
@@ -670,7 +680,7 @@ class CamEnv(CamCalib):
         if self._camDirection is None:
             print('\nCamera pose assumed unset (zero values)')
         else:
-            print('\nCamera pose set as [Roll,Pitch,Yaw]: ')
+            print('\nCamera pose set as [Yaw,Pitch,Roll]: ')
             print(str(self._camDirection))
 
         #Camera calibration (matrix and distortion coefficients)
@@ -1079,7 +1089,7 @@ def optimiseCamera(optimise, projvars, GCPxyz, GCPuv, optmethod='trf',
     #Compute GCP residuals with original camera info
     stable = [camloc, campose, radcorr, tancorr, focal, camcen]    
     res0 = computeResidualsUV(None, stable, GCPxyz, GCPuv, refimg, 
-                            optimise=None)
+                            optimise=None)   
     GCPxyz_proj0,depth,inframe = projectXYZ(camloc, campose, radcorr, tancorr, 
                                            focal, camcen, refimg, GCPxyz)
     
@@ -1118,8 +1128,8 @@ def optimiseCamera(optimise, projvars, GCPxyz, GCPuv, optmethod='trf',
         if optimise=='YPR':
             campose = out.x
         elif optimise == 'INT':
-            radcorr = out.x[0:3].reshape(1,3)
-            tancorr = out.x[3:5].reshape(1,2)
+            radcorr = list(out.x[0:3])
+            tancorr = list(out.x[3:5])
             focal = list(out.x[5:7])
             camcen = list(out.x[7:9])        
         elif optimise == 'EXT':
@@ -1128,8 +1138,8 @@ def optimiseCamera(optimise, projvars, GCPxyz, GCPuv, optmethod='trf',
         else:
             camloc = out.x[0:3]
             campose = out.x[3:6]
-            radcorr = out.x[6:9].reshape(1,3)
-            tancorr = out.x[9:11].reshape(1,2)
+            radcorr = list(out.x[6:9])
+            tancorr = list(out.x[9:11])
             focal = list(out.x[11:13])
             camcen = list(out.x[13:15]) 
         
@@ -1145,8 +1155,8 @@ def optimiseCamera(optimise, projvars, GCPxyz, GCPuv, optmethod='trf',
                                (GCPxyz_proj1[i][0]-GCPuv[i][0])+
                                (GCPxyz_proj1[i][1]-GCPuv[i][1])*
                                (GCPxyz_proj1[i][1]-GCPuv[i][1])))
-        print('Original px residuals (average): ' + str(np.mean(res0)))        
-        print('Optimised px residuals (average): ' + str(np.mean(res1)))
+        print('Original px residuals (average): ' + str(np.nanmean(res0)))        
+        print('Optimised px residuals (average): ' + str(np.nanmean(res1)))
         
         #Compile new projection parameter list
         projvars1 = [camloc, campose, radcorr, tancorr, focal, camcen, 
@@ -1163,6 +1173,8 @@ def optimiseCamera(optimise, projvars, GCPxyz, GCPuv, optmethod='trf',
                 ims=refimg.shape
             else:
                 ims=refimg.getImageSize()
+                refimg=refimg.getImageArray()
+
             
             #Plot GCPs using Utilities.plotResiduals function 
             plotResiduals(refimg, ims, GCPuv, GCPxyz_proj0, GCPxyz_proj1)
@@ -1235,11 +1247,11 @@ def computeResidualsXYZ(invprojvars, GCPxyz, GCPuv, dem):
     for i in range(len(GCPxyz_proj)):
         residual.append(np.sqrt((GCPxyz_proj[i][0]-GCPxyz[i][0])**2 + 
                                 (GCPxyz_proj[i][1]-GCPxyz[i][1])**2))  
-    residual = np.array(residual)
-    
-    print('Average residual: ' + str(np.mean(residual)) + ' m')
+    residual = np.array(residual)    
 
     fig, (ax1) = plt.subplots(1, figsize=(20,10))
+    fig.canvas.set_window_title('Average residual difference: ' + 
+                                str(np.nanmean(residual)) + ' m')
           
     #Plot DEM and set cmap
     demextent = dem.getExtent()

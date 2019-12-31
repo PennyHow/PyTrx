@@ -58,13 +58,19 @@ if not os.path.exists(destination):
 #Define camera environment
 cameraenvironment = CamEnv(camdata)
 
+#Optimise camera environment
+optparams = 'YPR'
+cameraenvironment.optimiseCamEnv(optparams)
+
 ##Show ground control points
 #cameraenvironment.showGCPs()
+#cameraenvironment.showResiduals()
 
 
 #-----------------------   Calculate homography   -----------------------------
 
 #Set homography parameters
+hmethod='sparse'                #Method
 hgwinsize=(25,25)               #Tracking window size
 hgback=1.0                      #Back-tracking threshold
 hgmax=50000                     #Maximum number of points to seed
@@ -74,11 +80,12 @@ hgminf=4                        #Minimum number of seeded points to track
 
 #Set up Homography object
 homog = Homography(camimgs, cameraenvironment, caminvmask, calibFlag=True, 
-                   band='L', equal=True)
+                band='L', equal=True)
 
 #Calculate homography
-hg = homog.calcHomographyPairs(hgwinsize, hgback, hgminf, 
-                               [hgmax, hgqual, hgmind])            
+hg = homog.calcHomographies([hmethod, [hgmax, hgqual, hgmind], [hgwinsize, 
+                                hgback, hgminf]])
+           
 homogmatrix = [item[0] for item in hg] 
 
 

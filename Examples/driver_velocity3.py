@@ -77,7 +77,7 @@ hmaskPath = '../Examples/camenv_data/invmasks/KR2_2014_inv.jpg'
 refimagePath = '../Examples/camenv_data/refimages/KR2_2014.JPG'
 
 #Define GCPs (world coordinates and corresponding image coordinates)
-GCPpath = '../Examples/camenv_data/gcps/KR2_2014_modify.txt'
+GCPpath = '../Examples/camenv_data/gcps/KR2_2014.txt'
 #GCPpath = '../Examples/camenv_data/gcps/KR2_2014_arcticdem20140512.txt'
 
 print('\nDEFINING DATA OUTPUTS')
@@ -158,9 +158,9 @@ imn1 = Path(imagelist[0]).name
 
 
 print('\nOPTIMISING CAMERA ENVIRONMENT')
-new_projvars = [camloc, campose, radcorr, tancorr, focal, camcen, refimagePath] 
-#new_projvars = optimiseCamera(optparams, projvars, GCPxyz, GCPuv, 
-#                              optmethod=optmethod, show=True)
+projvars = [camloc, campose, radcorr, tancorr, focal, camcen, refimagePath] 
+new_projvars = optimiseCamera('YPR', projvars, GCPxyz, GCPuv, 
+                              optmethod=optmethod, show=True)
 
 
 print('\nCOMPILING TRANSFORMATION PARAMETERS')
@@ -180,8 +180,6 @@ new_invprojvars = setProjection(dem, camloc1, campose1,
 campars = [dem, new_projvars, new_invprojvars]                 
 
 residuals = computeResidualsXYZ(new_invprojvars, GCPxyz, GCPuv, dem)
-
-sys.exit(1)
 
 print('\nLOADING MASKS')
 print('Defining velocity mask')

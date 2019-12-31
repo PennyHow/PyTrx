@@ -8,16 +8,16 @@ You should have received a copy of the license along with this
 work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
 
 
-PYTRX EXAMPLE VELOCITY DRIVER
+PYTRX EXAMPLE SPARSE VELOCITY DRIVER
 
 This script is part of PyTrx, an object-oriented programme created for the 
 purpose of calculating real-world measurements from oblique images and 
 time-lapse image series.
 
-This driver calculates surface velocities using modules in PyTrx at Kronebreen,
-Svalbard, for a subset of the images collected during the 2014 melt season. 
-Specifically this script performs feature-tracking through sequential daily 
-images of the glacier to derive surface velocities (spatial average, 
+This driver calculates sparse surface velocities using modules in PyTrx at 
+Kronebreen, Svalbard, for a subset of the images collected during the 2014 melt 
+season. Specifically this script performs feature-tracking through sequential 
+daily images of the glacier to derive surface velocities (spatial average, 
 individual point displacements and interpolated velocity maps) which have been 
 corrected for image distortion and motion in the camera platform (i.e. image
 registration).
@@ -55,16 +55,20 @@ if not os.path.exists(destination):
 #Define camera environment
 cameraenvironment = CamEnv(camdata)
 
+#Optimise camera environment to refine camera pose
+cameraenvironment.optimiseCamEnv('YPR')
+
 #Report camera data and show corrected image
 cameraenvironment.reportCamData()
 cameraenvironment.showGCPs()
 cameraenvironment.showPrincipalPoint()
-cameraenvironment.showCalib()
+cameraenvironment.showResiduals()
+
 
 #----------------------   Calculate homography   ------------------------------
 
 #Set homography parameters
-hmethod='sparse'                 #Method
+hmethod='sparse'                #Method
 hgwinsize=(25,25)               #Tracking window size
 hgback=1.0                      #Back-tracking threshold
 hgmax=50000                     #Maximum number of points to seed
@@ -84,7 +88,7 @@ hgout = homog.calcHomographies([hmethod, [hgmax, hgqual, hgmind], [hgwinsize,
 #----------------------   Calculate velocities   ------------------------------
 
 #Set velocity parameters
-vmethod='sparse'                 #Method
+vmethod='sparse'                #Method
 vwinsize=(25,25)                #Tracking window size
 bk = 1.0                        #Back-tracking threshold  
 mpt = 50000                     #Maximum number of points to seed

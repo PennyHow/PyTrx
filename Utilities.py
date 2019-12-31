@@ -172,6 +172,8 @@ def plotResiduals(img, ims, gcp1, gcp2, gcp3):
     '''
     #Plot image                
     fig, (ax1) = plt.subplots(1)
+    fig.canvas.set_window_title('Average residual difference: ' + 
+                                str(np.nanmean(gcp3-gcp2)) + ' px')
     ax1.axis([0,ims[1],ims[0],0])
     ax1.imshow(img, cmap='gray')
     

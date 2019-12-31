@@ -33,7 +33,7 @@ import os
 sys.path.append('../')
 from Line import Line
 from Velocity import Homography
-from CamEnv import CamEnv
+from CamEnv import CamEnv, optimiseCamera
 import FileHandler
 from Utilities import plotLinePX, plotLineXYZ
 
@@ -54,9 +54,21 @@ if not os.path.exists(destination):
 cam = CamEnv(camdata)
 
 
+#--------------------   Optimise camera environment   -------------------------
+
+#Optimisation parameters
+optflag = 'YPR'                 #Parameters to optimise (YPR/INT/EXT/ALL)
+optmethod = 'trf'               #Optimisation method (trf/dogbox/lm)
+show=False                      #Show refined camera environment
+
+#Optimise camera environment
+cam.optimiseCamEnv(optflag, optmethod, show)
+
+
 #---------------------   Calculate homography   -------------------------------
 
 #Set homography parameters
+hmethod='sparse'                #Method
 hgwinsize=(25,25)               #Tracking window size
 hgback=1.0                      #Back-tracking threshold
 hgmax=50000                     #Maximum number of points to seed
@@ -68,8 +80,9 @@ hgminf=4                        #Minimum number of seeded points to track
 homog = Homography(camimgs, cam, invmask, calibFlag=True, band='L', equal=True)
 
 #Calculate homography
-hg = homog.calcHomographyPairs(hgwinsize, hgback, hgminf, 
-                               [hgmax, hgqual, hgmind])            
+hg = homog.calcHomographies([hmethod, [hgmax, hgqual, hgmind], [hgwinsize, 
+                             hgback, hgminf]])    
+      
 homogmatrix = [item[0] for item in hg] 
 
 
