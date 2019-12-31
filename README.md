@@ -1,17 +1,15 @@
 # PyTrx
-PyTrx (short for 'Python Tracking') is a Python object-oriented toolbox created for the purpose of calculating real-world measurements from oblique images and time-lapse image series. Its primary purpose is to obtain velocities, surface areas, and distances from imagery of glacial environments.<br>
+PyTrx (short for 'Python Tracking') is a Python object-oriented toolbox created for the purpose of calculating real-world measurements from oblique images and time-lapse image series. Its primary purpose is to obtain velocities, surface areas, and distances from imagery of glacial environments. <br>
 
-Authors: Penelope How (p.how@york.ac.uk), Nick Hulton, and Lynne Buie (née Addison)<br>
+<b>This branch currently serves as a construction repository to update PyTrx's compatibility with Python 3, and develop additional functionality.</b><br>
+
+Authors: Penelope How (how@asiaq.gl), Nick Hulton, and Lynne Buie (née Addison)<br>
 
 <hr>
 
 <h3>PyTrx citations</h3>
 
-We are happy for others to use and adapt PyTrx for their own processing needs. If used, please cite the following key publication and Digital Object Identifier (DOI) where possible:<br>
-
-<h3>How et al. (2018) PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. Geoscientific Instrumentation, Methods and Data Systems Discussion, <a href="https://doi.org/10.5194/gi-2018-28">doi:10.5194/gi-2018-28</a>, In Review.</h3> <br>
-
-If you use PyTrx for scientific papers, please also include some of our work using PyTrx which is listed below: <br>
+We are happy for others to use and adapt PyTrx for their own processing needs. If used, please cite the following key publications and Digital Object Identifier (DOI) where possible:<br>
 
 <b>*PyTrx used for detection of supraglacial lakes and meltwater plumes*</b><br>
 How et al. (2017) Rapidly changing subglacial hydrological pathways at a tidewater glacier revealed through simultaneous observations of water pressure, supraglacial lakes, meltwater plumes and surface velocities. <i>The Cryosphere</i> 11, 2691-2710, <a href="https://doi.org/10.5194/tc-11-2691-2017">doi:10.5194/tc-11-2691-2017</a><br>
@@ -75,7 +73,7 @@ This module contains a set of functions for plotting and interpolating data.<br>
 
 <h3>PyTrx set-up and requirements</h3>
 
-PyTrx has been coded with Python 2.7 and has the following key dependencies: <br><br>
+PyTrx has been coded with Python 3 and has the following key dependencies: <br><br>
 
 <b>OpenCV (v3.4.2):</b> <a href="https://opencv.org/releases.html">opencv.org</a><br>
 <b>GDAL (v2.3.2):</b> <a href="http://www.gisinternals.com/archive.php">gisinternals.com</a><br>
@@ -85,7 +83,7 @@ These packages may not necessarily be installed with distributions of Python (e.
 
 PyTrx also needs other packages, which are commonly included with distributions of Python. Compatibility with all versions of these packages are highly likely: <b>datetime</b>, <b>glob</b>, <b>imghdr</b>, <b>math</b>, <b>Matplotlib</b>, <b>NumPy</b>, <b>operator</b>, <b>os</b>, <b>pathlib</b>, <b>PyLab</b>, <b>SciPy</b>, <b>struct</b>, and <b>sys</b> <br>
 
-PyTrx was originally written using a Linux operating system. Inputted file path structures may differ between operating systems and it is therefore advised to check file path structures before running scripts.
+The .yml environment file provided with PyTrx contains an environment suitable for set-up in a Linux or Windows operating system. PyTrx was originally written using a Linux operating system. Inputted file path structures may differ between operating systems and it is therefore advised to check file path structures before running scripts.
 
 <hr>
 
@@ -97,3 +95,9 @@ There are other useful software available for terrestrial photogrammetry in glac
 <a href="http://imgraft.glaciology.net/">ImGRAFT</a> - Matlab toolbox for feature-tracking and georectification <br>
 <a href="http://www.mn.uio.no/geo/english/research/projects/icemass/cias/">CIAS</a> - IDL gui for feature-tracking <br>
 <a href="https://www.geosci-model-dev.net/9/307/2016/">PRACTISE</a> - Matlab toolbox for georectification
+
+<hr>
+
+<h3>Copyright</h3>
+
+<a rel="license" href="http://creativecommons.org/licenses/by/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by/4.0/88x31.png" /></a><br />This work is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International License</a>.

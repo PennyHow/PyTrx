@@ -1,4 +1,13 @@
 '''
+PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+PyTrx is licensed under a
+Creative Commons Attribution 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+
 PYRX DEM MODULE
 
 This script is part of PyTrx, an object-oriented programme created for the 
@@ -21,20 +30,19 @@ Key stand-alone functions
 load_DEM:                       Load DEM from .mat or .tiff file
 voxelviewshed:                  Calculate a viewshed over a DEM from a given 
                                 viewpoint in the DEM scene    
-      
-@author: Penny How (p.how@ed.ac.uk)
-         Nick Hulton 
-         Lynne Buie
 '''
 
 #Import packages
 import numpy as np
+from PIL import Image, ImageDraw
+import ogr
 import scipy.io as sio
 import gdal
 import math
 from scipy import interpolate
 from gdalconst import GA_ReadOnly 
 import struct
+import matplotlib.pyplot as plt
 from scipy.interpolate import RectBivariateSpline
 
 #------------------------------------------------------------------------------
@@ -51,13 +59,14 @@ class ExplicitRaster(object):
     '''
     
     #Basic constuctor method
-    def __init__(self, X, Y, Z, nodata=float('nan')): 
+    def __init__(self, X, Y, Z, nodata=float('nan')):
+        
         #Check XYZ data is all the same size
         if not (X.shape==Y.shape and X.shape==Z.shape):
-            print 'Raster data and/or co-ordinate arrays are differently sized'
-            print 'X-shape',X.shape
-            print 'Y-shape',Y.shape
-            print 'Z-shape',Z.shape
+            print('Raster data and/or co-ordinate arrays are differently sized')
+            print('X-shape ' + str(X.shape))
+            print('Y-shape ' + str(Y.shape))
+            print('Z-shape ' + str(Z.shape))
             return
         
         #Define class atrributes
@@ -89,8 +98,22 @@ class ExplicitRaster(object):
     def getZ(self):
         '''Return height (Z) data of DEM.'''
         return self.getData(2)
+            
         
-     
+    def getZcoord(self, x, y):
+        '''Return height (Z) at given XY coordinate in DEM.'''
+        
+        rowcoords = self.getData(0)[0,:]    
+        colcoords = self.getData(1)[:,0]
+        
+        demz = self.getZ()
+      
+        xcoord = (np.abs(rowcoords-x)).argmin()
+        ycoord = (np.abs(colcoords-y)).argmin()
+
+        return demz[ycoord,xcoord]
+            
+            
     def getShape(self):
         '''Return the shape of the DEM data array.'''
         return self._data[0].shape
@@ -191,11 +214,12 @@ class ExplicitRaster(object):
         columns in the array, how NaN values in the array are filled, and the
         data extent coordinates.
         '''      
-        print '\nDEM object reporting:\n'
-        print 'Data has ',self.getRows(),' rows by ',self.getCols(),' columns'
-        print 'No data item is: ',self.getNoData()
-        print ('Data Extent Coordinates are [xmin,xmax,ymin,ymax]: ',
-               self.getExtent())
+        print('\nDEM object reporting:\n')
+        print('Data has ' + str(self.getRows()) + ' rows by ' + 
+              str(self.getCols()) + ' columns')
+        print('No data item is: ' + str(self.getNoData()))
+        print('Data Extent Coordinates are [xmin,xmax,ymin,ymax]: ' +
+               str(self.getExtent()))
  
     
 def load_DEM(demfile):
@@ -215,8 +239,8 @@ def load_DEM(demfile):
     
     #No DEM data passed if file type is not recognised
     else:
-        print 'DEM format (suffix) not supported'
-        print 'DEM file: ',demfile,' not read'
+        print('DEM format (suffix) not supported')
+        print('DEM file: ' + str(demfile) + ' not read')
         return None
 
     
@@ -233,7 +257,7 @@ def DEM_FromMat(matfile):
 
     #Flip array if not compatible
     if Y[0][0]>Y[-1][0]:
-        print '\nFlipping input DEM'
+        print('\nFlipping input DEM')
         X = np.flipud(X)
         Y = np.flipud(Y)
         Z = np.flipud(Z)
@@ -348,7 +372,7 @@ def voxelviewshed(dem, viewpoint):
     x=np.empty(X.shape[0])
 
     #Populate array
-    for i in xrange(X.shape[0]):
+    for i in range(X.shape[0]):
         x[i]=(math.atan2(Y[i],X[i])+math.pi)/(math.pi*2)
     y=Z/d
     
@@ -394,14 +418,14 @@ def voxelviewshed(dem, viewpoint):
         f=interpolate.interp1d(xx,yy)
         voxy=np.maximum(voxy,f(voxx))
 
-    #Re-format voolean array
+    #Re-format boolean array
     vis=np.reshape(vis,sz,order='F')
     vis.shape=sz
 
     #Return boolean array
     return vis
 
-
+   
 #------------------------------------------------------------------------------
 
 #if __name__ == "__main__":   

@@ -1,4 +1,13 @@
 '''
+PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+PyTrx is licensed under a
+Creative Commons Attribution 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+
 PYTRX EXAMPLE MANUAL LINE DRIVER
 
 This script is part of PyTrx, an object-oriented programme created for the 
@@ -14,10 +23,6 @@ corrected for image distortion.
 Previously defined lines can also be imported from text or shape file (this 
 can be changed by commenting and uncommenting commands in the "Calculate lines" 
 section of this script).
-
-@author: Penny How (p.how@ed.ac.uk)
-         Nick Hulton
-         Lynne Buie
 '''
 
 #Import packages
@@ -28,7 +33,7 @@ import os
 sys.path.append('../')
 from Line import Line
 from Velocity import Homography
-from CamEnv import CamEnv
+from CamEnv import CamEnv, optimiseCamera
 import FileHandler
 from Utilities import plotLinePX, plotLineXYZ
 
@@ -49,9 +54,21 @@ if not os.path.exists(destination):
 cam = CamEnv(camdata)
 
 
+#--------------------   Optimise camera environment   -------------------------
+
+#Optimisation parameters
+optflag = 'YPR'                 #Parameters to optimise (YPR/INT/EXT/ALL)
+optmethod = 'trf'               #Optimisation method (trf/dogbox/lm)
+show=False                      #Show refined camera environment
+
+#Optimise camera environment
+cam.optimiseCamEnv(optflag, optmethod, show)
+
+
 #---------------------   Calculate homography   -------------------------------
 
 #Set homography parameters
+hmethod='sparse'                #Method
 hgwinsize=(25,25)               #Tracking window size
 hgback=1.0                      #Back-tracking threshold
 hgmax=50000                     #Maximum number of points to seed
@@ -63,8 +80,9 @@ hgminf=4                        #Minimum number of seeded points to track
 homog = Homography(camimgs, cam, invmask, calibFlag=True, band='L', equal=True)
 
 #Calculate homography
-hg = homog.calcHomographyPairs(hgwinsize, hgback, hgminf, 
-                               [hgmax, hgqual, hgmind])            
+hg = homog.calcHomographies([hmethod, [hgmax, hgqual, hgmind], [hgwinsize, 
+                             hgback, hgminf]])    
+      
 homogmatrix = [item[0] for item in hg] 
 
 
@@ -127,4 +145,4 @@ for i in range(len(pxcoords)):
     
 #------------------------------------------------------------------------------
 
-print '\n\nFinished'
+print('\n\nFinished')

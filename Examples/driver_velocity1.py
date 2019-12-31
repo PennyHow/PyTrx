@@ -1,21 +1,26 @@
 '''
-PYTRX EXAMPLE VELOCITY DRIVER
+PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+PyTrx is licensed under a
+Creative Commons Attribution 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+
+PYTRX EXAMPLE SPARSE VELOCITY DRIVER
 
 This script is part of PyTrx, an object-oriented programme created for the 
 purpose of calculating real-world measurements from oblique images and 
 time-lapse image series.
 
-This driver calculates surface velocities using modules in PyTrx at Kronebreen,
-Svalbard, for a subset of the images collected during the 2014 melt season. 
-Specifically this script performs feature-tracking through sequential daily 
-images of the glacier to derive surface velocities (spatial average, 
+This driver calculates sparse surface velocities using modules in PyTrx at 
+Kronebreen, Svalbard, for a subset of the images collected during the 2014 melt 
+season. Specifically this script performs feature-tracking through sequential 
+daily images of the glacier to derive surface velocities (spatial average, 
 individual point displacements and interpolated velocity maps) which have been 
 corrected for image distortion and motion in the camera platform (i.e. image
 registration).
-
-@author: Penny How (p.how@ed.ac.uk)
-         Nick Hulton 
-         Lynne Buie
 '''
 
 #Import packages
@@ -50,16 +55,21 @@ if not os.path.exists(destination):
 #Define camera environment
 cameraenvironment = CamEnv(camdata)
 
+#Optimise camera environment to refine camera pose
+cameraenvironment.optimiseCamEnv('YPR')
+
 #Report camera data and show corrected image
 cameraenvironment.reportCamData()
 cameraenvironment.showGCPs()
 cameraenvironment.showPrincipalPoint()
-cameraenvironment.showCalib()
+cameraenvironment.showResiduals()
+
 
 #----------------------   Calculate homography   ------------------------------
 
 #Set homography parameters
-hgwinsize=(25,25)                 #Tracking window size
+hmethod='sparse'                #Method
+hgwinsize=(25,25)               #Tracking window size
 hgback=1.0                      #Back-tracking threshold
 hgmax=50000                     #Maximum number of points to seed
 hgqual=0.1                      #Corner quality for seeding
@@ -71,14 +81,15 @@ homog = Homography(camimgs, cameraenvironment, caminvmask, calibFlag=True,
                 band='L', equal=True)
 
 #Calculate homography
-hgout = homog.calcHomographyPairs(hgwinsize, hgback, hgminf, 
-                                  [hgmax, hgqual, hgmind])
+hgout = homog.calcHomographies([hmethod, [hgmax, hgqual, hgmind], [hgwinsize, 
+                                hgback, hgminf]])
 
-
+    
 #----------------------   Calculate velocities   ------------------------------
 
 #Set velocity parameters
-vwinsize=(25,25)                 #Tracking window size
+vmethod='sparse'                #Method
+vwinsize=(25,25)                #Tracking window size
 bk = 1.0                        #Back-tracking threshold  
 mpt = 50000                     #Maximum number of points to seed
 ql = 0.1                        #Corner quality for seeding
@@ -89,8 +100,9 @@ mfeat = 4                       #Minimum number of seeded points to track
 velo=Velocity(camimgs, cameraenvironment, hgout, camvmask, calibFlag=True, 
               band='L', equal=True) 
 
-velocities = velo.calcVelocities(vwinsize, bk, mfeat, [mpt, ql, mdis])
-
+velocities = velo.calcVelocities([vmethod, [mpt, ql, mdis], [vwinsize, bk, 
+                                  mfeat]])                                   
+                                    
 xyzvel=[item[0][0] for item in velocities] 
 xyz0=[item[0][1] for item in velocities]
 xyz1=[item[0][2] for item in velocities]
@@ -103,7 +115,7 @@ uv1corr=[item[1][3] for item in velocities]
 
 #---------------------------  Export data   -----------------------------------
 
-print '\n\nWRITING DATA TO FILE'
+print('\n\nWRITING DATA TO FILE')
 
 #Write out camera calibration info to .txt file
 target1 = '../Examples/camenv_data/calib/KR2_2014_1.txt'
@@ -129,7 +141,7 @@ writeVeloSHP(xyzvel, xyzerr, xyz0, imn, target4, proj)       #Write shapefile
   
 #----------------------------   Plot Results   --------------------------------
 
-print '\n\nPLOTTING DATA'
+print('\n\nPLOTTING DATA')
 
 #Set interpolation method ("nearest"/"cubic"/"linear")
 method='linear' 
@@ -151,23 +163,23 @@ imgset=velo._imageSet
 for i in range(len(imn)-1):
 
     #Get image name and print
-    print '\nVisualising data for ' + str(imn[i]) 
+    print('\nVisualising data for ' + str(imn[i]))
 
     #Plot uv velocity points on image plane   
-    print 'Plotting image plane output'
+    print('Plotting image plane output')
     plotVeloPX(uvvel[i], uv0[i], uv1corr[i], 
                imgset[i].getImageCorr(cameraMatrix, distortP), 
                show=True, save=target4+'uv_'+imn[i])
 
 
     #Plot xyz velocity points on dem  
-    print 'Plotting XYZ output'
+    print('Plotting XYZ output')
     plotVeloXYZ(xyzvel[i], xyz0[i], xyz1[i], 
                 dem, show=True, save=target4+'xyz_'+imn[i])
     
                 
     #Plot interpolation map
-    print 'Plotting interpolation map'
+    print('Plotting interpolation map')
     grid, pointsextent = interpolateHelper(xyzvel[i], xyz0[i], xyz1[i], method)
     plotInterpolate(grid, pointsextent, dem, show=True, 
                     save=target4+'interp_'+imn[i])                        
@@ -179,7 +191,7 @@ for i in range(len(imn)-1):
 #many mapping software, such as ArcGIS and QGIS, and imported to create raster
 #surfaces
 
-print '\n\nWRITING ASCII FILES'
+print('\n\nWRITING ASCII FILES')
 
 #Set destination for file outputs
 target5 = destination + 'asciifiles/'
@@ -196,7 +208,7 @@ for i in range(velo.getLength()-1):
     #Open the fileName file with write permissions
     imn=velo._imageSet[i].getImageName()
     afile = open(target5 + imn + '_interpmap.txt','w')
-    print '\nWriting file: ' + target5 + imn + '_interpmap.txt'
+    print('\nWriting file: ' + str(target5) + str(imn) + '_interpmap.txt')
     
     #Make a list for each raster header variable, with the label and value
     col = ['ncols', str(grid.shape[1])]
@@ -226,4 +238,4 @@ for i in range(velo.getLength()-1):
 
 
 #------------------------------------------------------------------------------
-print '\nFinished'
+print('\nFinished')

@@ -1,4 +1,13 @@
 '''
+PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+PyTrx is licensed under a
+Creative Commons Attribution 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+
 PYTRX UTILITIES MODULE
 
 This script is part of PyTrx, an object-oriented programme created for the 
@@ -36,10 +45,6 @@ plotVeloXYZ:                    Plot figure with image overlayed with xyz
 plotInterpolate:                Plot the results of the velocity 
                                 interpolation process for a particular image 
                                 pair
-             
-@author: Penny How (p.how@ed.ac.uk)
-         Nick Hulton 
-         Lynne Buie
 '''
 
 #Import packages
@@ -158,8 +163,37 @@ def plotCalib(matrix, distortion, img, imn):
     ax2.axis([0,w,h,0])    
     plt.show()
 #    plt.close()
+
+
+def plotResiduals(img, ims, gcp1, gcp2, gcp3):
+    '''Function to plot sets of points to show offsets. This is 
+    commonly used for inspecting differences between image GCPs and projected 
+    GCPs, e.g. within the optimiseCamera function in CamEnv.
+    '''
+    #Plot image                
+    fig, (ax1) = plt.subplots(1)
+    fig.canvas.set_window_title('Average residual difference: ' + 
+                                str(np.nanmean(gcp3-gcp2)) + ' px')
+    ax1.axis([0,ims[1],ims[0],0])
+    ax1.imshow(img, cmap='gray')
+    
+    #Plot UV GCPs
+    ax1.scatter(gcp1[:,0], gcp1[:,1], color='red', marker='+', 
+                label='UV')
+    
+    #Plot projected XYZ GCPs
+    ax1.scatter(gcp2[:,0], gcp2[:,1], color='green', 
+                marker='+', label='Projected XYZ (original)')
+
+    #Plot optimised XYZ GCPs if given
+    ax1.scatter(gcp3[:,0], gcp3[:,1], color='blue', 
+                marker='+', label='Projected XYZ (optimised)')
+    
+    #Add legend and show plot
+    ax1.legend()
+    plt.show()        
         
-        
+    
 def plotAreaPX(uv, img, show=True, save=None):
     '''Plot figure with image overlayed with pixel features (either areas or 
     line features).
@@ -202,7 +236,7 @@ def plotAreaPX(uv, img, show=True, save=None):
                 xl.append(pt[0])
                 yl.append(pt[1])
             else:
-                print 'Unrecognised point structure for plotting'
+                print('Unrecognised point structure for plotting')
                 pass
             
         ax1.plot(xl, yl, c='#FFFF33', linestyle='-') 
@@ -540,7 +574,7 @@ def interpolateHelper(xyzvel, xyz0, xyz1, method='linear'):
             y1.append(sy)                                #pt0 y values
             y2.append(ey)                                #pt1 y values
         elif np.isnan(v)==True:
-            print '\nNaN value removed for interpolation'
+            print('\nNaN value removed for interpolation')
                               
     #Bound point positions in array for grid construction
     newpts=np.array([x1,y1]).T  

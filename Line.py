@@ -1,4 +1,13 @@
 '''
+PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+PyTrx is licensed under a
+Creative Commons Attribution 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+
 PYTRX LINE MODULE
 
 This script is part of PyTrx, an object-oriented programme created for the 
@@ -25,10 +34,6 @@ calcManualLines:                Calculate xyz and uv lines/distances from a
 Key stand-alone functions
 calcManualLine:                 Calculate xyz and uv lines/distances from an 
                                 image
-                                                               
-@author: Penny How (p.how@ed.ac.uk)
-         Nick Hulton 
-         Lynne Buie
 '''
 
 #Import packages
@@ -97,7 +102,7 @@ class Line(ImageSequence):
         Returns
         lines (list):           XYZ and UV line lengths and coordinates
         ''' 
-        print '\n\nCOMMENCING LINE DETECTION'                        
+        print('\n\nCOMMENCING LINE DETECTION')                        
             
         #Set up output dataset
         lines=[]        
@@ -172,7 +177,7 @@ def calcManualLine(img, imn, hmatrix=None, invprojvars=None):
     plt.imshow(img, origin='upper',cmap='gray')        
     rawpx = plt.ginput(n=0, timeout=0, show_clicks=True, 
                        mouse_add=1, mouse_pop=3, mouse_stop=2)            
-    print '\nYou clicked ' + str(len(rawpx)) + ' points in image ' + imn
+    print('\nYou clicked ' + str(len(rawpx)) + ' points in image ' + str(imn))
     
     #Show plot
     plt.show()
@@ -186,7 +191,7 @@ def calcManualLine(img, imn, hmatrix=None, invprojvars=None):
     
     #Calculate homography-corrected pts if desired
     if hmatrix is not None:
-        print 'Correcting for camera motion'
+        print('Correcting for camera motion')
         pxpts = Velocity.apply_persp_homographyPts(pxpts, hmatrix, 
                                                    inverse=True)
         
@@ -195,9 +200,9 @@ def calcManualLine(img, imn, hmatrix=None, invprojvars=None):
         
     #Create OGR pixl line object and extract length
     pxline = getOGRLine(pxpts)
-    print 'Line contains %i points' % (pxline.GetPointCount())  
+    print('Line contains ' + str(pxline.GetPointCount()) + ' points')  
     pxline = pxline.Length()                 
-    print 'Line length: %d px' % (pxline)
+    print('Line length: ' + str(pxline) + ' px')
     
              
     if invprojvars is not None:  
@@ -208,7 +213,7 @@ def calcManualLine(img, imn, hmatrix=None, invprojvars=None):
         xyzline = getOGRLine(xyzpts)
         xyzline = xyzline.Length()
             
-        print 'Line length: %d m' % (xyzline)
+        print('Line length: ' + str(xyzline) + ' m')
         
         return [[xyzline, xyzpts], [pxline, pxpts]]
     

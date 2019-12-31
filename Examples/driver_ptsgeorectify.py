@@ -1,4 +1,13 @@
 '''
+PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+PyTrx is licensed under a
+Creative Commons Attribution 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+
 PYTRX EXAMPLE POINT GEORECTIFICATION DRIVER
 
 This script is part of PyTrx, an object-oriented programme created for the 
@@ -11,10 +20,6 @@ georectification functions in PyTrx. These locations are plotted onto the DEM,
 with the colour of each point denoting the style of calving in that particular
 instance. The xyz locations are exported subsequently as a text file (.txt) 
 and as a shape file (.shp).
-
-@author: Penny How (pennyruthhow@gmail.com)
-         Nick Hulton
-         Lynne Buie
 '''
 
 #Import packages
@@ -46,11 +51,11 @@ if not os.path.exists(destination):
 #----------------------   Import calving data from file   ---------------------
 
 #Import individual calving event data
-f=file(tu1calving,'r')                              #Read file
+f=open(tu1calving,'r')                              #Read file
 header=f.readline()                                 #Read first line
 h=header.split(',')                                 #Split first line
 for name in h:
-    print '\nReading ' + str(name) + ' from file'                      
+    print('\nReading ' + str(name) + ' from file')                     
 
 #Read all lines in file
 alllines=[]
@@ -82,7 +87,7 @@ for line in alllines:
 tu1_xy=[] 
 for a,b in zip(loc_x,loc_y):
     tu1_xy.append([a,b])
-print '\n\n' + str(len(tu1_xy)) + ' locations for calving events detected'
+print('\n\n' + str(len(tu1_xy)) + ' locations for calving events detected')
 tu1_xy=np.array(tu1_xy)
 
 
@@ -102,12 +107,12 @@ tu1cam.showGCPs()
 
 #Inverse project image coordinates using function from CamEnv object                       
 tu1_xyz = projectUV(tu1_xy, invprojvars)
-print '\n\n' + str(len(tu1_xyz)) + ' locations for calving events georectified'
+print('\n\n' + str(len(tu1_xyz)) +' locations for calving events georectified')
 
 
 #-----------------------   Plot xyz location on DEM   -------------------------
 
-print '\n\nPLOTTING XYZ CALVING LOCATIONS'
+print('\n\nPLOTTING XYZ CALVING LOCATIONS')
 
 
 #Boolean flags (True/False)
@@ -176,16 +181,16 @@ for i in range(len(xr)):
         subx.append(xr[i])
         suby.append(yr[i])                  #Append xyz of subaqueous style
     else:
-        print '\nUnrecognised calving style'
+        print('\nUnrecognised calving style')
         pass
 
 
-print '\nUnclassified events: ' + str(len(nanx))
-print 'Waterline events: ' + str(len(waterx))
-print 'Ice fall events: ' + str(len(icex))
-print 'Stack collapses: ' + str(len(stackx))
-print 'Sheet collapses: ' + str(len(sheetx)) 
-print 'Subaqueous events: ' + str(len(subx))
+print('\nUnclassified events: ' + str(len(nanx)))
+print('Waterline events: ' + str(len(waterx)))
+print('Ice fall events: ' + str(len(icex)))
+print('Stack collapses: ' + str(len(stackx)))
+print('Sheet collapses: ' + str(len(sheetx)))
+print('Subaqueous events: ' + str(len(subx)))
 
 
 #Plot calving event locations by calving style (denoted by colour)
@@ -224,7 +229,7 @@ plt.close()
         
 #------------------   Export xyz locations as .txt file   ---------------------
 
-print '\n\nSAVING TEXT FILE'
+print('\n\nSAVING TEXT FILE')
 
 
 #Write xyz coordinates to .txt file
@@ -238,7 +243,7 @@ f.close()
 
 #------------------   Export xyz locations as .shp file   ---------------------
 
-print '\n\nSAVING SHAPE FILE'
+print('\n\nSAVING SHAPE FILE')
 
 
 #Get ESRI shapefile driver     
@@ -254,7 +259,7 @@ if os.path.exists(shp):
     driver.DeleteDataSource(shp)
 ds = driver.CreateDataSource(shp)
 if ds is None:
-    print 'Could not create file %s' %shp
+    print('Could not create file ' + str(shp))
  
        
 #Set WGS84 projection
@@ -307,4 +312,4 @@ ds.Destroy()
 
 #------------------------------------------------------------------------------
 
-print '\n\nFinished'
+print('\n\nFinished')

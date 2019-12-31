@@ -1,4 +1,13 @@
 '''
+PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+PyTrx is licensed under a
+Creative Commons Attribution 4.0 International License.
+
+You should have received a copy of the license along with this
+work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+
+
 PYTRX FILEHANDLER MODULE
 
 This script is part of PyTrx, an object-oriented programme created for the 
@@ -78,10 +87,6 @@ importLineData:         Function to get xyz and px line data from text files
                         script. All imported data is held in the Line class 
                         object specified as an input variable. This can be 
                         easily retrieved from the Line class object itself.
-                        
-@author: Penny How (p.how@ed.ac.uk)
-         Nick Hulton 
-         Lynne Buie
 '''
 
 #Import packages
@@ -92,6 +97,7 @@ import matplotlib.pyplot as plt
 import scipy.io as sio
 from osgeo import ogr,osr
 import os
+from functools import reduce
 
 #------------------------------------------------------------------------------   
 
@@ -116,10 +122,10 @@ def readMask(img, writeMask=None):
         try:
             myMask = Image.open(writeMask)
             myMask = np.array(myMask)
-            print ('\nMask loaded')
+            print('\nImage mask loaded')
             return myMask
         except:
-            print '\nMask file not found. Proceeding to manually digitise...'
+            print('\nMask file not found. Proceeding to manually digitise...')
 
     #Plot mask manually on the selected image
     fig=plt.gcf()
@@ -129,7 +135,7 @@ def readMask(img, writeMask=None):
     imgplot.set_cmap('gray')
     x1 = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, mouse_pop=3, 
                     mouse_stop=2)
-    print '\n' + str(len(x1)) + ' points seeded'
+    print('\n' + str(len(x1)) + ' points seeded')
     plt.show()
     plt.close()
     
@@ -155,11 +161,11 @@ def readMask(img, writeMask=None):
     
     #Write to .jpg file    
     if writeMask!=None:
-        print '\nMask plotted: ' + writeMask
+        print('\nMask plotted: ' + str(writeMask))
         try:
             img1.save(writeMask, quality=75)
         except:
-            print '\nFailed to write file: ' + writeMask
+            print('\nFailed to write file: ' + str(writeMask))
         
     return myMask  
 
@@ -192,15 +198,15 @@ def readCalib(fileName, paramList):
         try:
             myFile=open(fileName,'r')
         except:
-            print '\nProblem opening calibration text file: ',fileName
-            print 'No calibration parameters successfully read'
+            print('\nProblem opening calibration text file: ' + str(fileName))
+            print('No calibration parameters successfully read')
             return None
         
         #Read lines in file
         lines = []
         for line in myFile.readlines():
             lines.append(line[0:-1]) 
-        
+                
         #Set up a dictionary and input the calibration parameters 
         calib = {}
         for p in paramList:
@@ -273,14 +279,17 @@ def returnData(lines, data):
     D=[]
     
     for x in data:
-        
+                
         # Find the fields on each line
-        lines[x] = lines[x].translate(None, '[]')
-        fields = lines[x].split()
+        fields = lines[x].replace('[','').replace(']','')
+        fields=fields.split()
+        
         d = []
+        
+        #Float all values
         for f in fields:
             d.append(float(f))
-            
+                            
         # Add the fields to the data list
         D.append(d)
 
@@ -563,7 +572,7 @@ def writeVeloFile(xyzvel, uvvel, homog, imn, fname):
         #Break line in output file
         f.write('\n')
             
-    print '\nVelocity file written:' + fname        
+    print('\nVelocity file written:' + str(fname))        
         
    
 def writeHomogFile(homog, imn, fname):
@@ -661,7 +670,7 @@ def writeHomogFile(homog, imn, fname):
         f.write(str(np.mean(errdist)) + ',' + str(np.mean(homogdist)) + ',' + 
                 str(np.mean(sn)) + '\n')
         
-    print '\nHomography file written' + fname
+    print('\nHomography file written' + str(fname))
 
 
 def writeAreaFile(pxareas, xyzareas, imn, destination):
@@ -824,7 +833,8 @@ def writeVeloSHP(xyzvel, xyzerr, xyz0, imn, fileDirectory, projection=None):
         
         #Get velocity, pt and image name for time step
         vel = xyzvel[i]
-        err = xyzerr[i]
+        if xyzerr != None:
+            err = xyzerr[i]
         pt0 = xyz0[i]            
         im = imn[i] 
         
@@ -834,7 +844,7 @@ def writeVeloSHP(xyzvel, xyzerr, xyz0, imn, fileDirectory, projection=None):
             driver.DeleteDataSource(shp)
         ds = driver.CreateDataSource(shp)
         if ds is None:
-            print 'Could not create file %s' %shp
+            print('Could not create file ' + str(shp))
         
         #Set projection
         if type(projection) is int:
@@ -858,29 +868,49 @@ def writeVeloSHP(xyzvel, xyzerr, xyz0, imn, fileDirectory, projection=None):
         x0 = pt0[:,0]
         y0 = pt0[:,1]
         
-        #Create point features with data attributes in layer           
-        for v,e,x,y in zip(vel, err, x0, y0):
-            count=1
-        
-            #Create feature    
-            feature = ogr.Feature(layer.GetLayerDefn())
-        
-            #Create feature attributes    
-            feature.SetField('id', count)
-            feature.SetField('velocity', v)
-            feature.SetField('error', e)
-            feature.SetField('snr', e/v)
+        #Create point features with data attributes in layer
+        if xyzerr != None:
+            for v,e,x,y in zip(vel, err, x0, y0):
+                count=1
             
-            #Create feature location
-            wkt = "POINT(%f %f)" %  (float(x) , float(y))
-            point = ogr.CreateGeometryFromWkt(wkt)
-            feature.SetGeometry(point)
-            layer.CreateFeature(feature)
-        
-            #Free up data space
-            feature.Destroy()                       
-            count=count+1
-
+                #Create feature    
+                feature = ogr.Feature(layer.GetLayerDefn())
+            
+                #Create feature attributes    
+                feature.SetField('id', count)
+                feature.SetField('velocity', v)
+                feature.SetField('error', e)
+                feature.SetField('snr', e/v)
+                
+                #Create feature location
+                wkt = "POINT(%f %f)" %  (float(x) , float(y))
+                point = ogr.CreateGeometryFromWkt(wkt)
+                feature.SetGeometry(point)
+                layer.CreateFeature(feature)
+            
+                #Free up data space
+                feature.Destroy()                       
+                count=count+1
+        else:
+            for v,x,y in zip(vel, x0, y0):
+                count=1
+            
+                #Create feature    
+                feature = ogr.Feature(layer.GetLayerDefn())
+            
+                #Create feature attributes    
+                feature.SetField('id', count)
+                feature.SetField('velocity', v)
+                
+                #Create feature location
+                wkt = "POINT(%f %f)" %  (float(x) , float(y))
+                point = ogr.CreateGeometryFromWkt(wkt)
+                feature.SetGeometry(point)
+                layer.CreateFeature(feature)
+            
+                #Free up data space
+                feature.Destroy()                       
+                count=count+1
         #Free up data space                          
         ds.Destroy()
         
@@ -926,7 +956,7 @@ def writeAreaSHP(xyzpts, imn, fileDirectory, projection=None):
             driver.DeleteDataSource(shp)
         ds = driver.CreateDataSource(shp)
         if ds is None:
-            print 'Could not create file %s' %shp
+            print('Could not create file ' + str(shp))
     
         if type(projection) is int:
             proj = osr.SpatialReference()
@@ -1010,7 +1040,7 @@ def writeLineSHP(xyzpts, imn, fileDirectory, projection=None):
             driver.DeleteDataSource(shp)
         ds = driver.CreateDataSource(shp)
         if ds is None:
-            print 'Could not create file %s' %shp
+            print('Could not create file ' + str(shp))
     
         if type(projection) is int:
             proj = osr.SpatialReference()
@@ -1107,12 +1137,12 @@ def importAreaFile(fname, dimension):
     extent (list):       Pixel areas for polygons          
     '''
     #Read file and detect number of images based on number of lines
-    f=file(fname,'r')      
+    f=open(fname,'r')      
     alllines=[]
     for line in f.readlines():
         if len(line) >= 6:
             alllines.append(line)  #Read lines in file             
-    print '\nDetected coordinates from ' + str(len(alllines)) + ' images'
+    print('\nDetected coordinates from ' + str(len(alllines)) + ' images')
     f.close() 
     
     #Extract strings from lines         
@@ -1165,12 +1195,12 @@ def importLineFile(fname, dimension):
     lines (list):        Line coordinates and lengths
     '''
     #Read file and detect number of images based on number of lines
-    f=file(fname,'r')      
+    f=open(fname,'r')      
     alllines=[]
     for line in f.readlines():
         if len(line) >= 6:
             alllines.append(line)  #Read lines in file             
-    print '\nDetected coordinates from ' + str(len(alllines)) + ' images'
+    print('\nDetected coordinates from ' + str(len(alllines)) + ' images')
     f.close() 
     
     #Extract strings from lines         
