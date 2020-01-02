@@ -112,6 +112,7 @@ uvvel=[item[1][0] for item in velocities]
 uv0=[item[1][1] for item in velocities] 
 uv1=[item[1][2] for item in velocities]
 uv1corr=[item[1][3] for item in velocities]
+uverr=[item[1][3] for item in velocities]
 
 
 #---------------------------  Export data   -----------------------------------
@@ -137,7 +138,7 @@ target4 = destination + 'shpfiles/'     #Define file destination
 if not os.path.exists(target4):
     os.makedirs(target3)                #Create file destination
 proj = 32633                            #ESPG:32633 is projection WGS84
-writeVeloSHP(xyzvel, xyzerr, xyz0, imn, target4, proj)       #Write shapefile
+writeVeloSHP(xyzvel, uverr, xyz0, imn, target4, proj)       #Write shapefile
 
   
 #----------------------------   Plot Results   --------------------------------
