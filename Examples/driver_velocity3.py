@@ -9,7 +9,7 @@ You should have received a copy of the license along with this
 work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
 
 
-PYTRX EXAMPLE DENSE VELOCITY DRIVER (EXTENDED VERSION)
+PYTRX EXAMPLE SPARSE & DENSE VELOCITY DRIVER (EXTENDED VERSION)
 
 This script is part of PyTrx, an object-oriented programme created for the 
 purpose of calculating real-world measurements from oblique images and 
@@ -274,11 +274,13 @@ xyzerr2=[item[1][4] for item in velo2]
 uvvel2=[item[1][0] for item in velo2]
 xyz02=[item[0][1] for item in velo2]
 
-xyzerr2 = xyzerr2[0].flatten()
+xyzerr3=[]
+for i in xyzerr2:
+    xyzerr3.append(list(i))
 
 #Write points to shp file                
 FileHandler.writeVeloSHP(xyzvel1, xyzerr1, xyz01, names, target1, projection)       
-FileHandler.writeVeloSHP(xyzvel2, xyzerr2, xyz02, names, target2, projection)
+FileHandler.writeVeloSHP(xyzvel2, xyzerr3, xyz02, names, target2, projection)
     
 #------------------------------------------------------------------------------
 print('\nFinished')
