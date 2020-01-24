@@ -98,4 +98,4 @@ There are other useful software available for terrestrial photogrammetry in glac
 
 <h3>Copyright</h3>
 
-PyTrx is licensed under a <a href="https://choosealicense.com/licenses/mit/"MIT>License.</a>
+PyTrx is licensed under a <a href="https://choosealicense.com/licenses/mit/">MIT License</a>.
