@@ -11,7 +11,7 @@ We are happy for others to use and adapt PyTrx for their own processing needs. I
 
 <b>How et al. (2020) PyTrx: a Python-based monoscopic terrestrial photogrammetry toolset for glaciology. <i>Frontiers in Earth Science</i>, accepted, <a href="https://dx.doi.org/10.3389/feart.2020.00021">doi:10.3389/feart.2020.00021</a></b><br><br>
   
-PyTrx has been used in the following publication. Please cite them where possible:<br>
+PyTrx has been used in the following publications. In addition to the publication above, please cite any that are applicable where possible:<br>
 
 <b>*PyTrx used for georectification of glacier calving event locations*</b><br>
 How et al. (2019) Calving controlled by melt-undercutting: detailed mechanisms revealed through time-lapse observations. <i>Annals of Glaciology</i> 60 (78), 20-31, <a href="https://dx.doi.org/10.1017/aog.2018.28">doi:10.1017/aog.2018.28</a><br>
