@@ -1,11 +1,10 @@
 '''
 PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
 
-PyTrx is licensed under a
-Creative Commons Attribution 4.0 International License.
+PyTrx is licensed under a MIT License.
 
 You should have received a copy of the license along with this
-work. If not, see <http://creativecommons.org/licenses/by/4.0/>.
+work. If not, see <https://choosealicense.com/licenses/mit/>.
 
 
 PYRX DEM MODULE
