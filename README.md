@@ -9,7 +9,7 @@ Authors: Penelope How (how@asiaq.gl), Nick Hulton, and Lynne Buie (née Addison)
 
 We are happy for others to use and adapt PyTrx for their own processing needs. If used, please cite the following key publication and Digital Object Identifier:<br>
 
-<b>How et al. (2020) PyTrx: a Python-based monoscopic terrestrial photogrammetry toolset for glaciology. <i>Frontiers in Earth Sciences</i>, accepted, <a href="https://dx.doi.org/10.3389/feart.2020.00021">doi:10.3389/feart.2020.00021</a></b><br><br>
+<b>How et al. (2020) PyTrx: a Python-based monoscopic terrestrial photogrammetry toolset for glaciology. <i>Frontiers in Earth Science</i>, accepted, <a href="https://dx.doi.org/10.3389/feart.2020.00021">doi:10.3389/feart.2020.00021</a></b><br><br>
   
 PyTrx has been used in the following publication. Please cite them where possible:<br>
 
