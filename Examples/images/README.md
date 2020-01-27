@@ -1,7 +1,7 @@
 # Image sets for PyTrx examples
 This folder contains the camera environment data needed to run the examples provided with PyTrx. The camera numbers and references correspond with those given in the PyTrx methods paper:
 
-<h3>How et al. (2018) PyTrx: A Python toolbox for deriving velocities, surface areas and line measurements from oblique imagery in glacial environments. Geoscientific Instrumentation, Methods and Data Systems Discussion, <a href="https://doi.org/10.5194/gi-2018-28">doi:10.5194/gi-2018-28</a>, In Review.</h3>
+<h3>How et al. (2020) PyTrx: a Python-based monoscopic terrestrial photogrammetry toolset for glaciology. <i>Frontiers in Earth Science</i>, accepted, <a href="https://dx.doi.org/10.3389/feart.2020.00021">doi:10.3389/feart.2020.00021</a></h3>
 
 The example image sets distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. 
 

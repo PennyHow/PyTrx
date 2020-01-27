@@ -66,7 +66,7 @@ optmethod = 'trf'               #Optimisation method: trf=Trust Region
                                 #lm=Levenberg-Marquardt algorithm
 
 #Optimise camera                                
-cameraenvironment.optimiseCamEnv(optparams, optmethod='trf', show=True)
+cameraenvironment.optimiseCamEnv(optparams, optmethod, True)
 
 #Report camera data and show corrected image
 cameraenvironment.reportCamData()
