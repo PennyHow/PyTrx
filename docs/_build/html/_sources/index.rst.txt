@@ -12,6 +12,7 @@ PyTrx documentation
 
    Quickstart
    Area
+   CamEnv
    DEM
    FileHandler
    Images
