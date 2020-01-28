@@ -258,15 +258,13 @@ images (histogram equalisation is applied if True); default is True.
         
         :param params:              List that defines the parameters for 
                                     deriving velocity: Method: 'sparse' or 
-'dense' (str).
-Seed parameters: either containing the corner parameters for the sparse method 
-- max. number of corners (int), quality (int), and min. distance (int). Or the 
-grid spacing (list) for the dense method.
-Tracking parameters: either containing the sparse method parameters - window 
-size (tuple), backtracking threshold (int) and minimum tracked features (int).
-Or the dense method parameters - tracking method (int), template size (int), 
-search window size (int), correlation threshold (int), and minimum tracked 
-features (int)
+'dense' (str). Seed parameters: either containing the corner parameters for the 
+sparse method - max. number of corners (int), quality (int), and min. distance 
+(int). Or the grid spacing (list) for the dense method. Tracking parameters: 
+either containing the sparse method parameters - window size (tuple), 
+backtracking threshold (int) and minimum tracked features (int). Or the dense 
+method parameters - tracking method (int), template size (int), search window 
+size (int), correlation threshold (int), and minimum tracked features (int)
         :type params: str
         :returns: A ist containing the xyz and uv velocities. The first element 
 holds the xyz velocity for each point (xyz[0]), the xyz positions for the 
