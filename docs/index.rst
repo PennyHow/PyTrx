@@ -14,11 +14,11 @@ Authors: Penelope How (how@asiaq.gl), Nick Hulton, and Lynne Buie (née Addison)
    :maxdepth: 2
    :caption: Contents:
 
-   Installation
-   Guide
-   Examples
-   Modules
-   Links
+   source/Installation
+   source/Guide
+   source/Examples
+   source/Modules
+   source/Links
 
 
 Indices and tables

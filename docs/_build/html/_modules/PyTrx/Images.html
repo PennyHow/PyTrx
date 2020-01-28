@@ -67,7 +67,7 @@
 
 <span class="c1">#------------------------------------------------------------------------------</span>
 
-<div class="viewcode-block" id="CamImage"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage">[docs]</a><span class="k">class</span> <span class="nc">CamImage</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>    
+<div class="viewcode-block" id="CamImage"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage">[docs]</a><span class="k">class</span> <span class="nc">CamImage</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>    
     <span class="sd">&quot;&quot;&quot;A class representing a raw single band (optical RGB or greyscale). This </span>
 <span class="sd">    CamImage object is used in subsequent timelapse analysis. The object </span>
 <span class="sd">    contains the image data, image path, image dimensions and timestamp </span>
@@ -108,22 +108,22 @@
             <span class="k">return</span>
 
                     
-<div class="viewcode-block" id="CamImage.imageGood"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.imageGood">[docs]</a>    <span class="k">def</span> <span class="nf">imageGood</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.imageGood"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.imageGood">[docs]</a>    <span class="k">def</span> <span class="nf">imageGood</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return image file path status.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_imageGood</span></div>
 
         
-<div class="viewcode-block" id="CamImage.clearImage"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.clearImage">[docs]</a>    <span class="k">def</span> <span class="nf">clearImage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.clearImage"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.clearImage">[docs]</a>    <span class="k">def</span> <span class="nf">clearImage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Clear memory of image data.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="o">=</span><span class="kc">None</span></div>
 
 
-<div class="viewcode-block" id="CamImage.clearImageArray"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.clearImageArray">[docs]</a>    <span class="k">def</span> <span class="nf">clearImageArray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.clearImageArray"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.clearImageArray">[docs]</a>    <span class="k">def</span> <span class="nf">clearImageArray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Clear memory of image array data.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_imageArray</span><span class="o">=</span><span class="kc">None</span>     </div>
 
         
-<div class="viewcode-block" id="CamImage.clearAll"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.clearAll">[docs]</a>    <span class="k">def</span> <span class="nf">clearAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.clearAll"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.clearAll">[docs]</a>    <span class="k">def</span> <span class="nf">clearAll</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Clear memory of all retained data.&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_image</span><span class="o">=</span><span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_imageArray</span><span class="o">=</span><span class="kc">None</span>      </div>
@@ -151,31 +151,31 @@
             <span class="k">return</span> <span class="kc">False</span>
 
         
-<div class="viewcode-block" id="CamImage.getImageType"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.getImageType">[docs]</a>    <span class="k">def</span> <span class="nf">getImageType</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.getImageType"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.getImageType">[docs]</a>    <span class="k">def</span> <span class="nf">getImageType</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the image file type.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">imghdr</span><span class="o">.</span><span class="n">what</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_impath</span><span class="p">)</span>        </div>
 
 
-<div class="viewcode-block" id="CamImage.getImagePath"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.getImagePath">[docs]</a>    <span class="k">def</span> <span class="nf">getImagePath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.getImagePath"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.getImagePath">[docs]</a>    <span class="k">def</span> <span class="nf">getImagePath</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the file path of the image.&quot;&quot;&quot;</span>        
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_impath</span></div>
 
 
-<div class="viewcode-block" id="CamImage.getImageName"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.getImageName">[docs]</a>    <span class="k">def</span> <span class="nf">getImageName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.getImageName"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.getImageName">[docs]</a>    <span class="k">def</span> <span class="nf">getImageName</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return image name.&quot;&quot;&quot;</span>
         <span class="n">imn</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getImagePath</span><span class="p">()</span>
         <span class="n">imn</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">imn</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">imn</span><span class="o">.</span><span class="n">name</span>   </div>
 
 
-<div class="viewcode-block" id="CamImage.getImage"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.getImage">[docs]</a>    <span class="k">def</span> <span class="nf">getImage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.getImage"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.getImage">[docs]</a>    <span class="k">def</span> <span class="nf">getImage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the image.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_readImage</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_image</span></div>
 
     
-<div class="viewcode-block" id="CamImage.getImageCorr"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.getImageCorr">[docs]</a>    <span class="k">def</span> <span class="nf">getImageCorr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cameraMatrix</span><span class="p">,</span> <span class="n">distortP</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.getImageCorr"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.getImageCorr">[docs]</a>    <span class="k">def</span> <span class="nf">getImageCorr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cameraMatrix</span><span class="p">,</span> <span class="n">distortP</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the image array that is corrected for the specificied </span>
 <span class="sd">        camera matrix and distortion parameters.</span>
 <span class="sd">        </span>
@@ -208,14 +208,14 @@
         <span class="k">return</span> <span class="n">corr_image</span></div>
 
         
-<div class="viewcode-block" id="CamImage.getImageArray"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.getImageArray">[docs]</a>    <span class="k">def</span> <span class="nf">getImageArray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.getImageArray"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.getImageArray">[docs]</a>    <span class="k">def</span> <span class="nf">getImageArray</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the image as an array.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_imageArray</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_readImageData</span><span class="p">()</span>   
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_imageArray</span></div>
  
 
-<div class="viewcode-block" id="CamImage.getImageEnhance"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.getImageEnhance">[docs]</a>    <span class="k">def</span> <span class="nf">getImageEnhance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.getImageEnhance"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.getImageEnhance">[docs]</a>    <span class="k">def</span> <span class="nf">getImageEnhance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return enhanced image using :func:`PyTrx.Images.enhanceImg` function.</span>
 
 <span class="sd">        :param diff: Inputted as either &#39;light or &#39;dark&#39;, signifying the intensity of the image pixels. &#39;light&#39; increases the intensity such that dark pixels become much brighter and bright pixels become slightly brighter. &#39;dark&#39; decreases the intensity such that dark pixels become much darker and bright pixels become slightly darker.</span>
@@ -232,7 +232,7 @@
         <span class="k">return</span> <span class="n">image1</span></div>
 
        
-<div class="viewcode-block" id="CamImage.getImageSize"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.getImageSize">[docs]</a>    <span class="k">def</span> <span class="nf">getImageSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.getImageSize"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.getImageSize">[docs]</a>    <span class="k">def</span> <span class="nf">getImageSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the size of the image (which is obtained from the image Exif </span>
 <span class="sd">        information).&quot;&quot;&quot;</span>        
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_imsize</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -240,7 +240,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_imsize</span></div>
 
         
-<div class="viewcode-block" id="CamImage.getImageTime"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.getImageTime">[docs]</a>    <span class="k">def</span> <span class="nf">getImageTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.getImageTime"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.getImageTime">[docs]</a>    <span class="k">def</span> <span class="nf">getImageTime</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the time of the image (which is obtained from the image Exif</span>
 <span class="sd">        information).&quot;&quot;&quot;</span>       
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timestamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -248,7 +248,7 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_timestamp</span></div>
  
        
-<div class="viewcode-block" id="CamImage.getExif"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.getExif">[docs]</a>    <span class="k">def</span> <span class="nf">getExif</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.getExif"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.getExif">[docs]</a>    <span class="k">def</span> <span class="nf">getExif</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return the exif image size and time stamp data from the image. Image</span>
 <span class="sd">        size is returned as a string (height, width). The time stamp is</span>
 <span class="sd">        returned as a Python datetime object.&quot;&quot;&quot;</span>
@@ -281,7 +281,7 @@
         <span class="k">return</span> <span class="n">imsize</span><span class="p">,</span> <span class="n">timestamp</span>      </div>
 
         
-<div class="viewcode-block" id="CamImage.changeBand"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.changeBand">[docs]</a>    <span class="k">def</span> <span class="nf">changeBand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">band</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.changeBand"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.changeBand">[docs]</a>    <span class="k">def</span> <span class="nf">changeBand</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">band</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Change the band you want the image to represent (&#39;r&#39;, &#39;b&#39;, &#39;g&#39; or &#39;l&#39;)</span>
 <span class="sd">        </span>
 <span class="sd">        :param band: Image band (&#39;r&#39;, &#39;b&#39;, &#39;g&#39;, or &#39;l&#39;)</span>
@@ -291,7 +291,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_readImageData</span><span class="p">()</span></div>
         
         
-<div class="viewcode-block" id="CamImage.reportCamImageData"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.CamImage.reportCamImageData">[docs]</a>    <span class="k">def</span> <span class="nf">reportCamImageData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CamImage.reportCamImageData"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.CamImage.reportCamImageData">[docs]</a>    <span class="k">def</span> <span class="nf">reportCamImageData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Report image data (file path, image size and datetime).&quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Image source path: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getImagePath</span><span class="p">()))</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Image size: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getImageSize</span><span class="p">()))</span>
@@ -344,7 +344,7 @@
 
 <span class="c1">#------------------------------------------------------------------------------</span>
         
-<div class="viewcode-block" id="ImageSequence"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.ImageSequence">[docs]</a><span class="k">class</span> <span class="nc">ImageSequence</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageSequence"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.ImageSequence">[docs]</a><span class="k">class</span> <span class="nc">ImageSequence</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A class to model a raw collection of CamImage objects, which can </span>
 <span class="sd">    subsequently be used for making photogrammetric measurements from.</span>
 <span class="sd">      </span>
@@ -399,7 +399,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_loadImageStringSequence</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_imageList</span><span class="p">)</span>
             
             
-<div class="viewcode-block" id="ImageSequence.getImageArrNo"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.ImageSequence.getImageArrNo">[docs]</a>    <span class="k">def</span> <span class="nf">getImageArrNo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageSequence.getImageArrNo"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.ImageSequence.getImageArrNo">[docs]</a>    <span class="k">def</span> <span class="nf">getImageArrNo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get image array i from image sequence</span>
 <span class="sd">        </span>
 <span class="sd">        :param i: Image number in sequence</span>
@@ -413,7 +413,7 @@
         <span class="k">return</span> <span class="n">arr</span></div>
 
     
-<div class="viewcode-block" id="ImageSequence.getImageObj"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.ImageSequence.getImageObj">[docs]</a>    <span class="k">def</span> <span class="nf">getImageObj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageSequence.getImageObj"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.ImageSequence.getImageObj">[docs]</a>    <span class="k">def</span> <span class="nf">getImageObj</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">i</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get :class:`PyTrx.Images.CamImage` object i from image sequence</span>
 <span class="sd">        </span>
 <span class="sd">        :param i: Image number in sequence</span>
@@ -442,17 +442,17 @@
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Image: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">imageStr</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; not added to sequence&#39;</span><span class="p">)</span>
 
                 
-<div class="viewcode-block" id="ImageSequence.getImages"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.ImageSequence.getImages">[docs]</a>    <span class="k">def</span> <span class="nf">getImages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageSequence.getImages"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.ImageSequence.getImages">[docs]</a>    <span class="k">def</span> <span class="nf">getImages</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return image set (i.e. a sequence of CamImage objects).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_imageSet</span></div>
 
         
-<div class="viewcode-block" id="ImageSequence.getImageFileList"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.ImageSequence.getImageFileList">[docs]</a>    <span class="k">def</span> <span class="nf">getImageFileList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageSequence.getImageFileList"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.ImageSequence.getImageFileList">[docs]</a>    <span class="k">def</span> <span class="nf">getImageFileList</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return list of image file paths.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_imageList</span></div>
 
 
-<div class="viewcode-block" id="ImageSequence.getImageNames"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.ImageSequence.getImageNames">[docs]</a>    <span class="k">def</span> <span class="nf">getImageNames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageSequence.getImageNames"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.ImageSequence.getImageNames">[docs]</a>    <span class="k">def</span> <span class="nf">getImageNames</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return list of image file names.&quot;&quot;&quot;</span>
         <span class="n">imgf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getImageFileList</span><span class="p">()</span>
         <span class="n">imns</span> <span class="o">=</span> <span class="p">[]</span>
@@ -462,12 +462,12 @@
         <span class="k">return</span> <span class="n">imns</span></div>
 
         
-<div class="viewcode-block" id="ImageSequence.getLength"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.ImageSequence.getLength">[docs]</a>    <span class="k">def</span> <span class="nf">getLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="ImageSequence.getLength"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.ImageSequence.getLength">[docs]</a>    <span class="k">def</span> <span class="nf">getLength</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return length of image set.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_imageSet</span><span class="p">)</span></div></div>
 
 
-<div class="viewcode-block" id="enhanceImage"><a class="viewcode-back" href="../../Modules.html#PyTrx.Images.enhanceImage">[docs]</a><span class="k">def</span> <span class="nf">enhanceImage</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
+<div class="viewcode-block" id="enhanceImage"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Images.enhanceImage">[docs]</a><span class="k">def</span> <span class="nf">enhanceImage</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Change brightness and contrast of image using phi and theta variables. </span>
 <span class="sd">    Change phi and theta values accordingly.</span>
 <span class="sd">    </span>

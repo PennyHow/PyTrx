@@ -63,7 +63,7 @@
 
 <span class="c1">#------------------------------------------------------------------------------</span>
 
-<div class="viewcode-block" id="Line"><a class="viewcode-back" href="../../Modules.html#PyTrx.Line.Line">[docs]</a><span class="k">class</span> <span class="nc">Line</span><span class="p">(</span><span class="n">ImageSequence</span><span class="p">):</span>
+<div class="viewcode-block" id="Line"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Line.Line">[docs]</a><span class="k">class</span> <span class="nc">Line</span><span class="p">(</span><span class="n">ImageSequence</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A class for handling lines/distances (e.g. glacier terminus position)</span>
 <span class="sd">    through an image sequence, with methods to manually define pixel lines in </span>
 <span class="sd">    the image plane and georectify them to generate real-world coordinates and </span>
@@ -101,7 +101,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_hmatrix</span><span class="o">=</span><span class="kc">None</span>
         
         
-<div class="viewcode-block" id="Line.calcManualLines"><a class="viewcode-back" href="../../Modules.html#PyTrx.Line.Line.calcManualLines">[docs]</a>    <span class="k">def</span> <span class="nf">calcManualLines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Line.calcManualLines"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Line.Line.calcManualLines">[docs]</a>    <span class="k">def</span> <span class="nf">calcManualLines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Method to manually define pixel lines from an image sequence. The </span>
 <span class="sd">        lines are manually defined by the user on an image plot. Returns the </span>
 <span class="sd">        line pixel coordinates and pixel length.</span>
@@ -156,7 +156,7 @@
 
 <span class="c1">#------------------------------------------------------------------------------</span>
 
-<div class="viewcode-block" id="calcManualLine"><a class="viewcode-back" href="../../Modules.html#PyTrx.Line.calcManualLine">[docs]</a><span class="k">def</span> <span class="nf">calcManualLine</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">hmatrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">invprojvars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="calcManualLine"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Line.calcManualLine">[docs]</a><span class="k">def</span> <span class="nf">calcManualLine</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">hmatrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">invprojvars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Manually define a line in a given image to produce XYZ and UV line </span>
 <span class="sd">    length and corresponding coordinates. Lines are defined through user input </span>
 <span class="sd">    by clicking in the interactive image plot. This primarily operates via the </span>
@@ -229,7 +229,7 @@
         <span class="k">return</span> <span class="p">[[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="p">[</span><span class="n">pxline</span><span class="p">,</span> <span class="n">pxpts</span><span class="p">]]</span></div>
 
 
-<div class="viewcode-block" id="getOGRLine"><a class="viewcode-back" href="../../Modules.html#PyTrx.Line.getOGRLine">[docs]</a><span class="k">def</span> <span class="nf">getOGRLine</span><span class="p">(</span><span class="n">pts</span><span class="p">):</span>
+<div class="viewcode-block" id="getOGRLine"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Line.getOGRLine">[docs]</a><span class="k">def</span> <span class="nf">getOGRLine</span><span class="p">(</span><span class="n">pts</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to construct an OGR line from a set of uv coordinates.</span>
 <span class="sd">    </span>
 <span class="sd">    :param pts: A series of uv coordinates denoting a line</span>

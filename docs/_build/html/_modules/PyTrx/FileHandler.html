@@ -62,7 +62,7 @@
 
 <span class="c1">#------------------------------------------------------------------------------   </span>
 
-<div class="viewcode-block" id="readMask"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.readMask">[docs]</a><span class="k">def</span> <span class="nf">readMask</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">writeMask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="readMask"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.readMask">[docs]</a><span class="k">def</span> <span class="nf">readMask</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">writeMask</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to create a mask for point seeding using PIL to rasterize </span>
 <span class="sd">    polygon. The mask is manually defined by the user using the pyplot ginput </span>
 <span class="sd">    function. This subsequently returns the manually defined area as a .jpg </span>
@@ -129,7 +129,7 @@
     <span class="k">return</span> <span class="n">myMask</span>  </div>
 
 
-<div class="viewcode-block" id="readCalib"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.readCalib">[docs]</a><span class="k">def</span> <span class="nf">readCalib</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">paramList</span><span class="p">):</span>
+<div class="viewcode-block" id="readCalib"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.readCalib">[docs]</a><span class="k">def</span> <span class="nf">readCalib</span><span class="p">(</span><span class="n">fileName</span><span class="p">,</span> <span class="n">paramList</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to find camera calibrations from a file given a list or </span>
 <span class="sd">    Matlab file containing the required parameters. Returns the parameters as a</span>
 <span class="sd">    dictionary object. Compatible file structures: 1) .txt file </span>
@@ -185,7 +185,7 @@
                <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Acceptable file types are .txt and .mat.&#39;</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="lineSearch"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.lineSearch">[docs]</a><span class="k">def</span> <span class="nf">lineSearch</span><span class="p">(</span><span class="n">lineList</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
+<div class="viewcode-block" id="lineSearch"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.lineSearch">[docs]</a><span class="k">def</span> <span class="nf">lineSearch</span><span class="p">(</span><span class="n">lineList</span><span class="p">,</span> <span class="n">search</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to supplement the readCalib function. Given an input parameter </span>
 <span class="sd">    to search within the file, this will return the line numbers of the data.</span>
 <span class="sd">    </span>
@@ -216,7 +216,7 @@
     <span class="k">return</span> <span class="n">dataLines</span></div>
 
 
-<div class="viewcode-block" id="returnData"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.returnData">[docs]</a><span class="k">def</span> <span class="nf">returnData</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<div class="viewcode-block" id="returnData"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.returnData">[docs]</a><span class="k">def</span> <span class="nf">returnData</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to supplement the importCalibration function. Given the line </span>
 <span class="sd">    numbers of the parameter data (the ouput of the lineSearch function), this </span>
 <span class="sd">    will return the data.</span>
@@ -252,7 +252,7 @@
     <span class="k">return</span> <span class="n">D</span></div>
 
 
-<div class="viewcode-block" id="readMatrixDistortion"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.readMatrixDistortion">[docs]</a><span class="k">def</span> <span class="nf">readMatrixDistortion</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="readMatrixDistortion"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.readMatrixDistortion">[docs]</a><span class="k">def</span> <span class="nf">readMatrixDistortion</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to support the calibrate function. Returns the </span>
 <span class="sd">    intrinsic matrix and distortion parameters required for calibration from a</span>
 <span class="sd">    given file.</span>
@@ -278,7 +278,7 @@
     <span class="k">return</span> <span class="n">intrMat</span><span class="p">,</span> <span class="n">tanDis</span><span class="p">,</span> <span class="n">radDis</span></div>
 
 
-<div class="viewcode-block" id="checkMatrix"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.checkMatrix">[docs]</a><span class="k">def</span> <span class="nf">checkMatrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
+<div class="viewcode-block" id="checkMatrix"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.checkMatrix">[docs]</a><span class="k">def</span> <span class="nf">checkMatrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to support the calibrate function. Checks and converts the </span>
 <span class="sd">    intrinsic matrix to the correct format for calibration with OpenCV.</span>
 <span class="sd">    </span>
@@ -305,7 +305,7 @@
     <span class="k">return</span> <span class="n">mat</span></div>
 
 
-<div class="viewcode-block" id="readImg"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.readImg">[docs]</a><span class="k">def</span> <span class="nf">readImg</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">band</span><span class="o">=</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">equal</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+<div class="viewcode-block" id="readImg"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.readImg">[docs]</a><span class="k">def</span> <span class="nf">readImg</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">band</span><span class="o">=</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">equal</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to prepare an image by opening, equalising, converting to </span>
 <span class="sd">    either grayscale or a specified band, then returning a copy.</span>
 
@@ -359,7 +359,7 @@
     <span class="k">return</span> <span class="n">bw</span></div>
 
 
-<div class="viewcode-block" id="readGCPs"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.readGCPs">[docs]</a><span class="k">def</span> <span class="nf">readGCPs</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
+<div class="viewcode-block" id="readGCPs"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.readGCPs">[docs]</a><span class="k">def</span> <span class="nf">readGCPs</span><span class="p">(</span><span class="n">fileName</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to read ground control points from a .txt file. The data in the</span>
 <span class="sd">    file is referenced to under a header line. Data is appended by skipping the</span>
 <span class="sd">    header line and finding the world and image coordinates from each line.</span>
@@ -403,7 +403,7 @@
     <span class="k">return</span> <span class="n">world</span><span class="p">,</span> <span class="n">image</span></div>
 
     
-<div class="viewcode-block" id="writeCalibFile"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.writeCalibFile">[docs]</a><span class="k">def</span> <span class="nf">writeCalibFile</span><span class="p">(</span><span class="n">intrMat</span><span class="p">,</span> <span class="n">tanDis</span><span class="p">,</span> <span class="n">radDis</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+<div class="viewcode-block" id="writeCalibFile"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.writeCalibFile">[docs]</a><span class="k">def</span> <span class="nf">writeCalibFile</span><span class="p">(</span><span class="n">intrMat</span><span class="p">,</span> <span class="n">tanDis</span><span class="p">,</span> <span class="n">radDis</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Write camera calibration data to .txt file, including camera matrix, and </span>
 <span class="sd">    radial and tangential distortion parameters. </span>
 
@@ -424,7 +424,7 @@
             <span class="s1">&#39;End&#39;</span><span class="p">)</span></div>
             
 
-<div class="viewcode-block" id="writeVeloFile"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.writeVeloFile">[docs]</a><span class="k">def</span> <span class="nf">writeVeloFile</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">,</span> <span class="n">uvvel</span><span class="p">,</span> <span class="n">homog</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+<div class="viewcode-block" id="writeVeloFile"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.writeVeloFile">[docs]</a><span class="k">def</span> <span class="nf">writeVeloFile</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">,</span> <span class="n">uvvel</span><span class="p">,</span> <span class="n">homog</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to write all velocity data from a given timeLapse sequence to </span>
 <span class="sd">    .csv file. Data is formatted as sequential columns containing the following</span>
 <span class="sd">    information: Image pair 1 name, Image pair 2 name, Average xyz velocity,</span>
@@ -520,7 +520,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Velocity file written:&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span>        </div>
         
    
-<div class="viewcode-block" id="writeHomogFile"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.writeHomogFile">[docs]</a><span class="k">def</span> <span class="nf">writeHomogFile</span><span class="p">(</span><span class="n">homog</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
+<div class="viewcode-block" id="writeHomogFile"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.writeHomogFile">[docs]</a><span class="k">def</span> <span class="nf">writeHomogFile</span><span class="p">(</span><span class="n">homog</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">fname</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to write all homography data from a given timeLapse sequence to </span>
 <span class="sd">    .csv file. Data is formatted as sequential columns containing the following </span>
 <span class="sd">    information: Image pair 1 name, Image pair 2 name, Homography matrix (i.e. </span>
@@ -613,7 +613,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Homography file written&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">fname</span><span class="p">))</span></div>
 
 
-<div class="viewcode-block" id="writeAreaFile"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.writeAreaFile">[docs]</a><span class="k">def</span> <span class="nf">writeAreaFile</span><span class="p">(</span><span class="n">pxareas</span><span class="p">,</span> <span class="n">xyzareas</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">destination</span><span class="p">):</span>
+<div class="viewcode-block" id="writeAreaFile"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.writeAreaFile">[docs]</a><span class="k">def</span> <span class="nf">writeAreaFile</span><span class="p">(</span><span class="n">pxareas</span><span class="p">,</span> <span class="n">xyzareas</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">destination</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Write UV and XYZ areas to csv file.</span>
 
 <span class="sd">    :param pxarea: Pixel extents</span>
@@ -640,7 +640,7 @@
                     <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">xyzareas</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
             
 
-<div class="viewcode-block" id="writeAreaCoords"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.writeAreaCoords">[docs]</a><span class="k">def</span> <span class="nf">writeAreaCoords</span><span class="p">(</span><span class="n">pxpts</span><span class="p">,</span> <span class="n">xyzpts</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">pxdestination</span><span class="p">,</span> <span class="n">xyzdestination</span><span class="p">):</span>
+<div class="viewcode-block" id="writeAreaCoords"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.writeAreaCoords">[docs]</a><span class="k">def</span> <span class="nf">writeAreaCoords</span><span class="p">(</span><span class="n">pxpts</span><span class="p">,</span> <span class="n">xyzpts</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">pxdestination</span><span class="p">,</span> <span class="n">xyzdestination</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Write UV and XYZ area coordinates to text files. These file types are </span>
 <span class="sd">    compatible with the importing tools (importAreaPX, importAreaXYZ).</span>
 
@@ -688,7 +688,7 @@
             <span class="n">polycount</span><span class="o">=</span><span class="mi">1</span></div>
                                         
 
-<div class="viewcode-block" id="writeLineFile"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.writeLineFile">[docs]</a><span class="k">def</span> <span class="nf">writeLineFile</span><span class="p">(</span><span class="n">pxline</span><span class="p">,</span> <span class="n">xyzline</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">destination</span><span class="p">):</span>
+<div class="viewcode-block" id="writeLineFile"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.writeLineFile">[docs]</a><span class="k">def</span> <span class="nf">writeLineFile</span><span class="p">(</span><span class="n">pxline</span><span class="p">,</span> <span class="n">xyzline</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">destination</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Write UV and XYZ line lengths to csv file.</span>
 
 <span class="sd">    :param pxline: Pixel line lengths</span>
@@ -714,7 +714,7 @@
                     <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
     
 
-<div class="viewcode-block" id="writeLineCoords"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.writeLineCoords">[docs]</a><span class="k">def</span> <span class="nf">writeLineCoords</span><span class="p">(</span><span class="n">uvpts</span><span class="p">,</span> <span class="n">xyzpts</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">pxdestination</span><span class="p">,</span> <span class="n">xyzdestination</span><span class="p">):</span>
+<div class="viewcode-block" id="writeLineCoords"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.writeLineCoords">[docs]</a><span class="k">def</span> <span class="nf">writeLineCoords</span><span class="p">(</span><span class="n">uvpts</span><span class="p">,</span> <span class="n">xyzpts</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">pxdestination</span><span class="p">,</span> <span class="n">xyzdestination</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Write UV and XYZ line coordinates to text file. These file types are </span>
 <span class="sd">    compatible with the importing tools (importLinePX, importLineXYZ)</span>
 <span class="sd">    </span>
@@ -749,7 +749,7 @@
             <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">)</span></div>
                 
             
-<div class="viewcode-block" id="writeVeloSHP"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.writeVeloSHP">[docs]</a><span class="k">def</span> <span class="nf">writeVeloSHP</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">,</span> <span class="n">xyzerr</span><span class="p">,</span> <span class="n">xyz0</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">fileDirectory</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span> 
+<div class="viewcode-block" id="writeVeloSHP"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.writeVeloSHP">[docs]</a><span class="k">def</span> <span class="nf">writeVeloSHP</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">,</span> <span class="n">xyzerr</span><span class="p">,</span> <span class="n">xyz0</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">fileDirectory</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span> 
     <span class="sd">&quot;&quot;&quot;Write OGR real velocity points (from ALL images) to file in a .shp</span>
 <span class="sd">    file type that is compatible with ESRI mapping software.</span>
 <span class="sd">    </span>
@@ -861,7 +861,7 @@
         <span class="n">ds</span><span class="o">.</span><span class="n">Destroy</span><span class="p">()</span></div>
         
 
-<div class="viewcode-block" id="writeAreaSHP"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.writeAreaSHP">[docs]</a><span class="k">def</span> <span class="nf">writeAreaSHP</span><span class="p">(</span><span class="n">xyzpts</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">fileDirectory</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="writeAreaSHP"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.writeAreaSHP">[docs]</a><span class="k">def</span> <span class="nf">writeAreaSHP</span><span class="p">(</span><span class="n">xyzpts</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">fileDirectory</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Write OGR real polygon areas (from ALL images) to file in a .shp</span>
 <span class="sd">    file type that is compatible with ESRI mapping software.</span>
 <span class="sd">    </span>
@@ -941,7 +941,7 @@
         <span class="n">ds</span><span class="o">.</span><span class="n">Destroy</span><span class="p">()</span></div>
         
         
-<div class="viewcode-block" id="writeLineSHP"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.writeLineSHP">[docs]</a><span class="k">def</span> <span class="nf">writeLineSHP</span><span class="p">(</span><span class="n">xyzpts</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">fileDirectory</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="writeLineSHP"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.writeLineSHP">[docs]</a><span class="k">def</span> <span class="nf">writeLineSHP</span><span class="p">(</span><span class="n">xyzpts</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">fileDirectory</span><span class="p">,</span> <span class="n">projection</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Write OGR real line features (from ALL images) to file in a .shp</span>
 <span class="sd">    file type that is compatible with ESRI mapping software.</span>
 <span class="sd">    </span>
@@ -1013,7 +1013,7 @@
         <span class="n">ds</span><span class="o">.</span><span class="n">Destroy</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="importAreaData"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.importAreaData">[docs]</a><span class="k">def</span> <span class="nf">importAreaData</span><span class="p">(</span><span class="n">xyzfile</span><span class="p">,</span> <span class="n">pxfile</span><span class="p">):</span>
+<div class="viewcode-block" id="importAreaData"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.importAreaData">[docs]</a><span class="k">def</span> <span class="nf">importAreaData</span><span class="p">(</span><span class="n">xyzfile</span><span class="p">,</span> <span class="n">pxfile</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Import xyz and px data from text files.</span>
 <span class="sd">    </span>
 <span class="sd">    :param xyzfile: File directory to xyz coordinates</span>
@@ -1038,7 +1038,7 @@
     <span class="k">return</span> <span class="n">areas</span></div>
 
 
-<div class="viewcode-block" id="importLineData"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.importLineData">[docs]</a><span class="k">def</span> <span class="nf">importLineData</span><span class="p">(</span><span class="n">xyzfile</span><span class="p">,</span> <span class="n">pxfile</span><span class="p">):</span>
+<div class="viewcode-block" id="importLineData"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.importLineData">[docs]</a><span class="k">def</span> <span class="nf">importLineData</span><span class="p">(</span><span class="n">xyzfile</span><span class="p">,</span> <span class="n">pxfile</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Import xyz and px data from text files.</span>
 
 <span class="sd">    :param xyzfile: File directory to xyz coordinates</span>
@@ -1063,7 +1063,7 @@
     <span class="k">return</span> <span class="n">lines</span></div>
    
 
-<div class="viewcode-block" id="importAreaFile"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.importAreaFile">[docs]</a><span class="k">def</span> <span class="nf">importAreaFile</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">dimension</span><span class="p">):</span>
+<div class="viewcode-block" id="importAreaFile"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.importAreaFile">[docs]</a><span class="k">def</span> <span class="nf">importAreaFile</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">dimension</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Import pixel polygon data from text file and compute pixel extents.</span>
 <span class="sd">      </span>
 <span class="sd">    :param fname: Path to the text file containing the UV coordinate data</span>
@@ -1120,7 +1120,7 @@
     <span class="k">return</span> <span class="n">areas</span></div>
      
      
-<div class="viewcode-block" id="importLineFile"><a class="viewcode-back" href="../../Modules.html#PyTrx.FileHandler.importLineFile">[docs]</a><span class="k">def</span> <span class="nf">importLineFile</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">dimension</span><span class="p">):</span>
+<div class="viewcode-block" id="importLineFile"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.FileHandler.importLineFile">[docs]</a><span class="k">def</span> <span class="nf">importLineFile</span><span class="p">(</span><span class="n">fname</span><span class="p">,</span> <span class="n">dimension</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Import XYZ line data from text file and compute line lengths.</span>
 <span class="sd">        </span>
 <span class="sd">    :param fname: Path to the text file containing the XYZ coordinate data</span>

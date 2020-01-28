@@ -71,7 +71,7 @@
 <span class="kn">from</span> <span class="nn">CamEnv</span> <span class="k">import</span> <span class="n">projectUV</span><span class="p">,</span> <span class="n">projectXYZ</span><span class="p">,</span> <span class="n">setProjection</span>
 
 <span class="c1">#------------------------------------------------------------------------------</span>
-<div class="viewcode-block" id="Homography"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.Homography">[docs]</a><span class="k">class</span> <span class="nc">Homography</span><span class="p">(</span><span class="n">ImageSequence</span><span class="p">):</span>
+<div class="viewcode-block" id="Homography"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.Homography">[docs]</a><span class="k">class</span> <span class="nc">Homography</span><span class="p">(</span><span class="n">ImageSequence</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A class for the processing the homography of an image sequence to </span>
 <span class="sd">    determine motion in a camera platform. This class treats the images as a </span>
 <span class="sd">    contigous sequence of name references by default.</span>
@@ -107,7 +107,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Homography mask set&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Homography.calcHomographies"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.Homography.calcHomographies">[docs]</a>    <span class="k">def</span> <span class="nf">calcHomographies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">homogmethod</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">RANSAC</span><span class="p">,</span> 
+<div class="viewcode-block" id="Homography.calcHomographies"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.Homography.calcHomographies">[docs]</a>    <span class="k">def</span> <span class="nf">calcHomographies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">homogmethod</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">RANSAC</span><span class="p">,</span> 
                          <span class="n">ransacReprojThreshold</span><span class="o">=</span><span class="mf">5.0</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Function to generate a homography model through a sequence of </span>
 <span class="sd">        images, and perform for image registration. Points that are assumed </span>
@@ -196,12 +196,12 @@
         <span class="k">return</span> <span class="n">homog</span>            </div>
 
 
-<div class="viewcode-block" id="Homography.getInverseMask"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.Homography.getInverseMask">[docs]</a>    <span class="k">def</span> <span class="nf">getInverseMask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Homography.getInverseMask"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.Homography.getInverseMask">[docs]</a>    <span class="k">def</span> <span class="nf">getInverseMask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Return inverse mask.&#39;&#39;&#39;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_invmask</span></div></div>
 
             
-<div class="viewcode-block" id="Velocity"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.Velocity">[docs]</a><span class="k">class</span> <span class="nc">Velocity</span><span class="p">(</span><span class="n">ImageSequence</span><span class="p">):</span>
+<div class="viewcode-block" id="Velocity"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.Velocity">[docs]</a><span class="k">class</span> <span class="nc">Velocity</span><span class="p">(</span><span class="n">ImageSequence</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A class for the processing of an ImageSet to determine pixel </span>
 <span class="sd">    displacements and real-world velocities from a sparse set of points, with </span>
 <span class="sd">    methods to track in the xy image plane and project tracks to real-world </span>
@@ -242,7 +242,7 @@
             <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Velocity mask set&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="Velocity.calcVelocities"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.Velocity.calcVelocities">[docs]</a>    <span class="k">def</span> <span class="nf">calcVelocities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
+<div class="viewcode-block" id="Velocity.calcVelocities"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.Velocity.calcVelocities">[docs]</a>    <span class="k">def</span> <span class="nf">calcVelocities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Function to calculate velocities between succesive image pairs. </span>
 <span class="sd">        Image pairs are called from the ImageSequence object. Points are seeded</span>
 <span class="sd">        in the first of these pairs using the Shi-Tomasi algorithm with </span>
@@ -355,19 +355,19 @@
         <span class="k">return</span> <span class="n">velocity</span></div>
        
         
-<div class="viewcode-block" id="Velocity.getMask"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.Velocity.getMask">[docs]</a>    <span class="k">def</span> <span class="nf">getMask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Velocity.getMask"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.Velocity.getMask">[docs]</a>    <span class="k">def</span> <span class="nf">getMask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns the image mask.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span></div>
  
  
-<div class="viewcode-block" id="Velocity.getCamEnv"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.Velocity.getCamEnv">[docs]</a>    <span class="k">def</span> <span class="nf">getCamEnv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Velocity.getCamEnv"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.Velocity.getCamEnv">[docs]</a>    <span class="k">def</span> <span class="nf">getCamEnv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Returns the camera environment object (CamEnv).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camEnv</span></div></div>
     
 
 <span class="c1">#------------------------------------------------------------------------------    </span>
 
-<div class="viewcode-block" id="calcSparseVelocity"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.calcSparseVelocity">[docs]</a><span class="k">def</span> <span class="nf">calcSparseVelocity</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">calib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">homog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
+<div class="viewcode-block" id="calcSparseVelocity"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.calcSparseVelocity">[docs]</a><span class="k">def</span> <span class="nf">calcSparseVelocity</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">calib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">homog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                        <span class="n">invprojvars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">winsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="mi">25</span><span class="p">),</span> <span class="n">back_thresh</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> 
                        <span class="n">min_features</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">seedparams</span><span class="o">=</span><span class="p">[</span><span class="mi">50000</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">]):</span>
     <span class="sd">&quot;&quot;&quot;Function to calculate the velocity between a pair of images. Points </span>
@@ -540,7 +540,7 @@
                 <span class="p">[</span><span class="n">pxvel</span><span class="p">,</span> <span class="n">src_pts_corr</span><span class="p">,</span> <span class="n">dst_pts_corr</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ptserrors</span><span class="p">]]</span></div>
         
 
-<div class="viewcode-block" id="calcDenseVelocity"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.calcDenseVelocity">[docs]</a><span class="k">def</span> <span class="nf">calcDenseVelocity</span><span class="p">(</span><span class="n">im0</span><span class="p">,</span> <span class="n">im1</span><span class="p">,</span> <span class="n">griddistance</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">templatesize</span><span class="p">,</span> 
+<div class="viewcode-block" id="calcDenseVelocity"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.calcDenseVelocity">[docs]</a><span class="k">def</span> <span class="nf">calcDenseVelocity</span><span class="p">(</span><span class="n">im0</span><span class="p">,</span> <span class="n">im1</span><span class="p">,</span> <span class="n">griddistance</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">templatesize</span><span class="p">,</span> 
                       <span class="n">searchsize</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">calib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">homog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">campars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                       <span class="n">threshold</span><span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">min_features</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to calculate the velocity between a pair of images using </span>
@@ -710,7 +710,7 @@
                 <span class="p">[</span><span class="n">pxvel</span><span class="p">,</span> <span class="n">src_pts_corr</span><span class="p">,</span> <span class="n">dst_pts_corr</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">ptserrors</span><span class="p">]]</span></div>
 
         
-<div class="viewcode-block" id="calcSparseHomography"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.calcSparseHomography">[docs]</a><span class="k">def</span> <span class="nf">calcSparseHomography</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">correct</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">RANSAC</span><span class="p">,</span> 
+<div class="viewcode-block" id="calcSparseHomography"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.calcSparseHomography">[docs]</a><span class="k">def</span> <span class="nf">calcSparseHomography</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">correct</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">RANSAC</span><span class="p">,</span> 
                          <span class="n">ransacReprojThreshold</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">winsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="mi">25</span><span class="p">),</span> 
                          <span class="n">back_thresh</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">min_features</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> 
                          <span class="n">seedparams</span><span class="o">=</span><span class="p">[</span><span class="mi">50000</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">]):</span>
@@ -808,7 +808,7 @@
             <span class="n">homogerrors</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="calcDenseHomography"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.calcDenseHomography">[docs]</a><span class="k">def</span> <span class="nf">calcDenseHomography</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">correct</span><span class="p">,</span> <span class="n">griddistance</span><span class="p">,</span> <span class="n">templatesize</span><span class="p">,</span> 
+<div class="viewcode-block" id="calcDenseHomography"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.calcDenseHomography">[docs]</a><span class="k">def</span> <span class="nf">calcDenseHomography</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">correct</span><span class="p">,</span> <span class="n">griddistance</span><span class="p">,</span> <span class="n">templatesize</span><span class="p">,</span> 
                         <span class="n">searchsize</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">projvars</span><span class="p">,</span> <span class="n">trackmethod</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">TM_CCORR_NORMED</span><span class="p">,</span> 
                         <span class="n">homogmethod</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">RANSAC</span><span class="p">,</span> <span class="n">ransacReprojThreshold</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> 
                         <span class="n">threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">min_features</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
@@ -913,7 +913,7 @@
             <span class="n">homogerrors</span><span class="p">)</span></div>
     
 
-<div class="viewcode-block" id="apply_persp_homographyPts"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.apply_persp_homographyPts">[docs]</a><span class="k">def</span> <span class="nf">apply_persp_homographyPts</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">homog</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>        
+<div class="viewcode-block" id="apply_persp_homographyPts"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.apply_persp_homographyPts">[docs]</a><span class="k">def</span> <span class="nf">apply_persp_homographyPts</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">homog</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>        
     <span class="sd">&quot;&quot;&quot;Funtion to apply a perspective homography to a sequence of 2D </span>
 <span class="sd">    values held in X and Y. The perspective homography is represented as a </span>
 <span class="sd">    3 X 3 matrix (homog). The source points are inputted as an array. The </span>
@@ -969,7 +969,7 @@
         <span class="k">return</span> <span class="n">hpts</span> </div>
         
 
-<div class="viewcode-block" id="opticalMatch"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.opticalMatch">[docs]</a><span class="k">def</span> <span class="nf">opticalMatch</span><span class="p">(</span><span class="n">i0</span><span class="p">,</span> <span class="n">iN</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="n">winsize</span><span class="p">,</span> <span class="n">back_thresh</span><span class="p">,</span> <span class="n">min_features</span><span class="p">):</span>
+<div class="viewcode-block" id="opticalMatch"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.opticalMatch">[docs]</a><span class="k">def</span> <span class="nf">opticalMatch</span><span class="p">(</span><span class="n">i0</span><span class="p">,</span> <span class="n">iN</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="n">winsize</span><span class="p">,</span> <span class="n">back_thresh</span><span class="p">,</span> <span class="n">min_features</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to match between two masked images using Optical Flow. The </span>
 <span class="sd">    Lucas Kanade optical flow algorithm is applied using the OpenCV function </span>
 <span class="sd">    calcOpticalFlowPyrLK to find these tracked points in the second image. A </span>
@@ -1033,7 +1033,7 @@
     <span class="k">return</span> <span class="p">[</span><span class="n">p0</span><span class="p">,</span><span class="n">p1</span><span class="p">,</span><span class="n">p0r</span><span class="p">],</span> <span class="n">error</span></div>
 
 
-<div class="viewcode-block" id="templateMatch"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.templateMatch">[docs]</a><span class="k">def</span> <span class="nf">templateMatch</span><span class="p">(</span><span class="n">im0</span><span class="p">,</span> <span class="n">im1</span><span class="p">,</span> <span class="n">uv0</span><span class="p">,</span> <span class="n">templatesize</span><span class="p">,</span> <span class="n">searchsize</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
+<div class="viewcode-block" id="templateMatch"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.templateMatch">[docs]</a><span class="k">def</span> <span class="nf">templateMatch</span><span class="p">(</span><span class="n">im0</span><span class="p">,</span> <span class="n">im1</span><span class="p">,</span> <span class="n">uv0</span><span class="p">,</span> <span class="n">templatesize</span><span class="p">,</span> <span class="n">searchsize</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
                   <span class="n">min_features</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">TM_CCORR_NORMED</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to template match between two images. Templates in the first</span>
 <span class="sd">    image (im0) are generated from a given set of points (uv0) and matched to </span>
@@ -1154,7 +1154,7 @@
         <span class="k">return</span> <span class="p">[</span><span class="n">uv0t</span><span class="p">,</span> <span class="n">uv1</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">avercorr</span></div>
 
 
-<div class="viewcode-block" id="seedCorners"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.seedCorners">[docs]</a><span class="k">def</span> <span class="nf">seedCorners</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">maxpoints</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">mindist</span><span class="p">,</span> <span class="n">min_features</span><span class="p">):</span>
+<div class="viewcode-block" id="seedCorners"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.seedCorners">[docs]</a><span class="k">def</span> <span class="nf">seedCorners</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">maxpoints</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">mindist</span><span class="p">,</span> <span class="n">min_features</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to seed corner features using the Shi-Tomasi corner feature </span>
 <span class="sd">    detection method in OpenCV&#39;s goodFeaturesToTrack function. </span>
 <span class="sd">        </span>
@@ -1191,7 +1191,7 @@
         <span class="k">return</span> <span class="n">p0</span></div>
 
 
-<div class="viewcode-block" id="seedGrid"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.seedGrid">[docs]</a><span class="k">def</span> <span class="nf">seedGrid</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">griddistance</span><span class="p">,</span> <span class="n">projvars</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
+<div class="viewcode-block" id="seedGrid"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.seedGrid">[docs]</a><span class="k">def</span> <span class="nf">seedGrid</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">griddistance</span><span class="p">,</span> <span class="n">projvars</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Define pixel grid at a specified grid distance, taking into </span>
 <span class="sd">    consideration the image size and image mask.</span>
 <span class="sd">    </span>
@@ -1267,7 +1267,7 @@
     
     <span class="k">return</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">uv</span></div>
 
-<div class="viewcode-block" id="readDEMmask"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.readDEMmask">[docs]</a><span class="k">def</span> <span class="nf">readDEMmask</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">invprojvars</span><span class="p">,</span> <span class="n">demMaskPath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="readDEMmask"><a class="viewcode-back" href="../../source/Modules.html#PyTrx.Velocity.readDEMmask">[docs]</a><span class="k">def</span> <span class="nf">readDEMmask</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">invprojvars</span><span class="p">,</span> <span class="n">demMaskPath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Read/generate DEM mask for subsequent grid generation. If a valid </span>
 <span class="sd">    filename is given then the DEM mask is loaded from file. If the filename</span>
 <span class="sd">    does not exist, then the mask is defined. To define the DEM mask, a mask is</span>
