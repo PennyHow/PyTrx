@@ -1,38 +1,15 @@
+#PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+#
+#PyTrx is licensed under a MIT License.
+#
+#You should have received a copy of the license along with this
+#work. If not, see <https://choosealicense.com/licenses/mit/>.
+
 '''
-PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
-
-PyTrx is licensed under a MIT License.
-
-You should have received a copy of the license along with this
-work. If not, see <https://choosealicense.com/licenses/mit/>.
-
-
-PYTRX LINE MODULE
-
-This script is part of PyTrx, an object-oriented programme created for the 
-purpose of calculating real-world measurements from oblique images and 
-time-lapse image series.
-
-This is the Line module of PyTrx. It handles the functionality for obtaining 
-line measurements from oblique time-lapse imagery. Specifically, this module 
-contains functions for:
-(1) Performing manual detection of lines in oblique imagery.
-(2) Determining real-world surface areas and distances from oblique imagery.
-
-Classes 
-Line:                           A class for handling lines/distances (e.g. 
-                                glacier terminus position) through an image 
-                                sequence, with methods to manually define pixel 
-                                lines in the image plane and georectify them to 
-                                generate real-world coordinates and distances
-
-Key class functions
-calcManualLines:                Calculate xyz and uv lines/distances from a
-                                sequence of images
-
-Key stand-alone functions
-calcManualLine:                 Calculate xyz and uv lines/distances from an 
-                                image
+The Line module handles the functionality for obtaining line measurements from 
+oblique time-lapse imagery. Specifically, this module contains functions for:
+(1) Performing manual detection of lines in oblique imagery; and (2) 
+Determining real-world distances from oblique imagery.
 '''
 
 #Import packages
@@ -53,31 +30,28 @@ class Line(ImageSequence):
     the image plane and georectify them to generate real-world coordinates and 
     distances. The Line class object primarily inherits from the Area class.
     
-    Args
-    imageList (str, list):     List of images, for the ImageSet object.        
-    cameraenv (str):           Camera environment parameters which can be read 
-                               into the CamEnv class as a text file (see CamEnv 
-                               documentation for exact information needed).
-    calibFlag (bool):          An indicator of whether images are calibrated, 
-                               for the ImageSet object.          
-    band (str):                String denoting the desired image band.
-    equal (bool):              Flag denoting whether histogram equalisation is 
-                               applied to images (histogram equalisation is 
-                               applied if True). Default is True.                         
-    loadall (bool):            Flag which, if true, will force all images in 
-                               the sequence to be loaded as images (array) 
-                               initially and thus not re-loaded in subsequent 
-                               processing. 
-                               This is only advised for small image sequences. 
-    timingMethod (str):        Method for deriving timings from imagery. By 
-                               default, timings are extracted from the image 
-                               EXIF data.
-    '''
-     
+    :param imageList: List of images to be inputted into the 
+:class:'PyTrx.Images.ImageSequence' object
+    :type imageList: str/list            
+    :param cameraenv: Camera environment parameters which can be read into the 
+:class:'PyTrx.CamEnv.CamEnv' object as a text file
+    :type cameraenv: str 
+    :param hmatrix: Homography matrix
+    :type hmatrix: arr          
+    :param calibFlag: An indicator of whether images are calibrated, for the 
+:class:'PyTrx.Images.ImageSequence' object, default to True
+    :type calibFlag: bool, optional         .          
+    :param band: String denoting the desired image band, default to 'L' 
+(grayscale)
+    :type band: str                .
+    :param equal: Flag denoting whether histogram equalisation is applied to 
+images (histogram equalisation is applied if True). Default to True.
+    :type equal: bool, optional              
+    '''     
     #Object initialisation        
     def __init__(self, imageList, cameraenv, hmatrix, calibFlag=True, band='L', 
                  equal=True):
-
+        '''Line object initialisation'''
         #Initialise and inherit from the ImageSequence object        
         ImageSequence.__init__(self, imageList, band, equal)
 
@@ -98,8 +72,7 @@ class Line(ImageSequence):
         lines are manually defined by the user on an image plot. Returns the 
         line pixel coordinates and pixel length.
         
-        Returns
-        lines (list):           XYZ and UV line lengths and coordinates
+        :returns: XYZ and UV line lengths and coordinates (list)
         ''' 
         print('\n\nCOMMENCING LINE DETECTION')                        
             
@@ -156,16 +129,18 @@ def calcManualLine(img, imn, hmatrix=None, invprojvars=None):
     plot interaction. If inverse projection variables are given, XYZ lines
     and coordinates are also calculated.
     
-    Args
-    img (arr):              Image array for plotting.
-    imn (str):              Image name.
-    invprojvars (list):     Inverse projection variables
-    
-    Returns
-    xyzline (list):         Line length (xyz)
-    xyzpts (list):          XYZ coordinates of lines
-    pxline (list):          Line length (px)
-    pxpts (list):           UV coordinates of lines
+    :param img: Image array for plotting.
+    :type img: arr
+    :param imn: Image name
+    :type imn: str
+    :param hmatrix: Homography matrix, default to None
+    :type hmatrix: arr, optional
+    :param invprojvars: Inverse projection variables [X,Y,Z,uv0], default to
+None
+    :type invprojvars: list, optional    
+    :returns: Four list elements containing: line length in xyz (list), 
+xyz coordinates of lines (list), line length in pixels (list), and uv
+coordinates of lines (list)
     '''
     #Initialise figure window
     fig=plt.gcf()
@@ -224,12 +199,10 @@ def calcManualLine(img, imn, hmatrix=None, invprojvars=None):
 def getOGRLine(pts):
     '''Function to construct an OGR line from a set of uv coordinates.
     
-    Args
-    pts (arr):                A series of uv coordinates denoting a line.
-    
-    Returns
-    line (ogr.Geometry):      A line object constructed from the input 
-                              coordinates.
+    :param pts: A series of uv coordinates denoting a line
+    :type pts: arr
+    :returns: A line object (ogr.Geometry) constructed from the input 
+coordinates
     ''' 
     #Initially construct geometry object             
     line = ogr.Geometry(ogr.wkbLineString)

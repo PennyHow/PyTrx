@@ -1,47 +1,23 @@
+#PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+#
+#PyTrx is licensed under a MIT License.
+#
+#You should have received a copy of the license along with this
+#work. If not, see <https://choosealicense.com/licenses/mit/>.
+
 '''
-PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
-
-PyTrx is licensed under a MIT License.
-
-You should have received a copy of the license along with this
-work. If not, see <https://choosealicense.com/licenses/mit/>.
-
-
-PYRX DEM MODULE
-
-This script is part of PyTrx, an object-oriented programme created for the 
-purpose of calculating real-world measurements from oblique images and 
-time-lapse image series.
-
-This module, DEM, contains functionality for handling DEM data and implementing
-this data into the camera environment (CamEnv) object class.
-
-Classes
-ExplicitRaster:                 A class to represent a numeric Raster with 
-                                explicit XY cell referencing in each grid cell
-
-
-Key functions
-densify:                        Densify a DEM array by a given densification 
-                                factor (i.e. 'smoothing')           
-
-Key stand-alone functions
-load_DEM:                       Load DEM from .mat or .tiff file
-voxelviewshed:                  Calculate a viewshed over a DEM from a given 
-                                viewpoint in the DEM scene    
+The DEM module contains functionality for handling DEM data and implementing
+this data into the :class:'PyTrx.CamEnv.CamEnv' object class.
 '''
 
 #Import packages
 import numpy as np
-from PIL import Image, ImageDraw
-import ogr
 import scipy.io as sio
 import gdal
 import math
 from scipy import interpolate
 from gdalconst import GA_ReadOnly 
 import struct
-import matplotlib.pyplot as plt
 from scipy.interpolate import RectBivariateSpline
 
 #------------------------------------------------------------------------------
@@ -50,16 +26,19 @@ class ExplicitRaster(object):
     '''A class to represent a numeric Raster with explicit XY cell referencing
     in each grid cell.
     
-    Args
-    X:              X data
-    Y:              Y data
-    Z:              Z data
-    nodata:         Condition for NaN data values (default: 'nan')
+    :param X: X data
+    :type X: arr
+    :param Y: Y data
+    :type Y: arr
+    :param Z: Z data
+    :type Z: arr
+    :param nodata: Condition for NaN data values, default to 'nan'
+    :type nodata: int, optional
     '''
     
     #Basic constuctor method
     def __init__(self, X, Y, Z, nodata=float('nan')):
-        
+        '''Explicit Raster initialisation.'''
         #Check XYZ data is all the same size
         if not (X.shape==Y.shape and X.shape==Z.shape):
             print('Raster data and/or co-ordinate arrays are differently sized')
@@ -79,8 +58,12 @@ class ExplicitRaster(object):
     def getData(self,dim=None):
         '''Return DEM data. XYZ dimensions can be individually called with the
         dim input variable (integer: 0, 1, or 2).
-        '''
-        
+
+        :param dim: Dimension to retrieve (0, 1, or 2), default to None
+        :type dim: int
+        :returns: DEM dimension as array
+        :rtype: arr
+        '''        
         #Return all DEM data if no dimension is specified
         if dim==None:
             return self._data
@@ -95,12 +78,23 @@ class ExplicitRaster(object):
 
             
     def getZ(self):
-        '''Return height (Z) data of DEM.'''
+        '''Return height (Z) data of DEM.
+        
+        :returns: DEM Z values
+        :rtype: arr'''
         return self.getData(2)
             
         
     def getZcoord(self, x, y):
-        '''Return height (Z) at given XY coordinate in DEM.'''
+        '''Return height (Z) at a given XY coordinate in DEM.
+        
+        :param x: X coordinate
+        :type x: int
+        :param y: Y coordinate
+        :type y: int        
+        :returns: DEM Z value for given coordinate
+        :rtype: int
+        '''
         
         rowcoords = self.getData(0)[0,:]    
         colcoords = self.getData(1)[:,0]
@@ -114,32 +108,63 @@ class ExplicitRaster(object):
             
             
     def getShape(self):
-        '''Return the shape of the DEM data array.'''
+        '''Return the shape of the DEM data array.
+        
+        :returns: DEM shape
+        :rtype: arr
+        '''
         return self._data[0].shape
 
     
     def getRows(self):
-        '''Return the number of rows in the DEM data array.'''
+        '''Return the number of rows in the DEM data array.
+        
+        :returns: DEM row count
+        :rtype: int
+        '''
         return self._data[0].shape[0]
 
         
     def getCols(self):
-        '''Return the number of columns in the DEM data array.'''
+        '''Return the number of columns in the DEM data array.
+        
+        :returns: DEM column count
+        :rtype: int
+        '''
         return self._data[0].shape[1]
 
     
     def getNoData(self):
-        '''Return fill value for no data in DEM array.''' 
+        '''Return fill value for no data in DEM array.
+        
+        :returns: DEM nan fill value
+        :rtype: int
+        '''
         return self._nodata
  
        
     def getExtent(self):
-        '''Return DEM extent.'''     
+        '''Return DEM extent.
+        
+        :returns: DEM extent
+        :rtype: list
+        '''     
         return self._extents
  
        
     def subset(self,cmin,cmax,rmin,rmax):
         '''Return a specified subset of the DEM array.
+        
+        :param cmin: Column minimum extent
+        :type cmin: int
+        :param cmax: Column maximum extent
+        :type cmax: int        
+        :param rmin: Row minimum extent
+        :type rmin: int
+        :param rmax: Row maximum extent
+        :type rmax: int 
+        :returns: Subset of DEM
+        :rtype: :class:'PyTrx.DEM.ExplicitRaster'
         '''
         
         #Find minimum extent value
@@ -165,6 +190,11 @@ class ExplicitRaster(object):
         subsequently values are interpolated using the SciPy function 
         RectBivariateSpline. The densification factor is set to 2 by default,
         meaning that the size of the DEM array is doubled.
+
+        :param densefac: Densification factor
+        :type densefac: int
+        :returns: Densified DEM
+        :rtype: :class:'PyTrx.DEM.ExplicitRaster'
         '''
         
         #Get XYZ dem data
@@ -224,6 +254,11 @@ class ExplicitRaster(object):
 def load_DEM(demfile):
     '''Function for loading DEM data from different file types, which is 
     automatically detected. Recognised file types: .mat and .tif.
+    
+    :param demfile: DEM filepath
+    :type demfile: str 
+    :returns: A DEM object
+    :rtype: :class:'PyTrx.DEM.ExplicitRaster'
     '''    
     #Determine file type based on filename suffix
     suffix=demfile.split('.')[-1].upper()
@@ -246,6 +281,11 @@ def load_DEM(demfile):
 def DEM_FromMat(matfile):
     '''Function for loading a DEM array from a Matlab (.mat) file containing
     separate X, Y, Z matrices.
+
+    :param matfile: DEM .mat filepath
+    :type matfile: str
+    :returns: A DEM object
+    :rtype: :class:'PyTrx.DEM.ExplicitRaster'
     '''
     
     #Load Matlab file and XYZ matrices as arrays
@@ -269,6 +309,11 @@ def DEM_FromMat(matfile):
 def DEM_FromTiff(tiffFile):
     '''Function for loading a DEM array from a .tiff file containing
     raster-formatted data. The tiff data importing is handled by GDAL.
+
+    :param tifffile: DEM .tif filepath
+    :type tifffile: str
+    :returns: A DEM object
+    :rtype: :class:'PyTrx.DEM.ExplicitRaster'
     '''
     
     #Open tiff file with GDAL
@@ -318,18 +363,17 @@ def DEM_FromTiff(tiffFile):
 def voxelviewshed(dem, viewpoint):
     '''Calculate a viewshed over a DEM from a given viewpoint in the DEM scene.
     This function is based on the viewshed function (voxelviewshed.m) available 
-    in ImGRAFT.
-    
+    in ImGRAFT.   
     The ImGRAFT voxelviewshed.m script is available at:
     http://github.com/grinsted/ImGRAFT/blob/master/voxelviewshed.m
     
-    Inputs
-    X,Y,Z:                      Input DEM (regular grid).
-    viewpoint:                  3-element vector specifying the viewpoint.
+    :param dem: A DEM object
+    :type dem: :class:'PyTrx.DEM.ExplicitRaster'
+    :param viewpoint: 3-element vector specifying the viewpoint
+    :type viewpoint: list
     
-    Output
-    vis:                        Boolean visibility matrix (which is the same 
-                                size as dem)
+    :returns: Boolean visibility matrix (which is the same size as dem)
+    :rtype: arr
     '''
     #Get XYZ arrays    
     X=dem.getData(0)

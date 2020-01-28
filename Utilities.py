@@ -1,7 +1,7 @@
 #PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
-
+#
 #PyTrx is licensed under a MIT License.
-
+#
 #You should have received a copy of the license along with this
 #work. If not, see <https://choosealicense.com/licenses/mit/>.
 
@@ -21,7 +21,7 @@ import cv2
 #------------------------------------------------------------------------------  
 
 def plotGCPs(gcps, img, imn, dem, camloc, extent=None):
-    '''Function to show the ground control points, on the image and DEM.
+    '''Function to show the ground control points, on the image and the DEM.
     
     :param gcps: GCPs
     :type gcps: arr
@@ -29,8 +29,8 @@ def plotGCPs(gcps, img, imn, dem, camloc, extent=None):
     :type img: arr
     :param imn: Image name 
     :type imn: str 
-    :param dem: DEM object
-    :type dem: :class:`PyTrx.DEM.ExplicitRaster`
+    :param dem: :class:`PyTrx.DEM.ExplicitRaster` object 
+    :type dem: arr
     :param extent: DEM extent indicator, default to None
     :type extent: list, optional
     :returns: A figure with the plotted uv and xyz GCPs

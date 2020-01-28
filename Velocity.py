@@ -1,45 +1,19 @@
+#PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+#
+#PyTrx is licensed under a MIT License.
+#
+#You should have received a copy of the license along with this
+#work. If not, see <https://choosealicense.com/licenses/mit/>.
+
 '''
-PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
-
-PyTrx is licensed under a MIT License.
-
-You should have received a copy of the license along with this
-work. If not, see <https://choosealicense.com/licenses/mit/>.
-
-
-PYTRX VELOCITY MODULE
-
-This script is part of PyTrx, an object-oriented programme created for the 
-purpose of calculating real-world measurements from oblique images and 
-time-lapse image series.
-
-This is the Velocity module of PyTrx. It handles the functionality for 
-obtaining velocity and homography  measurements from oblique time-lapse imagery. 
-Specifically, this module contains functions for:
-(1) Performing camera registration from static point feature tracking (referred 
-    to here as homography).
-(2) Calculating surface velocities derived from feature tracking, with 
-    associated errors and signal-to-noise ratio calculated.
-(3) Determining real-world surface areas and distances from oblique imagery.
-
-Classes
-Velocity:                       A class for the processing of an image sequence 
-                                to determine pixel displacements and real-world 
-                                velocities from a sparse set of points
-Homography:                     A class for determining camera platform motion 
-                                through an image sequence
-
-Key Velocity functions 
-calcVelocities:                 Calculate velocities between succesive image 
-                                pairs in an image sequence
-
-Key Homography functions
-calcHomographyPairs:            Calculate homography between succesive image 
-                                pairs in an image sequence
-                               
-Key standalone functions
-calcVelocity:                   Calculate velocities between an image pair
-calcHomography:                 Calculate homography between an image pair
+The Velocity module handles the functionality for obtaining velocity and 
+homography measurements from oblique time-lapse imagery. Specifically, this 
+module contains functions for: (1) Performing camera registration from static 
+point feature tracking (referred to here as homography); and (2) Calculating 
+surface velocities derived from feature tracking, with associated errors and 
+signal-to-noise ratio calculated. These functions can be performed with either
+a sparse or dense method, using corner features for tracking in the sparse
+method and a grid of evenly space points in the dense method.
 '''
 
 #Import packages
@@ -49,8 +23,7 @@ import math
 from matplotlib import path
 import matplotlib.pyplot as plt
 from scipy import interpolate
-from PIL import Image, ImageDraw
-import ogr
+from PIL import Image
 import numpy.ma as ma
 
 #Import PyTrx functions and classes
@@ -61,27 +34,30 @@ from CamEnv import projectUV, projectXYZ, setProjection
 #------------------------------------------------------------------------------
 class Homography(ImageSequence):
     '''A class for the processing the homography of an image sequence to 
-    determine motion in a camera platform.
+    determine motion in a camera platform. This class treats the images as a 
+    contigous sequence of name references by default.
     
-    This class treats the images as a contigous sequence of name references by
-    default.
-    
-    Args
-    imageList:          List of images, for the ImageSet object.
-    camEnv:             The Camera Environment corresponding to the images, 
-                        for the ImageSequence object.
-    invmaskPath:        As above, but the mask for the stationary feature 
-                        tracking (for camera registration/determining
-                        camera homography).
-    band:               String denoting the desired image band.
-    equal:              Flag denoting whether histogram equalisation is applied 
-                        to images (histogram equalisation is applied if True). 
-                        Default is True.                        
-    '''
-        
+    :param imageList: List of images, for the ImageSet object
+    :type imageList: list
+    :param camEnv: The Camera Environment corresponding to the images, for the 
+:class:'PyTrx.Images.ImageSequence' object
+    :type camEnv: :class:'PyTrx.CamEnv.CamEnv'
+    :param invmaskPath: The mask for the stationary feature tracking (for 
+camera registration/determining camera homography), default to None
+    :type invmaskPath: arr, optional
+    :param calibFlag: Flag denoting whether images should be corrected for
+lens distortion, default to True
+    :type calibFlag: bool, optional
+    :param band: String denoting the desired image band, default to 'L' 
+(grayscale)
+    :type band: str, optional
+    :param equal: Flag denoting whether histogram equalisation is applied to 
+images (histogram equalisation is applied if True); default is True.                        
+    :type equal: bool, optional    
+    '''        
     def __init__(self, imageList, camEnv, invmaskPath=None, calibFlag=True, 
                  band='L', equal=True):
-        
+        '''Homography object initialisation'''
         ImageSequence.__init__(self, imageList, band, equal)
         
         #Set initial class properties
@@ -104,52 +80,34 @@ class Homography(ImageSequence):
         to be static in the image plane are tracked between image pairs, and 
         movement in these points are used to generate sequential homography 
         models.
-        
-        The homography models are held in the Velocity object and can be called
-        in subsequent velocity functions, such as calcVelocities and
-        calcVelocity.
-        
-        Args
-        params (list):              List that defines the parameters for 
-                                    point matching:
-                                        
-                                    Method: 'sparse' or 'dense' (str).
-                                    
-                                    Seed parameters: either containing the 
-                                    corner parameters for the sparse method 
-                                    - max. number of corners (int), quality 
-                                    (int), and min. distance (int). Or the grid 
-                                    spacing (list) for the dense method.
-                                    
-                                    Tracking parameters: either containing the
-                                    sparse method parameters -
-                                    window size (tuple), backtracking threshold 
-                                    (int) and minimum tracked features (int).
-                                    Or the dense method parameters - tracking 
-                                    method (int), template size (int), search
-                                    window size (int), backtracking threshold 
-                                    (int), and minimum tracked features (int).
-        homogmethod (int):          Method used to calculate homography model,
-                                    which plugs into the OpenCV function
-                                    cv2.findHomography: 
-                                    cv2.RANSAC: RANSAC-based robust method.
-                                    cv2.LEAST_MEDIAN: Least-Median robust 
-                                    0: a regular method using all the points.                                   
-        ransacReprojThreshold (int):Maximum allowed reprojection error.                                    
-        
-        Returns
-        homog (list):               List of homography information for all 
-                                    image pairs in sequence.
-        
         Input example:
         For sparse homographies:
         homog = Homography.calcHomographies([['sparse'], [50000, 0.1, 5], 
-                                             [(25,25), 1.0, 4]])
-        
+        [(25,25), 1.0, 4]])       
         For dense homographies:
         homog = Homography.calcHomographies([['dense'], [100,100], 
-                                             [cv2.TM_CCORR_NORMED, 50, 100, 
-                                             1.0, 4]])
+        [cv2.TM_CCORR_NORMED, 50, 100, 1.0, 4]])
+        
+        :param params: List that defines the parameters for point matching:
+Method: 'sparse' or 'dense' (str). Seed parameters: either containing the corner
+parameters for the sparse method - max. number of corners (int), quality (int),
+and min. distance (int). Or the grid spacing (list) for the dense method.
+Tracking parameters: either containing the sparse method parameters - window
+size (tuple), backtracking threshold(int) and minimum tracked features (int).
+Or the dense method parameters - tracking method (int), template size (int),
+search window size (int), backtracking threshold (int), and minimum tracked
+features (int)
+        :type params: list              
+        :param homogmethod: Method used to calculate homography model, which
+plugs into the OpenCV function. This can either be cv2.RANSAC (a RANSAC-based
+robust method), cv2.LEAST_MEDIAN (a Least-Median robust method) or '0' (a
+regular method using all the points); default to cv2.RANSAC
+        :type homogmethod: int, optional                                  
+        :param ransacReprojThreshold: Maximum allowed reprojection error,
+default to 5.0
+        :type ransacReprojThreshold: int                                     
+        :returns: A list of homography information for all image pairs in 
+sequence
         ''' 
         print('\n\nCALCULATING HOMOGRAPHY')
 
@@ -225,41 +183,36 @@ class Velocity(ImageSequence):
     '''A class for the processing of an ImageSet to determine pixel 
     displacements and real-world velocities from a sparse set of points, with 
     methods to track in the xy image plane and project tracks to real-world 
-    (xyz) coordinates.
+    (xyz) coordinates. This class treats the images as a contigous sequence of 
+    name references by default.
     
-    This class treats the images as a contigous sequence of name references by
-    default.
-    
-    Args
-    imageList:          List of images, for the ImageSet object.
-    camEnv:             The Camera Environment corresponding to the images, 
-                        for the ImageSequence object.
-    maskPath:           The file path for the mask indicating the target area
-                        for deriving velocities from. If this file exists, the 
-                        mask will be loaded. If this file does not exist, then 
-                        the mask generation process will load, and the result 
-                        will be saved with this path.
-    invmaskPath:        As above, but the mask for the stationary feature 
-                        tracking (for camera registration/determining
-                        camera homography).
-    image0:             The image number in the ImageSet from which the 
-                        analysis will commence. This is set to the first image 
-                        in the ImageSet by default.
-    band:               String denoting the desired image band.
-    equal:              Flag denoting whether histogram equalisation is applied 
-                        to images (histogram equalisation is applied if True). 
-                        Default is True.                        
-    loadall:            Flag which, if true, will force all images in the 
-                        sequence to be loaded as images (array) initially and 
-                        thus not re-loaded in subsequent processing. This is 
-                        only advised for small image sequences. 
-    timingMethod:       Method for deriving timings from imagery. By default, 
-                        timings are extracted from the image EXIF data. 
-    '''
-        
+    :param imageList: List of images, for the :class:'PyTrx.Images.ImageSequence' 
+object
+    :type imageList: list
+    :param camEnv:  The Camera Environment object, :class:'PyTrx.CamEnv.CamEnv' 
+corresponding to the images
+    :type camEnv: :class:'PyTrx.CamEnv.CamEnv'
+    :param homography: Homography model for the corresponding image, defaults
+to None
+    :type homography: list, optional
+    :param maskPath: The file path for the mask indicating the target area for 
+deriving velocities from. If this file exists, the mask will be loaded. If this 
+file does not exist, then the mask generation process will load, and the result 
+will be saved with this path; default to None
+    :type maskPath: str, optional
+    :param calibFlag: Flag denoting whether images should be corrected for
+lens distortion, default to True
+    :type calibFlag: bool, optional
+    :param band: String denoting the desired image band, default to 'L' 
+(grayscale)
+    :type band: str, optional
+    :param equal: Flag denoting whether histogram equalisation is applied to 
+images (histogram equalisation is applied if True); default is True.                        
+    :type equal: bool, optional 
+    '''        
     def __init__(self, imageList, camEnv, homography=None, maskPath=None, 
                  calibFlag=True, band='L', equal=True):
-        
+        '''Velocity object initialisation'''        
         ImageSequence.__init__(self, imageList, band, equal)
         
         #Set initial class properties
@@ -280,65 +233,21 @@ class Velocity(ImageSequence):
         '''Function to calculate velocities between succesive image pairs. 
         Image pairs are called from the ImageSequence object. Points are seeded
         in the first of these pairs using the Shi-Tomasi algorithm with 
-        OpenCV's goodFeaturesToTrack function. 
-        
+        OpenCV's goodFeaturesToTrack function.         
         The Lucas Kanade optical flow algorithm is applied using the OpenCV 
         function calcOpticalFlowPyrLK to find these tracked points in the 
         second image of each image pair. A backward tracking method then tracks 
         back from these to the first image in the pair, checking if this is 
-        within a certain distance as a validation measure.
-        
+        within a certain distance as a validation measure.        
         Tracked points are corrected for image distortion and camera platform
         motion (if needed). The points in each image pair are georectified 
         subsequently to obtain xyz points. The georectification functions are 
         called from the Camera Environment object, and are based on those in
         ImGRAFT (Messerli and Grinsted, 2015). Velocities are finally derived 
         from these using a simple Pythagoras' theorem method.
-        
         This function returns the xyz velocities and points from each image 
         pair, and their corresponding uv velocities and points in the image 
         plane.
-        
-        Args
-        params (list):              List that defines the parameters for 
-                                    deriving velocity:
-                                        
-                                    Method: 'sparse' or 'dense' (str).
-                                    
-                                    Seed parameters: either containing the 
-                                    corner parameters for the sparse method 
-                                    - max. number of corners (int), quality 
-                                    (int), and min. distance (int). Or the grid 
-                                    spacing (list) for the dense method.
-                                    
-                                    Tracking parameters: either containing the
-                                    sparse method parameters -
-                                    window size (tuple), backtracking threshold 
-                                    (int) and minimum tracked features (int).
-                                    Or the dense method parameters - tracking 
-                                    method (int), template size (int), search
-                                    window size (int), correlation threshold 
-                                    (int), and minimum tracked 
-                                    features (int).
-        
-        Returns
-        velocity (list):            List containing the xyz and uv velocities. 
-                                    The first element holds the xyz velocity 
-                                    for each point (xyz[0]), the xyz positions 
-                                    for the points in the first image (xyz[1]), 
-                                    and the xyz positions for the points in the 
-                                    second image(xyz[2]). The second element 
-                                    contains the uv velocities for each point 
-                                    (uv[0], the uv positions for the points in 
-                                    the first image (uv[1]), the uv positions 
-                                    for the points in the second image (uv[2]), 
-                                    and the corrected uv points in the second 
-                                    image if they have been calculated using 
-                                    the homography model for image registration 
-                                    (uv[3]). If the corrected points have not 
-                                    been calculated then an empty list is 
-                                    merely returned. 
-                                    
         Input example:
         For sparse velocities: 
         velocity = Velocity.calcVelocities([['sparse'], [50000, 0.1, 5.0], 
@@ -346,8 +255,29 @@ class Velocity(ImageSequence):
         For dense velocities:
         velocity = Velocity.calcVelocities([['dense'],[100,100],
                                             ['cv2.TM_CCORR_NORMED', 50, 100, 4]])
-        '''
-           
+        
+        :param params:              List that defines the parameters for 
+                                    deriving velocity: Method: 'sparse' or 
+'dense' (str).
+Seed parameters: either containing the corner parameters for the sparse method 
+- max. number of corners (int), quality (int), and min. distance (int). Or the 
+grid spacing (list) for the dense method.
+Tracking parameters: either containing the sparse method parameters - window 
+size (tuple), backtracking threshold (int) and minimum tracked features (int).
+Or the dense method parameters - tracking method (int), template size (int), 
+search window size (int), correlation threshold (int), and minimum tracked 
+features (int)
+        :type params: str
+        :returns: A ist containing the xyz and uv velocities. The first element 
+holds the xyz velocity for each point (xyz[0]), the xyz positions for the 
+points in the first image (xyz[1]), and the xyz positions for the points in the 
+second image(xyz[2]). The second element contains the uv velocities for each 
+point (uv[0], the uv positions for the points in the first image (uv[1]), the 
+uv positions for the points in the second image (uv[2]), and the corrected uv 
+points in the second image if they have been calculated using the homography 
+model for image registration (uv[3]). If the corrected points have not been
+calculated then an empty list is merely returned.
+        '''           
         print('\n\nCALCULATING VELOCITIES')
         velocity=[]
 
@@ -437,12 +367,12 @@ class Velocity(ImageSequence):
        
         
     def getMask(self):
-        '''Return image mask.'''
+        '''Returns the image mask.'''
         return self._mask
  
  
     def getCamEnv(self):
-        '''Return camera environment object (CamEnv).'''
+        '''Returns the camera environment object (CamEnv).'''
         return self._camEnv
     
 
@@ -453,60 +383,57 @@ def calcSparseVelocity(img1, img2, mask, calib=None, homog=None,
                        min_features=4, seedparams=[50000, 0.1, 5.0]):
     '''Function to calculate the velocity between a pair of images. Points 
     are seeded in the first of these either by a defined grid spacing, or using 
-    the Shi-Tomasi algorithm with OpenCV's goodFeaturesToTrack function. 
-    
+    the Shi-Tomasi algorithm with OpenCV's goodFeaturesToTrack function.  
     The Lucas Kanade optical flow algorithm is applied using the OpenCV 
     function calcOpticalFlowPyrLK to find these tracked points in the 
     second image. A backward tracking method then tracks back from these to 
     the original points, checking if this is within a certain distance as a 
     validation measure.
-    
     Tracked points are corrected for image distortion and camera platform
     motion (if needed). The points in the image pair are georectified 
     subsequently to obtain xyz points.  The georectification functions are 
-    called from the Camera Environment object, and are based on those in
-    ImGRAFT (Messerli and Grinsted, 2015). Velocities are finally derived
-    from these using a simple Pythagoras' theorem method.
+    called from the :class:'PyTrx.CamEnv.CamEnv' object, and are based on those 
+    in ImGRAFT (Messerli and Grinsted, 2015). Velocities are finally derived
+    from these using a simple Pythagoras' theorem method. This function returns 
+    the xyz velocities and points, and their corresponding uv velocities and 
+    points in the image plane.
     
-    This function returns the xyz velocities and points, and their 
-    corresponding uv velocities and points in the image plane.
-    
-    Args
-    img1 (arr):                 Image 1 in the image pair.
-    img2 (arr):                 Image 2 in the image pair.
-    hmatrix (arr):              Homography matrix.
-    hpts (arr):                 Homography points.
-    back_thesh (int):           Threshold for back-tracking distance (i.e.
-                                the difference between the original seeded
-                                point and the back-tracked point in im0).
-    min_features (int):         Minimum number of seeded points to track.
-    seedparams (list):          Point seeding parameters, which indicate
-                                whether points are generated based on corner
-                                features or a grid with defined spacing. 
-                                The three corner features parameters denote 
-                                maximum number of corners detected, corner
-                                quality, and minimum distance between corners; 
-                                inputted as a list. For grid generation, the
-                                only input parameter needed is the grid 
-                                spacing; inputted as a list containing the 
-                                horizontal and vertical grid spacing.
-                 
-    Returns
-    xyz (list)                  List containing the xyz velocities for each 
-                                point (xyz[0]), the xyz positions for the 
-                                points in the first image (xyz[1]), and the 
-                                xyz positions for the points in the second 
-                                image(xyz[2]). 
-    uv (list):                  List containing the uv velocities for each
-                                point (uv[0], the uv positions for the 
-                                points in the first image (uv[1]), the
-                                uv positions for the points in the second
-                                image (uv[2]), and the corrected uv points 
-                                in the second image if they have been 
-                                calculated using the homography model for
-                                image registration (uv[3]). If the 
-                                corrected points have not been calculated 
-                                then an empty list is merely returned.                                 
+    :param img1: Image 1 in the image pair
+    :type img1: arr                 
+    :param img2: Image 2 in the image pair
+    :type img2: arr
+    :param mask: 
+    :type mask: arr
+    :param calib: default to None
+    :type calib: list, optional
+    :param homog: default to None
+    :type homog: list, optional
+    :param invprojvars: default to None
+    :type invprojvars: list, optional
+    :param winsize: default to (25, 25)
+    :type winsize: tuple, optional
+    :param back_thesh: Threshold for back-tracking distance (i.e.the difference 
+between the original seeded point and the back-tracked point in im0); default
+to 1.0
+    :type back_thresh: int, optional
+    :param min_features: Minimum number of seeded points to track, default to 4
+    :type min_features: int, optional
+    :param seedparams: Point seeding parameters, which indicate whether points 
+are generated based on corner features or a grid with defined spacing. The 
+three corner features parameters denote maximum number of corners detected, 
+corner quality, and minimum distance between corners; inputted as a list. For 
+grid generation, the only input parameter needed is the grid spacing; inputted 
+as a list containing the horizontal and vertical grid spacing. Default to
+[50000, 0.1, 5.0]
+    :type seedparams: list, optional                           
+    :returns: Two lists, 1. The xyz velocities for each point (xyz[0]), the xyz 
+positions for the points in the first image (xyz[1]), and the xyz positions for 
+the points in the second image(xyz[2]); 2. The uv velocities for each point 
+(uv[0], the uv positions for the points in the first image (uv[1]), the uv 
+positions for the points in the second image (uv[2]), and the corrected uv 
+points in the second image if they have been calculated using the homography 
+model for image registration (uv[3]). If the corrected points have not been 
+calculated then an empty list is merely returned                                 
     '''       
     #Set threshold difference for homography correction
     displacement_tolerance_rel=2.0
@@ -644,64 +571,58 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
     '''Function to calculate the velocity between a pair of images using 
     a gridded template matching approach. Gridded points are defined by grid 
     distance, which are then used to either generate templates for matching
-    or tracked using the Lucas Kanade optical flow algorithm.
-    
+    or tracked using the Lucas Kanade optical flow algorithm.    
     Tracked points are corrected for image distortion and camera platform
     motion (if needed). The points in the image pair are georectified 
     subsequently to obtain xyz points.  The georectification functions are 
     called from the Camera Environment object, and are based on those in
     ImGRAFT (Messerli and Grinsted, 2015). Velocities are finally derived
-    from these using a simple Pythagoras' theorem method.
+    from these using a simple Pythagoras' theorem method. This function returns 
+    the xyz velocities and points, and their corresponding uv velocities and 
+    points in the image plane.
     
-    This function returns the xyz velocities and points, and their 
-    corresponding uv velocities and points in the image plane.
-    
-    Inputs
-    im0 (arr):                  Image 1 in the image pair.
-    im1 (arr):                  Image 2 in the image pair.
-    griddistance (list):        Grid spacing, defined by two values. 
-                                representing pixel row and column spacing.
-    method (str/int):           Method for matching:
-                                cv2.TM_CCOEFF: Cross-coefficient.
-                                cv2.TM_CCOEFF_NORMED: Normalised cross-coeff.
-                                cv2.TM_CCORR - Cross correlation.
-                                cv2.TM_CCORR_NORMED - Normalised cross-corr.
-                                cv2.TM_SQDIFF - Square difference.
-                                cv2.TM_SQDIFF_NORMED - Normalised square diff.
-    templatesize (int):         Template window size in im0 for matching.
-    searchsize (int):           Search window size in im1 for matching.                 
-    mask (arr):                 Mask array for masking DEM.
-    calib (list):               Calibration parameters.
-    homog (list):               Homography parameters, hmatrix (arr) and hpts
-                                (arr).
-    campars (list):             List containing information for transforming
-                                between the image plane and 3D scene:
-                                1. DEM (ExplicitRaster object);
-                                2. Projection parameters (camera location, 
-                                camera post, radial distortion coefficients, 
-                                tangential distortion coefficients, 
-                                focal length, camera centre, and reference 
-                                image)
-                                3. Inverse projection parameters (coordinate
-                                system  3D scene - X, Y, Z, uv0)         
-    min_features (int):         Minimum number of seeded points to track.
-                 
-    Outputs
-    xyz (list)                  List containing the xyz velocities for each 
-                                point (xyz[0]), the xyz positions for the 
-                                points in the first image (xyz[1]), and the 
-                                xyz positions for the points in the second 
-                                image(xyz[2]). 
-    uv (list):                  List containing the uv velocities for each
-                                point (uv[0], the uv positions for the 
-                                points in the first image (uv[1]), the
-                                uv positions for the points in the second
-                                image (uv[2]), and the corrected uv points 
-                                in the second image if they have been 
-                                calculated using the homography model for
-                                image registration (uv[3]). If the 
-                                corrected points have not been calculated 
-                                then an empty list is merely returned.                                 
+    :param im0: Image 1 in the image pair
+    :type im0: arr
+    :param im1: Image 2 in the image pair                  
+    :type im1: arr                  
+    :param griddistance: Grid spacing, defined by two values representing pixel 
+row and column spacing.
+    :type griddistance: list
+    :param method: (str/int): Method for tmeplate matching: cv2.TM_CCOEFF - 
+Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR 
+- Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF
+ - Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff
+    :type method: int
+    :param templatesize: Template window size in im0 for matching
+    :type templatesize: int
+    :param searchsize: Search window size in im1 for matching
+    :type searchsize: int               
+    :param mask: Mask array for masking DEM
+    :type mask: arr
+    :param calib: Calibration parameters, default to None
+    :type calib: list, optional
+    :param homog: Homography parameters, hmatrix (arr) and hpts (arr), default 
+to None
+    :type homog: list, optional
+    :param campars: List containing information for transforming between the 
+image plane and 3D scene: 1. DEM (ExplicitRaster object); 2. Projection 
+parameters (camera location, camera position, radial distortion coefficients, 
+tangential distortion coefficients, focal length, camera centre, and reference 
+image); 3. Inverse projection parameters (coordinate system  3D scene - X, Y, 
+Z, uv0). Default to None    
+    :type campar: list, optioanl    
+    :param theshold: Threshold for template correlation; default to 0.8
+    :type threshold: int, optional
+    :param min_features: Minimum number of seeded points to track, default to 4
+    :type min_features: int, optional
+    :returns: Two lists, 1. containing the xyz velocities for each point 
+(xyz[0]), the xyz positions for the points in the first image (xyz[1]), and the 
+ xyz positions for the points in the second image(xyz[2]); amd 2. containing 
+the uv velocities for each point (uv[0], the uv positions for the points in 
+the first image (uv[1]), the uv positions for the points in the second image 
+(uv[2]), and the corrected uv points in the second image if they have been 
+calculated using the homography model for image registration (uv[3]). If the 
+corrected points have not been calculated then an empty list is merely returned                                 
     '''       
     #Set threshold difference for point tracks
     displacement_tolerance_rel=2.0
@@ -838,38 +759,44 @@ def calcSparseHomography(img1, img2, mask, correct, method=cv2.RANSAC,
     platform given an image pair (i.e. image registration). Returns the 
     homography representing tracked image movement, and the tracked 
     features from each image.
-    
-    Args
-    img1 (arr):                 Image 1 in the image pair.
-    img2 (arr):                 Image 2 in the image pair.
-    method (int):               Method used to calculate homography model,
-                                which plugs into the OpenCV function
-                                cv2.findHomography: 
-                                cv2.RANSAC: RANSAC-based robust method.
-                                cv2.LEAST_MEDIAN: Least-Median robust 
-                                0: a regular method using all the points.                                   
-    ransacReprojThreshold (int):Maximum allowed reprojection error.
-    back_thesh (int):           Threshold for back-tracking distance (i.e.
-                                the difference between the original seeded
-                                point and the back-tracked point in im0).
-    min_features (int):         Minimum number of seeded points to track.
-    seedparams (list):          Corner feature generation parameters - maximum 
-                                number of points to seed in im0, corner feature 
-                                quality, and minimum distance between corner 
-                                points.
-                    
-    Returns
-    homogMatrix (arr):          The calculated homographic shift for the 
-                                image pair (homogMatrix).
-    src_pts_corr,
-    dst_pts_corr,
-    homog_pts (arr):            The original, tracked and back-tracked 
-                                homography points.  
-    ptserror (list):            Difference between the original homography 
-                                points and the back-tracked points.
-    homogerror (list):          Difference between the interpolated 
-                                homography matrix and the equivalent 
-                                tracked points
+
+    :param img1: Image 1 in the image pair
+    :type img1: arr                 
+    :param img2: Image 2 in the image pair
+    :type img2: arr
+    :param mask: Mask array for image points to be seeded
+    :type mask: arr
+    :param correct: Calibration parameters for correcting image for 
+ lens distortion, default to None
+    :type correct: list, optional
+    :param method: Method used to calculate homography model: cv2.RANSAC - 
+RANSAC-based robust method; cv2.LEAST_MEDIAN - Least-Median robust; 0 - a 
+regular method using all the points. Default to None
+    :type method: int, optional
+    :param ransacReprojThreshold: default to 5.0
+    :type ransacReprojThreshold: int, optional
+    :param winsize: default to (25, 25)
+    :type winsize: tuple, optional
+    :param back_thesh: Threshold for back-tracking distance (i.e.the difference 
+between the original seeded point and the back-tracked point in im0); default
+to 1.0
+    :type back_thresh: int, optional
+    :param min_features: Minimum number of seeded points to track, default to 4
+    :type min_features: int, optional
+    :param seedparams: Point seeding parameters, which indicate whether points 
+are generated based on corner features or a grid with defined spacing. The 
+three corner features parameters denote maximum number of corners detected, 
+corner quality, and minimum distance between corners; inputted as a list. For 
+grid generation, the only input parameter needed is the grid spacing; inputted 
+as a list containing the horizontal and vertical grid spacing. Default to
+[50000, 0.1, 5.0]
+    :type seedparams: list, optional                           
+    :returns: homogMatrix (arr) - The calculated homographic shift for the 
+image pair; src_pts_corr (arr) - original homography points; dst_pts_corr (arr)
+ -  tracked homography points; homog_pts (arr) -back-tracked homography points;  
+ptserror (list) - Difference between the original homography points and the 
+back-tracked points; homogerror (list) -Difference between the interpolated 
+homography matrix and the equivalent tracked points
     '''           
     #Seed corner features
     p0 = seedCorners(img1, mask, seedparams[0], seedparams[1], seedparams[2], 
@@ -946,43 +873,50 @@ def calcDenseHomography(img1, img2, mask, correct, griddistance, templatesize,
     homography representing tracked image movement, and the tracked 
     features from each image.
     
-    Inputs
-    img1:                       Image 1 in the image pair.
-    img2:                       Image 2 in the image pair.
-    method:                     Method used to calculate homography model,
-                                which plugs into the OpenCV function
-                                cv2.findHomography: 
-                                cv2.RANSAC: RANSAC-based robust method.
-                                cv2.LEAST_MEDIAN: Least-Median robust 
-                                0: a regular method using all the points.                                   
-    ransacReprjThreshold:       Maximum allowed reprojection error.
-    back_thesh:                 Threshold for back-tracking distance (i.e.
-                                the difference between the original seeded
-                                point and the back-tracked point in im0).
-    maxpoints:                  Maximum number of points to seed in im0
-    quality:                    Corner feature quality.
-    mindist:                    Minimum distance between seeded points.
-    calcHomogError:             Flag to denote whether homography errors
-                                should be calculated.                 
-    min_features:               Minimum number of seeded points to track.
-    
-    Outputs
-    homogMatrix:                The calculated homographic shift for the 
-                                image pair (homogMatrix).
-    src_pts_corr,
-    dst_pts_corr,
-    homog_pts:                  The original, tracked and back-tracked 
-                                homography points.  
-    ptserror:                   Difference between the original homography 
-                                points and the back-tracked points.
-    homogerror:                 Difference between the interpolated 
-                                homography matrix and the equivalent 
-                                tracked points
-    '''     
-#                      im0, im1, griddistance, method, templatesize, 
-#                      searchsize, mask, calib=None, homog=None, campars=None, 
-#                      back_thresh=1.0, min_features=4
-     
+    :param img1: Image 1 in the image pair
+    :type img1: arr
+    :param img2: Image 2 in the image pair                  
+    :type img2: arr 
+    :param mask: Mask array for image points to be seeded
+    :type mask: arr
+    :param correct: Calibration parameters for correcting image for 
+ lens distortion
+    :type correct: list               
+    :param griddistance: Grid spacing, defined by two values representing pixel 
+row and column spacing
+    :type griddistance: list
+    :param templatesize: Template window size in im0 for matching
+    :type templatesize: int
+    :param searchsize: Search window size in im1 for matching
+    :type searchsize: int  
+    :param dem: :class:'PyTrx.DEM.ExplicitRaster' object
+    :type dem: arr
+    :param projvars: List containing projection parameters (camera location, 
+camera position, radial distortion coefficients, tangential distortion 
+coefficients, focal length, camera centre, and reference image)
+    :type projvars: list    
+    :param trackmethod: (str/int): Method for tmeplate matching: cv2.TM_CCOEFF - 
+Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR 
+- Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF
+ - Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff
+    :type trackmethod: int
+    :param homogmethod: Method used to calculate homography model: cv2.RANSAC - 
+RANSAC-based robust method; cv2.LEAST_MEDIAN - Least-Median robust; 0 - a 
+regular method using all the points. Default to None
+    :type homogmethod: int, optional    
+    :param ransacReprojThreshold: default to 5.0
+    :type ransacReprojThreshold: int, optional       
+    :param theshold: Threshold for template correlation; default to 0.8
+    :type threshold: int, optional
+    :param min_features: Minimum number of seeded points to track, default to 4
+    :type min_features: int, optional                          
+    :returns: homogMatrix (arr) - The calculated homographic shift for the 
+image pair; src_pts_corr (arr) - original homography points; dst_pts_corr (arr)
+ -  tracked homography points; homog_pts (arr) -back-tracked homography points;  
+ptserror (list) - Difference between the original homography points and the 
+back-tracked points; homogerror (list) -Difference between the interpolated 
+homography matrix and the equivalent tracked points
+    '''          
     #Generate grid for tracking
     xyz0, uv0 = seedGrid(dem, griddistance, projvars, mask)
             
@@ -1055,14 +989,14 @@ def apply_persp_homographyPts(pts, homog, inverse=False):
     homography perspective matrix is modelled in the same manner as done so 
     in OpenCV.
     
-    Variables
-    pts (arr/list):             Input point positions to correct
-    homog (arr):                Perspective homography matrix                                  
-    inverse (bool):             Flag to denote if perspective homography matrix 
-                                needs inversing
-    
-    Returns
-    hpts (arr):                 Corrected point positions
+    :param pts: Input point positions to correct
+    :type pts: arr/list             
+    :param homog: Perspective homography matrix 
+    :type homog: arr                                                 
+    :param inverse:  Flag to denote if perspective homography matrix needs 
+inversing, default to False
+    :type inverse: bool, optional            
+    :return: hpts (arr), corrected point positions
     '''
     #If input is array         
     if isinstance(pts,np.ndarray):
@@ -1113,23 +1047,22 @@ def opticalMatch(i0, iN, p0, winsize, back_thresh, min_features):
     measure. The resulting error is the difference between the original feature 
     point and the backtracked feature point. 
     
-    Variables
-    i0 (arr):                   Image 1 in the image pair
-    iN (arr):                   Image 2 in the image pair
-    winsize (tuple):            Window size for tracking e.g. (25,25)
-    back_thesh (int):           Threshold for back-tracking distance (i.e.
-                                the difference between the original seeded
-                                point and the back-tracked point in im0)
-    
-    Returns
-    p1 (arr):                   Point coordinates for points tracked to image 2
-    p0r (arr):                  Point coordinates for points back-tracked
-                                from image 2 to image 1
-    error (arr):                SNR measurements for the corresponding tracked 
-                                point. The signal is the magnitude of the 
-                                displacement from p0 to p1, and the noise is 
-                                the magnitude of the displacement from p0r to 
-                                p0
+    :param i0: Image 1 in the image pair
+    :type i0: arr
+    :param iN: Image 2 in the image pair
+    :type iN: arr
+    :param winsize: Window size for tracking e.g. (25,25)
+    :type winsize: tuple
+    :param back_thesh: Threshold for back-tracking distance (i.e. the 
+difference between the original seeded point and the back-tracked point in im0)
+    :type back_thresh: int
+    :param min_features: Minimum number of seeded points to track
+    :type min_features: int   
+    :return: Point coordinates for points tracked to image 2 (arr), Point 
+coordinates for points back-tracked from image 2 to image 1 (arr), and SNR 
+measurements for the corresponding tracked point. The signal is the magnitude 
+of the displacement from p0 to p1, and the noise is the magnitude of the 
+displacement from p0r to p0 (arr)
     '''
     #Feature tracking set-up parameters
     lk_params = dict( winSize  = winsize,
@@ -1182,35 +1115,29 @@ def templateMatch(im0, im1, uv0, templatesize, searchsize, threshold=0.8,
     matchTemplate function. After matching, the origin point of each matched 
     template in image 2 is returned, along with the average correlation in 
     each template.
-    
-    Variables
-    im0 (arr):                   Image 1 in the image pair.
-    im1 (arr):                   Image 2 in the image pair.
-    uv0 (tuple):                 Grid points for image 1.
-    templatesize (int):          Pixel dimensions of the template size, given
-                                 as a single value (i.e. each template is a 
-                                 square) 
-    searchsize(int):             Pixel dimensions of the search size, given as 
-                                 a single value (i.e. each search window is a 
-                                 square) 
-    min_features (int):          Minimum number of point tracks to return
-    method (int):                Method of correlation:
-                                 cv2.TM_CCOEFF: Cross-coefficient
-                                 cv2.TM_CCOEFF_NORMED: Normalised cross-coeff
-                                 cv2.TM_CCORR - Cross correlation
-                                 cv2.TM_CCORR_NORMED - Normalised cross-corr
-                                 cv2.TM_SQDIFF - Square difference
-                                 cv2.TM_SQDIFF_NORMED - Normalised square diff
-    
-    Returns
-    p1 (arr):                   Point coordinates for points tracked to image 2
-    p0r (arr):                  Point coordinates for points back-tracked
-                                from image 2 to image 1
-    error (arr):                SNR measurements for the corresponding tracked 
-                                point. The signal is the magnitude of the 
-                                displacement from p0 to p1, and the noise is 
-                                the magnitude of the displacement from p0r to 
-                                p0
+                                    
+    :param im0: Image 1 in the image pair
+    :type im0: arr
+    :param im1: Image 2 in the image pair                  
+    :type im1: arr                  
+    :param uv0: Grid points for image 1
+    :type uv0: tuple
+    :param templatesize: Template window size in im0 for matching
+    :type templatesize: int
+    :param searchsize: Search window size in im1 for matching
+    :type searchsize: int   
+    :param min_features: Minimum number of seeded points to track, default to 4
+    :type min_features: int, optional   
+    :param method: (str/int): Method for tmeplate matching: cv2.TM_CCOEFF - 
+Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR 
+- Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF
+ - Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff
+    :type method: int
+    :returns: Point coordinates for points tracked to image 2 (arr), Point 
+coordinates for points back-tracked from image 2 to image 1 (arr), and SNR 
+measurements for the corresponding tracked point where the signal is the 
+magnitude of the displacement from p0 to p1, and the noise is the magnitude of 
+the displacement from p0r to p0 (arr)
     '''
     #Create empty outputs
     avercorr=[]
@@ -1310,17 +1237,19 @@ def seedCorners(im, mask, maxpoints, quality, mindist, min_features):
     '''Function to seed corner features using the Shi-Tomasi corner feature 
     detection method in OpenCV's goodFeaturesToTrack function. 
         
-    Variables
-    im (arr):                   Image for seeding corner points
-    mask (arr):                 Image mask to seed points in
-    maxpoints (int):            Maximum number of corner points to seed
-    quality (int):              Corner feature quality
-    mindist (int):              Minimum distance between seeded points                
-    min_features (int):         Minimum number of seeded points to track
-    
-    Returns
-    p0 (arr):                   Point coordinates for corner features seeded in 
-                                image
+    :param img: Image for seeding corner points
+    :type img: arr                 
+    :param mask: Mask array for points to be seeded
+    :type mask: arr
+    :param maxpoints: Maximum number of corners detected
+    :type maxpoints: int   
+    :param quality: Corner quality (between 0.0 and 1.0)
+    :type quality: int 
+    :param mindist: Minimum distance between corners
+    :type mindist: int 
+    :param min_features: Minimum number of seeded points to track
+    :type min_features: int
+    :returns: Point coordinates for corner features seeded in image (arr)
     '''    
     #Find corners of the first image. p0 is returned as an array of shape 
     #(n,1,2), where n is the number of features identified 
@@ -1344,18 +1273,20 @@ def seedGrid(dem, griddistance, projvars, mask):
     '''Define pixel grid at a specified grid distance, taking into 
     consideration the image size and image mask.
     
-    Input variables:
-    dem (ExplicitRaster):   DEM object.
-    griddistance (list):    The row and column spacing of the grid.
-    projvars (list):        Projection variables (camera location, camera pose,
-                            radial distortion coefficients, tangential 
-                            distortion coefficients, focal length, principal
-                            point, reference image path).
-    mask (bool):            Boolean denoting image mask
-    
-    Returns:
-    xyz (arr):              Grid point array in DEM space
-    uv (arr):               Grid points in 
+    :param dem: :class:'PyTrx.DEM.ExplicitRaster' DEM object
+    :type dem: arr          
+    :param griddistance: Grid spacing, defined by two values representing pixel 
+row and column spacing.
+    :type griddistance: list
+    :param projvars: Projection parameters (camera location, camera position, 
+radial distortion coefficients, tangential distortion coefficients, focal 
+length, camera centre, and reference image)
+    :type projvars: list         
+    :param mask: Mask array for masking DEM
+    :type mask: arr
+    :returns: Two arrays containing the grid point positions in the DEM 
+coordinate system (arr), and the grid point positions in the image coordinate 
+system (arr)
     '''
     #Get DEM z values
     demz = dem.getZ()
@@ -1431,15 +1362,16 @@ def readDEMmask(dem, img, invprojvars, demMaskPath=None):
     matching, where masked regions of the DEM are reassigned to 
     NaN using Numpy's ma.mask function.
     
-    Input variables:
-    dem (ExplicitRaster):       Input DEM object.
-    img (arr):                  List containing image mask points.
-    invprojvars (list):         Inverse projection variables (X,Y,Z,uv0).
-    demMaskPath (str):          Path to outputted mask file.
-    
-    Returns
-    demMask (arr):              Boolean visibility matrix (which is the same 
-                                size as the dem)
+    :param dem: :class:'PyTrx.DEM.ExplicitRaster' DEM object
+    :type dem: arr          
+    :param img: Image to initially define mask in
+    :type img: arr
+    :param invprojvars: Inverse projection variables [X,Y,Z,uv0]
+    :type invprojvars: list         
+    :param demMaskPath: File path to outputted mask file, default to None
+    :type demMaskPath: str, optional
+    :returns: A Boolean visibility matrix (which is the same dimensions as the 
+dem)
     '''    
     #Check if a DEM mask already exists, if not enter digitising
     if demMaskPath!=None:

@@ -1,49 +1,15 @@
+#PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+#
+#PyTrx is licensed under a MIT License.
+#
+#You should have received a copy of the license along with this
+#work. If not, see <https://choosealicense.com/licenses/mit/>.
+
 '''
-PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
-
-PyTrx is licensed under a MIT License.
-
-You should have received a copy of the license along with this
-work. If not, see <https://choosealicense.com/licenses/mit/>.
-
-
-PYTRX IMAGES MODULE
-
-This script is part of PyTrx, an object-oriented programme created for the 
-purpose of calculating real-world measurements from oblique images and 
-time-lapse image series.
-
-This is the Images module of PyTrx. This module contains the object-
-constructors and functions for:
-(1) Importing and handling image data, specifically RBG, one-band (R, B or G), 
-    and grayscale images 
-(2) Handling image sequences (i.e. a set of multiple images)
-
-Classes
-CamImage:                       A class to represent raw images and holds 
-                                information on image properties (image size, 
-                                exif data, bands for subsequent processing).
-ImageSequence:                  A class to model a raw collection of CamImage 
-                                objects.
-
-Key functions in CamImage
-getImageCorr:                   Return the image array that is corrected for 
-                                the specified camera matrix and distortion 
-                                parameters.
-getImageArray:                  Return the image as an array.
-                        
-Key functions in ImageSequence
-getImageArrNo:                  Get image array i from image sequence
-getImageObj:                    Get CamImage object i from image sequence
-getImages:                      Return image set (i.e. a sequence of CamImage 
-                                objects)
-getFileList:                    Return list of image file paths
-getLength:                      Return length of image set
-
-
-Key stand-alone functions
-enhanceImage:                   Change brightness and contrast of image using 
-                                phi and theta variables
+The Images module contains the object-constructors and functions for: (1) 
+Importing and handling image data, specifically RBG, one-band (R, B or G), and 
+grayscale images; and (2) Handling image sequences (i.e. a set of multiple 
+images).
 '''
 
 #Import packages
@@ -66,29 +32,24 @@ class CamImage(object):
     '''A class representing a raw single band (optical RGB or greyscale). This 
     CamImage object is used in subsequent timelapse analysis. The object 
     contains the image data, image path, image dimensions and timestamp 
-    (derived from the image Exif data, if available).
-        
+    (derived from the image Exif data, if available).       
     Optionally the user can specify whether the red, blue or green values 
     should be used, or whether the images should be converted to grey scale 
     which is the default. No image calibration is undertaken at this point.
-    
-    Args
-    imagePath:        The file path to a given image
-    band:             Specified image band to pass forward
-                      'r': red band
-                      'b': blue band
-                      'g': green band
-                      'l': grayscale (default)
-    equal:            Flag denoting whether histogram equalisation is 
-                      applied to images (histogram equalisation is applied 
-                      if True). Default is True
-                          
     The default grayscale band option ('l') applies an equalization filter 
     on the image whereas the RGB splits are raw RGB. This could be modified 
     to permit more sophisticated settings of RGB combinations and/or 
     filters with file reading.
-    '''
     
+    :param imagePath: The file path to a given image
+    :type imagePath: str
+    :param band: Specified image band to pass forward: 'r' - red band; 'b' - 
+blue band; 'g' - green band; and 'l' - grayscale. Default to 'l'
+    :type band: str
+    :param equal: Flag denoting whether histogram equalisation is applied to 
+images (histogram equalisation is applied if True). Default to True
+    :type equal: bool, optional
+    '''   
     def __init__(self, imagePath, band='l', equal=True):
         '''CamImage constructor to set image path, read in image data in the 
         specified band and access Exif data.         
@@ -179,7 +140,13 @@ class CamImage(object):
     
     def getImageCorr(self, cameraMatrix, distortP):
         '''Return the image array that is corrected for the specificied 
-        camera matrix and distortion parameters.'''
+        camera matrix and distortion parameters.
+        
+        :param cameraMatrix: Intrinsic camera matrix
+        :type cameraMatrix: arr
+        :param distortP: Lens distortion parameters
+        :type distortP: arr
+        :returns: Image corrected for image distortion (arr)'''
         #Get image array        
         if self._imageArray is None:
             self._readImageData()
@@ -210,7 +177,15 @@ class CamImage(object):
  
 
     def getImageEnhance(self, diff, phi, theta):
-        '''Return enhanced image using enhanceImage function.'''
+        '''Return enhanced image using :func:'PyTrx.Images.enhanceImg' function.
+        
+        :param diff:
+        :type diff: str
+        :param phi:
+        :type phi: int
+        :param theta:
+        :type theta:int
+        '''
         image = self.getImageArray()
         image1 = enhanceImage(image, diff, phi, theta)
         return image1
@@ -267,7 +242,10 @@ class CamImage(object):
         
     def changeBand(self,band):
         '''Change the band you want the image to represent ('r', 'b', 'g' or
-        'l').'''
+        'l')
+        :param band: Image band ('r', 'b', 'g', or 'l')
+        :type band: str
+        '''
         self._band=band.upper()
         self._readImageData()
         
@@ -329,26 +307,17 @@ class ImageSequence(object):
     '''A class to model a raw collection of CamImage objects, which can 
     subsequently be used for making photogrammetric measurements from.
       
-    Inputs:
-        imageList: The list of images, which can be passed in 3 ways:
-                   1) As a list of CamImage objects e.g.
-                   imageSet = ImageSet(["image1.JPG", "image2.JPG"])
-                   2) As a list of image paths e.g.
-                   imageSet = ImageSet([Image("image1.JPG"), 
-                              Image("image2.JPG")])
-                   imageSet = ImageSet([ImageObject1, ImageObject2])
-                   3) As a folder containing images e.g.
-                   imageSet = ImageSet("Folder/*")
-                   4) (To implement) A file containing the sequence
-                   of images to be processed
-        band:      Specified image band to pass forward
-                    'r': red band
-                    'b': blue band
-                    'g': green band
-                    'l': grayscale (default)
-        equal:     Flag denoting whether histogram equalisation is applied to 
-                   images (histogram equalisation is applied if True). Default
-                   is True.
+    :param imageList: The list of images, which can be passed in 3 ways: 1) As 
+a list of :class:'PyTrx.Image.CamImage' objects e.g. imageSet=ImageSet([ImageObject1, 
+ImageObject2]); 2) As a list of image paths e.g. 
+imageSet=ImageSet(["image1.JPG","image2.JPG"]); and 3) As a folder containing 
+images e.g. imageSet=ImageSet("Folder/*")
+    :type imageList: str
+    :param band: Image band ('r', 'b', 'g', or 'l'), default to 'l'
+    :type band: str, optional
+    :param equal: Flag denoting whether histogram equalisation is applied to 
+images (histogram equalisation is applied if True). Default to True
+    :type equal: bool, optional
     '''
     def __init__(self, imageList, band='L', equal=True):
         print('\n\nCONSTRUCTING IMAGE SEQUENCE')
@@ -395,7 +364,11 @@ class ImageSequence(object):
             
             
     def getImageArrNo(self,i):
-        '''Get image array i from image sequence.'''
+        '''Get image array i from image sequence
+        
+        :param i: Image number in sequence
+        :type i: int
+        :returns: Image array'''
         im=self._imageSet[i]
         arr=im.getImageArray()
         im.clearAll()
@@ -403,14 +376,18 @@ class ImageSequence(object):
 
     
     def getImageObj(self,i):
-        '''Get CamImage object i from image sequence.'''
+        '''Get :class:'PyTrx.Images.CamImage' object i from image sequence
+        
+        :param i: Image number in sequence
+        :type i: int
+        :returns: :class:'PyTrx.Images.CamImage' object '''
         imo=self._imageSet[i] 
         return imo
 
         
     def _loadImageStringSequence(self,imageList):
-        '''Function for generating an image set (of CamImage objects) from a 
-        list of images.'''       
+        '''Function for generating an image set (of :class:'PyTrx.Images.CamImage' 
+        objects) from a list of images'''       
         #Construct CamImage objects
         self._imageSet = []
         for imageStr in imageList:
@@ -454,25 +431,21 @@ def enhanceImage(img, diff, phi, theta):
     '''Change brightness and contrast of image using phi and theta 
     variables. Change phi and theta values accordingly.
     
-    Args
-    img (arr):                    Input image array for enhancement.
-    
-    Returns
-    img1 (arr):                   Enhanced image.
-    
-    Enhancement parameters (self._enhance):
-    diff:                   Inputted as either 'light or 'dark', signifying 
-                            the intensity of the image pixels. 'light' 
-                            increases the intensity such that dark pixels 
-                            become much brighter and bright pixels become 
-                            slightly brighter. 
-                            'dark' decreases the intensity such that dark 
-                            pixels become much darker and bright pixels 
-                            become slightly darker.
-    phi:                    Defines the intensity of all pixel values.
-    theta:                  Defines the number of "colours" in the image, 
-                            e.g. 3 signifies that all the pixels will be 
-                            grouped into one of three pixel values.
+    :param img: Input image array for enhancement
+    :type img: arr
+    :param diff: Inputted as either 'light or 'dark', signifying the intensity 
+of the image pixels. 'light' increases the intensity such that dark pixels 
+become much brighter and bright pixels become slightly brighter. 'dark' 
+decreases the intensity such that dark pixels become much darker and bright 
+pixels become slightly darker.
+    :type diff: str
+    :param phi: Defines the intensity of all pixel values
+    :type phi: int
+    :param theta: Defines the number of "colours" in the image, e.g. 3 
+signifies that all the pixels will be grouped into one of three pixel values
+    :type theta:int               .
+    :returns img1: Enhanced image.
+    :rtype: arr
     '''                          
     #Define maximum pixel intensity
     maxIntensity = 255.0 #depends on dtype of image data 
