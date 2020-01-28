@@ -1,49 +1,14 @@
+#PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
+
+#PyTrx is licensed under a MIT License.
+
+#You should have received a copy of the license along with this
+#work. If not, see <https://choosealicense.com/licenses/mit/>.
+
 '''
-PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
-
-PyTrx is licensed under a MIT License.
-
-You should have received a copy of the license along with this
-work. If not, see <https://choosealicense.com/licenses/mit/>.
-
-
-PYTRX UTILITIES MODULE
-
-This script is part of PyTrx, an object-oriented programme created for the 
-purpose of calculating real-world measurements from oblique images and 
-time-lapse image series.
-
-This module, Utilities, contains stand-alone functions needed for simple 
+The Utilities module contains stand-alone functions needed for simple 
 plotting and interpolation. These merely serve as examples and it is highly 
 encouraged to adapt these functions for visualising datasets.
-
-Functions available in Utilities
-plotGCPs:                       Plot GCPs onto a reference image, with 
-                                corresponding xyz points plotted onto DEM
-plotPrinciplePoint:             Plot principle point on image
-plotCalib:                      Plot image corrected for distortion (and 
-                                uncorrected image for comparison)
-plotAreaPX:                     Plot figure with image overlayed with detected
-                                areas
-plotLinePX:                     Plot figure with image overlayed with detected
-                                lines
-plotVeloPX:                     Plot figure with image overlayed with pixel 
-                                velocities. UV data are depicted as the uv 
-                                point in img0 and the corresponding pixel 
-                                velocity as a proportional arrow (computed 
-                                using the arrowplot function)
-plotAreaXYZ:                    Plot figure with image overlayed with xyz 
-                                coordinates representing detected areas
-plotLineXYZ:                    Plot figure with image overlayed with xyz 
-                                coordinates representing detected lines
-plotVeloXYZ:                    Plot figure with image overlayed with xyz 
-                                velocities. XYZ data are depicted as the xyz 
-                                point in img0 and the corresponding velocity as 
-                                a proportional arrow (computed using the 
-                                arrowplot function)
-plotInterpolate:                Plot the results of the velocity 
-                                interpolation process for a particular image 
-                                pair
 '''
 
 #Import packages
@@ -57,6 +22,18 @@ import cv2
 
 def plotGCPs(gcps, img, imn, dem, camloc, extent=None):
     '''Function to show the ground control points, on the image and DEM.
+    
+    :param gcps: GCPs
+    :type gcps: arr
+    :param img: Image array
+    :type img: arr
+    :param imn: Image name 
+    :type imn: str 
+    :param dem: DEM object
+    :type dem: :class:`PyTrx.DEM.ExplicitRaster`
+    :param extent: DEM extent indicator, default to None
+    :type extent: list, optional
+    :returns: A figure with the plotted uv and xyz GCPs
     '''       
     #Get GCPs      
     worldgcp=gcps[0]
@@ -111,10 +88,17 @@ def plotGCPs(gcps, img, imn, dem, camloc, extent=None):
  
     
 def plotPrincipalPoint(camcen, img, imn):
-    '''Function to show the principal point on the image, along with the 
+    """Function to show the principal point on the image, along with the 
     GCPs.
-    '''
- 
+
+    :param camcen: Principal point coordinates
+    :type camcen: list
+    :param img: Image array
+    :type img: arr
+    :param imn: Image name 
+    :type imn: str 
+    :returns: A figure with the prinicipal point plotted onto the image
+    """
     #Get the camera centre from the intrinsic matrix 
     ppx = camcen[0] 
     ppy = camcen[1]       
@@ -134,12 +118,21 @@ def plotPrincipalPoint(camcen, img, imn):
     
  
 def plotCalib(matrix, distortion, img, imn):
-    '''Function to show camera calibration. Two images are plotted, the 
+    """Function to show camera calibration. Two images are plotted, the 
     first with the original input image and the second with the calibrated
     image. This calibrated image is corrected for distortion using the 
-    distortion parameters held in the CamCalib object.
-    '''
-
+    distortion parameters held in the :class:`PyTrx.CamEnv.CamCalib` object.
+    
+    :param matrix: Camera matrix
+    :type matrix: arr
+    :param distortion: Distortion cofficients
+    :type distortion: arr
+    :param img: Image array
+    :type img: arr
+    :param imn: Image name 
+    :type imn: str 
+    :returns: A figure of an uncorred image and corrected image
+    """
     #Calculate optimal camera matrix 
     h = int(img.shape[0])
     w = int(img.shape[1])
@@ -165,10 +158,22 @@ def plotCalib(matrix, distortion, img, imn):
 
 
 def plotResiduals(img, ims, gcp1, gcp2, gcp3):
-    '''Function to plot sets of points to show offsets. This is 
+    """Function to plot sets of points to show offsets. This is 
     commonly used for inspecting differences between image GCPs and projected 
-    GCPs, e.g. within the optimiseCamera function in CamEnv.
-    '''
+    GCPs, e.g. within the optimiseCamera function.
+        
+    :param img: Image array
+    :type img: arr
+    :param ims: Image dimension (height, width)
+    :type ims: list
+    :param gcp1: Array with uv positions of image gcps
+    :type gcp1: arr
+    :param gcp2: Array with initial uv positions of projected gcps
+    :type gcp2: arr
+    :param gcp3: Array with optimised uv positions of projected gcps
+    :type gcp3: arr    
+    :returns: A figure of an image, plotted with uv gcps, initial projected gcps, and optimised gcps    
+    """ 
     #Plot image                
     fig, (ax1) = plt.subplots(1)
     fig.canvas.set_window_title('Average residual difference: ' + 
@@ -194,16 +199,18 @@ def plotResiduals(img, ims, gcp1, gcp2, gcp3):
         
     
 def plotAreaPX(uv, img, show=True, save=None):
-    '''Plot figure with image overlayed with pixel features (either areas or 
-    line features).
-    
-    Variables
-    uv (arr):           Input uv coordinates for plotting over image
-    img (arr):          Image array
-    show (bool):        Flag to denote whether the figure is shown
-    save (str):         Destination file to save figure to    
-    '''
-        
+    """Plot figure with image overlayed with pixel area features. 
+              
+    :param uv: Input uv coordinates for plotting over image
+    :type uv: arr          
+    :param img: Image array
+    :type img: arr
+    :param show: Flag to denote whether the figure is shown, defatuls to True
+    :type show: bool, optional 
+    :param save: Destination file to save figure to, defaults to None
+    :type save: str, optional
+    :returns: A figure with plotted area measurements overlaid onto a given image    
+    """          
     #Get image size
     imsz = img.shape
           
@@ -250,16 +257,18 @@ def plotAreaPX(uv, img, show=True, save=None):
 
 
 def plotLinePX(uv, img, show=True, save=None):
-    '''Plot figure with image overlayed with pixel features (either areas or 
-    line features).
+    """Plot figure with image overlayed with pixel line features.
     
-    Variables
-    uv (arr):           Input uv coordinates for plotting over image
-    img (arr):          Image array
-    show (bool):        Flag to denote whether the figure is shown
-    save (str):         Destination file to save figure to    
-    '''
-        
+    :param uv: Input uv coordinates for plotting over image
+    :type uv: arr          
+    :param img: Image array
+    :type img: arr
+    :param show: Flag to denote whether the figure is shown, defatuls to True
+    :type show: bool, optional 
+    :param save: Destination file to save figure to, defaults to None
+    :type save: str, optional
+    :returns: A figure with plotted line measurements overlaid onto a given image    
+    """         
     #Get image size
     imsz = img.shape
           
@@ -291,19 +300,24 @@ def plotLinePX(uv, img, show=True, save=None):
     
  
 def plotVeloPX(uvvel, uv0, uv1, img, show=True, save=None):
-    '''Plot figure with image overlayed with pixel velocities. UV data are
+    """Plot figure with image overlayed with pixel velocities. UV data are
     depicted as the uv point in img0 and the corresponding pixel velocity as a 
     proportional arrow (computed using the arrowplot function).
-    
-    Variables    
-    uvvel (arr):        Input pixel velocities
-    uv0 (arr):          Coordinates (u,v) for points in first image
-    uv1 (arr):          Coordinates (u,v) for points in second image
-    img (arr):          Image array
-    show (bool):        Flag to denote whether the figure is shown
-    save (str):         Destination file to save figure to  
-    '''
-        
+       
+    :param uvvel: Input pixel velocities
+    :type uvvel: arr        
+    :param uv0: Coordinates (u,v) for points in first image
+    :type uv0: arr          
+    :param uv1: Coordinates (u,v) for points in second image
+    :type uv1: arr          
+    :param img: Image array
+    :type img: arr
+    :param show: Flag to denote whether the figure is shown, defatuls to True
+    :type show: bool, optional 
+    :param save: Destination file to save figure to, defaults to None
+    :type save: str, optional
+    :returns: A figure with plotted point velocities overlaid onto a given image    
+    """           
     #Get image size
     imsz = img.shape
           
@@ -343,16 +357,19 @@ def plotVeloPX(uvvel, uv0, uv1, img, show=True, save=None):
     
        
 def plotAreaXYZ(xyz, dem, show=True, save=None):    
-    '''Plot figure with image overlayed with xyz coordinates representing 
+    """Plot figure with image overlayed with xyz coordinates representing 
     either areas or line features.
     
-    Variables
-    xyz (arr):              Input xyz coordinates for plotting
-    dem (ExplicitRaster):   Underlying DEM for plotting over
-    show (bool):            Flag to denote whether the figure is shown
-    save (str):             Destination file to save figure to 
-    '''                           
-
+    :param xyz: Input xyz coordinates for plotting
+    :type xyz: arr     
+    :param dem: Underlying DEM for plotting over
+    :type dem: :class:`PyTrx.DEM.ExplicitRaster`
+    :param show: Flag to denote whether the figure is shown, defatuls to True
+    :type show: bool, optional 
+    :param save: Destination file to save figure to, defaults to None
+    :type save: str, optional
+    :returns: A figure with plotted areas overlaid onto a given DEM    
+    """                           
     #Set-up plot
     fig, (ax1) = plt.subplots(1, figsize=(20,10))
     ax1.set_xticks([])
@@ -393,16 +410,19 @@ def plotAreaXYZ(xyz, dem, show=True, save=None):
 
 
 def plotLineXYZ(xyz, dem, show=True, save=None):    
-    '''Plot figure with image overlayed with xyz coordinates representing 
+    """Plot figure with image overlayed with xyz coordinates representing 
     either areas or line features.
     
-    Variables
-    xyz (arr):              Input xyz coordinates for plotting
-    dem (ExplicitRaster):   Underlying DEM for plotting over
-    show (bool):            Flag to denote whether the figure is shown
-    save (str):             Destination file to save figure to 
-    '''                           
-
+    :param xyz: Input xyz coordinates for plotting
+    :type xyz: arr  
+    :param dem: Underlying DEM for plotting over
+    :type dem: :class:`PyTrx.DEM.ExplicitRaster`
+    :param show: Flag to denote whether the figure is shown, defatuls to True
+    :type show: bool, optional 
+    :param save: Destination file to save figure to, defaults to None
+    :type save: str, optional
+    :returns: A figure with plotted lines overlaid onto a given DEM    
+    """                                 
     #Set-up plot
     fig, (ax1) = plt.subplots(1, figsize=(20,10))
     ax1.set_xticks([])
@@ -436,19 +456,24 @@ def plotLineXYZ(xyz, dem, show=True, save=None):
         
 
 def plotVeloXYZ(xyzvel, xyz0, xyz1, dem, show=True, save=None):
-    '''Plot figure with image overlayed with xyz velocities. XYZ data are
+    """Plot figure with image overlayed with xyz velocities. XYZ data are
     depicted as the xyz point in img0 and the corresponding velocity as a 
     proportional arrow (computed using the arrowplot function).
     
-    Variables   
-    xyzvel (arr):           Input xyz velocities
-    xyz0 (arr):             Coordinates (x,y) for points in first image
-    xyz1 (arr):             Coordinates (x,y) for points in second image
-    dem (ExplicitRaster):   Underlying DEM for plotting over
-    show (bool):            Flag to denote whether the figure is shown
-    save (str):             Destination file to save figure to 
-    '''                           
-
+    :param xyzvel: Input xyz velocities 
+    :type xyzvel: arr           
+    :param xyz0: Coordinates (x,y) for points in first image
+    :type xyz0: arr
+    :param xyz1: Coordinates (x,y) for points in second image 
+    :type xyz1: arr
+    :param dem: Underlying DEM for plotting over
+    :type dem: :class:`PyTrx.DEM.ExplicitRaster`
+    :param show: Flag to denote whether the figure is shown, defatuls to True
+    :type show: bool, optional 
+    :param save: Destination file to save figure to, defaults to None
+    :type save: str, optional
+    :returns: A figure with plotted points denoting velocities, overlaid onto a given DEM                          
+    """  
     #Set-up plot
     fig, (ax1) = plt.subplots(1, figsize=(20,10))
     ax1.set_xticks([])
@@ -492,17 +517,21 @@ def plotVeloXYZ(xyzvel, xyz0, xyz1, dem, show=True, save=None):
         
 
 def plotInterpolate(grid, pointextent, dem, show=True, save=None):
-    '''Function to plot the results of the velocity interpolation process for 
+    """Function to plot the results of the velocity interpolation process for 
     a particular image pair.
-
-    Variables
-    grid (arr):             Numpy grid. It is recommended that this is 
-                            constructed using the interpolateHelper function
-    pointextent (list):     Grid extent
-    show (bool):            Flag to denote whether the figure is shown
-    dem (ExplicitRaster):   Underlying DEM for plotting over
-    save (str):             Destination file to save figure to
-    ''' 
+    
+    :param grid: Numpy grid. It is recommended that this is constructed using the interpolateHelper function
+    :type grid: arr
+    :param pointextent: Grid extent
+    :type pointextent: list
+    :param dem: Underlying DEM for plotting over
+    :type dem: :class:`PyTrx.DEM.ExplicitRaster`
+    :param show: Flag to denote whether the figure is shown, defatuls to True
+    :type show: bool, optional 
+    :param save: Destination file to save figure to, defaults to None
+    :type save: str, optional
+    :returns: A figure with interpolated velocity results overlaid onto a given DEM
+    """  
     #Set-up plot
     fig, (ax1) = plt.subplots(1, figsize=(20,10))
     ax1.set_xticks([])
@@ -539,23 +568,22 @@ def plotInterpolate(grid, pointextent, dem, show=True, save=None):
     
 
 def interpolateHelper(xyzvel, xyz0, xyz1, method='linear'):
-    '''Function to interpolate a point dataset. This uses functions of 
+    """Function to interpolate a point dataset. This uses functions of 
     the SciPy package to set up a grid (grid) and then interpolate using a
-    linear interpolation method (griddata).
+    linear interpolation method (griddata). Methods are those compatible with 
+    SciPy's interpolate.griddata function: 'nearest', 'cubic' and 'linear'.
     
-    Methods are those compatible with SciPy's interpolate.griddata function: 
-    "nearest", "cubic" and "linear"
-    
-    Variables
-    xyzvel (arr):           Input xyz velocities
-    xyz0 (arr):             Coordinates (x,y) for points in first image
-    xyz1 (arr):             Coordinates (x,y) for points in second image
-    method (str):           Interpolation method ("nearest"/"cubic"/"linear")
-    
-    Returns
-    grid (arr):             Interpolated grid 
-    pointsextent (list):    Grid extent
-    '''                                             
+    :param xxyzvel: Input xyz velocities
+    :type xyzvel: arr
+    :param xyz0: Coordinates (x,y) for points in first image
+    :type xyz0: arr
+    :param xyz1: Coordinates (x,y) for points in second image
+    :type xyz1: arr
+    :param method: Interpolation method, defaults to 'linear'
+    :type method: str, optional
+    :returns: An interpolated grid of points and grid extent
+    :rtype: list
+    """            
     #Create empty lists for xyz information without NaNs
     velo=[]  
     x1=[]
@@ -608,24 +636,27 @@ def interpolateHelper(xyzvel, xyz0, xyz1, method='linear'):
            
     
 def arrowplot(xst, yst, xend, yend, scale=1.0, headangle=15, headscale=0.2):    
-    '''Plot arrows to denote the direction and magnitude of the displacement. 
+    """Plot arrows to denote the direction and magnitude of the displacement. 
     Direction is indicated by the bearing of the arrow, and the magnitude is 
     indicated by the length of the arrow.
     
-    Variables
-    x0 (arr):           X coordinates for pt0
-    y0 (arr):           Y coordinates for pt0
-    x1 (arr):           X coordinates for pt1
-    y1 (arr):           Y coordinates for pt1
-    scale (int):        Arrow scale
-    headangle (int):    Plotting angle
-    headscale (int):    Arrow head scale
-    
-    Returns
-    xs (arr):           x coordinates for arrowplot
-    ys (arr):           y coordinates for arrowplot
-    '''
-    
+    :param x0: X coordinates for pt0
+    :type x0: arr
+    :param y0: Y coordinates for pt0
+    :type y0: arr
+    :param x1: X coordinates for pt1
+    :type x1: arr
+    :param y1: Y coordinates for pt1
+    :type y1: arr
+    :param scale: Arrow scale, defaults to 1.0
+    :type scale: int, optional
+    :param headangle: Plotting angle, defaults to 15
+    :type headangle: int, optional
+    :param headscale: Arrow head scale, defaults to 0.2
+    :type headscale: int, optional
+    :returns: Arrow plots as two arrays denoting x and y coordinates 
+    :rtype: arr
+    """    
     #Define plotting angle
     angle=math.pi*headangle/180.
 

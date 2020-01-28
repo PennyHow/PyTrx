@@ -11,19 +11,6 @@ PyTrx documentation
    :caption: Contents:
 
    Quickstart
-<<<<<<< HEAD
-=======
-   Area
-   CamEnv
-   DEM
-   FileHandler
-   Images
-   Line
-   Utilities
-   Velocity
-
->>>>>>> master
-
 
 
 Indices and tables

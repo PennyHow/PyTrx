@@ -1,0 +1,814 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>PyTrx.Utilities &#8212; PyTrx 1.1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PyTrx 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for PyTrx.Utilities</h1><div class="highlight"><pre>
+<span></span><span class="c1">#PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie</span>
+
+<span class="c1">#PyTrx is licensed under a MIT License.</span>
+
+<span class="c1">#You should have received a copy of the license along with this</span>
+<span class="c1">#work. If not, see &lt;https://choosealicense.com/licenses/mit/&gt;.</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">The Utilities module contains stand-alone functions needed for simple </span>
+<span class="sd">plotting and interpolation. These merely serve as examples and it is highly </span>
+<span class="sd">encouraged to adapt these functions for visualising datasets.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">#Import packages</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">griddata</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+
+<span class="c1">#------------------------------------------------------------------------------  </span>
+
+<div class="viewcode-block" id="plotGCPs"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotGCPs">[docs]</a><span class="k">def</span> <span class="nf">plotGCPs</span><span class="p">(</span><span class="n">gcps</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">camloc</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to show the ground control points, on the image and DEM.</span>
+<span class="sd">    </span>
+<span class="sd">    :param gcps: GCPs</span>
+<span class="sd">    :type gcps: arr</span>
+<span class="sd">    :param img: Image array</span>
+<span class="sd">    :type img: arr</span>
+<span class="sd">    :param imn: Image name </span>
+<span class="sd">    :type imn: str </span>
+<span class="sd">    :param dem: DEM object</span>
+<span class="sd">    :type dem: :class:`PyTrx.DEM.ExplicitRaster`</span>
+<span class="sd">    :param extent: DEM extent indicator, default to None</span>
+<span class="sd">    :type extent: list, optional</span>
+<span class="sd">    :returns: A figure with the plotted uv and xyz GCPs</span>
+<span class="sd">    &#39;&#39;&#39;</span>       
+    <span class="c1">#Get GCPs      </span>
+    <span class="n">worldgcp</span><span class="o">=</span><span class="n">gcps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">imgcp</span> <span class="o">=</span> <span class="n">gcps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    
+    <span class="c1">#Get DEM and DEM extent (if specified)</span>
+    <span class="n">demex</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">getExtent</span><span class="p">()</span>
+    <span class="n">xscale</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">getCols</span><span class="p">()</span><span class="o">/</span><span class="p">(</span><span class="n">demex</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">demex</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">yscale</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">getRows</span><span class="p">()</span><span class="o">/</span><span class="p">(</span><span class="n">demex</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="n">demex</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    
+    <span class="k">if</span> <span class="n">extent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">xmin</span><span class="o">=</span><span class="n">extent</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">xmax</span><span class="o">=</span><span class="n">extent</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">ymin</span><span class="o">=</span><span class="n">extent</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">ymax</span><span class="o">=</span><span class="n">extent</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+            
+        <span class="n">xdmin</span><span class="o">=</span><span class="p">(</span><span class="n">xmin</span><span class="o">-</span><span class="n">demex</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">xscale</span>
+        <span class="n">xdmax</span><span class="o">=</span><span class="p">((</span><span class="n">xmax</span><span class="o">-</span><span class="n">demex</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">xscale</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">ydmin</span><span class="o">=</span><span class="p">(</span><span class="n">ymin</span><span class="o">-</span><span class="n">demex</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="n">yscale</span>
+        <span class="n">ydmax</span><span class="o">=</span><span class="p">((</span><span class="n">ymax</span><span class="o">-</span><span class="n">demex</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="n">yscale</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">demred</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">xdmin</span><span class="p">,</span><span class="n">xdmax</span><span class="p">,</span><span class="n">ydmin</span><span class="p">,</span><span class="n">ydmax</span><span class="p">)</span>
+        <span class="n">lims</span> <span class="o">=</span> <span class="n">demred</span><span class="o">.</span><span class="n">getExtent</span><span class="p">()</span>
+        
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">xdmin</span><span class="o">=</span><span class="p">(</span><span class="n">demex</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">demex</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">xscale</span>
+        <span class="n">xdmax</span><span class="o">=</span><span class="p">((</span><span class="n">demex</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">demex</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span><span class="n">xscale</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">ydmin</span><span class="o">=</span><span class="p">(</span><span class="n">demex</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">-</span><span class="n">demex</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="n">yscale</span>
+        <span class="n">ydmax</span><span class="o">=</span><span class="p">((</span><span class="n">demex</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">-</span><span class="n">demex</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span><span class="o">*</span><span class="n">yscale</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">demred</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">subset</span><span class="p">(</span><span class="n">xdmin</span><span class="p">,</span><span class="n">xdmax</span><span class="p">,</span><span class="n">ydmin</span><span class="p">,</span><span class="n">ydmax</span><span class="p">)</span>
+        <span class="n">lims</span> <span class="o">=</span> <span class="n">demred</span><span class="o">.</span><span class="n">getExtent</span><span class="p">()</span> 
+    
+    <span class="c1">#Get DEM z values for plotting</span>
+    <span class="n">demred</span><span class="o">=</span><span class="n">demred</span><span class="o">.</span><span class="n">getZ</span><span class="p">()</span>
+    
+    <span class="c1">#Plot image points    </span>
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span><span class="n">ax2</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;GCP locations of &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">imn</span><span class="p">))</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+              <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">0</span><span class="p">])</span>  
+    <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">imgcp</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">imgcp</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+    
+    <span class="c1">#Plot world points</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">locator_params</span><span class="p">(</span><span class="n">axis</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="n">lims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">lims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">lims</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">lims</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">demred</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> 
+               <span class="n">extent</span><span class="o">=</span><span class="p">[</span><span class="n">lims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">lims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">lims</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">lims</span><span class="p">[</span><span class="mi">3</span><span class="p">]],</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">worldgcp</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">worldgcp</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span>
+    <span class="n">ax2</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">camloc</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">camloc</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+<span class="c1">#    plt.close()</span>
+ 
+    
+<div class="viewcode-block" id="plotPrincipalPoint"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotPrincipalPoint">[docs]</a><span class="k">def</span> <span class="nf">plotPrincipalPoint</span><span class="p">(</span><span class="n">camcen</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function to show the principal point on the image, along with the </span>
+<span class="sd">    GCPs.</span>
+
+<span class="sd">    :param camcen: Principal point coordinates</span>
+<span class="sd">    :type camcen: list</span>
+<span class="sd">    :param img: Image array</span>
+<span class="sd">    :type img: arr</span>
+<span class="sd">    :param imn: Image name </span>
+<span class="sd">    :type imn: str </span>
+<span class="sd">    :returns: A figure with the prinicipal point plotted onto the image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#Get the camera centre from the intrinsic matrix </span>
+    <span class="n">ppx</span> <span class="o">=</span> <span class="n">camcen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+    <span class="n">ppy</span> <span class="o">=</span> <span class="n">camcen</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>       
+     
+    <span class="c1">#Plot image points</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;Principal Point of &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">imn</span><span class="p">))</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+              <span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">0</span><span class="p">])</span>        
+
+    <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">ppx</span><span class="p">,</span> <span class="n">ppy</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;yellow&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">axhline</span><span class="p">(</span><span class="n">y</span><span class="o">=</span><span class="n">ppy</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">axvline</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">ppx</span><span class="p">)</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span> </div>
+<span class="c1">#    plt.close()</span>
+    
+ 
+<div class="viewcode-block" id="plotCalib"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotCalib">[docs]</a><span class="k">def</span> <span class="nf">plotCalib</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">distortion</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function to show camera calibration. Two images are plotted, the </span>
+<span class="sd">    first with the original input image and the second with the calibrated</span>
+<span class="sd">    image. This calibrated image is corrected for distortion using the </span>
+<span class="sd">    distortion parameters held in the :class:`PyTrx.CamEnv.CamCalib` object.</span>
+<span class="sd">    </span>
+<span class="sd">    :param matrix: Camera matrix</span>
+<span class="sd">    :type matrix: arr</span>
+<span class="sd">    :param distortion: Distortion cofficients</span>
+<span class="sd">    :type distortion: arr</span>
+<span class="sd">    :param img: Image array</span>
+<span class="sd">    :type img: arr</span>
+<span class="sd">    :param imn: Image name </span>
+<span class="sd">    :type imn: str </span>
+<span class="sd">    :returns: A figure of an uncorred image and corrected image</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1">#Calculate optimal camera matrix </span>
+    <span class="n">h</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">w</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">img</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">newMat</span><span class="p">,</span> <span class="n">roi</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">getOptimalNewCameraMatrix</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">distortion</span><span class="p">,</span> 
+                                                <span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">h</span><span class="p">),</span> <span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="n">w</span><span class="p">,</span><span class="n">h</span><span class="p">))</span>
+
+    <span class="c1">#Correct image for distortion                                                </span>
+    <span class="n">corr_image</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">undistort</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">matrix</span><span class="p">,</span> 
+                               <span class="n">distortion</span><span class="p">,</span> <span class="n">newCameraMatrix</span><span class="o">=</span><span class="n">newMat</span><span class="p">)</span>
+   
+    
+    <span class="c1">#Plot uncorrected and corrected images                         </span>
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">,</span><span class="n">ax2</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;Calibration output of &#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">imn</span><span class="p">))</span>
+    <span class="n">implot1</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>
+    <span class="n">implot1</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>    
+    <span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">implot2</span> <span class="o">=</span> <span class="n">ax2</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">corr_image</span><span class="p">)</span>        
+    <span class="n">implot2</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>    
+    <span class="n">ax2</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">w</span><span class="p">,</span><span class="n">h</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>    
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+<span class="c1">#    plt.close()</span>
+
+
+<div class="viewcode-block" id="plotResiduals"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotResiduals">[docs]</a><span class="k">def</span> <span class="nf">plotResiduals</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">ims</span><span class="p">,</span> <span class="n">gcp1</span><span class="p">,</span> <span class="n">gcp2</span><span class="p">,</span> <span class="n">gcp3</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function to plot sets of points to show offsets. This is </span>
+<span class="sd">    commonly used for inspecting differences between image GCPs and projected </span>
+<span class="sd">    GCPs, e.g. within the optimiseCamera function.</span>
+<span class="sd">        </span>
+<span class="sd">    :param img: Image array</span>
+<span class="sd">    :type img: arr</span>
+<span class="sd">    :param ims: Image dimension (height, width)</span>
+<span class="sd">    :type ims: list</span>
+<span class="sd">    :param gcp1: Array with uv positions of image gcps</span>
+<span class="sd">    :type gcp1: arr</span>
+<span class="sd">    :param gcp2: Array with initial uv positions of projected gcps</span>
+<span class="sd">    :type gcp2: arr</span>
+<span class="sd">    :param gcp3: Array with optimised uv positions of projected gcps</span>
+<span class="sd">    :type gcp3: arr    </span>
+<span class="sd">    :returns: A figure of an image, plotted with uv gcps, initial projected gcps, and optimised gcps    </span>
+<span class="sd">    &quot;&quot;&quot;</span> 
+    <span class="c1">#Plot image                </span>
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;Average residual difference: &#39;</span> <span class="o">+</span> 
+                                <span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">gcp3</span><span class="o">-</span><span class="n">gcp2</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; px&#39;</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">ims</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">ims</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+    
+    <span class="c1">#Plot UV GCPs</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">gcp1</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">gcp1</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> 
+                <span class="n">label</span><span class="o">=</span><span class="s1">&#39;UV&#39;</span><span class="p">)</span>
+    
+    <span class="c1">#Plot projected XYZ GCPs</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">gcp2</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">gcp2</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;green&#39;</span><span class="p">,</span> 
+                <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Projected XYZ (original)&#39;</span><span class="p">)</span>
+
+    <span class="c1">#Plot optimised XYZ GCPs if given</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">gcp3</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">gcp3</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> 
+                <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Projected XYZ (optimised)&#39;</span><span class="p">)</span>
+    
+    <span class="c1">#Add legend and show plot</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>        </div>
+        
+    
+<div class="viewcode-block" id="plotAreaPX"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotAreaPX">[docs]</a><span class="k">def</span> <span class="nf">plotAreaPX</span><span class="p">(</span><span class="n">uv</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot figure with image overlayed with pixel area features. </span>
+<span class="sd">              </span>
+<span class="sd">    :param uv: Input uv coordinates for plotting over image</span>
+<span class="sd">    :type uv: arr          </span>
+<span class="sd">    :param img: Image array</span>
+<span class="sd">    :type img: arr</span>
+<span class="sd">    :param show: Flag to denote whether the figure is shown, defatuls to True</span>
+<span class="sd">    :type show: bool, optional </span>
+<span class="sd">    :param save: Destination file to save figure to, defaults to None</span>
+<span class="sd">    :type save: str, optional</span>
+<span class="sd">    :returns: A figure with plotted area measurements overlaid onto a given image    </span>
+<span class="sd">    &quot;&quot;&quot;</span>          
+    <span class="c1">#Get image size</span>
+    <span class="n">imsz</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span>
+          
+    <span class="c1">#Create image plotting window</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+    
+    <span class="c1">#Plot image</span>
+    <span class="n">implot</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>        
+    <span class="n">implot</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>    
+    <span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">imsz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">imsz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    
+    <span class="c1">#Set window name</span>
+    <span class="k">if</span> <span class="n">save</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;UV output: &#39;</span> <span class="o">+</span> <span class="n">save</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;UV output&#39;</span><span class="p">)</span>
+    
+    <span class="c1">#Extract xy data from features               </span>
+    <span class="k">for</span> <span class="n">shp</span> <span class="ow">in</span> <span class="n">uv</span><span class="p">:</span> 
+        <span class="n">xl</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">yl</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">shp</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">xl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">yl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">pt</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                <span class="n">xl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                <span class="n">yl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Unrecognised point structure for plotting&#39;</span><span class="p">)</span>
+                <span class="k">pass</span>
+            
+        <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xl</span><span class="p">,</span> <span class="n">yl</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;#FFFF33&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> 
+    
+    <span class="c1">#Save figure</span>
+    <span class="k">if</span> <span class="n">save</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span> 
+    
+    <span class="c1">#Show figure    </span>
+    <span class="k">if</span> <span class="n">show</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>    </div>
+
+
+<div class="viewcode-block" id="plotLinePX"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotLinePX">[docs]</a><span class="k">def</span> <span class="nf">plotLinePX</span><span class="p">(</span><span class="n">uv</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot figure with image overlayed with pixel line features.</span>
+<span class="sd">    </span>
+<span class="sd">    :param uv: Input uv coordinates for plotting over image</span>
+<span class="sd">    :type uv: arr          </span>
+<span class="sd">    :param img: Image array</span>
+<span class="sd">    :type img: arr</span>
+<span class="sd">    :param show: Flag to denote whether the figure is shown, defatuls to True</span>
+<span class="sd">    :type show: bool, optional </span>
+<span class="sd">    :param save: Destination file to save figure to, defaults to None</span>
+<span class="sd">    :type save: str, optional</span>
+<span class="sd">    :returns: A figure with plotted line measurements overlaid onto a given image    </span>
+<span class="sd">    &quot;&quot;&quot;</span>         
+    <span class="c1">#Get image size</span>
+    <span class="n">imsz</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span>
+          
+    <span class="c1">#Create image plotting window</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+    
+    <span class="c1">#Plot image</span>
+    <span class="n">implot</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>        
+    <span class="n">implot</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>    
+    <span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">imsz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">imsz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    
+    <span class="c1">#Set window name</span>
+    <span class="k">if</span> <span class="n">save</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;UV output: &#39;</span> <span class="o">+</span> <span class="n">save</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;UV output&#39;</span><span class="p">)</span>
+                   
+    <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">uv</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">uv</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;#FFFF33&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> 
+    
+    <span class="c1">#Save figure</span>
+    <span class="k">if</span> <span class="n">save</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span> 
+    
+    <span class="c1">#Show figure    </span>
+    <span class="k">if</span> <span class="n">show</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>    </div>
+    
+ 
+<div class="viewcode-block" id="plotVeloPX"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotVeloPX">[docs]</a><span class="k">def</span> <span class="nf">plotVeloPX</span><span class="p">(</span><span class="n">uvvel</span><span class="p">,</span> <span class="n">uv0</span><span class="p">,</span> <span class="n">uv1</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot figure with image overlayed with pixel velocities. UV data are</span>
+<span class="sd">    depicted as the uv point in img0 and the corresponding pixel velocity as a </span>
+<span class="sd">    proportional arrow (computed using the arrowplot function).</span>
+<span class="sd">       </span>
+<span class="sd">    :param uvvel: Input pixel velocities</span>
+<span class="sd">    :type uvvel: arr        </span>
+<span class="sd">    :param uv0: Coordinates (u,v) for points in first image</span>
+<span class="sd">    :type uv0: arr          </span>
+<span class="sd">    :param uv1: Coordinates (u,v) for points in second image</span>
+<span class="sd">    :type uv1: arr          </span>
+<span class="sd">    :param img: Image array</span>
+<span class="sd">    :type img: arr</span>
+<span class="sd">    :param show: Flag to denote whether the figure is shown, defatuls to True</span>
+<span class="sd">    :type show: bool, optional </span>
+<span class="sd">    :param save: Destination file to save figure to, defaults to None</span>
+<span class="sd">    :type save: str, optional</span>
+<span class="sd">    :returns: A figure with plotted point velocities overlaid onto a given image    </span>
+<span class="sd">    &quot;&quot;&quot;</span>           
+    <span class="c1">#Get image size</span>
+    <span class="n">imsz</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">shape</span>
+          
+    <span class="c1">#Create image plotting window</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+    
+    <span class="c1">#Plot image</span>
+    <span class="n">implot</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">img</span><span class="p">)</span>        
+    <span class="n">implot</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>    
+    <span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="n">imsz</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">imsz</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>  
+    
+    <span class="c1">#Set window name</span>
+    <span class="k">if</span> <span class="n">save</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;UV output: &#39;</span> <span class="o">+</span> <span class="n">save</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;UV output&#39;</span><span class="p">)</span>
+        
+    <span class="c1">#Plot xy positions onto images</span>
+    <span class="n">uvplt</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">uv0</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">uv0</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">uvvel</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                        <span class="n">vmax</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">uvvel</span><span class="p">),</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;gist_ncar&quot;</span><span class="p">))</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">uvplt</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+
+    <span class="c1">#Plot arrows</span>
+    <span class="n">xar</span><span class="p">,</span><span class="n">yar</span><span class="o">=</span><span class="n">arrowplot</span><span class="p">(</span><span class="n">uv0</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">uv0</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> <span class="n">uv1</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="n">uv1</span><span class="p">[:,</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],</span> 
+                      <span class="n">scale</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">headangle</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xar</span><span class="p">,</span><span class="n">yar</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+       
+    <span class="c1">#Save figure</span>
+    <span class="k">if</span> <span class="n">save</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span> 
+    
+    <span class="c1">#Show figure    </span>
+    <span class="k">if</span> <span class="n">show</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>    </div>
+    
+       
+<div class="viewcode-block" id="plotAreaXYZ"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotAreaXYZ">[docs]</a><span class="k">def</span> <span class="nf">plotAreaXYZ</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>    
+    <span class="sd">&quot;&quot;&quot;Plot figure with image overlayed with xyz coordinates representing </span>
+<span class="sd">    either areas or line features.</span>
+<span class="sd">    </span>
+<span class="sd">    :param xyz: Input xyz coordinates for plotting</span>
+<span class="sd">    :type xyz: arr     </span>
+<span class="sd">    :param dem: Underlying DEM for plotting over</span>
+<span class="sd">    :type dem: :class:`PyTrx.DEM.ExplicitRaster`</span>
+<span class="sd">    :param show: Flag to denote whether the figure is shown, defatuls to True</span>
+<span class="sd">    :type show: bool, optional </span>
+<span class="sd">    :param save: Destination file to save figure to, defaults to None</span>
+<span class="sd">    :type save: str, optional</span>
+<span class="sd">    :returns: A figure with plotted areas overlaid onto a given DEM    </span>
+<span class="sd">    &quot;&quot;&quot;</span>                           
+    <span class="c1">#Set-up plot</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    
+    <span class="c1">#Set window name</span>
+    <span class="k">if</span> <span class="n">save</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;XYZ output: &#39;</span> <span class="o">+</span> <span class="n">save</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;XYZ output&#39;</span><span class="p">)</span>        
+        
+    <span class="c1">#Prepare DEM for plotting</span>
+    <span class="k">if</span> <span class="n">dem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">demextent</span> <span class="o">=</span> <span class="n">dem</span><span class="o">.</span><span class="n">getExtent</span><span class="p">()</span>
+        <span class="n">demz</span> <span class="o">=</span> <span class="n">dem</span><span class="o">.</span><span class="n">getZ</span><span class="p">()</span>           
+    
+        <span class="c1">#Plot DEM and set cmap</span>
+        <span class="n">implot</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">demz</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">demextent</span><span class="p">)</span>
+        <span class="n">implot</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="n">demextent</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">demextent</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">demextent</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">demextent</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+                           
+    <span class="c1">#Extract xy data from features               </span>
+    <span class="k">for</span> <span class="n">shp</span> <span class="ow">in</span> <span class="n">xyz</span><span class="p">:</span> 
+        <span class="n">xl</span><span class="o">=</span><span class="p">[]</span>
+        <span class="n">yl</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">shp</span><span class="p">:</span>
+            <span class="n">xl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">yl</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xl</span><span class="p">,</span> <span class="n">yl</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;#FFFF33&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>        
+    
+    <span class="c1">#Save figure</span>
+    <span class="k">if</span> <span class="n">save</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save</span><span class="p">)</span>
+    
+    <span class="c1">#Show figure</span>
+    <span class="k">if</span> <span class="n">show</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>         </div>
+
+
+<div class="viewcode-block" id="plotLineXYZ"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotLineXYZ">[docs]</a><span class="k">def</span> <span class="nf">plotLineXYZ</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>    
+    <span class="sd">&quot;&quot;&quot;Plot figure with image overlayed with xyz coordinates representing </span>
+<span class="sd">    either areas or line features.</span>
+<span class="sd">    </span>
+<span class="sd">    :param xyz: Input xyz coordinates for plotting</span>
+<span class="sd">    :type xyz: arr  </span>
+<span class="sd">    :param dem: Underlying DEM for plotting over</span>
+<span class="sd">    :type dem: :class:`PyTrx.DEM.ExplicitRaster`</span>
+<span class="sd">    :param show: Flag to denote whether the figure is shown, defatuls to True</span>
+<span class="sd">    :type show: bool, optional </span>
+<span class="sd">    :param save: Destination file to save figure to, defaults to None</span>
+<span class="sd">    :type save: str, optional</span>
+<span class="sd">    :returns: A figure with plotted lines overlaid onto a given DEM    </span>
+<span class="sd">    &quot;&quot;&quot;</span>                                 
+    <span class="c1">#Set-up plot</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    
+    <span class="c1">#Set window name</span>
+    <span class="k">if</span> <span class="n">save</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;XYZ output: &#39;</span> <span class="o">+</span> <span class="n">save</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;XYZ output&#39;</span><span class="p">)</span>        
+        
+    <span class="c1">#Prepare DEM for plotting</span>
+    <span class="k">if</span> <span class="n">dem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">demextent</span> <span class="o">=</span> <span class="n">dem</span><span class="o">.</span><span class="n">getExtent</span><span class="p">()</span>
+        <span class="n">demz</span> <span class="o">=</span> <span class="n">dem</span><span class="o">.</span><span class="n">getZ</span><span class="p">()</span>           
+    
+        <span class="c1">#Plot DEM and set cmap</span>
+        <span class="n">implot</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">demz</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">demextent</span><span class="p">)</span>
+        <span class="n">implot</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="n">demextent</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">demextent</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">demextent</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">demextent</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+                           
+    <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xyz</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">xyz</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;#FFFF33&#39;</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;-&#39;</span><span class="p">)</span>        
+    
+    <span class="c1">#Save figure</span>
+    <span class="k">if</span> <span class="n">save</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save</span><span class="p">)</span>
+    
+    <span class="c1">#Show figure</span>
+    <span class="k">if</span> <span class="n">show</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+        
+
+<div class="viewcode-block" id="plotVeloXYZ"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotVeloXYZ">[docs]</a><span class="k">def</span> <span class="nf">plotVeloXYZ</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">,</span> <span class="n">xyz0</span><span class="p">,</span> <span class="n">xyz1</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Plot figure with image overlayed with xyz velocities. XYZ data are</span>
+<span class="sd">    depicted as the xyz point in img0 and the corresponding velocity as a </span>
+<span class="sd">    proportional arrow (computed using the arrowplot function).</span>
+<span class="sd">    </span>
+<span class="sd">    :param xyzvel: Input xyz velocities </span>
+<span class="sd">    :type xyzvel: arr           </span>
+<span class="sd">    :param xyz0: Coordinates (x,y) for points in first image</span>
+<span class="sd">    :type xyz0: arr</span>
+<span class="sd">    :param xyz1: Coordinates (x,y) for points in second image </span>
+<span class="sd">    :type xyz1: arr</span>
+<span class="sd">    :param dem: Underlying DEM for plotting over</span>
+<span class="sd">    :type dem: :class:`PyTrx.DEM.ExplicitRaster`</span>
+<span class="sd">    :param show: Flag to denote whether the figure is shown, defatuls to True</span>
+<span class="sd">    :type show: bool, optional </span>
+<span class="sd">    :param save: Destination file to save figure to, defaults to None</span>
+<span class="sd">    :type save: str, optional</span>
+<span class="sd">    :returns: A figure with plotted points denoting velocities, overlaid onto a given DEM                          </span>
+<span class="sd">    &quot;&quot;&quot;</span>  
+    <span class="c1">#Set-up plot</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>
+    
+    <span class="c1">#Set window name</span>
+    <span class="k">if</span> <span class="n">save</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;XYZ output: &#39;</span> <span class="o">+</span> <span class="n">save</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;XYZ output&#39;</span><span class="p">)</span>
+        
+    <span class="c1">#Prepare DEM for plotting</span>
+    <span class="k">if</span> <span class="n">dem</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">demextent</span> <span class="o">=</span> <span class="n">dem</span><span class="o">.</span><span class="n">getExtent</span><span class="p">()</span>
+        <span class="n">demz</span> <span class="o">=</span> <span class="n">dem</span><span class="o">.</span><span class="n">getZ</span><span class="p">()</span>           
+    
+        <span class="c1">#Plot DEM and set cmap</span>
+        <span class="n">implot</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">demz</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">demextent</span><span class="p">)</span>
+        <span class="n">implot</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>   
+                                      
+    <span class="c1">#Scatter plot velocity points from img0                 </span>
+    <span class="n">xyzplt</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">xyz0</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">xyz0</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="n">xyzvel</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> 
+                         <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s1">&#39;gist_ncar&#39;</span><span class="p">),</span> 
+                         <span class="n">vmin</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">vmax</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">))</span>  
+
+    <span class="c1">#Plot vector arrows denoting direction                             </span>
+    <span class="n">xar</span><span class="p">,</span><span class="n">yar</span><span class="o">=</span><span class="n">arrowplot</span><span class="p">(</span><span class="n">xyz0</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">xyz0</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span><span class="n">xyz1</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span><span class="n">xyz1</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span><span class="n">scale</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span>
+                      <span class="n">headangle</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">xar</span><span class="p">,</span><span class="n">yar</span><span class="p">,</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+    <span class="c1">#Plot color bar</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">xyzplt</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+                
+    <span class="c1">#Save figure</span>
+    <span class="k">if</span> <span class="n">save</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+     
+    <span class="c1">#Show figure</span>
+    <span class="k">if</span> <span class="n">show</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+        
+
+<div class="viewcode-block" id="plotInterpolate"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotInterpolate">[docs]</a><span class="k">def</span> <span class="nf">plotInterpolate</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">pointextent</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function to plot the results of the velocity interpolation process for </span>
+<span class="sd">    a particular image pair.</span>
+<span class="sd">    </span>
+<span class="sd">    :param grid: Numpy grid. It is recommended that this is constructed using the interpolateHelper function</span>
+<span class="sd">    :type grid: arr</span>
+<span class="sd">    :param pointextent: Grid extent</span>
+<span class="sd">    :type pointextent: list</span>
+<span class="sd">    :param dem: Underlying DEM for plotting over</span>
+<span class="sd">    :type dem: :class:`PyTrx.DEM.ExplicitRaster`</span>
+<span class="sd">    :param show: Flag to denote whether the figure is shown, defatuls to True</span>
+<span class="sd">    :type show: bool, optional </span>
+<span class="sd">    :param save: Destination file to save figure to, defaults to None</span>
+<span class="sd">    :type save: str, optional</span>
+<span class="sd">    :returns: A figure with interpolated velocity results overlaid onto a given DEM</span>
+<span class="sd">    &quot;&quot;&quot;</span>  
+    <span class="c1">#Set-up plot</span>
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([])</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">set_yticks</span><span class="p">([])</span>    
+
+    <span class="c1">#Set name of window</span>
+    <span class="k">if</span> <span class="n">save</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;XYZ interpolate: &#39;</span> <span class="o">+</span> <span class="n">save</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;XYZ interpolate&#39;</span><span class="p">)</span>        
+        
+    <span class="c1">#Prepare DEM for plotting</span>
+    <span class="k">if</span> <span class="n">dem</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">demextent</span> <span class="o">=</span> <span class="n">dem</span><span class="o">.</span><span class="n">getExtent</span><span class="p">()</span>
+        <span class="n">demz</span> <span class="o">=</span> <span class="n">dem</span><span class="o">.</span><span class="n">getZ</span><span class="p">()</span>           
+    
+        <span class="c1">#Plot DEM and set cmap</span>
+        <span class="n">implot</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">demz</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">demextent</span><span class="p">)</span>
+        <span class="n">implot</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+        <span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="n">demextent</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">demextent</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">demextent</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">demextent</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+                    
+    <span class="c1">#Plot interpolated grid with colour bar legend </span>
+    <span class="n">interp</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">get_cmap</span><span class="p">(</span><span class="s2">&quot;gist_ncar&quot;</span><span class="p">),</span> 
+                        <span class="n">extent</span><span class="o">=</span><span class="n">pointextent</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">)</span>                
+    <span class="n">plt</span><span class="o">.</span><span class="n">colorbar</span><span class="p">(</span><span class="n">interp</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="n">ax1</span><span class="p">)</span>
+    
+    <span class="c1">#Save if variable not none</span>
+    <span class="k">if</span> <span class="n">save</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">save</span> <span class="o">+</span> <span class="s1">&#39;interp.jpg&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>  
+            
+    <span class="c1">#Show plot</span>
+    <span class="k">if</span> <span class="n">show</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
+    
+
+<div class="viewcode-block" id="interpolateHelper"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.interpolateHelper">[docs]</a><span class="k">def</span> <span class="nf">interpolateHelper</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">,</span> <span class="n">xyz0</span><span class="p">,</span> <span class="n">xyz1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Function to interpolate a point dataset. This uses functions of </span>
+<span class="sd">    the SciPy package to set up a grid (grid) and then interpolate using a</span>
+<span class="sd">    linear interpolation method (griddata). Methods are those compatible with </span>
+<span class="sd">    SciPy&#39;s interpolate.griddata function: &#39;nearest&#39;, &#39;cubic&#39; and &#39;linear&#39;.</span>
+<span class="sd">    </span>
+<span class="sd">    :param xxyzvel: Input xyz velocities</span>
+<span class="sd">    :type xyzvel: arr</span>
+<span class="sd">    :param xyz0: Coordinates (x,y) for points in first image</span>
+<span class="sd">    :type xyz0: arr</span>
+<span class="sd">    :param xyz1: Coordinates (x,y) for points in second image</span>
+<span class="sd">    :type xyz1: arr</span>
+<span class="sd">    :param method: Interpolation method, defaults to &#39;linear&#39;</span>
+<span class="sd">    :type method: str, optional</span>
+<span class="sd">    :returns: An interpolated grid of points and grid extent</span>
+<span class="sd">    :rtype: list</span>
+<span class="sd">    &quot;&quot;&quot;</span>            
+    <span class="c1">#Create empty lists for xyz information without NaNs</span>
+    <span class="n">velo</span><span class="o">=</span><span class="p">[]</span>  
+    <span class="n">x1</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">x2</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">y1</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">y2</span><span class="o">=</span><span class="p">[]</span> 
+                                     
+    <span class="c1">#Remove NaN values from velocities and points                   </span>
+    <span class="k">for</span> <span class="n">v</span><span class="p">,</span><span class="n">sx</span><span class="p">,</span><span class="n">ex</span><span class="p">,</span><span class="n">sy</span><span class="p">,</span><span class="n">ey</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">,</span> <span class="n">xyz0</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">xyz1</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">xyz0</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> 
+                             <span class="n">xyz1</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]):</span>                          
+        <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">==</span><span class="kc">False</span><span class="p">:</span>
+            <span class="n">velo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>                            <span class="c1">#xyz velocities</span>
+            <span class="n">x1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sx</span><span class="p">)</span>                                <span class="c1">#pt0 x values</span>
+            <span class="n">x2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ex</span><span class="p">)</span>                                <span class="c1">#pt1 x values</span>
+            <span class="n">y1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sy</span><span class="p">)</span>                                <span class="c1">#pt0 y values</span>
+            <span class="n">y2</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ey</span><span class="p">)</span>                                <span class="c1">#pt1 y values</span>
+        <span class="k">elif</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="o">==</span><span class="kc">True</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">NaN value removed for interpolation&#39;</span><span class="p">)</span>
+                              
+    <span class="c1">#Bound point positions in array for grid construction</span>
+    <span class="n">newpts</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x1</span><span class="p">,</span><span class="n">y1</span><span class="p">])</span><span class="o">.</span><span class="n">T</span>  
+       
+    <span class="c1">#Define gridsize</span>
+    <span class="n">gridsize</span><span class="o">=</span><span class="mf">10.</span>
+    
+    <span class="c1">#Define grid using point extent</span>
+    <span class="n">minx</span><span class="o">=</span><span class="nb">divmod</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">x1</span><span class="p">),</span><span class="n">gridsize</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">gridsize</span>
+    <span class="n">miny</span><span class="o">=</span><span class="nb">divmod</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">y1</span><span class="p">),</span><span class="n">gridsize</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">gridsize</span>
+    <span class="n">maxx</span><span class="o">=</span><span class="p">(</span><span class="nb">divmod</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">x2</span><span class="p">),</span><span class="n">gridsize</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">gridsize</span>
+    <span class="n">maxy</span><span class="o">=</span><span class="p">(</span><span class="nb">divmod</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">y2</span><span class="p">),</span><span class="n">gridsize</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">gridsize</span>
+    <span class="n">pointsextent</span><span class="o">=</span><span class="p">[</span><span class="n">minx</span><span class="p">,</span><span class="n">maxx</span><span class="p">,</span><span class="n">miny</span><span class="p">,</span><span class="n">maxy</span><span class="p">]</span>   
+         
+    <span class="c1">#Generate buffer around grid</span>
+    <span class="n">incrsx</span><span class="o">=</span><span class="p">((</span><span class="n">maxx</span><span class="o">-</span><span class="n">minx</span><span class="p">)</span><span class="o">/</span><span class="n">gridsize</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+    <span class="n">incrsy</span><span class="o">=</span><span class="p">((</span><span class="n">maxy</span><span class="o">-</span><span class="n">miny</span><span class="p">)</span><span class="o">/</span><span class="n">gridsize</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+
+    <span class="c1">#Construct grid dimensions</span>
+    <span class="n">grid_y</span><span class="p">,</span><span class="n">grid_x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[</span><span class="n">miny</span><span class="p">:</span><span class="n">maxy</span><span class="p">:</span><span class="nb">complex</span><span class="p">(</span><span class="n">incrsy</span><span class="p">),</span>
+                             <span class="n">minx</span><span class="p">:</span><span class="n">maxx</span><span class="p">:</span><span class="nb">complex</span><span class="p">(</span><span class="n">incrsx</span><span class="p">)]</span>
+    
+    <span class="c1">#Interpolate the velocity points to the grid</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">griddata</span><span class="p">(</span><span class="n">newpts</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">velo</span><span class="p">),</span> <span class="p">(</span><span class="n">grid_x</span><span class="p">,</span> <span class="n">grid_y</span><span class="p">),</span> 
+                    <span class="n">method</span><span class="o">=</span><span class="n">method</span><span class="p">)</span>
+     
+<span class="c1">#    DEVELOPMENT TO BE COMPLETED: snr grid</span>
+<span class="c1">#    error = griddata(newpts, np.float64(snrs), (grid_x, grid_y), </span>
+<span class="c1">#                     method=method)      </span>
+                
+    <span class="k">return</span> <span class="n">grid</span><span class="p">,</span> <span class="n">pointsextent</span> </div>
+           
+    
+<div class="viewcode-block" id="arrowplot"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.arrowplot">[docs]</a><span class="k">def</span> <span class="nf">arrowplot</span><span class="p">(</span><span class="n">xst</span><span class="p">,</span> <span class="n">yst</span><span class="p">,</span> <span class="n">xend</span><span class="p">,</span> <span class="n">yend</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">headangle</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">headscale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>    
+    <span class="sd">&quot;&quot;&quot;Plot arrows to denote the direction and magnitude of the displacement. </span>
+<span class="sd">    Direction is indicated by the bearing of the arrow, and the magnitude is </span>
+<span class="sd">    indicated by the length of the arrow.</span>
+<span class="sd">    </span>
+<span class="sd">    :param x0: X coordinates for pt0</span>
+<span class="sd">    :type x0: arr</span>
+<span class="sd">    :param y0: Y coordinates for pt0</span>
+<span class="sd">    :type y0: arr</span>
+<span class="sd">    :param x1: X coordinates for pt1</span>
+<span class="sd">    :type x1: arr</span>
+<span class="sd">    :param y1: Y coordinates for pt1</span>
+<span class="sd">    :type y1: arr</span>
+<span class="sd">    :param scale: Arrow scale, defaults to 1.0</span>
+<span class="sd">    :type scale: int, optional</span>
+<span class="sd">    :param headangle: Plotting angle, defaults to 15</span>
+<span class="sd">    :type headangle: int, optional</span>
+<span class="sd">    :param headscale: Arrow head scale, defaults to 0.2</span>
+<span class="sd">    :type headscale: int, optional</span>
+<span class="sd">    :returns: Arrow plots as two arrays denoting x and y coordinates </span>
+<span class="sd">    :rtype: arr</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
+    <span class="c1">#Define plotting angle</span>
+    <span class="n">angle</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">headangle</span><span class="o">/</span><span class="mf">180.</span>
+
+    <span class="n">xs</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">ys</span><span class="o">=</span><span class="p">[]</span>
+    
+    <span class="c1">#Iterate through xy point data</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">xst</span><span class="p">)):</span>
+        <span class="c1">#Get xy start position</span>
+        <span class="n">x1</span><span class="o">=</span><span class="n">xst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">y1</span><span class="o">=</span><span class="n">yst</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        
+        <span class="c1">#Get xy end position</span>
+        <span class="n">x2</span><span class="o">=</span><span class="n">xend</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="n">y2</span><span class="o">=</span><span class="n">yend</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        
+        <span class="c1">#Calculate point displacement</span>
+        <span class="n">xd</span><span class="o">=</span><span class="n">x2</span><span class="o">-</span><span class="n">x1</span>
+        <span class="n">yd</span><span class="o">=</span><span class="n">y2</span><span class="o">-</span><span class="n">y1</span>
+        <span class="n">dist</span><span class="o">=</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">xd</span><span class="o">*</span><span class="n">xd</span><span class="o">+</span><span class="n">yd</span><span class="o">*</span><span class="n">yd</span><span class="p">)</span>
+        
+        <span class="c1">#Determine plotting angle</span>
+        <span class="n">sinTheta</span> <span class="o">=</span> <span class="n">xd</span> <span class="o">/</span> <span class="n">dist</span>
+        <span class="n">cosTheta</span> <span class="o">=</span> <span class="n">yd</span> <span class="o">/</span> <span class="n">dist</span>
+        <span class="n">sinTheta</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">sinTheta</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">cosTheta</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">cosTheta</span><span class="p">,</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">sinTheta</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">sinTheta</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">cosTheta</span><span class="o">=</span><span class="nb">max</span><span class="p">(</span><span class="n">cosTheta</span><span class="p">,</span><span class="o">-</span><span class="mf">1.0</span><span class="p">)</span>
+        <span class="n">aSinTheta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">asin</span><span class="p">(</span><span class="n">sinTheta</span><span class="p">)</span>
+        
+        <span class="c1">#Determine length based on a given scale</span>
+        <span class="n">x2</span><span class="o">=</span><span class="n">x1</span><span class="o">+</span><span class="p">(</span><span class="n">xd</span><span class="o">*</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">y2</span><span class="o">=</span><span class="n">y1</span><span class="o">+</span><span class="p">(</span><span class="n">yd</span><span class="o">*</span><span class="n">scale</span><span class="p">)</span>
+        <span class="n">hs</span><span class="o">=</span><span class="n">dist</span><span class="o">*</span><span class="n">headscale</span>
+
+        <span class="c1">#These conditions give an angle between 0 and 2 Pi radians</span>
+        <span class="c1">#You should test them to make sure they are correct</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sinTheta</span> <span class="o">&gt;=</span> <span class="mf">0.0</span> <span class="ow">and</span> <span class="n">cosTheta</span> <span class="o">&gt;=</span> <span class="mf">0.0</span><span class="p">):</span>
+           <span class="n">theta</span> <span class="o">=</span> <span class="n">aSinTheta</span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">cosTheta</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">):</span>
+           <span class="n">theta</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">-</span> <span class="n">aSinTheta</span>
+        <span class="k">else</span><span class="p">:</span>
+           <span class="n">theta</span> <span class="o">=</span> <span class="p">(</span><span class="mf">2.0</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">pi</span> <span class="o">+</span> <span class="n">aSinTheta</span><span class="p">)</span>
+           
+        <span class="n">theta</span><span class="o">=</span><span class="n">theta</span><span class="o">+</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span>
+        <span class="n">x3</span><span class="o">=</span><span class="n">x2</span><span class="o">+</span><span class="n">hs</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="o">+</span><span class="n">angle</span><span class="p">)</span>
+        <span class="n">x4</span><span class="o">=</span><span class="n">x2</span><span class="o">+</span><span class="n">hs</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">theta</span><span class="o">-</span><span class="n">angle</span><span class="p">)</span>
+        <span class="n">y3</span><span class="o">=</span><span class="n">y2</span><span class="o">+</span><span class="n">hs</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="o">+</span><span class="n">angle</span><span class="p">)</span>
+        <span class="n">y4</span><span class="o">=</span><span class="n">y2</span><span class="o">+</span><span class="n">hs</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">theta</span><span class="o">-</span><span class="n">angle</span><span class="p">)</span>
+        
+        <span class="c1">#Append arrow plotting information</span>
+        <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+        <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y1</span><span class="p">)</span>
+        <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span>
+        <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y2</span><span class="p">)</span>
+        <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x3</span><span class="p">)</span>
+        <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y3</span><span class="p">)</span>
+        <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">))</span>
+        <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">))</span>
+        <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span>
+        <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y2</span><span class="p">)</span>
+        <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x4</span><span class="p">)</span>
+        <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">y4</span><span class="p">)</span>
+        <span class="n">xs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">))</span>
+        <span class="n">ys</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">))</span>
+    
+    <span class="c1">#Return xy arrow plotting information</span>
+    <span class="k">return</span> <span class="n">xs</span><span class="p">,</span><span class="n">ys</span>   </div>
+
+       
+<span class="c1">#------------------------------------------------------------------------------</span>
+
+<span class="c1">#if __name__ == &quot;__main__&quot;:   </span>
+<span class="c1">#    print &#39;\nProgram finished&#39;</span>
+
+<span class="c1">#------------------------------------------------------------------------------   </span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PyTrx 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Penelope How, Nick Hulton, Lynne Buie.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>
