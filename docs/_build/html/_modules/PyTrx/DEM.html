@@ -1,0 +1,556 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>PyTrx.DEM &#8212; PyTrx 1.1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PyTrx 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for PyTrx.DEM</h1><div class="highlight"><pre>
+<span></span><span class="c1">#PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie</span>
+<span class="c1">#</span>
+<span class="c1">#PyTrx is licensed under a MIT License.</span>
+<span class="c1">#</span>
+<span class="c1">#You should have received a copy of the license along with this</span>
+<span class="c1">#work. If not, see &lt;https://choosealicense.com/licenses/mit/&gt;.</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">The DEM module contains functionality for handling DEM data and implementing</span>
+<span class="sd">this data into the :class:&#39;PyTrx.CamEnv.CamEnv&#39; object class.</span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">#Import packages</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">scipy.io</span> <span class="k">as</span> <span class="nn">sio</span>
+<span class="kn">import</span> <span class="nn">gdal</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">interpolate</span>
+<span class="kn">from</span> <span class="nn">gdalconst</span> <span class="k">import</span> <span class="n">GA_ReadOnly</span> 
+<span class="kn">import</span> <span class="nn">struct</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="k">import</span> <span class="n">RectBivariateSpline</span>
+
+<span class="c1">#------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="ExplicitRaster"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster">[docs]</a><span class="k">class</span> <span class="nc">ExplicitRaster</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>   
+    <span class="sd">&#39;&#39;&#39;A class to represent a numeric Raster with explicit XY cell referencing</span>
+<span class="sd">    in each grid cell.</span>
+<span class="sd">    </span>
+<span class="sd">    :param X: X data</span>
+<span class="sd">    :type X: arr</span>
+<span class="sd">    :param Y: Y data</span>
+<span class="sd">    :type Y: arr</span>
+<span class="sd">    :param Z: Z data</span>
+<span class="sd">    :type Z: arr</span>
+<span class="sd">    :param nodata: Condition for NaN data values, default to &#39;nan&#39;</span>
+<span class="sd">    :type nodata: int, optional</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="c1">#Basic constuctor method</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">)):</span>
+        <span class="sd">&#39;&#39;&#39;Explicit Raster initialisation.&#39;&#39;&#39;</span>
+        <span class="c1">#Check XYZ data is all the same size</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="o">==</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span> <span class="ow">and</span> <span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="o">==</span><span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Raster data and/or co-ordinate arrays are differently sized&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;X-shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Y-shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Z-shape &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">))</span>
+            <span class="k">return</span>
+        
+        <span class="c1">#Define class atrributes</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">])</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span><span class="o">=</span><span class="n">nodata</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_extents</span><span class="o">=</span><span class="p">[</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span><span class="n">X</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span>
+                       <span class="n">X</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">2</span><span class="p">]),</span><span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mf">0.5</span><span class="o">*</span><span class="p">(</span><span class="n">Y</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]),</span><span class="n">Y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mf">0.5</span><span class="o">*</span>
+                       <span class="p">(</span><span class="n">Y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">Y</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">][</span><span class="o">-</span><span class="mi">1</span><span class="p">])]</span>
+    
+    
+<div class="viewcode-block" id="ExplicitRaster.getData"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getData">[docs]</a>    <span class="k">def</span> <span class="nf">getData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dim</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return DEM data. XYZ dimensions can be individually called with the</span>
+<span class="sd">        dim input variable (integer: 0, 1, or 2).</span>
+
+<span class="sd">        :param dim: Dimension to retrieve (0, 1, or 2), default to None</span>
+<span class="sd">        :type dim: int</span>
+<span class="sd">        :returns: DEM dimension as array</span>
+<span class="sd">        :rtype: arr</span>
+<span class="sd">        &#39;&#39;&#39;</span>        
+        <span class="c1">#Return all DEM data if no dimension is specified</span>
+        <span class="k">if</span> <span class="n">dim</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
+        
+        <span class="c1">#Return specific DEM dimension </span>
+        <span class="k">elif</span> <span class="p">(</span><span class="n">dim</span><span class="o">==</span><span class="mi">0</span> <span class="ow">or</span> <span class="n">dim</span><span class="o">==</span><span class="mi">1</span> <span class="ow">or</span> <span class="n">dim</span><span class="o">==</span><span class="mi">2</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="n">dim</span><span class="p">]</span>
+        
+        <span class="c1">#Return None if no DEM data present </span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+            
+<div class="viewcode-block" id="ExplicitRaster.getZ"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getZ">[docs]</a>    <span class="k">def</span> <span class="nf">getZ</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return height (Z) data of DEM.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: DEM Z values</span>
+<span class="sd">        :rtype: arr&#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div>
+            
+        
+<div class="viewcode-block" id="ExplicitRaster.getZcoord"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getZcoord">[docs]</a>    <span class="k">def</span> <span class="nf">getZcoord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return height (Z) at a given XY coordinate in DEM.</span>
+<span class="sd">        </span>
+<span class="sd">        :param x: X coordinate</span>
+<span class="sd">        :type x: int</span>
+<span class="sd">        :param y: Y coordinate</span>
+<span class="sd">        :type y: int        </span>
+<span class="sd">        :returns: DEM Z value for given coordinate</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="n">rowcoords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">,:]</span>    
+        <span class="n">colcoords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">1</span><span class="p">)[:,</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="n">demz</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getZ</span><span class="p">()</span>
+      
+        <span class="n">xcoord</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">rowcoords</span><span class="o">-</span><span class="n">x</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+        <span class="n">ycoord</span> <span class="o">=</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="n">colcoords</span><span class="o">-</span><span class="n">y</span><span class="p">))</span><span class="o">.</span><span class="n">argmin</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="n">demz</span><span class="p">[</span><span class="n">ycoord</span><span class="p">,</span><span class="n">xcoord</span><span class="p">]</span></div>
+            
+            
+<div class="viewcode-block" id="ExplicitRaster.getShape"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getShape">[docs]</a>    <span class="k">def</span> <span class="nf">getShape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return the shape of the DEM data array.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: DEM shape</span>
+<span class="sd">        :rtype: arr</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span></div>
+
+    
+<div class="viewcode-block" id="ExplicitRaster.getRows"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getRows">[docs]</a>    <span class="k">def</span> <span class="nf">getRows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return the number of rows in the DEM data array.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: DEM row count</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
+
+        
+<div class="viewcode-block" id="ExplicitRaster.getCols"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getCols">[docs]</a>    <span class="k">def</span> <span class="nf">getCols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return the number of columns in the DEM data array.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: DEM column count</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
+
+    
+<div class="viewcode-block" id="ExplicitRaster.getNoData"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getNoData">[docs]</a>    <span class="k">def</span> <span class="nf">getNoData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return fill value for no data in DEM array.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: DEM nan fill value</span>
+<span class="sd">        :rtype: int</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span></div>
+ 
+       
+<div class="viewcode-block" id="ExplicitRaster.getExtent"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getExtent">[docs]</a>    <span class="k">def</span> <span class="nf">getExtent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return DEM extent.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: DEM extent</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &#39;&#39;&#39;</span>     
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extents</span></div>
+ 
+       
+<div class="viewcode-block" id="ExplicitRaster.subset"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.subset">[docs]</a>    <span class="k">def</span> <span class="nf">subset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">cmin</span><span class="p">,</span><span class="n">cmax</span><span class="p">,</span><span class="n">rmin</span><span class="p">,</span><span class="n">rmax</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return a specified subset of the DEM array.</span>
+<span class="sd">        </span>
+<span class="sd">        :param cmin: Column minimum extent</span>
+<span class="sd">        :type cmin: int</span>
+<span class="sd">        :param cmax: Column maximum extent</span>
+<span class="sd">        :type cmax: int        </span>
+<span class="sd">        :param rmin: Row minimum extent</span>
+<span class="sd">        :type rmin: int</span>
+<span class="sd">        :param rmax: Row maximum extent</span>
+<span class="sd">        :type rmax: int </span>
+<span class="sd">        :returns: Subset of DEM</span>
+<span class="sd">        :rtype: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="c1">#Find minimum extent value</span>
+        <span class="n">cmin</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">cmin</span><span class="p">))</span>
+        <span class="n">rmin</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">rmin</span><span class="p">))</span>
+        
+        <span class="c1">#Find maximum extent value</span>
+        <span class="n">cmax</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">cmax</span><span class="p">))</span>
+        <span class="n">rmax</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">rmax</span><span class="p">))</span>
+        
+        <span class="c1">#Extract XYZ subset</span>
+        <span class="n">X</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">rmin</span><span class="p">:</span><span class="n">rmax</span><span class="p">,</span><span class="n">cmin</span><span class="p">:</span><span class="n">cmax</span><span class="p">]</span>
+        <span class="n">Y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">rmin</span><span class="p">:</span><span class="n">rmax</span><span class="p">,</span><span class="n">cmin</span><span class="p">:</span><span class="n">cmax</span><span class="p">]</span>
+        <span class="n">Z</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">2</span><span class="p">][</span><span class="n">rmin</span><span class="p">:</span><span class="n">rmax</span><span class="p">,</span><span class="n">cmin</span><span class="p">:</span><span class="n">cmax</span><span class="p">]</span>
+        
+        <span class="c1">#Construct new XYZ array  </span>
+        <span class="k">return</span> <span class="n">ExplicitRaster</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">)</span></div>
+ 
+       
+<div class="viewcode-block" id="ExplicitRaster.densify"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.densify">[docs]</a>    <span class="k">def</span> <span class="nf">densify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">densefac</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Function to densify the DEM array by a given densification factor.</span>
+<span class="sd">        The array is multiplied by the given densification factor and then</span>
+<span class="sd">        subsequently values are interpolated using the SciPy function </span>
+<span class="sd">        RectBivariateSpline. The densification factor is set to 2 by default,</span>
+<span class="sd">        meaning that the size of the DEM array is doubled.</span>
+
+<span class="sd">        :param densefac: Densification factor</span>
+<span class="sd">        :type densefac: int</span>
+<span class="sd">        :returns: Densified DEM</span>
+<span class="sd">        :rtype: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="c1">#Get XYZ dem data</span>
+        <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,:]</span>
+        <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">1</span><span class="p">,:,</span><span class="mi">0</span><span class="p">]</span>        
+        <span class="n">z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+        
+        <span class="c1">#Multipy size of xy arrays by the densification factor</span>
+        <span class="n">nx</span><span class="o">=</span><span class="p">((</span><span class="n">x</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">densefac</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+        <span class="n">ny</span><span class="o">=</span><span class="p">((</span><span class="n">y</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">*</span><span class="n">densefac</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span>
+        
+        <span class="c1">#Define new array data spacing</span>
+        <span class="n">xd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">nx</span><span class="p">)</span>
+        <span class="n">yd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ny</span><span class="p">)</span>
+        
+        <span class="c1">#Create mesh grid</span>
+        <span class="n">yv</span><span class="p">,</span><span class="n">xv</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">meshgrid</span><span class="p">(</span><span class="n">yd</span><span class="p">,</span><span class="n">xd</span><span class="p">)</span>
+
+        <span class="c1">#Interpolate </span>
+        <span class="n">f</span><span class="o">=</span><span class="n">RectBivariateSpline</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="p">,</span> <span class="n">bbox</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> 
+                              <span class="n">kx</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ky</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="c1">#Create empty array for Z data</span>
+        <span class="n">zv</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">))</span>
+        
+        <span class="c1">#Reshape XYZ arrays</span>
+        <span class="n">xv</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">xv</span><span class="p">,(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="p">))</span>
+        <span class="n">yv</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">yv</span><span class="p">,(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="p">))</span>
+        <span class="n">zv</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">zv</span><span class="p">,(</span><span class="n">nx</span><span class="o">*</span><span class="n">ny</span><span class="p">))</span>
+             
+        <span class="c1">#Populate empty Z array</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xv</span><span class="o">.</span><span class="n">size</span><span class="p">):</span>
+            <span class="n">zv</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">f</span><span class="p">(</span><span class="n">xv</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">yv</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="c1">#Transpose arrays for compatibility        </span>
+        <span class="n">xv</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">xv</span><span class="p">,(</span><span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">)))</span>
+        <span class="n">yv</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">yv</span><span class="p">,(</span><span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">)))</span>
+        <span class="n">zv</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">zv</span><span class="p">,(</span><span class="n">nx</span><span class="p">,</span><span class="n">ny</span><span class="p">)))</span>
+
+        <span class="c1">#Construct new XYZ array        </span>
+        <span class="k">return</span> <span class="n">ExplicitRaster</span><span class="p">(</span><span class="n">xv</span><span class="p">,</span><span class="n">yv</span><span class="p">,</span><span class="n">zv</span><span class="p">)</span></div>
+               
+        
+<div class="viewcode-block" id="ExplicitRaster.reportDEM"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.reportDEM">[docs]</a>    <span class="k">def</span> <span class="nf">reportDEM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Self reporter for DEM class object. Returns the number of rows and</span>
+<span class="sd">        columns in the array, how NaN values in the array are filled, and the</span>
+<span class="sd">        data extent coordinates.</span>
+<span class="sd">        &#39;&#39;&#39;</span>      
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">DEM object reporting:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Data has &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getRows</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39; rows by &#39;</span> <span class="o">+</span> 
+              <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getCols</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39; columns&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No data item is: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getNoData</span><span class="p">()))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Data Extent Coordinates are [xmin,xmax,ymin,ymax]: &#39;</span> <span class="o">+</span>
+               <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getExtent</span><span class="p">()))</span></div></div>
+ 
+    
+<div class="viewcode-block" id="load_DEM"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.load_DEM">[docs]</a><span class="k">def</span> <span class="nf">load_DEM</span><span class="p">(</span><span class="n">demfile</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function for loading DEM data from different file types, which is </span>
+<span class="sd">    automatically detected. Recognised file types: .mat and .tif.</span>
+<span class="sd">    </span>
+<span class="sd">    :param demfile: DEM filepath</span>
+<span class="sd">    :type demfile: str </span>
+<span class="sd">    :returns: A DEM object</span>
+<span class="sd">    :rtype: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>    
+    <span class="c1">#Determine file type based on filename suffix</span>
+    <span class="n">suffix</span><span class="o">=</span><span class="n">demfile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    
+    <span class="c1">#MAT file import if detected</span>
+    <span class="k">if</span> <span class="n">suffix</span><span class="o">==</span><span class="p">(</span><span class="s2">&quot;MAT&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">DEM_FromMat</span><span class="p">(</span><span class="n">demfile</span><span class="p">)</span>
+        
+    <span class="c1">#TIF file import if detected</span>
+    <span class="k">elif</span> <span class="n">suffix</span><span class="o">==</span><span class="p">(</span><span class="s2">&quot;TIF&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">suffix</span><span class="o">==</span><span class="p">(</span><span class="s2">&quot;TIFF&quot;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">DEM_FromTiff</span><span class="p">(</span><span class="n">demfile</span><span class="p">)</span>
+    
+    <span class="c1">#No DEM data passed if file type is not recognised</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DEM format (suffix) not supported&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DEM file: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">demfile</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; not read&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span></div>
+
+    
+<div class="viewcode-block" id="DEM_FromMat"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.DEM_FromMat">[docs]</a><span class="k">def</span> <span class="nf">DEM_FromMat</span><span class="p">(</span><span class="n">matfile</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function for loading a DEM array from a Matlab (.mat) file containing</span>
+<span class="sd">    separate X, Y, Z matrices.</span>
+
+<span class="sd">    :param matfile: DEM .mat filepath</span>
+<span class="sd">    :type matfile: str</span>
+<span class="sd">    :returns: A DEM object</span>
+<span class="sd">    :rtype: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="c1">#Load Matlab file and XYZ matrices as arrays</span>
+    <span class="n">mat</span> <span class="o">=</span> <span class="n">sio</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="n">matfile</span><span class="p">)</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">mat</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">])</span>
+    <span class="n">Y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">mat</span><span class="p">[</span><span class="s1">&#39;Y&#39;</span><span class="p">])</span>
+    <span class="n">Z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">mat</span><span class="p">[</span><span class="s1">&#39;Z&#39;</span><span class="p">])</span>
+
+    <span class="c1">#Flip array if not compatible</span>
+    <span class="k">if</span> <span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">&gt;</span><span class="n">Y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Flipping input DEM&#39;</span><span class="p">)</span>
+        <span class="n">X</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">Y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+        <span class="n">Z</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+    
+    <span class="c1">#Construct DEM array</span>
+    <span class="n">dem</span><span class="o">=</span><span class="n">ExplicitRaster</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">dem</span> </div>
+
+
+<div class="viewcode-block" id="DEM_FromTiff"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.DEM_FromTiff">[docs]</a><span class="k">def</span> <span class="nf">DEM_FromTiff</span><span class="p">(</span><span class="n">tiffFile</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function for loading a DEM array from a .tiff file containing</span>
+<span class="sd">    raster-formatted data. The tiff data importing is handled by GDAL.</span>
+
+<span class="sd">    :param tifffile: DEM .tif filepath</span>
+<span class="sd">    :type tifffile: str</span>
+<span class="sd">    :returns: A DEM object</span>
+<span class="sd">    :rtype: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="c1">#Open tiff file with GDAL</span>
+    <span class="n">dataset</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">tiffFile</span><span class="p">,</span> <span class="n">GA_ReadOnly</span><span class="p">)</span>
+    
+    <span class="c1">#Define columns and rows in raster</span>
+    <span class="n">cols</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">RasterXSize</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">RasterYSize</span>
+    
+    <span class="c1">#Transform raster and define origins for populating</span>
+    <span class="n">geotransform</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">GetGeoTransform</span><span class="p">()</span> 
+    <span class="n">originX</span> <span class="o">=</span> <span class="n">geotransform</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">originY</span> <span class="o">=</span> <span class="n">geotransform</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">pixelWidth</span> <span class="o">=</span> <span class="n">geotransform</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">pixelHeight</span> <span class="o">=</span> <span class="n">geotransform</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+    
+    <span class="c1">#Get Z data from raster</span>
+    <span class="n">band</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">GetRasterBand</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">scanline</span> <span class="o">=</span> <span class="n">band</span><span class="o">.</span><span class="n">ReadRaster</span><span class="p">(</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">band</span><span class="o">.</span><span class="n">XSize</span><span class="p">,</span> <span class="n">band</span><span class="o">.</span><span class="n">YSize</span><span class="p">,</span><span class="n">band</span><span class="o">.</span><span class="n">XSize</span><span class="p">,</span> 
+                               <span class="n">band</span><span class="o">.</span><span class="n">YSize</span><span class="p">,</span> <span class="n">band</span><span class="o">.</span><span class="n">DataType</span><span class="p">)</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">struct</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="s1">&#39;f&#39;</span> <span class="o">*</span> <span class="n">band</span><span class="o">.</span><span class="n">XSize</span> <span class="o">*</span><span class="n">band</span><span class="o">.</span><span class="n">YSize</span><span class="p">,</span> <span class="n">scanline</span><span class="p">)</span>
+    <span class="n">Z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span><span class="n">cols</span><span class="p">)</span>
+
+    <span class="c1">#Create empty arrays for XY data    </span>
+    <span class="n">X</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">rows</span><span class="p">,</span><span class="n">cols</span><span class="p">))</span>
+    <span class="n">Y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">rows</span><span class="p">,</span><span class="n">cols</span><span class="p">))</span>
+    
+    <span class="c1">#Populate empty arrays from origins</span>
+    <span class="n">originX</span><span class="o">=</span><span class="n">originX</span><span class="o">+</span><span class="p">(</span><span class="n">pixelWidth</span><span class="o">*</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="n">originY</span><span class="o">=</span><span class="n">originY</span><span class="o">+</span><span class="p">(</span><span class="n">pixelWidth</span><span class="o">*</span><span class="mf">0.5</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">rows</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">cols</span><span class="p">):</span>
+            <span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">j</span><span class="o">*</span><span class="n">pixelWidth</span><span class="p">)</span><span class="o">+</span><span class="n">originX</span>
+            <span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">i</span><span class="o">*</span><span class="n">pixelHeight</span><span class="p">)</span><span class="o">+</span><span class="n">originY</span>
+    
+    <span class="c1">#Flip array if not compatible</span>
+    <span class="k">if</span> <span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">&gt;</span><span class="n">Y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">]:</span>   
+        <span class="n">X</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">X</span><span class="p">)</span> 
+        <span class="n">Y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+        <span class="n">Z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+     
+    <span class="c1">#Construct DEM array</span>
+    <span class="n">dem</span><span class="o">=</span><span class="n">ExplicitRaster</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">)</span>    
+    <span class="k">return</span> <span class="n">dem</span></div>
+
+            
+<div class="viewcode-block" id="voxelviewshed"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.voxelviewshed">[docs]</a><span class="k">def</span> <span class="nf">voxelviewshed</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">viewpoint</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Calculate a viewshed over a DEM from a given viewpoint in the DEM scene.</span>
+<span class="sd">    This function is based on the viewshed function (voxelviewshed.m) available </span>
+<span class="sd">    in ImGRAFT.   </span>
+<span class="sd">    The ImGRAFT voxelviewshed.m script is available at:</span>
+<span class="sd">    http://github.com/grinsted/ImGRAFT/blob/master/voxelviewshed.m</span>
+<span class="sd">    </span>
+<span class="sd">    :param dem: A DEM object</span>
+<span class="sd">    :type dem: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
+<span class="sd">    :param viewpoint: 3-element vector specifying the viewpoint</span>
+<span class="sd">    :type viewpoint: list</span>
+<span class="sd">    </span>
+<span class="sd">    :returns: Boolean visibility matrix (which is the same size as dem)</span>
+<span class="sd">    :rtype: arr</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1">#Get XYZ arrays    </span>
+    <span class="n">X</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">Y</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">Z</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+
+    <span class="c1">#Get array shape</span>
+    <span class="n">sz</span><span class="o">=</span><span class="n">Z</span><span class="o">.</span><span class="n">shape</span>    
+
+    <span class="c1">#Get grid spacing</span>
+    <span class="n">dx</span><span class="o">=</span><span class="nb">abs</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">X</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">dy</span><span class="o">=</span><span class="nb">abs</span><span class="p">(</span><span class="n">Y</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">Y</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1">#Linearise the grid</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">X</span><span class="p">,</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+    <span class="n">Y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">Y</span><span class="p">,</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">Y</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+    <span class="n">Z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">Z</span><span class="p">,</span><span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">Z</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+    
+    <span class="c1">#Define viewpoint in DEM grid space      </span>
+    <span class="n">X</span><span class="o">=</span><span class="p">(</span><span class="n">X</span><span class="o">-</span><span class="n">viewpoint</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span><span class="o">/</span><span class="n">dx</span>
+    <span class="n">Y</span><span class="o">=</span><span class="p">(</span><span class="n">Y</span><span class="o">-</span><span class="n">viewpoint</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">/</span><span class="n">dy</span>        
+    <span class="n">Z</span><span class="o">=</span><span class="n">Z</span><span class="o">-</span><span class="n">viewpoint</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+
+    <span class="c1">#Create empty array</span>
+    <span class="n">d</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">))</span>
+
+    <span class="c1">#Populate array    </span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">Z</span><span class="p">[</span><span class="n">i</span><span class="p">])):</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">+</span><span class="n">Z</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">Z</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            
+    <span class="c1">#Pythagoras&#39; theorem</span>
+    <span class="c1">#ImGRAFT/Matlab equiv: x=atan2(Y,X)+math.pi)/(math.pi*2);             (MAT)</span>
+    <span class="n">dint</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">X</span><span class="o">*</span><span class="n">X</span><span class="o">+</span><span class="n">Y</span><span class="o">*</span><span class="n">Y</span><span class="p">))</span>
+    
+    <span class="c1">#Create empty array </span>
+    <span class="n">x</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="c1">#Populate array</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">X</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">x</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">atan2</span><span class="p">(</span><span class="n">Y</span><span class="p">[</span><span class="n">i</span><span class="p">],</span><span class="n">X</span><span class="p">[</span><span class="n">i</span><span class="p">])</span><span class="o">+</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">y</span><span class="o">=</span><span class="n">Z</span><span class="o">/</span><span class="n">d</span>
+    
+    <span class="c1">#Round values and sort array</span>
+    <span class="c1">#ImGRAFT/Matlab equiv: [~,ix]=sortrows([round(sqrt(X.^2+Y.^2)) x]);   (MAT) </span>
+    <span class="n">ix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">lexsort</span><span class="p">((</span><span class="n">x</span><span class="p">,</span><span class="n">dint</span><span class="p">))</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+    <span class="c1">#Return a boolean of all array values that are not zero       </span>
+    <span class="c1">#ImGRAFT/Matlab equiv: loopix=find(diff(x(ix))&lt;0);                    (MAT)</span>
+    <span class="n">loopix</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="n">ix</span><span class="p">])</span><span class="o">&lt;</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="c1">#Create boolean array of 1&#39;s</span>
+    <span class="c1">#ImGRAFT/Matlab equiv: vis=true(size(X,1),1);                         (MAT)</span>
+    <span class="n">vis</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>        
+
+    <span class="c1">#Return maximum value (ignoring nans)</span>
+    <span class="n">maxd</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nanmax</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> 
+
+    <span class="c1">#Number of points in voxel horizon    </span>
+    <span class="n">N</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="mf">2.</span><span class="o">*</span><span class="n">math</span><span class="o">.</span><span class="n">pi</span><span class="o">/</span><span class="p">(</span><span class="n">dx</span><span class="o">/</span><span class="n">maxd</span><span class="p">))</span>
+
+    <span class="c1">#Populate viewshed x array</span>
+    <span class="c1">#ImGRAFT/Matlab equiv: voxx=(0:N)&#39;/N;                                 (MAT)</span>
+    <span class="n">voxx</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">N</span><span class="p">)</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">n</span><span class="o">=</span><span class="n">voxx</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span><span class="p">):</span>
+        <span class="n">voxx</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">i</span><span class="o">*</span><span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">n</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+    
+    <span class="c1">#Define viewshed y array</span>
+    <span class="c1">#ImGRAFT/Matlab equiv: voxy=zeros(size(voxx))-inf;                    (MAT)</span>
+    <span class="n">voxy</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span><span class="o">-</span><span class="mf">1.e+308</span>
+
+    <span class="c1">#Define visibility of each point in the array</span>
+    <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">loopix</span><span class="o">.</span><span class="n">size</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>            
+        <span class="n">lp</span><span class="o">=</span><span class="n">ix</span><span class="p">[</span><span class="n">loopix</span><span class="p">[</span><span class="n">k</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">:</span><span class="n">loopix</span><span class="p">[</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">lp</span><span class="o">=</span><span class="n">lp</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span><span class="o">+</span><span class="n">lp</span><span class="p">[:]</span><span class="o">+</span><span class="n">lp</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">yy</span><span class="o">=</span><span class="n">y</span><span class="p">[</span><span class="n">lp</span><span class="p">]</span>
+        <span class="n">xx</span><span class="o">=</span><span class="n">x</span><span class="p">[</span><span class="n">lp</span><span class="p">]</span>     
+        <span class="n">xx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">xx</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span>
+        <span class="n">xx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">xx</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span>       
+        <span class="n">f</span> <span class="o">=</span> <span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">voxx</span><span class="p">,</span><span class="n">voxy</span><span class="p">)</span>
+        <span class="n">vis</span><span class="p">[</span><span class="n">lp</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]]</span><span class="o">=</span><span class="n">f</span><span class="p">(</span><span class="n">xx</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span><span class="o">&lt;</span><span class="n">yy</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>        
+        <span class="n">f</span><span class="o">=</span><span class="n">interpolate</span><span class="o">.</span><span class="n">interp1d</span><span class="p">(</span><span class="n">xx</span><span class="p">,</span><span class="n">yy</span><span class="p">)</span>
+        <span class="n">voxy</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">voxy</span><span class="p">,</span><span class="n">f</span><span class="p">(</span><span class="n">voxx</span><span class="p">))</span>
+
+    <span class="c1">#Re-format boolean array</span>
+    <span class="n">vis</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">vis</span><span class="p">,</span><span class="n">sz</span><span class="p">,</span><span class="n">order</span><span class="o">=</span><span class="s1">&#39;F&#39;</span><span class="p">)</span>
+    <span class="n">vis</span><span class="o">.</span><span class="n">shape</span><span class="o">=</span><span class="n">sz</span>
+
+    <span class="c1">#Return boolean array</span>
+    <span class="k">return</span> <span class="n">vis</span></div>
+
+   
+<span class="c1">#------------------------------------------------------------------------------</span>
+
+<span class="c1">#if __name__ == &quot;__main__&quot;:   </span>
+<span class="c1">#    print &#39;\nProgram finished&#39;</span>
+
+<span class="c1">#------------------------------------------------------------------------------   </span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PyTrx 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Penelope How, Nick Hulton, Lynne Buie.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

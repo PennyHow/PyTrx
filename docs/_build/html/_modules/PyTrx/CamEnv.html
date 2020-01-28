@@ -1,0 +1,1427 @@
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>PyTrx.CamEnv &#8212; PyTrx 1.1.0 documentation</title>
+    <link rel="stylesheet" href="../../_static/classic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../_static/language_data.js"></script>
+    
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PyTrx 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for PyTrx.CamEnv</h1><div class="highlight"><pre>
+<span></span><span class="c1">#PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie</span>
+<span class="c1">#</span>
+<span class="c1">#PyTrx is licensed under a MIT License.</span>
+<span class="c1">#</span>
+<span class="c1">#You should have received a copy of the license along with this</span>
+<span class="c1">#work. If not, see &lt;https://choosealicense.com/licenses/mit/&gt;.</span>
+
+<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">The Camera Environment module contains the object-constructors and functions </span>
+<span class="sd">for: (1) Representing a camera model in three-dimensional space; and (2) </span>
+<span class="sd">Effective translation of measurements in an XY image plane to XYZ real-world </span>
+<span class="sd">coordinates. The projection and inverse transformation functions are based on </span>
+<span class="sd">those available in the ImGRAFT toolbox for Matlab. Translations from</span>
+<span class="sd">ImGRAFT are noted in related script comments.              </span>
+<span class="sd">&#39;&#39;&#39;</span>
+
+<span class="c1">#Import PyTrx packages</span>
+<span class="kn">from</span> <span class="nn">Utilities</span> <span class="k">import</span> <span class="n">plotGCPs</span><span class="p">,</span> <span class="n">plotCalib</span><span class="p">,</span> <span class="n">plotResiduals</span><span class="p">,</span> <span class="n">plotPrincipalPoint</span>
+<span class="kn">from</span> <span class="nn">FileHandler</span> <span class="k">import</span> <span class="n">readImg</span><span class="p">,</span> <span class="n">readGCPs</span><span class="p">,</span> <span class="n">readMatrixDistortion</span> 
+<span class="kn">from</span> <span class="nn">DEM</span> <span class="k">import</span> <span class="n">ExplicitRaster</span><span class="p">,</span><span class="n">load_DEM</span><span class="p">,</span><span class="n">voxelviewshed</span>
+<span class="kn">from</span> <span class="nn">Images</span> <span class="k">import</span> <span class="n">CamImage</span>
+
+<span class="c1">#Import other packages</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">interpolate</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="k">import</span> <span class="n">optimize</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">glob</span>
+
+<span class="c1">#------------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="GCPs"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.GCPs">[docs]</a><span class="k">class</span> <span class="nc">GCPs</span><span class="p">():</span>    
+    <span class="sd">&#39;&#39;&#39;A class representing the geography of the camera scene. Contains</span>
+<span class="sd">    ground control points, as the world and image points, the DEM data and </span>
+<span class="sd">    extent, and the image the ground control points correspond to, as an </span>
+<span class="sd">    Image object. </span>
+<span class="sd">    </span>
+<span class="sd">    :param dem: The file path of the ASCII DEM</span>
+<span class="sd">    :type dem: str</span>
+<span class="sd">    :param GCPpath: The file path of the GCP text file, with a header line, and</span>
+<span class="sd">tab delimited x, y, z world coordinates and xy image on each line</span>
+<span class="sd">    :type GCPpath: str</span>
+<span class="sd">    :param imagePath: The file path of the image the GCPs correspond to</span>
+<span class="sd">    :type imagePath: str</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">GCPpath</span><span class="p">,</span> <span class="n">imagePath</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Constructor to initiate the GCP object.&#39;&#39;&#39;</span>                
+        <span class="c1">#DEM handling</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dem</span> <span class="o">=</span> <span class="n">dem</span>
+       
+        <span class="c1">#Get image from CamImage object</span>
+        <span class="k">if</span> <span class="n">imagePath</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gcpImage</span><span class="o">=</span><span class="n">CamImage</span><span class="p">(</span><span class="n">imagePath</span><span class="p">)</span>
+        
+        <span class="c1">#Get GCP data using the readGCP function in FileHandler</span>
+        <span class="k">if</span> <span class="n">GCPpath</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
+            <span class="n">world</span><span class="p">,</span> <span class="n">image</span> <span class="o">=</span> <span class="n">readGCPs</span><span class="p">(</span><span class="n">GCPpath</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gcpxyz</span> <span class="o">=</span> <span class="n">world</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gcpuv</span> <span class="o">=</span> <span class="n">image</span>                
+
+        
+<div class="viewcode-block" id="GCPs.getGCPs"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.GCPs.getGCPs">[docs]</a>    <span class="k">def</span> <span class="nf">getGCPs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return the world and image GCPs.&#39;&#39;&#39;</span>       
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcpxyz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcpuv</span></div>
+
+        
+<div class="viewcode-block" id="GCPs.getDEM"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.GCPs.getDEM">[docs]</a>    <span class="k">def</span> <span class="nf">getDEM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return the dem object.&#39;&#39;&#39;</span>       
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dem</span></div>
+
+    
+<div class="viewcode-block" id="GCPs.getImage"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.GCPs.getImage">[docs]</a>    <span class="k">def</span> <span class="nf">getImage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return the GCP reference image.&#39;&#39;&#39;</span>        
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcpImage</span></div></div>
+
+                
+<span class="c1">#------------------------------------------------------------------------------        </span>
+   
+<div class="viewcode-block" id="CamCalib"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamCalib">[docs]</a><span class="k">class</span> <span class="nc">CamCalib</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;This base class models a standard camera calibration matrix as per </span>
+<span class="sd">    OpenCV, MatLab and ImGRAFT. The class uses a standard pinhole camera model, </span>
+<span class="sd">    drawing on the functions within OpenCV. A scene view is formed by </span>
+<span class="sd">    projecting 3D points into the image plane using a perspective </span>
+<span class="sd">    transformation.         </span>
+<span class="sd">    The camera intrinsic matrix is defined as a 3 x 3 array: [fx,0,0][s,fy,0]</span>
+<span class="sd">    [cx,cy,1], where fx and fy is the camera focal length (in pixel units) and </span>
+<span class="sd">    cx and cy as the location of the image centre (in pixels too), s is the </span>
+<span class="sd">    skew, and cx and cy are the image dimensions in pixels.        </span>
+<span class="sd">    In addition, the radial distortion and tangential distortion are </span>
+<span class="sd">    represented as a series of coefficients. These distortions are introduced </span>
+<span class="sd">    by discrepancies in the camera lens and between the lens and the camera </span>
+<span class="sd">    sensor: 1) Radial Distortion Coefficients: k ([k1,k2,k3,k4,k5,k6]), between </span>
+<span class="sd">    2 and 6 coefficients needed; and 2) Tangential Distortion Coefficients: </span>
+<span class="sd">    p ([p1,p2])</span>
+<span class="sd">    The object can be initiated directly either as a list of three elements for </span>
+<span class="sd">    each of the intrinsic, tangential and radial arrays, or by referencing a </span>
+<span class="sd">    file (.mat or .txt) containing the calibration data in a pre-designated </span>
+<span class="sd">    format.</span>
+<span class="sd">    </span>
+<span class="sd">    :param *args: Either a calibration text file, a series of calibration text </span>
+<span class="sd">files, a list of raw parameters, or a set of calibration images (along with </span>
+<span class="sd">calibration chessboard dimensions) </span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span> 
+        <span class="sd">&#39;&#39;&#39;Constructor to initiate the camera calibration object.&#39;&#39;&#39;</span>            
+        <span class="n">failed</span><span class="o">=</span><span class="kc">False</span> 
+            
+        <span class="c1">#Read calibration from file</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">str</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Attempting to read camera calibs from a single file&#39;</span><span class="p">)</span>
+            <span class="n">args</span><span class="o">=</span><span class="n">readMatrixDistortion</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="n">args</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">checkMatrix</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span>
+                <span class="n">failed</span><span class="o">=</span><span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tanCorr</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span><span class="o">=</span><span class="n">args</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_calibErr</span><span class="o">=</span><span class="kc">None</span>
+            
+
+        <span class="c1">#Read calibration from several files                      </span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">list</span><span class="p">):</span>                 
+            <span class="k">if</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;.txt&#39;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Attempting to read camera calibs from average over &#39;</span> 
+                      <span class="s1">&#39;several files&#39;</span><span class="p">)</span>
+                <span class="n">intrMat</span><span class="o">=</span><span class="p">[]</span>
+                <span class="n">tanCorr</span><span class="o">=</span><span class="p">[]</span>
+                <span class="n">radCorr</span><span class="o">=</span><span class="p">[]</span>               
+                <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">item</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+                        <span class="n">arg</span><span class="o">=</span><span class="n">readMatrixDistortion</span><span class="p">(</span><span class="n">item</span><span class="p">)</span>
+                        <span class="n">arg</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">checkMatrix</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="n">arg</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span>
+                            <span class="n">failed</span><span class="o">=</span><span class="kc">True</span>
+                            <span class="k">break</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">intrMat</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                            <span class="n">tanCorr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                            <span class="n">radCorr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">failed</span><span class="o">=</span><span class="kc">True</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">intrMat</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">intrMat</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_tanCorr</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">tanCorr</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">tanCorr</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">radCorr</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">radCorr</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_calibErr</span><span class="o">=</span><span class="kc">None</span>
+                
+            <span class="c1">#Calculate calibration from images                    </span>
+            <span class="k">elif</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;.JPG&#39;</span> <span class="ow">or</span> <span class="s1">&#39;.PNG&#39;</span><span class="p">:</span>
+                <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Attempting to calculate camera calibs from input&#39;</span>
+                        <span class="o">+</span> <span class="s1">&#39; images&#39;</span><span class="p">)</span>
+                <span class="n">calibimgs</span><span class="o">=</span><span class="p">[]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">])):</span>
+                    <span class="n">calibimgs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                    
+                <span class="n">arg</span><span class="p">,</span> <span class="n">err</span> <span class="o">=</span> <span class="n">calibrateImages</span><span class="p">(</span><span class="n">calibimgs</span><span class="p">,[</span><span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]),</span>
+                                           <span class="nb">int</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">])])</span>
+                <span class="n">arg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkMatrix</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+                
+                <span class="k">if</span> <span class="n">arg</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span>
+                    <span class="n">failed</span><span class="o">=</span><span class="kc">True</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="o">=</span><span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_tanCorr</span><span class="o">=</span><span class="n">arg</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span><span class="o">=</span><span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_calibErr</span><span class="o">=</span><span class="n">err</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">failed</span><span class="o">=</span><span class="kc">True</span>
+        
+        <span class="c1">#Define calibration from raw input</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">tuple</span><span class="p">):</span>
+            <span class="nb">print</span> <span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Attempting to make camera calibs from raw data &#39;</span>
+                   <span class="o">+</span> <span class="s1">&#39;sequences&#39;</span><span class="p">)</span>
+            
+            <span class="n">arg</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">checkMatrix</span><span class="p">([</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]])</span> 
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="o">=</span><span class="n">arg</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_tanCorr</span><span class="o">=</span><span class="n">arg</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span><span class="o">=</span><span class="n">arg</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_calibErr</span><span class="o">=</span><span class="kc">None</span> 
+            
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">failed</span><span class="o">=</span><span class="kc">True</span>
+                        
+            
+        <span class="k">if</span> <span class="n">failed</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Error creating camera calibration object&#39;</span> <span class="o">+</span>
+                  <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Please check calibration specification or files&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">None</span>
+            
+        <span class="bp">self</span><span class="o">.</span><span class="n">_focLen</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]]</span>       
+        <span class="bp">self</span><span class="o">.</span><span class="n">_camCen</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]]</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_intrMatCV2</span><span class="o">=</span><span class="kc">None</span>
+                
+            
+<div class="viewcode-block" id="CamCalib.getCalibdata"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamCalib.getCalibdata">[docs]</a>    <span class="k">def</span> <span class="nf">getCalibdata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return camera matrix, and tangential and radial distortion </span>
+<span class="sd">        coefficients.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: The object&#39;s intrinsic matrix, tangential distortion and</span>
+<span class="sd">radial distortion information</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tanCorr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span></div>
+
+        
+<div class="viewcode-block" id="CamCalib.getCamMatrix"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamCalib.getCamMatrix">[docs]</a>    <span class="k">def</span> <span class="nf">getCamMatrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return camera matrix.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: The object&#39;s intrinsic matrix</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span></div>
+
+    
+<div class="viewcode-block" id="CamCalib.getDistortCoeffsCV2"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamCalib.getDistortCoeffsCV2">[docs]</a>    <span class="k">def</span> <span class="nf">getDistortCoeffsCV2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return radial and tangential distortion coefficients.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: The object&#39;s tangential distortion and radial distortion </span>
+<span class="sd">information</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1">#Returns certain number of values depending on number of coefficients</span>
+        <span class="c1">#inputted  </span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tanCorr</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tanCorr</span><span class="p">),</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span><span class="p">[</span><span class="mi">2</span><span class="p">:])</span></div>
+
+        
+<div class="viewcode-block" id="CamCalib.getCamMatrixCV2"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamCalib.getCamMatrixCV2">[docs]</a>    <span class="k">def</span> <span class="nf">getCamMatrixCV2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return camera matrix in a structure that is compatible with </span>
+<span class="sd">        subsequent photogrammetric processing using OpenCV.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: The object&#39;s intrinsic matrix, compatiable with OpenCV   </span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intrMatCV2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            
+            <span class="c1"># Transpose if 0&#39;s are not in correct places</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">!=</span><span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">!=</span><span class="mi">0</span> <span class="ow">and</span> 
+                <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">==</span><span class="mi">0</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_intrMatCV2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="o">.</span><span class="n">transpose</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_intrMatCV2</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="p">[:]</span>
+                
+            <span class="c1"># Set 0&#39;s and 1&#39;s in the correct locations</span>
+            <span class="n">it</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="mi">0</span><span class="p">,</span><span class="mi">1</span><span class="p">],[</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">2</span><span class="p">,</span><span class="mi">0</span><span class="p">],[</span><span class="mi">2</span><span class="p">,</span><span class="mi">1</span><span class="p">]])</span>                 
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">it</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">it</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_intrMatCV2</span><span class="p">[</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">]</span><span class="o">=</span><span class="mf">0.</span>        
+            <span class="bp">self</span><span class="o">.</span><span class="n">_intrMatCV2</span><span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">=</span><span class="mf">1.</span> 
+    
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intrMatCV2</span></div>
+
+        
+<div class="viewcode-block" id="CamCalib.reportCalibData"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamCalib.reportCalibData">[docs]</a>    <span class="k">def</span> <span class="nf">reportCalibData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Self reporter for Camera Calibration object data.&#39;&#39;&#39;</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">DATA FROM CAMERA CALIBRATION OBJECT&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Intrinsic Matrix:&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Tangential Correction:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tanCorr</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Radial Correction:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Focal Length:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_focLen</span><span class="p">))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Camera Centre:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_camCen</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calibErr</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calibration Error:&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calibErr</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="CamCalib.checkMatrix"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamCalib.checkMatrix">[docs]</a>    <span class="k">def</span> <span class="nf">checkMatrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Function to support the calibrate function. Checks and converts the </span>
+<span class="sd">        intrinsic matrix to the correct format for calibration with opencv.</span>
+<span class="sd">        </span>
+<span class="sd">        :param matrix: Intrinsic camera matrix</span>
+<span class="sd">        :type matrix: arr</span>
+<span class="sd">        :returns: The object&#39;s intrinsic matrix (checked), tangential </span>
+<span class="sd">distortion and radial distortion information</span>
+<span class="sd">        &#39;&#39;&#39;</span>  
+        <span class="c1">###This is moved over from readfile. Need to check calibration matrices</span>
+        <span class="k">if</span> <span class="n">matrix</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+                
+        <span class="c1">#Check matrix</span>
+        <span class="n">intrMat</span><span class="o">=</span><span class="n">matrix</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="c1">#Check tangential distortion coefficients</span>
+        <span class="n">tanDis</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">td</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">tanDis</span><span class="p">[:</span><span class="n">td</span><span class="o">.</span><span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="n">td</span>
+        
+        <span class="c1">#Check radial distortion coefficients</span>
+        <span class="n">radDis</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">rd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">matrix</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span> 
+        <span class="n">radDis</span><span class="p">[:</span><span class="n">rd</span><span class="o">.</span><span class="n">size</span><span class="p">]</span> <span class="o">=</span> <span class="n">rd</span>
+           
+        <span class="k">return</span> <span class="n">intrMat</span><span class="p">,</span> <span class="n">tanDis</span><span class="p">,</span> <span class="n">radDis</span></div></div>
+
+                          
+<span class="c1">#------------------------------------------------------------------------------</span>
+                          
+<div class="viewcode-block" id="CamEnv"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv">[docs]</a><span class="k">class</span> <span class="nc">CamEnv</span><span class="p">(</span><span class="n">CamCalib</span><span class="p">):</span>    
+    <span class="sd">&#39;&#39;&#39; A class to represent the camera object, containing the intrinsic</span>
+<span class="sd">    matrix, distortion parameters and camera pose (position and direction).    </span>
+<span class="sd">    Also inherits from the :class:&#39;PyTrx.CamEnv.CamCalib&#39; object, representing </span>
+<span class="sd">    the intrinsic camera information.</span>
+<span class="sd">    This object can be initialised either through an environment file (and</span>
+<span class="sd">    passed to the initialiser as a filepath), or with the set intput parameters</span>
+<span class="sd">    </span>
+<span class="sd">    :param name: The reference name for the camera</span>
+<span class="sd">    :type name: str</span>
+<span class="sd">    :param GCPpath: The file path of the GCPs, for the GCPs object</span>
+<span class="sd">    :type GCPpath: str</span>
+<span class="sd">    :param DEMpath: The file path for the DEM, for the GCPs object</span>
+<span class="sd">    :type DEMpath: str    </span>
+<span class="sd">    :param imagePath: The file path for the GCP reference image, for the GCPs </span>
+<span class="sd">object</span>
+<span class="sd">    :type imagePath: str </span>
+<span class="sd">    :param calibPath: The file path for the calibration file. This can be</span>
+<span class="sd">either as a .mat Matlab file or a text file. The text file should be of the </span>
+<span class="sd">following tab delimited format: RadialDistortion [k1 k2 k3...k7], </span>
+<span class="sd">TangentialDistortion [p1 p2], IntrinsicMatrix [x y z][x y z][x y z], End</span>
+<span class="sd">    :type calibPath: str</span>
+<span class="sd">    :param coords: The x,y,z coordinates of the camera location, as a list</span>
+<span class="sd">    :type coords: list   </span>
+<span class="sd">    :param ypr: The yaw, pitch and roll of the camera, as a list</span>
+<span class="sd">    :type ypr: list</span>
+<span class="sd">    &#39;&#39;&#39;</span>    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">envFile</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Constructor to initiate Camera Environment object.&#39;&#39;&#39;</span> 
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">INITIALISING CAMERA ENVIRONMENT&#39;</span><span class="p">)</span>
+ 
+        <span class="c1">#Read camera environment from text file        </span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">envFile</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="c1">#Read parameters from the environment file </span>
+            <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataFromFile</span><span class="p">(</span><span class="n">envFile</span><span class="p">)</span>
+    
+            <span class="c1">#Exit programme if file is invalid</span>
+            <span class="k">if</span> <span class="n">params</span><span class="o">==</span><span class="kc">False</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Unable to define camera environment&#39;</span><span class="p">)</span>
+                <span class="k">pass</span>
+            
+            <span class="c1">#Extract input files from camera environment file </span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">GCPpath</span><span class="p">,</span> <span class="n">DEMpath</span><span class="p">,</span> <span class="n">imagePath</span><span class="p">,</span> 
+                 <span class="n">calibPath</span><span class="p">,</span> <span class="n">coords</span><span class="p">,</span> <span class="n">ypr</span><span class="p">,</span> <span class="n">DEMdensify</span><span class="p">)</span> <span class="o">=</span> <span class="n">params</span>           
+
+        <span class="c1">#Read camera environment from files as input variables</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">envFile</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="n">envFile</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">GCPpath</span> <span class="o">=</span> <span class="n">envFile</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">DEMpath</span> <span class="o">=</span> <span class="n">envFile</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">imagePath</span> <span class="o">=</span> <span class="n">envFile</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">calibPath</span> <span class="o">=</span> <span class="n">envFile</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="n">envFile</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span>
+            <span class="n">ypr</span> <span class="o">=</span> <span class="n">envFile</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span>
+            <span class="n">DEMdensify</span> <span class="o">=</span> <span class="n">envFile</span><span class="p">[</span><span class="mi">7</span><span class="p">]</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Invalid camera environment data type&#39;</span><span class="p">)</span>
+            <span class="k">pass</span>
+            
+        <span class="c1">#Set up object parameters</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_camloc</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">coords</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_DEMpath</span> <span class="o">=</span> <span class="n">DEMpath</span>        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_DEMdensify</span> <span class="o">=</span> <span class="n">DEMdensify</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_GCPpath</span> <span class="o">=</span> <span class="n">GCPpath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_imagePath</span> <span class="o">=</span> <span class="n">imagePath</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_refImage</span> <span class="o">=</span> <span class="n">CamImage</span><span class="p">(</span><span class="n">imagePath</span><span class="p">)</span> 
+
+        <span class="c1">#Set yaw, pitch and roll to 0 if no information is given        </span>
+        <span class="k">if</span> <span class="n">ypr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_camDirection</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_camDirection</span> <span class="o">=</span>  <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ypr</span><span class="p">)</span>
+
+        <span class="c1">#Initialise CamCalib object for calibration information        </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_calibPath</span><span class="o">=</span><span class="n">calibPath</span>
+        <span class="n">CamCalib</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">calibPath</span><span class="p">)</span>                
+                
+        <span class="c1">#Leave DEM and inverse projection variables empty to begin with</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_DEM</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_invProjVars</span> <span class="o">=</span> <span class="kc">None</span>
+      
+        <span class="c1">#Initialise GCPs object for GCP and DEM information</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_GCPpath</span><span class="o">!=</span><span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_imagePath</span><span class="o">!=</span><span class="kc">None</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Creating GCP environment&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_gcp</span><span class="o">=</span><span class="n">GCPs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_DEM</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_GCPpath</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_imagePath</span><span class="p">)</span>        
+        
+       
+<div class="viewcode-block" id="CamEnv.dataFromFile"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.dataFromFile">[docs]</a>    <span class="k">def</span> <span class="nf">dataFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Read CamEnv data from .txt file containing keywords and filepaths</span>
+<span class="sd">        to associated data.</span>
+<span class="sd">        </span>
+<span class="sd">        :param filename: Environment file path</span>
+<span class="sd">        :type filename: str</span>
+<span class="sd">        :returns: Camera environment information (name, GCP filepath, </span>
+<span class="sd">DEM filepath, image filepath, calibration file path, camera coordinates, </span>
+<span class="sd">camera pose (ypr) and DEM densification factor)</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1">#Define keywords to search for in file        </span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">key_labels</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;camera_environment_name&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;GCPpath&#39;</span><span class="p">:</span><span class="s1">&#39;gcp_path&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;DEMpath&#39;</span><span class="p">:</span><span class="s1">&#39;dem_path&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;imagePath&#39;</span><span class="p">:</span><span class="s1">&#39;image_path&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;calibPath&#39;</span><span class="p">:</span><span class="s1">&#39;calibration_path&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;coords&#39;</span><span class="p">:</span><span class="s1">&#39;camera_location&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;ypr&#39;</span><span class="p">:</span><span class="s1">&#39;yaw_pitch_roll&#39;</span><span class="p">,</span>
+                         <span class="s1">&#39;DEMdensify&#39;</span><span class="p">:</span><span class="s1">&#39;dem_densification&#39;</span><span class="p">}</span>
+        <span class="n">key_lines</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key_labels</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">key_lines</span><span class="p">:</span>
+            <span class="n">key_lines</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span><span class="kc">None</span><span class="p">})</span>
+        
+        <span class="c1">#Extract all lines in the specification file                       </span>
+<span class="c1">#        f=filename.open() </span>
+        <span class="n">f</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">()</span>
+        <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        
+        <span class="c1">#Search for keywords and identify which line they are in       </span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)):</span>
+            <span class="n">stripped</span><span class="o">=</span><span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_labels</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_labels</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">==</span><span class="n">stripped</span><span class="p">:</span>
+                    <span class="n">key_lines</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">key</span><span class="p">:</span><span class="n">i</span><span class="p">})</span>
+        
+        <span class="c1">#Define CamEnv name if information is present in .txt file</span>
+        <span class="n">lineNo</span><span class="o">=</span><span class="n">key_lines</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">lineNo</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getFileDataLine__</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span><span class="n">lineNo</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Name not supplied in: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>              
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="c1">#Define GCPpath if information is present in .txt file</span>
+        <span class="n">lineNo</span><span class="o">=</span><span class="n">key_lines</span><span class="p">[</span><span class="s2">&quot;GCPpath&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">lineNo</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
+            <span class="n">GCPpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getFileDataLine__</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span><span class="n">lineNo</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">GCPpath not supplied in: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>              
+            <span class="n">GCPpath</span><span class="o">=</span><span class="kc">None</span>
+            
+        <span class="c1">#Define DEMpath if information is present in .txt file</span>
+        <span class="n">lineNo</span><span class="o">=</span><span class="n">key_lines</span><span class="p">[</span><span class="s2">&quot;DEMpath&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">lineNo</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
+            <span class="n">DEMpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getFileDataLine__</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span><span class="n">lineNo</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">DEMpath not supplied in: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>              
+            <span class="k">return</span> <span class="kc">False</span>
+            
+        <span class="c1">#Define imagePath if information is present in .txt file</span>
+        <span class="n">lineNo</span><span class="o">=</span><span class="n">key_lines</span><span class="p">[</span><span class="s2">&quot;imagePath&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">lineNo</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
+            <span class="n">imagePath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getFileDataLine__</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span><span class="n">lineNo</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">imagePath not supplied in: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>              
+            <span class="k">return</span> <span class="kc">False</span> 
+
+        <span class="c1">#Define DEM densification specifications (DEMdensify)          </span>
+        <span class="n">lineNo</span><span class="o">=</span><span class="n">key_lines</span><span class="p">[</span><span class="s2">&quot;DEMdensify&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">lineNo</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
+            <span class="n">DEMdensify</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getFileDataLine__</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span><span class="n">lineNo</span><span class="p">)</span>
+            <span class="n">DEMdensify</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">DEMdensify</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Dem densification level not supplied in: &#39;</span> 
+                  <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>  
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Setting to 1 (No densification)&#39;</span><span class="p">)</span>
+            <span class="n">DEMdensify</span><span class="o">=</span><span class="mi">1</span>
+
+        <span class="c1">#Define calibPath if information is present in .txt file</span>
+        <span class="n">lineNo</span><span class="o">=</span><span class="n">key_lines</span><span class="p">[</span><span class="s2">&quot;calibPath&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">lineNo</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
+            <span class="n">calibPath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getFileDataLine__</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span><span class="n">lineNo</span><span class="p">)</span>            
+            <span class="n">fields</span> <span class="o">=</span> <span class="n">calibPath</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;[]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+            <span class="n">calibPath</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+                <span class="n">calibPath</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">calibPath</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">calibPath</span> <span class="o">=</span> <span class="n">calibPath</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>              
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">calibPath not supplied in: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>             
+            <span class="k">return</span> <span class="kc">False</span>   
+
+        <span class="c1">#Define camera location coordinates (coords)</span>
+        <span class="n">lineNo</span><span class="o">=</span><span class="n">key_lines</span><span class="p">[</span><span class="s2">&quot;coords&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">lineNo</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
+            <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getFileDataLine__</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span><span class="n">lineNo</span><span class="p">)</span>
+            <span class="n">fields</span> <span class="o">=</span> <span class="n">coords</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;[]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>    
+            <span class="n">coords</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+                <span class="n">coords</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Coordinates not supplied in: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>              
+            <span class="k">return</span> <span class="kc">False</span> 
+
+        <span class="c1">#Define yaw, pitch, roll if information is present in .txt file</span>
+        <span class="n">lineNo</span><span class="o">=</span><span class="n">key_lines</span><span class="p">[</span><span class="s2">&quot;ypr&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">lineNo</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
+            <span class="n">ypr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__getFileDataLine__</span><span class="p">(</span><span class="n">lines</span><span class="p">,</span><span class="n">lineNo</span><span class="p">)</span>           
+            <span class="n">fields</span> <span class="o">=</span> <span class="n">ypr</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;[]&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+            <span class="n">ypr</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+                <span class="n">ypr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">f</span><span class="p">))</span> 
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">YPR not supplied in: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">filename</span><span class="p">))</span>              
+            <span class="k">return</span> <span class="kc">False</span>
+           
+        <span class="k">return</span> <span class="n">name</span><span class="p">,</span><span class="n">GCPpath</span><span class="p">,</span><span class="n">DEMpath</span><span class="p">,</span><span class="n">imagePath</span><span class="p">,</span><span class="n">calibPath</span><span class="p">,</span><span class="n">coords</span><span class="p">,</span><span class="n">ypr</span><span class="p">,</span><span class="n">DEMdensify</span></div>
+
+
+<div class="viewcode-block" id="CamEnv.optimiseCamEnv"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.optimiseCamEnv">[docs]</a>    <span class="k">def</span> <span class="nf">optimiseCamEnv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimise</span><span class="p">,</span> <span class="n">optmethod</span><span class="o">=</span><span class="s1">&#39;trf&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Optimise projection variables in the camera environment. The precise </span>
+<span class="sd">        parameters to optimise are defined by the optimise variable.</span>
+<span class="sd">        </span>
+<span class="sd">        :param optimise: Parameters to optimise - &#39;YPR&#39; (optimise camera pose </span>
+<span class="sd">only), &#39;EXT&#39; (optimise external camera parameters), &#39;INT&#39; (optimise internal </span>
+<span class="sd">camera parameters), or &#39;ALL&#39; (optimise all projection parameters)</span>
+<span class="sd">        :type optimise: str</span>
+<span class="sd">        :param optmethod: Optimisation method, default to &#39;trf&#39;</span>
+<span class="sd">        :type optmethod: str, optional</span>
+<span class="sd">        :param show: Flag to denote if optimisation output should be plotted,</span>
+<span class="sd">default to False</span>
+<span class="sd">        :type show: bool, optional</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="c1">#Get GCPs</span>
+        <span class="n">xyz</span><span class="p">,</span> <span class="n">uv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcp</span><span class="o">.</span><span class="n">getGCPs</span><span class="p">()</span>
+
+        <span class="c1">#Get camera environment parameters</span>
+        <span class="n">projvars</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_camloc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camDirection</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span><span class="p">,</span> 
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_tanCorr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_focLen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camCen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refImage</span><span class="p">]</span>
+        
+        <span class="n">opt_projvars</span> <span class="o">=</span> <span class="n">optimiseCamera</span><span class="p">(</span><span class="n">optimise</span><span class="p">,</span> <span class="n">projvars</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">uv</span><span class="p">,</span> 
+                                      <span class="n">optmethod</span><span class="p">,</span> <span class="n">show</span><span class="p">)</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">_camloc</span> <span class="o">=</span> <span class="n">opt_projvars</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_camDirection</span> <span class="o">=</span> <span class="n">opt_projvars</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span> <span class="o">=</span> <span class="n">opt_projvars</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_tanCorr</span> <span class="o">=</span> <span class="n">opt_projvars</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_focLen</span> <span class="o">=</span> <span class="n">opt_projvars</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_camCen</span> <span class="o">=</span> <span class="n">opt_projvars</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_refImage</span> <span class="o">=</span> <span class="n">opt_projvars</span><span class="p">[</span><span class="mi">6</span><span class="p">]</span></div>
+
+    
+    <span class="k">def</span> <span class="nf">__getFileDataLine__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">lineNo</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return a data line from the Camera Environment Specification file.</span>
+<span class="sd">        </span>
+<span class="sd">        :param lines: Line string</span>
+<span class="sd">        :type lines: str</span>
+<span class="sd">        :param lineNo: Line number</span>
+<span class="sd">        :type lineNo: int</span>
+<span class="sd">        :returns: Data line</span>
+<span class="sd">        :rtype: str</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="n">lines</span><span class="p">[</span><span class="n">lineNo</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+
+        
+<div class="viewcode-block" id="CamEnv.getRefImageSize"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.getRefImageSize">[docs]</a>    <span class="k">def</span> <span class="nf">getRefImageSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return the dimensions of the reference image.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: Image size</span>
+<span class="sd">        :rtype: arr</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refImage</span><span class="o">.</span><span class="n">getImageSize</span><span class="p">()</span></div>
+      
+        
+<div class="viewcode-block" id="CamEnv.getDEM"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.getDEM">[docs]</a>    <span class="k">def</span> <span class="nf">getDEM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Return DEM as :class:&#39;PyTrx.DEM.ExplicitRaster&#39; object.</span>
+<span class="sd">        </span>
+<span class="sd">        :returns: DEM object</span>
+<span class="sd">        :rtype: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DEM</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dem</span> <span class="o">=</span> <span class="n">load_DEM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_DEMpath</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DEMdensify</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">dem</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">densify</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_DEMdensify</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_DEM</span><span class="o">=</span><span class="n">dem</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DEM</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DEM</span></div>
+
+
+<div class="viewcode-block" id="CamEnv.showGCPs"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.showGCPs">[docs]</a>    <span class="k">def</span> <span class="nf">showGCPs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Plot GCPs in image plane and DEM scene.&#39;&#39;&#39;</span>
+        <span class="n">xyz</span><span class="p">,</span> <span class="n">uv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcp</span><span class="o">.</span><span class="n">getGCPs</span><span class="p">()</span>               <span class="c1">#Get GCP positions</span>
+        <span class="n">dem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDEM</span><span class="p">()</span>                         <span class="c1">#Get DEM        </span>
+        <span class="n">refimage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_refImage</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">refimage</span><span class="o">.</span><span class="n">getImageArray</span><span class="p">()</span>              <span class="c1">#Get image array</span>
+        <span class="n">imn</span> <span class="o">=</span> <span class="n">refimage</span><span class="o">.</span><span class="n">getImageName</span><span class="p">()</span>               <span class="c1">#Get image name</span>
+
+        <span class="c1">#Plot GCPs</span>
+        <span class="n">plotGCPs</span><span class="p">([</span><span class="n">xyz</span><span class="p">,</span><span class="n">uv</span><span class="p">],</span> <span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camloc</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>            </div>
+
+
+<div class="viewcode-block" id="CamEnv.showPrincipalPoint"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.showPrincipalPoint">[docs]</a>    <span class="k">def</span> <span class="nf">showPrincipalPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Plot Principal Point on reference image.&#39;&#39;&#39;</span>
+        <span class="n">refimage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_refImage</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">refimage</span><span class="o">.</span><span class="n">getImageArray</span><span class="p">()</span>              <span class="c1">#Get image array</span>
+        <span class="n">imn</span> <span class="o">=</span> <span class="n">refimage</span><span class="o">.</span><span class="n">getImageName</span><span class="p">()</span>               <span class="c1">#Get image name</span>
+        
+        <span class="c1">#Plot principal point </span>
+        <span class="n">plotPrincipalPoint</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_camCen</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CamEnv.showCalib"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.showCalib">[docs]</a>    <span class="k">def</span> <span class="nf">showCalib</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Plot corrected and uncorrected reference image.&#39;&#39;&#39;</span>
+        <span class="n">refimage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_refImage</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">refimage</span><span class="o">.</span><span class="n">getImageArray</span><span class="p">()</span>              <span class="c1">#Get image array</span>
+        <span class="n">imn</span> <span class="o">=</span> <span class="n">refimage</span><span class="o">.</span><span class="n">getImageName</span><span class="p">()</span>               <span class="c1">#Get image name        </span>
+        <span class="n">matrix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getCamMatrixCV2</span><span class="p">()</span>             <span class="c1">#Get camera matrix</span>
+        <span class="n">distort</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDistortCoeffsCV2</span><span class="p">()</span>        <span class="c1">#Get distortion parameters</span>
+
+        <span class="c1">#Plot calibrated image</span>
+        <span class="n">plotCalib</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">distort</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">)</span>       </div>
+
+
+<div class="viewcode-block" id="CamEnv.showResiduals"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.showResiduals">[docs]</a>    <span class="k">def</span> <span class="nf">showResiduals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Show positions of xyz GCPs and projected GCPs, and residual </span>
+<span class="sd">        differences between their positions. This can be used as a measure of</span>
+<span class="sd">        a error in the georectification of measurements.&#39;&#39;&#39;</span>        
+        <span class="n">xyz</span><span class="p">,</span> <span class="n">uv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcp</span><span class="o">.</span><span class="n">getGCPs</span><span class="p">()</span>               <span class="c1">#Get GCPs</span>
+        <span class="n">dem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDEM</span><span class="p">()</span>                         <span class="c1">#Get DEM</span>
+
+        <span class="c1">#Set inverse projection parameters</span>
+        <span class="n">invprojvars</span> <span class="o">=</span> <span class="n">setProjection</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camloc</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camDirection</span><span class="p">,</span> 
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tanCorr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_focLen</span><span class="p">,</span> 
+                                    <span class="bp">self</span><span class="o">.</span><span class="n">_camCen</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refImage</span><span class="p">)</span>
+        
+        <span class="c1">#Compute residuals</span>
+        <span class="n">computeResidualsXYZ</span><span class="p">(</span><span class="n">invprojvars</span><span class="p">,</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">uv</span><span class="p">,</span> <span class="n">dem</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CamEnv.reportCamData"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.reportCamData">[docs]</a>    <span class="k">def</span> <span class="nf">reportCamData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&#39;&#39;&#39;Reporter for testing that the relevant data has been successfully </span>
+<span class="sd">        imported. Testing for camera Environment name, camera location (xyz),</span>
+<span class="sd">        reference image, DEM, DEM densification, GCPs, yaw pitch roll, camera </span>
+<span class="sd">        matrix, and distortion coefficients.</span>
+<span class="sd">        &#39;&#39;&#39;</span>
+        
+        <span class="c1">#Camera name and location</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">CAMERA ENVIRONMENT REPORT&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Camera Environment name: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">))</span> 
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Camera Location [X,Y,Z]: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_camloc</span><span class="p">))</span>
+        
+        <span class="c1">#Reference image</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Reference image used for baseline homography &#39;</span> <span class="o">+</span> 
+              <span class="s1">&#39;and/or GCP control:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_imagePath</span><span class="p">))</span>
+        
+        <span class="c1">#DEM and densification        </span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">DEM file used for projection:&#39;</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_DEMpath</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DEMdensify</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DEM is used at original resolution&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;DEM is resampled at &#39;</span><span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_DEMdensify</span><span class="p">)</span> <span class="o">+</span> 
+                  <span class="s1">&#39; times resolution&#39;</span><span class="p">)</span>
+        
+        <span class="c1">#GCPs        </span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_GCPpath</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">GCP file used to define camera pose:&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_GCPpath</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;No GCP file defined&#39;</span><span class="p">)</span>
+         
+        <span class="c1">#Yaw, pitch, roll</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camDirection</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Camera pose assumed unset (zero values)&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Camera pose set as [Yaw,Pitch,Roll]: &#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_camDirection</span><span class="p">))</span>
+
+        <span class="c1">#Camera calibration (matrix and distortion coefficients)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calibPath</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">list</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calibPath</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;.txt&#39;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calibration calculated from multiple files:&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calibPath</span><span class="p">))</span>
+
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calibPath</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calibPath</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;.txt&#39;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calibration calculated from single file:&#39;</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calibPath</span><span class="p">))</span>
+                
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calibPath</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">][</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="o">==</span> <span class="s1">&#39;.JPG&#39;</span> <span class="ow">or</span> <span class="s1">&#39;.PNG&#39;</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calibration calculated from raw images:&#39;</span><span class="p">)</span>                    
+                <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calibPath</span><span class="p">))</span>
+                                         
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calibPath</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">):</span>   
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calibration calculated from raw data:&#39;</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_calibPath</span><span class="p">))</span>
+        
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Calibration undefined&#39;</span><span class="p">)</span>
+        
+        
+        <span class="c1">#Report raster DEM details from the DEM class</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_DEM</span><span class="p">,</span><span class="n">ExplicitRaster</span><span class="p">):</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">DEM set:&#39;</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_DEM</span><span class="o">.</span><span class="n">reportDEM</span><span class="p">()</span>
+
+        <span class="c1">#Report calibration parameters from CamCalib class</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">reportCalibData</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="calibrateImages"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.calibrateImages">[docs]</a><span class="k">def</span> <span class="nf">calibrateImages</span><span class="p">(</span><span class="n">imageFiles</span><span class="p">,</span> <span class="n">xy</span><span class="p">,</span> <span class="n">refine</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function for calibrating a camera from a set of input calibration</span>
+<span class="sd">    images. Calibration is performed using OpenCV&#39;s chessboard calibration </span>
+<span class="sd">    functions. Input images (imageFile) need to be of a chessboard with </span>
+<span class="sd">    regular dimensions and a known number of corner features (xy).   </span>
+<span class="sd">    Please note that OpenCV&#39;s calibrateCamera function is incompatible </span>
+<span class="sd">    between different versions of OpenCV. Included here is the function</span>
+<span class="sd">    for version 3. Please see OpenCV&#39;s documentation for older versions.</span>
+<span class="sd">       </span>
+<span class="sd">    :param imageFiles: List of image file names</span>
+<span class="sd">    :type imageFiles: list</span>
+<span class="sd">    :param xy: Chessboard corner dimensions [rows, columns]</span>
+<span class="sd">    :type xy: list)           </span>
+<span class="sd">    :param refine: OpenCV camera model refinement method - </span>
+<span class="sd">cv2.CALIB_FIX_PRINCIPAL_POINT (fix principal point), </span>
+<span class="sd">cv2.CALIB_FIX_ASPECT_RATIO (Fix aspect ratio), cv2.CALIB_FIX_FOCAL_LENGTH (Fix </span>
+<span class="sd">focal length), cv2.CALIB_FIX_INTRINSIC (Fix camera model), </span>
+<span class="sd">cv2.CALIB_FIX_K1...6 (Fix radial coefficient 1-6), cv2.CALIB_FIX_TANGENT_DIST </span>
+<span class="sd">(Fix tangential coefficients), cv2.CALIB_USE_INTRINSIC_GUESS (Use initial </span>
+<span class="sd">intrinsic values), cv2.CALIB_ZERO_TANGENT_DIST (Set tangential distortion </span>
+<span class="sd">coefficients to zero), cv2.CALIB_RATIONAL_MODEL (Calculate radial distortion </span>
+<span class="sd">coefficients k4, k5, and k6). Default to None</span>
+<span class="sd">    :type refine: int, optional</span>
+<span class="sd">    :returns: A list containing the camera intrinsic matrix (arr), and </span>
+<span class="sd">tangential (arr) and radial distortion coefficents (arr), and the Camera </span>
+<span class="sd">calibration error (int)</span>
+<span class="sd">    &#39;&#39;&#39;</span>   
+    <span class="c1">#Define shape of array</span>
+    <span class="n">objp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>           
+    <span class="n">objp</span><span class="p">[:,:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span><span class="p">:</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> 
+
+    <span class="c1">#Array to store object pts and img pts from all images</span>
+    <span class="n">objpoints</span> <span class="o">=</span> <span class="p">[]</span>                                   
+    <span class="n">imgpoints</span> <span class="o">=</span> <span class="p">[]</span>                                   
+    
+    <span class="c1">#Set image counter for loop</span>
+    <span class="n">imageCount</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="c1">#Loop to determine if each image contains a chessboard pattern and </span>
+    <span class="c1">#store corner values if it does</span>
+    <span class="k">for</span> <span class="n">fname</span> <span class="ow">in</span> <span class="n">imageFiles</span><span class="p">:</span>
+        
+        <span class="c1">#Read file as an image using OpenCV</span>
+        <span class="n">img</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">fname</span><span class="p">)</span>   
+
+        <span class="c1">#Change RGB values to grayscale             </span>
+        <span class="n">gray</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">cvtColor</span><span class="p">(</span><span class="n">img</span><span class="p">,</span><span class="n">cv2</span><span class="o">.</span><span class="n">COLOR_BGR2GRAY</span><span class="p">)</span>    
+        
+        <span class="c1">#Find chessboard corners in image</span>
+        <span class="n">patternFound</span><span class="p">,</span> <span class="n">corners</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">findChessboardCorners</span><span class="p">(</span><span class="n">gray</span><span class="p">,</span>
+                                                          <span class="p">(</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span>
+                                                          <span class="kc">None</span><span class="p">)</span>
+        
+        <span class="c1">#Cycle through images, print if chessboard corners have been found </span>
+        <span class="c1">#for each image</span>
+        <span class="n">imageCount</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">imageCount</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">patternFound</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">fname</span><span class="p">)</span>
+        
+        <span class="c1">#If found, append object points to objp array</span>
+        <span class="k">if</span> <span class="n">patternFound</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">objpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">objp</span><span class="p">)</span>
+            
+            <span class="c1">#Determine chessboard corners to subpixel accuracy</span>
+            <span class="c1">#Inputs: winSize specified 11x11, zeroZone is nothing (-1,-1), </span>
+            <span class="c1">#opencv criteria</span>
+            <span class="n">cv2</span><span class="o">.</span><span class="n">cornerSubPix</span><span class="p">(</span><span class="n">gray</span><span class="p">,</span><span class="n">corners</span><span class="p">,(</span><span class="mi">11</span><span class="p">,</span><span class="mi">11</span><span class="p">),(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span>
+                             <span class="p">(</span><span class="n">cv2</span><span class="o">.</span><span class="n">TERM_CRITERIA_EPS</span><span class="o">+</span><span class="n">cv2</span><span class="o">.</span><span class="n">TERM_CRITERIA_MAX_ITER</span><span class="p">,</span>
+                             <span class="mi">30</span><span class="p">,</span><span class="mf">0.001</span><span class="p">))</span>
+                             
+            <span class="n">imgpoints</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">corners</span><span class="p">)</span>
+            
+            <span class="c1">#Draw and display corners</span>
+            <span class="n">cv2</span><span class="o">.</span><span class="n">drawChessboardCorners</span><span class="p">(</span><span class="n">img</span><span class="p">,(</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="n">corners</span><span class="p">,</span>
+                                      <span class="n">patternFound</span><span class="p">)</span>
+
+    <span class="c1">#Calculate initial camera matrix and distortion</span>
+    <span class="n">err</span><span class="p">,</span><span class="n">mtx</span><span class="p">,</span><span class="n">dist</span><span class="p">,</span><span class="n">rvecs</span><span class="p">,</span><span class="n">tvecs</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">calibrateCamera</span><span class="p">(</span><span class="n">objpoints</span><span class="p">,</span>
+                                                   <span class="n">imgpoints</span><span class="p">,</span>
+                                                   <span class="n">gray</span><span class="o">.</span><span class="n">shape</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                                                   <span class="kc">None</span><span class="p">,</span>
+                                                   <span class="mi">5</span><span class="p">)</span>
+    
+    <span class="c1">#Optimise camera matrix and distortion using fixed principal point</span>
+    <span class="k">if</span> <span class="n">refine</span> <span class="o">!=</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">err</span><span class="p">,</span><span class="n">mtx</span><span class="p">,</span><span class="n">dist</span><span class="p">,</span><span class="n">rvecs</span><span class="p">,</span><span class="n">tvecs</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">calibrateCamera</span><span class="p">(</span><span class="n">objpoints</span><span class="p">,</span>
+                                                       <span class="n">imgpoints</span><span class="p">,</span>
+                                                       <span class="n">gray</span><span class="o">.</span><span class="n">shape</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span>
+                                                       <span class="n">mtx</span><span class="p">,</span>
+                                                       <span class="mi">5</span><span class="p">,</span>
+                                                       <span class="n">flags</span><span class="o">=</span><span class="n">refine</span><span class="p">)</span>                                                                   
+
+    <span class="c1">#Change matrix structure for compatibility with PyTrx</span>
+    <span class="n">mtx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">mtx</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span><span class="n">mtx</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span>
+                   <span class="mi">0</span><span class="p">,</span><span class="n">mtx</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span><span class="p">,</span>
+                   <span class="n">mtx</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span><span class="n">mtx</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">2</span><span class="p">],</span><span class="mi">1</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
+
+    
+    <span class="c1">#Restructure distortion parameters for compatibility with PyTrx</span>
+    <span class="n">rad</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">dist</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">dist</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">dist</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">,</span> <span class="mf">0.0</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">6</span><span class="p">)</span>
+    <span class="n">tan</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">dist</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">4</span><span class="p">])</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="c1">#Return matrix, radial distortion and tangential distortion parameters</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">mtx</span><span class="p">,</span> <span class="n">tan</span><span class="p">,</span> <span class="n">rad</span><span class="p">],</span> <span class="n">err</span></div>
+        
+
+<div class="viewcode-block" id="constructDEM"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.constructDEM">[docs]</a><span class="k">def</span> <span class="nf">constructDEM</span><span class="p">(</span><span class="n">dempath</span><span class="p">,</span> <span class="n">densefactor</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Construct DEM from a given file path and densification factor.</span>
+<span class="sd">    </span>
+<span class="sd">    :param dempath: DEM filepath</span>
+<span class="sd">    :type dempath: str</span>
+<span class="sd">    :param densefactor: Densification factor</span>
+<span class="sd">    :type densefactor: int</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="c1">#Prepare DEM from file</span>
+    <span class="n">dem</span><span class="o">=</span><span class="n">load_DEM</span><span class="p">(</span><span class="n">dempath</span><span class="p">)</span>
+        
+    <span class="c1">#DEM densification</span>
+    <span class="k">if</span> <span class="n">densefactor</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">dem</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">densify</span><span class="p">(</span><span class="n">densefactor</span><span class="p">)</span>
+            
+    <span class="k">return</span> <span class="n">dem</span></div>
+
+            
+<div class="viewcode-block" id="setProjection"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.setProjection">[docs]</a><span class="k">def</span> <span class="nf">setProjection</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">camloc</span><span class="p">,</span> <span class="n">camdir</span><span class="p">,</span> <span class="n">radial</span><span class="p">,</span> <span class="n">tangen</span><span class="p">,</span> <span class="n">foclen</span><span class="p">,</span> <span class="n">camcen</span><span class="p">,</span> <span class="n">refimg</span><span class="p">,</span>
+                  <span class="n">viewshed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Set the inverse projection variables.</span>
+<span class="sd">    </span>
+<span class="sd">    :param dem: DEM object</span>
+<span class="sd">    :type dem: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
+<span class="sd">    :param camloc: Camera location (X,Y,Z)</span>
+<span class="sd">    :type camloc: arr</span>
+<span class="sd">    :param camdir: Camera pose [yaw, pitch, roll]</span>
+<span class="sd">    :type camdir: arr               </span>
+<span class="sd">    :param radial: Radial distortion coefficients</span>
+<span class="sd">    :type radial: arr</span>
+<span class="sd">    :param tangen: Tangential distortion coefficients</span>
+<span class="sd">    :type tangen: arr</span>
+<span class="sd">    :param foclen: Camera focal length</span>
+<span class="sd">    :type foclen: arr</span>
+<span class="sd">    :param camcen: Camera principal point</span>
+<span class="sd">    :type camcen: arr</span>
+<span class="sd">    :param refimg: Reference image (function only uses the image dimensions)</span>
+<span class="sd">    :type refimg: arr</span>
+<span class="sd">    :param viewshed: Flag to denote if viewshed from camera should be </span>
+<span class="sd">determined before projection</span>
+<span class="sd">    :type viewshed: bool</span>
+<span class="sd">    :returns: Inverse projection coefficients [X,Y,Z,uv0]</span>
+<span class="sd">    :rtype: list</span>
+<span class="sd">    &#39;&#39;&#39;</span>             
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Setting inverse projection coefficients&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">dem</span><span class="o">=</span><span class="n">constructDEM</span><span class="p">(</span><span class="n">dem</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">dem</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="n">X</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">Y</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">Z</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>        
+    <span class="k">else</span><span class="p">:</span>    
+        <span class="n">X</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">Y</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">Z</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    
+    <span class="c1">#Define visible extent of the DEM from the location of the camera</span>
+    <span class="k">if</span> <span class="n">viewshed</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="n">visible</span><span class="o">=</span><span class="n">voxelviewshed</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">camloc</span><span class="p">)</span>
+        <span class="n">XYZ</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="n">visible</span><span class="p">[:]],</span><span class="n">Y</span><span class="p">[</span><span class="n">visible</span><span class="p">[:]],</span><span class="n">Z</span><span class="p">[</span><span class="n">visible</span><span class="p">[:]]])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">X</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">X</span><span class="p">)</span>
+        <span class="n">Y</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">Y</span><span class="p">)</span>
+        <span class="n">Z</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ravel</span><span class="p">(</span><span class="n">Z</span><span class="p">)</span>
+        <span class="n">XYZ</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">])</span>
+        
+    <span class="c1">#Snap image plane to DEM extent</span>
+    <span class="n">XYZ</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">X</span><span class="p">[</span><span class="n">visible</span><span class="p">[:]],</span><span class="n">Y</span><span class="p">[</span><span class="n">visible</span><span class="p">[:]],</span><span class="n">Z</span><span class="p">[</span><span class="n">visible</span><span class="p">[:]]])</span>
+    <span class="n">uv0</span><span class="p">,</span><span class="n">dummy</span><span class="p">,</span><span class="n">inframe</span><span class="o">=</span><span class="n">projectXYZ</span><span class="p">(</span><span class="n">camloc</span><span class="p">,</span> <span class="n">camdir</span><span class="p">,</span> <span class="n">radial</span><span class="p">,</span> <span class="n">tangen</span><span class="p">,</span> <span class="n">foclen</span><span class="p">,</span> 
+                                 <span class="n">camcen</span><span class="p">,</span> <span class="n">refimg</span><span class="p">,</span> <span class="n">XYZ</span><span class="p">)</span>
+    <span class="n">uv0</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">uv0</span><span class="p">,</span><span class="n">XYZ</span><span class="p">])</span>
+    <span class="n">uv0</span><span class="o">=</span><span class="n">uv0</span><span class="p">[</span><span class="n">inframe</span><span class="p">,:]</span>
+
+    <span class="c1">#Assign real-world XYZ coordinates to image pixel coordinates         </span>
+    <span class="n">X</span><span class="o">=</span><span class="n">uv0</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">Y</span><span class="o">=</span><span class="n">uv0</span><span class="p">[:,</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">Z</span><span class="o">=</span><span class="n">uv0</span><span class="p">[:,</span><span class="mi">4</span><span class="p">]</span>
+    <span class="n">uv0</span><span class="o">=</span><span class="n">uv0</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span>
+    
+    <span class="c1">#Set inverse projection variables</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Inverse projection coefficients defined&#39;</span><span class="p">)</span>
+    <span class="n">invProjVars</span><span class="o">=</span><span class="p">[</span><span class="n">X</span><span class="p">,</span><span class="n">Y</span><span class="p">,</span><span class="n">Z</span><span class="p">,</span><span class="n">uv0</span><span class="p">]</span>              
+    <span class="k">return</span> <span class="n">invProjVars</span></div>
+            
+
+<div class="viewcode-block" id="projectXYZ"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.projectXYZ">[docs]</a><span class="k">def</span> <span class="nf">projectXYZ</span><span class="p">(</span><span class="n">camloc</span><span class="p">,</span> <span class="n">camdirection</span><span class="p">,</span> <span class="n">radial</span><span class="p">,</span> <span class="n">tangen</span><span class="p">,</span> <span class="n">foclen</span><span class="p">,</span> <span class="n">camcen</span><span class="p">,</span> <span class="n">refimg</span><span class="p">,</span> 
+               <span class="n">xyz</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Project the xyz world coordinates into the corresponding image </span>
+<span class="sd">    coordinates (uv). This is primarily executed using the ImGRAFT projection </span>
+<span class="sd">    function found in camera.m: uv,depth,inframe=cam.project(xyz)</span>
+<span class="sd">    </span>
+<span class="sd">    :param camloc: Camera location [X,Y,Z]</span>
+<span class="sd">    :type camloc: arr</span>
+<span class="sd">    :param camdirection: Camera pose (yaw, pitch, roll)</span>
+<span class="sd">    :type camdirection: arr</span>
+<span class="sd">    :param radial: Radial distortion coefficients</span>
+<span class="sd">    :type radial: arr</span>
+<span class="sd">    :param tangen: Tangential distortion coefficients</span>
+<span class="sd">    :type tangen: arr               </span>
+<span class="sd">    :param foclen: Camera focal length</span>
+<span class="sd">    :type foclen: arr               </span>
+<span class="sd">    :param camcen: Camera principal point</span>
+<span class="sd">    :type camcen: arr</span>
+<span class="sd">    :param refimg: Reference image (function only uses the image dimensions)</span>
+<span class="sd">    :type refimg: arr</span>
+<span class="sd">    :param xyz: world coordinates            </span>
+<span class="sd">    :type xyz: arr     </span>
+<span class="sd">    :returns: Pixel coordinates in image (arr), view depth (int), and a</span>
+<span class="sd">Boolean vector containing whether each projected 3D point is inside the frame        </span>
+<span class="sd">    &#39;&#39;&#39;</span>   
+    <span class="c1">#This was in ImGRAFT/Matlab to transpose the input array if it&#39;s </span>
+    <span class="c1">#ordered differently </span>
+    <span class="c1">#if size(xyz,2)&gt;3                                                 (MAT)</span>
+    <span class="c1">#   xyz=xyz&#39;;                                                     (MAT)</span>
+    <span class="c1">#end                                                              (MAT)</span>
+    <span class="c1">#xyz=bsxfun(@minus,xyz,cam.xyz);                                  (MAT)</span>
+    <span class="c1">###need to check xyz is an array of the correct size</span>
+    <span class="c1">###this does element-wise subtraction on the array columns</span>
+    
+    <span class="c1">#Get camera location</span>
+    <span class="n">xyz</span><span class="o">=</span><span class="n">xyz</span><span class="o">-</span><span class="n">camloc</span>
+    
+    <span class="c1">#Get camera rotation matrix from pose </span>
+    <span class="k">if</span> <span class="n">camdirection</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">Rprime</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">getRotation</span><span class="p">(</span><span class="n">camdirection</span><span class="p">))</span>
+    
+    <span class="c1">#Assign Rprime if camdirection variable is already a rotation matrix</span>
+    <span class="k">elif</span> <span class="n">camdirection</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">Rprime</span> <span class="o">=</span> <span class="n">camdirection</span>
+    
+    <span class="c1">#Multiply matrix</span>
+    <span class="n">xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">dot</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span><span class="n">Rprime</span><span class="p">)</span>
+    
+    <span class="c1">#ImGRAFT/Matlab equiv to below command: </span>
+    <span class="c1">#xy=bsxfun(@rdivide,xyz(:,1:2),xyz(:,3))                          (MAT)</span>
+    <span class="n">xy</span><span class="o">=</span><span class="n">xyz</span><span class="p">[:,</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">]</span><span class="o">/</span><span class="n">xyz</span><span class="p">[:,</span><span class="mi">2</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+                
+    <span class="k">if</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="c1">#Transposed from ImGRAFT</span>
+        <span class="n">r2</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">xy</span><span class="o">*</span><span class="n">xy</span><span class="p">,</span><span class="mi">1</span><span class="p">)</span>                
+        <span class="n">r2</span><span class="p">[</span><span class="n">r2</span><span class="o">&gt;</span><span class="mi">4</span><span class="p">]</span><span class="o">=</span><span class="mi">4</span>
+        
+        <span class="c1">#Transposed from ImGRAFT</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">allclose</span><span class="p">(</span><span class="n">radial</span><span class="p">[</span><span class="mi">2</span><span class="p">:</span><span class="mi">6</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">,</span> <span class="mf">0.</span><span class="p">]):</span>
+            <span class="n">a</span><span class="o">=</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">radial</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">r2</span><span class="o">+</span><span class="n">radial</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">r2</span><span class="o">*</span><span class="n">r2</span><span class="o">+</span><span class="n">radial</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">r2</span><span class="o">*</span><span class="n">r2</span><span class="o">*</span><span class="n">r2</span><span class="p">)</span>
+            <span class="n">a</span><span class="o">=</span><span class="n">a</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">radial</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">*</span><span class="n">r2</span><span class="o">+</span><span class="n">radial</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">*</span><span class="n">r2</span><span class="o">*</span><span class="n">r2</span><span class="o">+</span><span class="n">radial</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span><span class="o">*</span><span class="n">r2</span><span class="o">*</span><span class="n">r2</span><span class="o">*</span><span class="n">r2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">a</span><span class="o">=</span><span class="p">(</span><span class="mf">1.</span><span class="o">+</span><span class="n">radial</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">r2</span><span class="o">+</span><span class="n">radial</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">r2</span><span class="o">*</span><span class="n">r2</span><span class="o">+</span><span class="n">radial</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">r2</span><span class="o">*</span><span class="n">r2</span><span class="o">*</span><span class="n">r2</span><span class="p">)</span>
+
+        <span class="n">xty</span><span class="o">=</span><span class="n">xy</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">xy</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span>            
+        <span class="n">pt1</span><span class="o">=</span><span class="n">a</span><span class="o">*</span><span class="n">xy</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">tangen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">xty</span><span class="o">+</span><span class="n">tangen</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">r2</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">xy</span><span class="p">[:,</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">xy</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">pt2</span><span class="o">=</span><span class="n">a</span><span class="o">*</span><span class="n">xy</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">tangen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">xty</span><span class="o">+</span><span class="n">tangen</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="n">r2</span><span class="o">+</span><span class="mi">2</span><span class="o">*</span><span class="n">xy</span><span class="p">[:,</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">xy</span><span class="p">[:,</span><span class="mi">1</span><span class="p">])</span>            
+        <span class="n">xy</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">((</span><span class="n">pt1</span><span class="p">,</span><span class="n">pt2</span><span class="p">))</span>
+
+    <span class="c1">#ImGRAFT/Matlab version of code below: </span>
+    <span class="c1">#uv=[cam.f[1]*xy(:,1)+cam.c(1), cam.f(2)*xy(:,2)+cam.c(2)];       (MAT)</span>
+    <span class="n">uv</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">([</span><span class="n">xy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">xy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
+               
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">uv</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">foclen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">xy</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">camcen</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">uv</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">foclen</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">*</span> <span class="n">xy</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">camcen</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+ 
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="k">if</span> <span class="n">xyz</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span><span class="o">&lt;=</span><span class="mi">0</span><span class="p">:</span>
+            <span class="n">uv</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+            <span class="n">uv</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+    <span class="n">depth</span><span class="o">=</span><span class="n">xyz</span><span class="p">[:,</span><span class="mi">2</span><span class="p">]</span>
+    
+    <span class="c1">#Create empty array representing the image</span>
+    <span class="n">inframe</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">xy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">)</span>
+
+    <span class="c1">#Get size of reference image</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">refimg</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">ims</span><span class="o">=</span><span class="n">readImg</span><span class="p">(</span><span class="n">refimg</span><span class="p">)</span>
+        <span class="n">ims</span><span class="o">=</span><span class="n">ims</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">refimg</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+        <span class="n">ims</span><span class="o">=</span><span class="n">refimg</span><span class="o">.</span><span class="n">shape</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ims</span><span class="o">=</span><span class="n">refimg</span><span class="o">.</span><span class="n">getImageSize</span><span class="p">()</span>
+    
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">xy</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+        <span class="n">inframe</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="p">(</span><span class="n">depth</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">uv</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">1</span><span class="p">)</span><span class="o">&amp;</span><span class="p">(</span><span class="n">uv</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">&gt;=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">inframe</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">=</span><span class="n">inframe</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">&amp;</span><span class="p">(</span><span class="n">uv</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">0</span><span class="p">]</span><span class="o">&lt;=</span><span class="n">ims</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">&amp;</span><span class="p">(</span><span class="n">uv</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span><span class="o">&lt;=</span><span class="n">ims</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    
+    <span class="k">return</span> <span class="n">uv</span><span class="p">,</span><span class="n">depth</span><span class="p">,</span><span class="n">inframe</span></div>
+
+ 
+<div class="viewcode-block" id="projectUV"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.projectUV">[docs]</a><span class="k">def</span> <span class="nf">projectUV</span><span class="p">(</span><span class="n">uv</span><span class="p">,</span> <span class="n">invprojvars</span><span class="p">):</span>  
+    <span class="sd">&#39;&#39;&#39;Inverse project image coordinates (uv) to xyz world coordinates</span>
+<span class="sd">    using inverse projection variables (set using setProjection function).         </span>
+<span class="sd">    This function is primarily adopted from the ImGRAFT projection function </span>
+<span class="sd">    found in camera.m: uv,depth,inframe=cam.project(xyz)</span>
+<span class="sd">    </span>
+<span class="sd">    :param uv: Pixel coordinates in image</span>
+<span class="sd">    :type uv: arr</span>
+<span class="sd">    :param invprojvars: Inverse projection variables [X,Y,Z,uv0]</span>
+<span class="sd">    :type invprojvars: list       </span>
+<span class="sd">    :returns: World coordinates </span>
+<span class="sd">    :rtype: arr</span>
+<span class="sd">    &#39;&#39;&#39;</span>                  
+    <span class="c1">#Create empty numpy array</span>
+    <span class="n">xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">uv</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">3</span><span class="p">])</span>
+    <span class="n">xyz</span><span class="p">[::]</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
+    
+    <span class="c1">#Get XYZ real world coordinates and corresponding uv coordinates</span>
+    <span class="n">X</span><span class="o">=</span><span class="n">invprojvars</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">Y</span><span class="o">=</span><span class="n">invprojvars</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">Z</span><span class="o">=</span><span class="n">invprojvars</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+    <span class="n">uv0</span><span class="o">=</span><span class="n">invprojvars</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+    
+    <span class="c1">#Snap uv and xyz grids together</span>
+    <span class="n">xi</span><span class="o">=</span><span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span><span class="n">uv0</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">uv</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+    <span class="n">yi</span><span class="o">=</span><span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span><span class="n">uv0</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">uv</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+    <span class="n">zi</span><span class="o">=</span><span class="n">interpolate</span><span class="o">.</span><span class="n">griddata</span><span class="p">(</span><span class="n">uv0</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">uv</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+    
+    <span class="c1">#Return xyz grids                </span>
+    <span class="n">xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">column_stack</span><span class="p">([</span><span class="n">xi</span><span class="p">,</span><span class="n">yi</span><span class="p">,</span><span class="n">zi</span><span class="p">])</span>       
+    <span class="k">return</span> <span class="n">xyz</span></div>
+
+
+<div class="viewcode-block" id="optimiseCamera"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.optimiseCamera">[docs]</a><span class="k">def</span> <span class="nf">optimiseCamera</span><span class="p">(</span><span class="n">optimise</span><span class="p">,</span> <span class="n">projvars</span><span class="p">,</span> <span class="n">GCPxyz</span><span class="p">,</span> <span class="n">GCPuv</span><span class="p">,</span> <span class="n">optmethod</span><span class="o">=</span><span class="s1">&#39;trf&#39;</span><span class="p">,</span> 
+                   <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Optimise camera parameters using the pixel differences between a set</span>
+<span class="sd">    of image GCPs and projected XYZ GCPs. The optimisation routine adopts the</span>
+<span class="sd">    least_square function in scipy&#39;s optimize tools, using either the Trust </span>
+<span class="sd">    Region Reflective algorithm, the dogleg algorithm or the </span>
+<span class="sd">    Levenberg-Marquardt algorithm to refine a set group of projection </span>
+<span class="sd">    parameters - camera pose only, the internal camera parameters (i.e. radial </span>
+<span class="sd">    distortion, tangential distortion, focal length, principal point), the </span>
+<span class="sd">    external camera parameters (i.e. camera location, camera pose), or all </span>
+<span class="sd">    projection parameters (i.e. camera location, camera pose, radial </span>
+<span class="sd">    distortion, tangential distortion, focal length, principal point).    </span>
+<span class="sd">    The Trust Region Reflective algorithm is generally a robust method, ideal </span>
+<span class="sd">    for solving many variables (default). The Dogleg algorithm is ideal for </span>
+<span class="sd">    solving few variables. The Levenberg-Margquardt algorithm is the most </span>
+<span class="sd">    efficient method, ideal for solving few variables.</span>
+<span class="sd">    Pixel differences between a set of image GCPs and projected XYZ GCPs are</span>
+<span class="sd">    calculated and refined within the optimisation function, performing </span>
+<span class="sd">    iterations until an optimum solution is reached. A new set of optimised </span>
+<span class="sd">    projection parameters are returned.</span>
+<span class="sd">    </span>
+<span class="sd">    :param optimise: Flag denoting which variables will be optimised: YPR </span>
+<span class="sd">(camera pose only), INT (internal camera parameters), EXT (external camera </span>
+<span class="sd">parameters), LOC (all parameters except camera location), or ALL (all </span>
+<span class="sd">projection parameters)</span>
+<span class="sd">    :type optimise: str             </span>
+<span class="sd">    :param projvars: Projection parameters [camera location, camera pose, </span>
+<span class="sd">radial distortion, tangential distortion, focal length, principal point, </span>
+<span class="sd">reference image]</span>
+<span class="sd">    :typeprojvars: list</span>
+<span class="sd">    :param GCPuv: UV positions for GCPs, as shape (m, 2)</span>
+<span class="sd">    :type GCPuv: arr</span>
+<span class="sd">    :param optmethod: Optimisation method: &#39;trf&#39; (Trust Region Reflective </span>
+<span class="sd">algorithm), &#39;dogbox&#39; (dogleg algorithm), or &#39;lm&#39; (Levenberg-Marquardt </span>
+<span class="sd">algorithm)</span>
+<span class="sd">    :type optmethod: str                           </span>
+<span class="sd">    :param show: Flag denoting whether plot of residuals should be shown</span>
+<span class="sd">    :type show: bool                                           .                                 </span>
+<span class="sd">    :returns: A list containing the optimised projection parameters. If </span>
+<span class="sd">optimisation fails then None is returned    </span>
+<span class="sd">    &#39;&#39;&#39;</span>    
+    <span class="c1">#Get projectiion parameters from projvars</span>
+    <span class="n">camloc</span><span class="p">,</span> <span class="n">campose</span><span class="p">,</span> <span class="n">radcorr</span><span class="p">,</span> <span class="n">tancorr</span><span class="p">,</span> <span class="n">focal</span><span class="p">,</span> <span class="n">camcen</span><span class="p">,</span> <span class="n">refimg</span> <span class="o">=</span> <span class="n">projvars</span>
+
+    <span class="c1">#Compute GCP residuals with original camera info</span>
+    <span class="n">stable</span> <span class="o">=</span> <span class="p">[</span><span class="n">camloc</span><span class="p">,</span> <span class="n">campose</span><span class="p">,</span> <span class="n">radcorr</span><span class="p">,</span> <span class="n">tancorr</span><span class="p">,</span> <span class="n">focal</span><span class="p">,</span> <span class="n">camcen</span><span class="p">]</span>    
+    <span class="n">res0</span> <span class="o">=</span> <span class="n">computeResidualsUV</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">stable</span><span class="p">,</span> <span class="n">GCPxyz</span><span class="p">,</span> <span class="n">GCPuv</span><span class="p">,</span> <span class="n">refimg</span><span class="p">,</span> 
+                            <span class="n">optimise</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>   
+    <span class="n">GCPxyz_proj0</span><span class="p">,</span><span class="n">depth</span><span class="p">,</span><span class="n">inframe</span> <span class="o">=</span> <span class="n">projectXYZ</span><span class="p">(</span><span class="n">camloc</span><span class="p">,</span> <span class="n">campose</span><span class="p">,</span> <span class="n">radcorr</span><span class="p">,</span> <span class="n">tancorr</span><span class="p">,</span> 
+                                           <span class="n">focal</span><span class="p">,</span> <span class="n">camcen</span><span class="p">,</span> <span class="n">refimg</span><span class="p">,</span> <span class="n">GCPxyz</span><span class="p">)</span>
+    
+    <span class="c1">#Get variables for optimising    </span>
+    <span class="k">if</span> <span class="n">optimise</span><span class="o">==</span><span class="s1">&#39;YPR&#39;</span><span class="p">:</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">campose</span>
+        <span class="n">stable</span> <span class="o">=</span> <span class="p">[</span><span class="n">camloc</span><span class="p">,</span> <span class="n">radcorr</span><span class="p">,</span> <span class="n">tancorr</span><span class="p">,</span> <span class="n">focal</span><span class="p">,</span> <span class="n">camcen</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Commencing optimisation of YPR&#39;</span><span class="p">)</span>        
+    <span class="k">elif</span> <span class="n">optimise</span><span class="o">==</span><span class="s1">&#39;INT&#39;</span><span class="p">:</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">radcorr</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">tancorr</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> 
+                                 <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">focal</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">camcen</span><span class="p">)))</span>
+        <span class="n">stable</span> <span class="o">=</span> <span class="p">[</span><span class="n">camloc</span><span class="p">,</span> <span class="n">campose</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Commencing optimisation of internal camera parameters&#39;</span><span class="p">)</span>    
+    <span class="k">elif</span> <span class="n">optimise</span> <span class="o">==</span> <span class="s1">&#39;EXT&#39;</span><span class="p">:</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">camloc</span><span class="p">,</span> <span class="n">campose</span><span class="p">))</span>
+        <span class="n">stable</span> <span class="o">=</span> <span class="p">[</span><span class="n">radcorr</span><span class="p">,</span> <span class="n">tancorr</span><span class="p">,</span> <span class="n">focal</span><span class="p">,</span> <span class="n">camcen</span><span class="p">]</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Commencing optimisation of external camera parameters&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">optimise</span><span class="o">=</span><span class="s1">&#39;ALL&#39;</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">camloc</span><span class="p">,</span> <span class="n">campose</span><span class="p">,</span> <span class="n">radcorr</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> 
+                                 <span class="n">tancorr</span><span class="o">.</span><span class="n">flatten</span><span class="p">(),</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">focal</span><span class="p">),</span> 
+                                 <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">camcen</span><span class="p">)))</span>               
+        <span class="n">stable</span><span class="o">=</span><span class="kc">None</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Commencing optimisation of all projection parameters&#39;</span><span class="p">)</span>
+     
+    <span class="c1">#Optimise, passing through the computeResiduals function for iterating</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">least_squares</span><span class="p">(</span><span class="n">computeResidualsUV</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">optmethod</span><span class="p">,</span> 
+                                 <span class="n">verbose</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> 
+                                 <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">stable</span><span class="p">,</span> <span class="n">GCPxyz</span><span class="p">,</span> <span class="n">GCPuv</span><span class="p">,</span> <span class="n">refimg</span><span class="p">,</span> <span class="n">optimise</span><span class="p">))</span>  
+
+    <span class="c1">#If optimisation was sucessful</span>
+    <span class="k">if</span> <span class="n">out</span><span class="o">.</span><span class="n">success</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Optimisation successful&#39;</span><span class="p">)</span>
+        
+        <span class="c1">#Retrieve optimised parameters</span>
+        <span class="k">if</span> <span class="n">optimise</span><span class="o">==</span><span class="s1">&#39;YPR&#39;</span><span class="p">:</span>
+            <span class="n">campose</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">x</span>
+        <span class="k">elif</span> <span class="n">optimise</span> <span class="o">==</span> <span class="s1">&#39;INT&#39;</span><span class="p">:</span>
+            <span class="n">radcorr</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">])</span>
+            <span class="n">tancorr</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">])</span>
+            <span class="n">focal</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">7</span><span class="p">])</span>
+            <span class="n">camcen</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">9</span><span class="p">])</span>        
+        <span class="k">elif</span> <span class="n">optimise</span> <span class="o">==</span> <span class="s1">&#39;EXT&#39;</span><span class="p">:</span>
+            <span class="n">camloc</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">campose</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>             
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">camloc</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">campose</span> <span class="o">=</span> <span class="n">out</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+            <span class="n">radcorr</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">9</span><span class="p">])</span>
+            <span class="n">tancorr</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">9</span><span class="p">:</span><span class="mi">11</span><span class="p">])</span>
+            <span class="n">focal</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">11</span><span class="p">:</span><span class="mi">13</span><span class="p">])</span>
+            <span class="n">camcen</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">out</span><span class="o">.</span><span class="n">x</span><span class="p">[</span><span class="mi">13</span><span class="p">:</span><span class="mi">15</span><span class="p">])</span> 
+        
+        <span class="c1">#Calculate projected GCPs with new projection parameters</span>
+        <span class="n">GCPxyz_proj1</span><span class="p">,</span> <span class="n">depth</span><span class="p">,</span> <span class="n">inframe</span> <span class="o">=</span> <span class="n">projectXYZ</span><span class="p">(</span><span class="n">camloc</span><span class="p">,</span> <span class="n">campose</span><span class="p">,</span> <span class="n">radcorr</span><span class="p">,</span> 
+                                                  <span class="n">tancorr</span><span class="p">,</span> <span class="n">focal</span><span class="p">,</span> <span class="n">camcen</span><span class="p">,</span> 
+                                                  <span class="n">refimg</span><span class="p">,</span> <span class="n">GCPxyz</span><span class="p">)</span>   
+     
+        <span class="c1">#Calculate new residuals</span>
+        <span class="n">res1</span><span class="o">=</span><span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">GCPxyz_proj1</span><span class="p">)):</span>
+            <span class="n">res1</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">GCPxyz_proj1</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">GCPuv</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">*</span>
+                               <span class="p">(</span><span class="n">GCPxyz_proj1</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">GCPuv</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">+</span>
+                               <span class="p">(</span><span class="n">GCPxyz_proj1</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">GCPuv</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">*</span>
+                               <span class="p">(</span><span class="n">GCPxyz_proj1</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">GCPuv</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Original px residuals (average): &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">res0</span><span class="p">)))</span>        
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Optimised px residuals (average): &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">res1</span><span class="p">)))</span>
+        
+        <span class="c1">#Compile new projection parameter list</span>
+        <span class="n">projvars1</span> <span class="o">=</span> <span class="p">[</span><span class="n">camloc</span><span class="p">,</span> <span class="n">campose</span><span class="p">,</span> <span class="n">radcorr</span><span class="p">,</span> <span class="n">tancorr</span><span class="p">,</span> <span class="n">focal</span><span class="p">,</span> <span class="n">camcen</span><span class="p">,</span> 
+                     <span class="n">refimg</span><span class="p">]</span>
+        
+        <span class="c1">#If plotting flag is set to True</span>
+        <span class="k">if</span> <span class="n">show</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            
+            <span class="c1">#Get reference image</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">refimg</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">refimg</span><span class="o">=</span><span class="n">readImg</span><span class="p">(</span><span class="n">refimg</span><span class="p">)</span>
+                <span class="n">ims</span><span class="o">=</span><span class="n">refimg</span><span class="o">.</span><span class="n">shape</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">refimg</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="n">ims</span><span class="o">=</span><span class="n">refimg</span><span class="o">.</span><span class="n">shape</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">ims</span><span class="o">=</span><span class="n">refimg</span><span class="o">.</span><span class="n">getImageSize</span><span class="p">()</span>
+                <span class="n">refimg</span><span class="o">=</span><span class="n">refimg</span><span class="o">.</span><span class="n">getImageArray</span><span class="p">()</span>
+
+            
+            <span class="c1">#Plot GCPs using Utilities.plotResiduals function </span>
+            <span class="n">plotResiduals</span><span class="p">(</span><span class="n">refimg</span><span class="p">,</span> <span class="n">ims</span><span class="p">,</span> <span class="n">GCPuv</span><span class="p">,</span> <span class="n">GCPxyz_proj0</span><span class="p">,</span> <span class="n">GCPxyz_proj1</span><span class="p">)</span>
+        
+        <span class="c1">#Return new projection parameters list        </span>
+        <span class="k">return</span> <span class="n">projvars1</span>
+
+    <span class="c1">#If optimisation failed, print statement and return none</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Optimisation failed&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="kc">None</span>     </div>
+    
+
+<div class="viewcode-block" id="getRotation"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.getRotation">[docs]</a><span class="k">def</span> <span class="nf">getRotation</span><span class="p">(</span><span class="n">camDirection</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Calculates camera rotation matrix calculated from view </span>
+<span class="sd">    direction.</span>
+<span class="sd">    </span>
+<span class="sd">    :param camDirection: Camera pose (yaw,pitch,roll)</span>
+<span class="sd">    :type camDirection: arr             </span>
+<span class="sd">    :returns: Rotation matrix as array</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+
+    <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">camDirection</span><span class="p">)</span> 
+    <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">camDirection</span><span class="p">)</span>
+                
+    <span class="n">p</span><span class="o">=</span><span class="p">[</span><span class="n">S</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">S</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">,</span> <span class="n">S</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">S</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">,</span> <span class="n">S</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="n">q</span><span class="o">=</span><span class="p">[</span><span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">S</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">S</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">S</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">-</span> <span class="n">S</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">C</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+    <span class="n">r</span><span class="o">=</span><span class="p">[</span><span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">C</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">,</span> <span class="n">C</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">*</span><span class="n">S</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">,</span> <span class="o">-</span><span class="n">S</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+        
+    <span class="n">value</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">p</span><span class="p">,</span><span class="n">q</span><span class="p">,</span><span class="n">r</span><span class="p">])</span>
+    <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,:]</span><span class="o">=-</span><span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">2</span><span class="p">,:]</span>
+
+    <span class="k">return</span> <span class="n">value</span></div>
+
+
+<div class="viewcode-block" id="computeResidualsXYZ"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.computeResidualsXYZ">[docs]</a><span class="k">def</span> <span class="nf">computeResidualsXYZ</span><span class="p">(</span><span class="n">invprojvars</span><span class="p">,</span> <span class="n">GCPxyz</span><span class="p">,</span> <span class="n">GCPuv</span><span class="p">,</span> <span class="n">dem</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function for computing the pixel difference between GCP image points</span>
+<span class="sd">    and GCP projected XYZ points. This function is used in the optimisation </span>
+<span class="sd">    function (optimiseCamera), with parameters for optimising defined in the</span>
+<span class="sd">    first variable and stable parameters defined in the second. If no </span>
+<span class="sd">    optimisable parameters are given and the optimise flag is set to None then </span>
+<span class="sd">    residuals are computed for the original parameters (i.e. no optimisation).</span>
+<span class="sd">    </span>
+<span class="sd">    :param params: Optimisable parameters, given as a 1-D array of shape (m, )</span>
+<span class="sd">    :type params: arr</span>
+<span class="sd">    :param stable: Stable parameters that will not be optimised</span>
+<span class="sd">    :type stable: list</span>
+<span class="sd">    :param GCPxyz: GCPs in scene space (x,y,z)</span>
+<span class="sd">    :type GCPxyz: arr</span>
+<span class="sd">    :param GCPuv: GCPs in image space (u,v)</span>
+<span class="sd">    :type GCPuv: arr</span>
+<span class="sd">    :param refimg: Reference image, given as a CamImage object, file path </span>
+<span class="sd">string, or image array</span>
+<span class="sd">    :type refimg: :class:&#39;PyTrx.Images.CamImage&#39;/str/arr</span>
+<span class="sd">    :param optimise: Flag denoting which variables will be optimised: YPR </span>
+<span class="sd">(camera pose only), INT (internal camera parameters), EXT (external camera </span>
+<span class="sd">parameters), LOC (all parameters except camera location), or ALL (all </span>
+<span class="sd">projection parameters)</span>
+<span class="sd">    :type optimise: str</span>
+<span class="sd">    :returns: Array denoting pixel difference between UV and projected XYZ</span>
+<span class="sd">position of each GCP</span>
+<span class="sd">    :rtype: arr</span>
+<span class="sd">    &#39;&#39;&#39;</span>
+    <span class="n">GCPxyz_proj</span> <span class="o">=</span> <span class="n">projectUV</span><span class="p">(</span><span class="n">GCPuv</span><span class="p">,</span> <span class="n">invprojvars</span><span class="p">)</span>  
+        
+    <span class="c1">#Compute residuals using pythag theorem (i.e. pixel difference between pts)</span>
+    <span class="n">residual</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">GCPxyz_proj</span><span class="p">)):</span>
+        <span class="n">residual</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">GCPxyz_proj</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">GCPxyz</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> 
+                                <span class="p">(</span><span class="n">GCPxyz_proj</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">GCPxyz</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>  
+    <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">residual</span><span class="p">)</span>    
+
+    <span class="n">fig</span><span class="p">,</span> <span class="p">(</span><span class="n">ax1</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+    <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;Average residual difference: &#39;</span> <span class="o">+</span> 
+                                <span class="nb">str</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">nanmean</span><span class="p">(</span><span class="n">residual</span><span class="p">))</span> <span class="o">+</span> <span class="s1">&#39; m&#39;</span><span class="p">)</span>
+          
+    <span class="c1">#Plot DEM and set cmap</span>
+    <span class="n">demextent</span> <span class="o">=</span> <span class="n">dem</span><span class="o">.</span><span class="n">getExtent</span><span class="p">()</span>
+    <span class="n">demz</span> <span class="o">=</span> <span class="n">dem</span><span class="o">.</span><span class="n">getZ</span><span class="p">()</span>  
+    <span class="n">implot</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">demz</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">demextent</span><span class="p">)</span>
+    <span class="n">implot</span><span class="o">.</span><span class="n">set_cmap</span><span class="p">(</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="n">demextent</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">demextent</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">demextent</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">demextent</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+    
+    <span class="c1">#Plot UV GCPs</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">GCPxyz</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">GCPxyz</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> 
+                <span class="n">label</span><span class="o">=</span><span class="s1">&#39;XYZ&#39;</span><span class="p">)</span>
+    
+    <span class="c1">#Plot projected XYZ GCPs</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">GCPxyz_proj</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">GCPxyz_proj</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;blue&#39;</span><span class="p">,</span> 
+                <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Projected UV&#39;</span><span class="p">)</span>
+    
+    <span class="c1">#Add legend and show plot</span>
+    <span class="n">ax1</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
+    <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span> 
+        
+    <span class="c1">#Return all residuals</span>
+    <span class="k">return</span> <span class="n">residual</span></div>
+   
+
+<div class="viewcode-block" id="computeResidualsUV"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.computeResidualsUV">[docs]</a><span class="k">def</span> <span class="nf">computeResidualsUV</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">stable</span><span class="p">,</span> <span class="n">GCPxyz</span><span class="p">,</span> <span class="n">GCPuv</span><span class="p">,</span> <span class="n">refimg</span><span class="p">,</span> 
+                       <span class="n">optimise</span><span class="o">=</span><span class="s1">&#39;YPR&#39;</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function for computing the pixel difference between GCP image points</span>
+<span class="sd">    and GCP projected XYZ points. This function is used in the optimisation </span>
+<span class="sd">    function (optimiseCamera), with parameters for optimising defined in the</span>
+<span class="sd">    first variable and stable parameters defined in the second. If no </span>
+<span class="sd">    optimisable parameters are given and the optimise flag is set to None then </span>
+<span class="sd">    residuals are computed for the original parameters (i.e. no optimisation).</span>
+<span class="sd">    </span>
+<span class="sd">    :param params: Optimisable parameters, given as a 1-D array of shape (m, )</span>
+<span class="sd">    :type params: arr</span>
+<span class="sd">    :param stable: Stable parameters that will not be optimised</span>
+<span class="sd">    :type stable: list</span>
+<span class="sd">    :param GCPxyz: GCPs in scene space (x,y,z)</span>
+<span class="sd">    :type GCPxyz: arr</span>
+<span class="sd">    :param GCPuv: GCPs in image space (u,v)</span>
+<span class="sd">    :type GCPuv: arr</span>
+<span class="sd">    :param refimg: Reference image, given as a CamImage object, file path </span>
+<span class="sd">string, or image array</span>
+<span class="sd">    :type refimg: :class:&#39;PyTrx.Images.CamImage&#39;/str/arr</span>
+<span class="sd">    :param optimise: Flag denoting which variables will be optimised: YPR </span>
+<span class="sd">(camera pose only), INT (internal camera parameters), EXT (external camera </span>
+<span class="sd">parameters), LOC (all parameters except camera location), or ALL (all </span>
+<span class="sd">projection parameters)</span>
+<span class="sd">    :type optimise: str</span>
+<span class="sd">    :returns: Pixel difference between UV and projected XYZ position of each GCP</span>
+<span class="sd">    :rtype: arr</span>
+
+<span class="sd">    &#39;&#39;&#39;</span>
+    
+    <span class="c1">#Assign optimisable and stable parameters depending on optimise flag</span>
+    <span class="k">if</span> <span class="n">optimise</span> <span class="o">==</span> <span class="s1">&#39;YPR&#39;</span><span class="p">:</span>
+        <span class="n">campose</span> <span class="o">=</span> <span class="n">params</span>      
+        <span class="n">camloc</span><span class="p">,</span> <span class="n">radcorr</span><span class="p">,</span> <span class="n">tancorr</span><span class="p">,</span> <span class="n">focal</span><span class="p">,</span> <span class="n">camcen</span> <span class="o">=</span> <span class="n">stable</span>
+            
+    <span class="k">elif</span> <span class="n">optimise</span> <span class="o">==</span> <span class="s1">&#39;INT&#39;</span><span class="p">:</span>
+        <span class="n">radcorr</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">tancorr</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">5</span><span class="p">]</span>
+        <span class="n">focal</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">5</span><span class="p">:</span><span class="mi">7</span><span class="p">]</span>
+        <span class="n">camcen</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">7</span><span class="p">:</span><span class="mi">9</span><span class="p">]</span>
+        <span class="n">camloc</span><span class="p">,</span> <span class="n">campose</span> <span class="o">=</span> <span class="n">stable</span> 
+    
+    <span class="k">elif</span> <span class="n">optimise</span> <span class="o">==</span> <span class="s1">&#39;EXT&#39;</span><span class="p">:</span>
+        <span class="n">camloc</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">campose</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+        <span class="n">radcorr</span><span class="p">,</span> <span class="n">tancorr</span><span class="p">,</span> <span class="n">focal</span><span class="p">,</span> <span class="n">camcen</span> <span class="o">=</span> <span class="n">stable</span> 
+
+    <span class="k">elif</span> <span class="n">optimise</span> <span class="o">==</span> <span class="s1">&#39;ALL&#39;</span><span class="p">:</span>
+        <span class="n">camloc</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+        <span class="n">campose</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">3</span><span class="p">:</span><span class="mi">6</span><span class="p">]</span>
+        <span class="n">radcorr</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">6</span><span class="p">:</span><span class="mi">9</span><span class="p">]</span>
+        <span class="n">tancorr</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">9</span><span class="p">:</span><span class="mi">11</span><span class="p">]</span>
+        <span class="n">focal</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">11</span><span class="p">:</span><span class="mi">13</span><span class="p">]</span>
+        <span class="n">camcen</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="mi">13</span><span class="p">:</span><span class="mi">15</span><span class="p">]</span>
+        
+    <span class="k">else</span><span class="p">:</span>       
+        <span class="n">camloc</span><span class="p">,</span> <span class="n">campose</span><span class="p">,</span> <span class="n">radcorr</span><span class="p">,</span> <span class="n">tancorr</span><span class="p">,</span> <span class="n">focal</span><span class="p">,</span> <span class="n">camcen</span> <span class="o">=</span> <span class="n">stable</span>
+    
+    <span class="c1">#Project XYZ points to UV space       </span>
+    <span class="n">GCPxyz_proj</span><span class="p">,</span><span class="n">depth</span><span class="p">,</span><span class="n">inframe</span> <span class="o">=</span> <span class="n">projectXYZ</span><span class="p">(</span><span class="n">camloc</span><span class="p">,</span> <span class="n">campose</span><span class="p">,</span> <span class="n">radcorr</span><span class="p">,</span> <span class="n">tancorr</span><span class="p">,</span> 
+                                           <span class="n">focal</span><span class="p">,</span> <span class="n">camcen</span><span class="p">,</span> <span class="n">refimg</span><span class="p">,</span> <span class="n">GCPxyz</span><span class="p">)</span>
+    
+    <span class="c1">#Compute residuals using pythag theorem (i.e. pixel difference between pts)</span>
+    <span class="n">residual</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">GCPxyz_proj</span><span class="p">)):</span>
+        <span class="n">residual</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">GCPxyz_proj</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="n">GCPuv</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> 
+                                <span class="p">(</span><span class="n">GCPxyz_proj</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="n">GCPuv</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">])</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>  
+    <span class="n">residual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">residual</span><span class="p">)</span>
+
+    <span class="c1">#Return all residuals</span>
+    <span class="k">return</span> <span class="n">residual</span></div>
+ 
+<span class="c1">#------------------------------------------------------------------------------</span>
+
+<span class="c1">#if __name__ == &quot;__main__&quot;:   </span>
+<span class="c1">#    print &#39;\nProgram finished&#39;</span>
+
+<span class="c1">#------------------------------------------------------------------------------   </span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="../../index.html">PyTrx 1.1.0 documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2020, Penelope How, Nick Hulton, Lynne Buie.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.2.0.
+    </div>
+  </body>
+</html>

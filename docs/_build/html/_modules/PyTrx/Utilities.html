@@ -38,9 +38,9 @@
             
   <h1>Source code for PyTrx.Utilities</h1><div class="highlight"><pre>
 <span></span><span class="c1">#PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie</span>
-
+<span class="c1">#</span>
 <span class="c1">#PyTrx is licensed under a MIT License.</span>
-
+<span class="c1">#</span>
 <span class="c1">#You should have received a copy of the license along with this</span>
 <span class="c1">#work. If not, see &lt;https://choosealicense.com/licenses/mit/&gt;.</span>
 
@@ -59,8 +59,8 @@
 
 <span class="c1">#------------------------------------------------------------------------------  </span>
 
-<div class="viewcode-block" id="plotGCPs"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotGCPs">[docs]</a><span class="k">def</span> <span class="nf">plotGCPs</span><span class="p">(</span><span class="n">gcps</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">camloc</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Function to show the ground control points, on the image and DEM.</span>
+<div class="viewcode-block" id="plotGCPs"><a class="viewcode-back" href="../../Modules.html#PyTrx.Utilities.plotGCPs">[docs]</a><span class="k">def</span> <span class="nf">plotGCPs</span><span class="p">(</span><span class="n">gcps</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">camloc</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&#39;&#39;&#39;Function to show the ground control points, on the image and the DEM.</span>
 <span class="sd">    </span>
 <span class="sd">    :param gcps: GCPs</span>
 <span class="sd">    :type gcps: arr</span>
@@ -68,8 +68,8 @@
 <span class="sd">    :type img: arr</span>
 <span class="sd">    :param imn: Image name </span>
 <span class="sd">    :type imn: str </span>
-<span class="sd">    :param dem: DEM object</span>
-<span class="sd">    :type dem: :class:`PyTrx.DEM.ExplicitRaster`</span>
+<span class="sd">    :param dem: :class:`PyTrx.DEM.ExplicitRaster` object </span>
+<span class="sd">    :type dem: arr</span>
 <span class="sd">    :param extent: DEM extent indicator, default to None</span>
 <span class="sd">    :type extent: list, optional</span>
 <span class="sd">    :returns: A figure with the plotted uv and xyz GCPs</span>
@@ -126,7 +126,7 @@
 <span class="c1">#    plt.close()</span>
  
     
-<div class="viewcode-block" id="plotPrincipalPoint"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotPrincipalPoint">[docs]</a><span class="k">def</span> <span class="nf">plotPrincipalPoint</span><span class="p">(</span><span class="n">camcen</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">):</span>
+<div class="viewcode-block" id="plotPrincipalPoint"><a class="viewcode-back" href="../../Modules.html#PyTrx.Utilities.plotPrincipalPoint">[docs]</a><span class="k">def</span> <span class="nf">plotPrincipalPoint</span><span class="p">(</span><span class="n">camcen</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to show the principal point on the image, along with the </span>
 <span class="sd">    GCPs.</span>
 
@@ -156,7 +156,7 @@
 <span class="c1">#    plt.close()</span>
     
  
-<div class="viewcode-block" id="plotCalib"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotCalib">[docs]</a><span class="k">def</span> <span class="nf">plotCalib</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">distortion</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">):</span>
+<div class="viewcode-block" id="plotCalib"><a class="viewcode-back" href="../../Modules.html#PyTrx.Utilities.plotCalib">[docs]</a><span class="k">def</span> <span class="nf">plotCalib</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">distortion</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to show camera calibration. Two images are plotted, the </span>
 <span class="sd">    first with the original input image and the second with the calibrated</span>
 <span class="sd">    image. This calibrated image is corrected for distortion using the </span>
@@ -196,7 +196,7 @@
 <span class="c1">#    plt.close()</span>
 
 
-<div class="viewcode-block" id="plotResiduals"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotResiduals">[docs]</a><span class="k">def</span> <span class="nf">plotResiduals</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">ims</span><span class="p">,</span> <span class="n">gcp1</span><span class="p">,</span> <span class="n">gcp2</span><span class="p">,</span> <span class="n">gcp3</span><span class="p">):</span>
+<div class="viewcode-block" id="plotResiduals"><a class="viewcode-back" href="../../Modules.html#PyTrx.Utilities.plotResiduals">[docs]</a><span class="k">def</span> <span class="nf">plotResiduals</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">ims</span><span class="p">,</span> <span class="n">gcp1</span><span class="p">,</span> <span class="n">gcp2</span><span class="p">,</span> <span class="n">gcp3</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to plot sets of points to show offsets. This is </span>
 <span class="sd">    commonly used for inspecting differences between image GCPs and projected </span>
 <span class="sd">    GCPs, e.g. within the optimiseCamera function.</span>
@@ -237,7 +237,7 @@
     <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>        </div>
         
     
-<div class="viewcode-block" id="plotAreaPX"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotAreaPX">[docs]</a><span class="k">def</span> <span class="nf">plotAreaPX</span><span class="p">(</span><span class="n">uv</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="plotAreaPX"><a class="viewcode-back" href="../../Modules.html#PyTrx.Utilities.plotAreaPX">[docs]</a><span class="k">def</span> <span class="nf">plotAreaPX</span><span class="p">(</span><span class="n">uv</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Plot figure with image overlayed with pixel area features. </span>
 <span class="sd">              </span>
 <span class="sd">    :param uv: Input uv coordinates for plotting over image</span>
@@ -295,7 +295,7 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>    </div>
 
 
-<div class="viewcode-block" id="plotLinePX"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotLinePX">[docs]</a><span class="k">def</span> <span class="nf">plotLinePX</span><span class="p">(</span><span class="n">uv</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="plotLinePX"><a class="viewcode-back" href="../../Modules.html#PyTrx.Utilities.plotLinePX">[docs]</a><span class="k">def</span> <span class="nf">plotLinePX</span><span class="p">(</span><span class="n">uv</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Plot figure with image overlayed with pixel line features.</span>
 <span class="sd">    </span>
 <span class="sd">    :param uv: Input uv coordinates for plotting over image</span>
@@ -338,7 +338,7 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>    </div>
     
  
-<div class="viewcode-block" id="plotVeloPX"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotVeloPX">[docs]</a><span class="k">def</span> <span class="nf">plotVeloPX</span><span class="p">(</span><span class="n">uvvel</span><span class="p">,</span> <span class="n">uv0</span><span class="p">,</span> <span class="n">uv1</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="plotVeloPX"><a class="viewcode-back" href="../../Modules.html#PyTrx.Utilities.plotVeloPX">[docs]</a><span class="k">def</span> <span class="nf">plotVeloPX</span><span class="p">(</span><span class="n">uvvel</span><span class="p">,</span> <span class="n">uv0</span><span class="p">,</span> <span class="n">uv1</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Plot figure with image overlayed with pixel velocities. UV data are</span>
 <span class="sd">    depicted as the uv point in img0 and the corresponding pixel velocity as a </span>
 <span class="sd">    proportional arrow (computed using the arrowplot function).</span>
@@ -395,7 +395,7 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>    </div>
     
        
-<div class="viewcode-block" id="plotAreaXYZ"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotAreaXYZ">[docs]</a><span class="k">def</span> <span class="nf">plotAreaXYZ</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>    
+<div class="viewcode-block" id="plotAreaXYZ"><a class="viewcode-back" href="../../Modules.html#PyTrx.Utilities.plotAreaXYZ">[docs]</a><span class="k">def</span> <span class="nf">plotAreaXYZ</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>    
     <span class="sd">&quot;&quot;&quot;Plot figure with image overlayed with xyz coordinates representing </span>
 <span class="sd">    either areas or line features.</span>
 <span class="sd">    </span>
@@ -448,7 +448,7 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>         </div>
 
 
-<div class="viewcode-block" id="plotLineXYZ"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotLineXYZ">[docs]</a><span class="k">def</span> <span class="nf">plotLineXYZ</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>    
+<div class="viewcode-block" id="plotLineXYZ"><a class="viewcode-back" href="../../Modules.html#PyTrx.Utilities.plotLineXYZ">[docs]</a><span class="k">def</span> <span class="nf">plotLineXYZ</span><span class="p">(</span><span class="n">xyz</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>    
     <span class="sd">&quot;&quot;&quot;Plot figure with image overlayed with xyz coordinates representing </span>
 <span class="sd">    either areas or line features.</span>
 <span class="sd">    </span>
@@ -494,7 +494,7 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
         
 
-<div class="viewcode-block" id="plotVeloXYZ"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotVeloXYZ">[docs]</a><span class="k">def</span> <span class="nf">plotVeloXYZ</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">,</span> <span class="n">xyz0</span><span class="p">,</span> <span class="n">xyz1</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="plotVeloXYZ"><a class="viewcode-back" href="../../Modules.html#PyTrx.Utilities.plotVeloXYZ">[docs]</a><span class="k">def</span> <span class="nf">plotVeloXYZ</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">,</span> <span class="n">xyz0</span><span class="p">,</span> <span class="n">xyz1</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Plot figure with image overlayed with xyz velocities. XYZ data are</span>
 <span class="sd">    depicted as the xyz point in img0 and the corresponding velocity as a </span>
 <span class="sd">    proportional arrow (computed using the arrowplot function).</span>
@@ -555,7 +555,7 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
         
 
-<div class="viewcode-block" id="plotInterpolate"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.plotInterpolate">[docs]</a><span class="k">def</span> <span class="nf">plotInterpolate</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">pointextent</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="plotInterpolate"><a class="viewcode-back" href="../../Modules.html#PyTrx.Utilities.plotInterpolate">[docs]</a><span class="k">def</span> <span class="nf">plotInterpolate</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">pointextent</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to plot the results of the velocity interpolation process for </span>
 <span class="sd">    a particular image pair.</span>
 <span class="sd">    </span>
@@ -606,7 +606,7 @@
         <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span></div>
     
 
-<div class="viewcode-block" id="interpolateHelper"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.interpolateHelper">[docs]</a><span class="k">def</span> <span class="nf">interpolateHelper</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">,</span> <span class="n">xyz0</span><span class="p">,</span> <span class="n">xyz1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="interpolateHelper"><a class="viewcode-back" href="../../Modules.html#PyTrx.Utilities.interpolateHelper">[docs]</a><span class="k">def</span> <span class="nf">interpolateHelper</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">,</span> <span class="n">xyz0</span><span class="p">,</span> <span class="n">xyz1</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;linear&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Function to interpolate a point dataset. This uses functions of </span>
 <span class="sd">    the SciPy package to set up a grid (grid) and then interpolate using a</span>
 <span class="sd">    linear interpolation method (griddata). Methods are those compatible with </span>
@@ -674,7 +674,7 @@
     <span class="k">return</span> <span class="n">grid</span><span class="p">,</span> <span class="n">pointsextent</span> </div>
            
     
-<div class="viewcode-block" id="arrowplot"><a class="viewcode-back" href="../../source/PyTrx.html#PyTrx.Utilities.arrowplot">[docs]</a><span class="k">def</span> <span class="nf">arrowplot</span><span class="p">(</span><span class="n">xst</span><span class="p">,</span> <span class="n">yst</span><span class="p">,</span> <span class="n">xend</span><span class="p">,</span> <span class="n">yend</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">headangle</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">headscale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>    
+<div class="viewcode-block" id="arrowplot"><a class="viewcode-back" href="../../Modules.html#PyTrx.Utilities.arrowplot">[docs]</a><span class="k">def</span> <span class="nf">arrowplot</span><span class="p">(</span><span class="n">xst</span><span class="p">,</span> <span class="n">yst</span><span class="p">,</span> <span class="n">xend</span><span class="p">,</span> <span class="n">yend</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">headangle</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">headscale</span><span class="o">=</span><span class="mf">0.2</span><span class="p">):</span>    
     <span class="sd">&quot;&quot;&quot;Plot arrows to denote the direction and magnitude of the displacement. </span>
 <span class="sd">    Direction is indicated by the bearing of the arrow, and the magnitude is </span>
 <span class="sd">    indicated by the length of the arrow.</span>
