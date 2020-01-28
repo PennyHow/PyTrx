@@ -55,95 +55,38 @@ imagery; and (2) Determining real-world surface areas from oblique imagery.</p>
 <dt id="PyTrx.Area.Area">
 <em class="property">class </em><code class="sig-prename descclassname">PyTrx.Area.</code><code class="sig-name descname">Area</code><span class="sig-paren">(</span><em class="sig-param">imageList</em>, <em class="sig-param">cameraenv</em>, <em class="sig-param">hmatrix</em>, <em class="sig-param">calibFlag=True</em>, <em class="sig-param">band='L'</em>, <em class="sig-param">equal=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Area.html#Area"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Area.Area" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Images.ImageSequence</span></code></p>
-<dl class="simple">
-<dt>A class for processing change in area (i.e. a lake or plume) through an </dt><dd><p>image sequence, with methods to calculate extent change in an image plane 
+<p>A class for processing change in area (i.e. a lake or plume) through an 
+image sequence, with methods to calculate extent change in an image plane 
 (px) and real areal change via georectification.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param imageList</dt>
-<dd class="field-odd"><p>List of images, for the</p>
-</dd>
-</dl>
-</dd>
-<dt>:class:’PyTrx.Images.ImageSequence’ object</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type imageList</dt>
-<dd class="field-odd"><p>str/list</p>
-</dd>
-<dt class="field-even">param cameraenv</dt>
-<dd class="field-even"><p>Camera environment parameters which can be read into the</p>
-</dd>
-</dl>
-</dd>
-<dt>:class:’PyTrx.CamEnv.CamEnv’ object as a text file</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type cameraenv</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param hmatrix</dt>
-<dd class="field-even"><p>Homography matrix</p>
-</dd>
-<dt class="field-odd">type hmatrix</dt>
-<dd class="field-odd"><p>arr</p>
-</dd>
-<dt class="field-even">param calibFlag</dt>
-<dd class="field-even"><p>An indicator of whether images are calibrated, for the</p>
-</dd>
-</dl>
-</dd>
-<dt>:class:’PyTrx.Images.ImageSequence’ object</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type calibFlag</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-<dt class="field-even">param band</dt>
-<dd class="field-even"><p>String denoting the desired image band, default to ‘L’</p>
-</dd>
-</dl>
-</dd>
-<dt>(grayscale)</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type band</dt>
-<dd class="field-odd"><p>str, optional</p>
-</dd>
-<dt class="field-even">param equal</dt>
-<dd class="field-even"><p>Flag denoting whether histogram equalisation is applied to</p>
-</dd>
-</dl>
-</dd>
-<dt>images (histogram equalisation is applied if True). Default to True. </dt><dd><dl class="field-list simple">
-<dt class="field-odd">type equal</dt>
-<dd class="field-odd"><p>bool, optional</p>
-</dd>
-</dl>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imageList</strong> (<em>str/list</em>) – List of images, for the <a class="reference internal" href="#PyTrx.Images.ImageSequence" title="PyTrx.Images.ImageSequence"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.Images.ImageSequence</span></code></a> object</p></li>
+<li><p><strong>cameraenv</strong> (<em>str</em>) – Camera environment parameters which can be read into the <a class="reference internal" href="#PyTrx.CamEnv.CamEnv" title="PyTrx.CamEnv.CamEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.CamEnv.CamEnv</span></code></a> object as a text file</p></li>
+<li><p><strong>hmatrix</strong> (<em>arr</em>) – Homography matrix</p></li>
+<li><p><strong>calibFlag</strong> (<em>bool</em>) – An indicator of whether images are calibrated, for the <a class="reference internal" href="#PyTrx.Images.ImageSequence" title="PyTrx.Images.ImageSequence"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.Images.ImageSequence</span></code></a> object</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – String denoting the desired image band, default to ‘L’ (grayscale)</p></li>
+<li><p><strong>equal</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True). Default to True.</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="method">
 <dt id="PyTrx.Area.Area.calcAutoAreas">
 <code class="sig-name descname">calcAutoAreas</code><span class="sig-paren">(</span><em class="sig-param">colour=False</em>, <em class="sig-param">verify=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Area.html#Area.calcAutoAreas"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Area.Area.calcAutoAreas" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Detects areas of interest from a sequence of images, and returns </dt><dd><p>pixel and xyz areas.</p>
+<dd><p>Detects areas of interest from a sequence of images, and returns 
+pixel and xyz areas.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param colour</dt>
-<dd class="field-odd"><p>Flag to denote whether colour range for detection should</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>colour</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag to denote whether colour range for detection should be defined for each image or only once, default to False</p></li>
+<li><p><strong>verify</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag to denote whether detected polygons should be manually verified by user, default to False</p></li>
+</ul>
 </dd>
-</dl>
-</dd>
-<dt>be defined for each image or only once, default to False</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type colour</dt>
-<dd class="field-odd"><p>bool, optional</p>
-</dd>
-<dt class="field-even">param verify</dt>
-<dd class="field-even"><p>Flag to denote whether detected polygons should be</p>
-</dd>
-</dl>
-</dd>
-<dt>manually verified by user, default to False</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type verify</dt>
-<dd class="field-odd"><p>bool, optional</p>
-</dd>
-<dt class="field-even">returns</dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>XYZ and UV area information</p>
 </dd>
-<dt class="field-odd">rtype</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>list</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -182,39 +125,17 @@ the image/images.</p>
 <dl class="method">
 <dt id="PyTrx.Area.Area.setEnhance">
 <code class="sig-name descname">setEnhance</code><span class="sig-paren">(</span><em class="sig-param">diff</em>, <em class="sig-param">phi</em>, <em class="sig-param">theta</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Area.html#Area.setEnhance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Area.Area.setEnhance" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Set image enhancement parameters. Change brightness and contrast of </dt><dd><p>image using phi and theta variables.
-Change phi and theta values accordingly. See enhanceImg function for 
-detailed explanation of the parameters.</p>
+<dd><p>Set image enhancement parameters. Change brightness and contrast of 
+image using phi and theta variables. Change phi and theta values 
+accordingly. See enhanceImg function for detailed explanation of the 
+parameters.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param diff</dt>
-<dd class="field-odd"><p>Inputted as either ‘light or ‘dark’, signifying the intensity</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>of the image pixels. ‘light’ increases the intensity such that dark pixels 
-become much brighter and bright pixels become slightly brighter. ‘dark’ 
-decreases the intensity such that dark pixels become much darker and bright 
-pixels become slightly darker.</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type diff</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param phi</dt>
-<dd class="field-even"><p>Defines the intensity of all pixel values</p>
-</dd>
-<dt class="field-odd">type phi</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-<dt class="field-even">param theta</dt>
-<dd class="field-even"><p>Defines the number of “colours” in the image, e.g. 3</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>signifies that all the pixels will be grouped into one of three pixel values</dt><dd><p>:type theta:int               .</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>diff</strong> (<em>str</em>) – Inputted as either ‘light or ‘dark’, signifying the intensity of the image pixels. ‘light’ increases the intensity such that dark pixels become much brighter and bright pixels become slightly brighter. ‘dark’ decreases the intensity such that dark pixels become much darker and bright pixels become slightly darker.</p></li>
+<li><p><strong>phi</strong> (<em>int</em>) – Defines the intensity of all pixel values</p></li>
+<li><p><strong>theta</strong> (<em>int               .</em>) – Defines the number of “colours” in the image, e.g. 3 signifies that all the pixels will be grouped into one of three pixel values</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -255,19 +176,9 @@ define colour ranges and verify areas.</p>
 <dt id="PyTrx.Area.Area.setThreshold">
 <code class="sig-name descname">setThreshold</code><span class="sig-paren">(</span><em class="sig-param">number</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Area.html#Area.setThreshold"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Area.Area.setThreshold" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set threshold for number of polgons kept from an image.</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">param number</dt>
-<dd class="field-odd"><p>Number denoting the number of detected polygons that</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>will be retained</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type number</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-</dl>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>number</strong> (<em>int</em>) – Number denoting the number of detected polygons that will be retained</p>
 </dd>
 </dl>
 </dd></dl>
@@ -294,119 +205,56 @@ clicking them.</p>
 <dl class="function">
 <dt id="PyTrx.Area.calcAutoArea">
 <code class="sig-prename descclassname">PyTrx.Area.</code><code class="sig-name descname">calcAutoArea</code><span class="sig-paren">(</span><em class="sig-param">img</em>, <em class="sig-param">imn</em>, <em class="sig-param">colourrange</em>, <em class="sig-param">hmatrix=None</em>, <em class="sig-param">threshold=None</em>, <em class="sig-param">invprojvars=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Area.html#calcAutoArea"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Area.calcAutoArea" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Detects areas of interest from a given image, and returns pixel and xyz </dt><dd><p>areas along with polygon coordinates. Detection is performed from the image 
+<dd><p>Detects areas of interest from a given image, and returns pixel and xyz 
+areas along with polygon coordinates. Detection is performed from the image 
 using a predefined RBG colour range. The colour range is then used to 
 extract pixels within that range using the OpenCV function inRange. If a 
 threshold has been set (using the setThreshold function) then only nth 
 polygons will be retained. XYZ areas and polygon coordinates are only 
 calculated when a set of inverse projection variables are provided.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param img</dt>
-<dd class="field-odd"><p>Image array</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>arr</em>) – Image array</p></li>
+<li><p><strong>imn</strong> (<em>str</em>) – Image name</p></li>
+<li><p><strong>colourrange</strong> (<em>list</em>) – RBG colour range for areas to be detected from</p></li>
+<li><p><strong>hmatrix</strong> (<em>arr</em>) – Homography matrix, default to None</p></li>
+<li><p><strong>threshold</strong> (<em>int</em><em>, </em><em>optional</em>) – Threshold number of detected areas to retain, default to None</p></li>
+<li><p><strong>invprojvars</strong> (<em>list</em><em>, </em><em>optional</em>) – Inverse projection variables [X,Y,Z,uv0], default to None</p></li>
+</ul>
 </dd>
-<dt class="field-even">type img</dt>
-<dd class="field-even"><p>arr</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Four list items containing 1) the sum of total detected areas (xyz), 2) XYZ coordinates of detected areas, 3) Sum of total detected areas (px), and 4) UV coordinates of detected areas</p>
 </dd>
-<dt class="field-odd">param imn</dt>
-<dd class="field-odd"><p>Image name</p>
-</dd>
-<dt class="field-even">type imn</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">param colourrange</dt>
-<dd class="field-odd"><p>RBG colour range for areas to be detected from</p>
-</dd>
-<dt class="field-even">type colourrange</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param hmatrix</dt>
-<dd class="field-odd"><p>Homography matrix, default to None</p>
-</dd>
-<dt class="field-even">type hmatrix</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param threshold</dt>
-<dd class="field-odd"><p>Threshold number of detected areas to retain, default to None</p>
-</dd>
-<dt class="field-even">type threshold</dt>
-<dd class="field-even"><p>int, optional</p>
-</dd>
-<dt class="field-odd">param invprojvars</dt>
-<dd class="field-odd"><p>Inverse projection variables [X,Y,Z,uv0], default to None</p>
-</dd>
-<dt class="field-even">type invprojvars</dt>
-<dd class="field-even"><p>list, optional</p>
-</dd>
-<dt class="field-odd">returns</dt>
-<dd class="field-odd"><p>Four list items containing 1) the sum of total detected areas</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>(xyz), 2) XYZ coordinates of detected areas, 3) Sum of total detected areas 
-(px), and 4) UV coordinates of detected areas</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">rtype</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>list</p>
 </dd>
 </dl>
-</div></blockquote>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyTrx.Area.calcManualArea">
 <code class="sig-prename descclassname">PyTrx.Area.</code><code class="sig-name descname">calcManualArea</code><span class="sig-paren">(</span><em class="sig-param">img</em>, <em class="sig-param">imn</em>, <em class="sig-param">hmatrix=None</em>, <em class="sig-param">pxplot=None</em>, <em class="sig-param">invprojvars=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Area.html#calcManualArea"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Area.calcManualArea" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Manually define an area in a given image. User input is facilitated</dt><dd><p>through an interactive plot to click around the area of interest. XYZ areas
+<dd><p>Manually define an area in a given image. User input is facilitated
+through an interactive plot to click around the area of interest. XYZ areas
 are calculated if a set of inverse projection variables are given.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param img</dt>
-<dd class="field-odd"><p>Image array</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>arr</em>) – Image array</p></li>
+<li><p><strong>imn</strong> (<em>str</em>) – Image name</p></li>
+<li><p><strong>hmatrix</strong> (<em>arr</em>) – Homography matrix, default to None</p></li>
+<li><p><strong>pxplot</strong> (<em>list</em><em>, </em><em>optional</em>) – Plotting extent for manual area definition, default to None</p></li>
+<li><p><strong>invprojvars</strong> (<em>list</em><em>, </em><em>optional</em>) – Inverse projection variables [X,Y,Z,uv0], default to None</p></li>
+</ul>
 </dd>
-<dt class="field-even">type img</dt>
-<dd class="field-even"><p>arr</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Four list items containing 1) the sum of total detected areas (xyz), 2) XYZ coordinates of detected areas, 3) Sum of total detected areas (px), and 4) UV coordinates of detected areas</p>
 </dd>
-<dt class="field-odd">param imn</dt>
-<dd class="field-odd"><p>Image name</p>
-</dd>
-<dt class="field-even">type imn</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">param hmatrix</dt>
-<dd class="field-odd"><p>Homography matrix, default to None</p>
-</dd>
-<dt class="field-even">type hmatrix</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param pxplot</dt>
-<dd class="field-odd"><p>Plotting extent for manual area definition, default to None</p>
-</dd>
-<dt class="field-even">type pxplot</dt>
-<dd class="field-even"><p>list, optional</p>
-</dd>
-<dt class="field-odd">param invprojvars</dt>
-<dd class="field-odd"><p>Inverse projection variables [X,Y,Z,uv0], default to None</p>
-</dd>
-<dt class="field-even">type invprojvars</dt>
-<dd class="field-even"><p>list, optional</p>
-</dd>
-<dt class="field-odd">returns</dt>
-<dd class="field-odd"><p>Four list items containing 1) the sum of total detected areas</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>(xyz), 2) XYZ coordinates of detected areas, 3) Sum of total detected areas 
-(px), and 4) UV coordinates of detected areas</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">rtype</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>list</p>
 </dd>
 </dl>
-</div></blockquote>
 </dd></dl>
 
 <dl class="function">
@@ -465,8 +313,8 @@ ImGRAFT are noted in related script comments.</p>
 <dt id="PyTrx.CamEnv.CamCalib">
 <em class="property">class </em><code class="sig-prename descclassname">PyTrx.CamEnv.</code><code class="sig-name descname">CamCalib</code><span class="sig-paren">(</span><em class="sig-param">*args</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#CamCalib"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.CamCalib" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="simple">
-<dt>This base class models a standard camera calibration matrix as per </dt><dd><p>OpenCV, MatLab and ImGRAFT. The class uses a standard pinhole camera model, 
+<p>This base class models a standard camera calibration matrix as per 
+OpenCV, MatLab and ImGRAFT. The class uses a standard pinhole camera model, 
 drawing on the functions within OpenCV. A scene view is formed by 
 projecting 3D points into the image plane using a perspective 
 transformation.         
@@ -485,59 +333,39 @@ each of the intrinsic, tangential and radial arrays, or by referencing a
 file (.mat or .txt) containing the calibration data in a pre-designated 
 format.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param <a href="#id1"><span class="problematic" id="id2">*</span></a>args</dt>
-<dd class="field-odd"><p>Either a calibration text file, a series of calibration text</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>args</strong> (<em>str</em>) – Either a calibration text file, a series of calibration text files, a list of raw parameters, or a set of calibration images (along with calibration chessboard dimensions)</p>
 </dd>
 </dl>
-</dd>
-</dl>
-<p>files, a list of raw parameters, or a set of calibration images (along with 
-calibration chessboard dimensions)</p>
 <dl class="method">
 <dt id="PyTrx.CamEnv.CamCalib.checkMatrix">
 <code class="sig-name descname">checkMatrix</code><span class="sig-paren">(</span><em class="sig-param">matrix</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#CamCalib.checkMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.CamCalib.checkMatrix" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Function to support the calibrate function. Checks and converts the </dt><dd><p>intrinsic matrix to the correct format for calibration with opencv.</p>
+<dd><p>Function to support the calibrate function. Checks and converts the 
+intrinsic matrix to the correct format for calibration with opencv.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param matrix</dt>
-<dd class="field-odd"><p>Intrinsic camera matrix</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>matrix</strong> (<em>arr</em>) – Intrinsic camera matrix</p>
 </dd>
-<dt class="field-even">type matrix</dt>
-<dd class="field-even"><p>arr</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The object’s intrinsic matrix (checked), tangential distortion and radial distortion information</p>
 </dd>
-<dt class="field-odd">returns</dt>
-<dd class="field-odd"><p>The object’s intrinsic matrix (checked), tangential</p>
-</dd>
-</dl>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
-<p>distortion and radial distortion information</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="PyTrx.CamEnv.CamCalib.getCalibdata">
 <code class="sig-name descname">getCalibdata</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#CamCalib.getCalibdata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.CamCalib.getCalibdata" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Return camera matrix, and tangential and radial distortion </dt><dd><p>coefficients.</p>
-<dl class="field-list simple">
-<dt class="field-odd">returns</dt>
-<dd class="field-odd"><p>The object’s intrinsic matrix, tangential distortion and</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>radial distortion information</p>
+<dd><p>Return camera matrix, and tangential and radial distortion 
+coefficients.</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="PyTrx.CamEnv.CamCalib.getCamMatrix">
 <code class="sig-name descname">getCamMatrix</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#CamCalib.getCamMatrix"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.CamCalib.getCamMatrix" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return camera matrix.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The object’s intrinsic matrix</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="method">
@@ -545,25 +373,12 @@ calibration chessboard dimensions)</p>
 <code class="sig-name descname">getCamMatrixCV2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#CamCalib.getCamMatrixCV2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.CamCalib.getCamMatrixCV2" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return camera matrix in a structure that is compatible with 
 subsequent photogrammetric processing using OpenCV.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>The object’s intrinsic matrix, compatiable with OpenCV</p>
-</dd>
-</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="PyTrx.CamEnv.CamCalib.getDistortCoeffsCV2">
 <code class="sig-name descname">getDistortCoeffsCV2</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#CamCalib.getDistortCoeffsCV2"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.CamCalib.getDistortCoeffsCV2" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return radial and tangential distortion coefficients.</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">returns</dt>
-<dd class="field-odd"><p>The object’s tangential distortion and radial distortion</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>information</p>
 </dd></dl>
 
 <dl class="method">
@@ -578,100 +393,53 @@ subsequent photogrammetric processing using OpenCV.</p>
 <dt id="PyTrx.CamEnv.CamEnv">
 <em class="property">class </em><code class="sig-prename descclassname">PyTrx.CamEnv.</code><code class="sig-name descname">CamEnv</code><span class="sig-paren">(</span><em class="sig-param">envFile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#CamEnv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.CamEnv" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#PyTrx.CamEnv.CamCalib" title="PyTrx.CamEnv.CamCalib"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.CamEnv.CamCalib</span></code></a></p>
-<dl class="simple">
-<dt>A class to represent the camera object, containing the intrinsic</dt><dd><p>matrix, distortion parameters and camera pose (position and direction).    
-Also inherits from the :class:’PyTrx.CamEnv.CamCalib’ object, representing 
+<p>A class to represent the camera object, containing the intrinsic
+matrix, distortion parameters and camera pose (position and direction).    
+Also inherits from the <a class="reference internal" href="#PyTrx.CamEnv.CamCalib" title="PyTrx.CamEnv.CamCalib"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.CamEnv.CamCalib</span></code></a> object, representing 
 the intrinsic camera information.
 This object can be initialised either through an environment file (and
 passed to the initialiser as a filepath), or with the set intput parameters</p>
 <dl class="field-list simple">
-<dt class="field-odd">param name</dt>
-<dd class="field-odd"><p>The reference name for the camera</p>
-</dd>
-<dt class="field-even">type name</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">param GCPpath</dt>
-<dd class="field-odd"><p>The file path of the GCPs, for the GCPs object</p>
-</dd>
-<dt class="field-even">type GCPpath</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">param DEMpath</dt>
-<dd class="field-odd"><p>The file path for the DEM, for the GCPs object</p>
-</dd>
-<dt class="field-even">type DEMpath</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">param imagePath</dt>
-<dd class="field-odd"><p>The file path for the GCP reference image, for the GCPs</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<em>str</em>) – The reference name for the camera</p></li>
+<li><p><strong>GCPpath</strong> (<em>str</em>) – The file path of the GCPs, for the GCPs object</p></li>
+<li><p><strong>DEMpath</strong> (<em>str</em>) – The file path for the DEM, for the GCPs object</p></li>
+<li><p><strong>imagePath</strong> (<em>str</em>) – The file path for the GCP reference image, for the GCPs object</p></li>
+<li><p><strong>calibPath</strong> (<em>str</em>) – The file path for the calibration file. This can be either as a .mat Matlab file or a text file. The text file should be of the following tab delimited format: RadialDistortion [k1 k2 k3…k7], TangentialDistortion [p1 p2], IntrinsicMatrix [x y z][x y z][x y z], End</p></li>
+<li><p><strong>coords</strong> (<em>list</em>) – The x,y,z coordinates of the camera location, as a list</p></li>
+<li><p><strong>ypr</strong> (<em>list</em>) – The yaw, pitch and roll of the camera, as a list</p></li>
+</ul>
 </dd>
 </dl>
-</dd>
-<dt>object</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type imagePath</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param calibPath</dt>
-<dd class="field-even"><p>The file path for the calibration file. This can be</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>either as a .mat Matlab file or a text file. The text file should be of the 
-following tab delimited format: RadialDistortion [k1 k2 k3…k7], 
-TangentialDistortion [p1 p2], IntrinsicMatrix [x y z][x y z][x y z], End</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type calibPath</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param coords</dt>
-<dd class="field-even"><p>The x,y,z coordinates of the camera location, as a list</p>
-</dd>
-<dt class="field-odd">type coords</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-<dt class="field-even">param ypr</dt>
-<dd class="field-even"><p>The yaw, pitch and roll of the camera, as a list</p>
-</dd>
-<dt class="field-odd">type ypr</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-</dl>
-</div></blockquote>
 <dl class="method">
 <dt id="PyTrx.CamEnv.CamEnv.dataFromFile">
 <code class="sig-name descname">dataFromFile</code><span class="sig-paren">(</span><em class="sig-param">filename</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#CamEnv.dataFromFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.CamEnv.dataFromFile" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Read CamEnv data from .txt file containing keywords and filepaths</dt><dd><p>to associated data.</p>
+<dd><p>Read CamEnv data from .txt file containing keywords and filepaths
+to associated data.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param filename</dt>
-<dd class="field-odd"><p>Environment file path</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<em>str</em>) – Environment file path</p>
 </dd>
-<dt class="field-even">type filename</dt>
-<dd class="field-even"><p>str</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Camera environment information (name, GCP filepath, DEM filepath, image filepath, calibration file path, camera coordinates, camera pose (ypr) and DEM densification factor)</p>
 </dd>
-<dt class="field-odd">returns</dt>
-<dd class="field-odd"><p>Camera environment information (name, GCP filepath,</p>
-</dd>
-</dl>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
-<p>DEM filepath, image filepath, calibration file path, camera coordinates, 
-camera pose (ypr) and DEM densification factor)</p>
 </dd></dl>
 
 <dl class="method">
 <dt id="PyTrx.CamEnv.CamEnv.getDEM">
 <code class="sig-name descname">getDEM</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#CamEnv.getDEM"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.CamEnv.getDEM" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return DEM as :class:’PyTrx.DEM.ExplicitRaster’ object.</p>
+<dd><p>Return DEM as <a class="reference internal" href="#PyTrx.DEM.ExplicitRaster" title="PyTrx.DEM.ExplicitRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.DEM.ExplicitRaster</span></code></a> object.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>DEM object</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>:class:’PyTrx.DEM.ExplicitRaster’</p>
+<dd class="field-even"><p><a class="reference internal" href="#PyTrx.DEM.ExplicitRaster" title="PyTrx.DEM.ExplicitRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.DEM.ExplicitRaster</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -693,39 +461,15 @@ camera pose (ypr) and DEM densification factor)</p>
 <dl class="method">
 <dt id="PyTrx.CamEnv.CamEnv.optimiseCamEnv">
 <code class="sig-name descname">optimiseCamEnv</code><span class="sig-paren">(</span><em class="sig-param">optimise</em>, <em class="sig-param">optmethod='trf'</em>, <em class="sig-param">show=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#CamEnv.optimiseCamEnv"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.CamEnv.optimiseCamEnv" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Optimise projection variables in the camera environment. The precise </dt><dd><p>parameters to optimise are defined by the optimise variable.</p>
+<dd><p>Optimise projection variables in the camera environment. The precise 
+parameters to optimise are defined by the optimise variable.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param optimise</dt>
-<dd class="field-odd"><p>Parameters to optimise - ‘YPR’ (optimise camera pose</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>only), ‘EXT’ (optimise external camera parameters), ‘INT’ (optimise internal 
-camera parameters), or ‘ALL’ (optimise all projection parameters)</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type optimise</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param optmethod</dt>
-<dd class="field-even"><p>Optimisation method, default to ‘trf’</p>
-</dd>
-<dt class="field-odd">type optmethod</dt>
-<dd class="field-odd"><p>str, optional</p>
-</dd>
-<dt class="field-even">param show</dt>
-<dd class="field-even"><p>Flag to denote if optimisation output should be plotted,</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>default to False</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type show</dt>
-<dd class="field-odd"><p>bool, optional</p>
-</dd>
-</dl>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>optimise</strong> (<em>str</em>) – Parameters to optimise - ‘YPR’ (optimise camera pose only), ‘EXT’ (optimise external camera parameters), ‘INT’ (optimise internal camera parameters), or ‘ALL’ (optimise all projection parameters)</p></li>
+<li><p><strong>optmethod</strong> (<em>str</em><em>, </em><em>optional</em>) – Optimisation method, default to ‘trf’</p></li>
+<li><p><strong>show</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag to denote if optimisation output should be plotted, default to False</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -771,33 +515,17 @@ a error in the georectification of measurements.</p>
 <dt id="PyTrx.CamEnv.GCPs">
 <em class="property">class </em><code class="sig-prename descclassname">PyTrx.CamEnv.</code><code class="sig-name descname">GCPs</code><span class="sig-paren">(</span><em class="sig-param">dem</em>, <em class="sig-param">GCPpath</em>, <em class="sig-param">imagePath</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#GCPs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.GCPs" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="simple">
-<dt>A class representing the geography of the camera scene. Contains</dt><dd><p>ground control points, as the world and image points, the DEM data and 
+<p>A class representing the geography of the camera scene. Contains
+ground control points, as the world and image points, the DEM data and 
 extent, and the image the ground control points correspond to, as an 
 Image object.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param dem</dt>
-<dd class="field-odd"><p>The file path of the ASCII DEM</p>
-</dd>
-<dt class="field-even">type dem</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">param GCPpath</dt>
-<dd class="field-odd"><p>The file path of the GCP text file, with a header line, and</p>
-</dd>
-</dl>
-</dd>
-<dt>tab delimited x, y, z world coordinates and xy image on each line</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type GCPpath</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param imagePath</dt>
-<dd class="field-even"><p>The file path of the image the GCPs correspond to</p>
-</dd>
-<dt class="field-odd">type imagePath</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dem</strong> (<em>str</em>) – The file path of the ASCII DEM</p></li>
+<li><p><strong>GCPpath</strong> (<em>str</em>) – The file path of the GCP text file, with a header line, and tab delimited x, y, z world coordinates and xy image on each line</p></li>
+<li><p><strong>imagePath</strong> (<em>str</em>) – The file path of the image the GCPs correspond to</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="method">
@@ -823,189 +551,84 @@ Image object.</p>
 <dl class="function">
 <dt id="PyTrx.CamEnv.calibrateImages">
 <code class="sig-prename descclassname">PyTrx.CamEnv.</code><code class="sig-name descname">calibrateImages</code><span class="sig-paren">(</span><em class="sig-param">imageFiles</em>, <em class="sig-param">xy</em>, <em class="sig-param">refine=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#calibrateImages"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.calibrateImages" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Function for calibrating a camera from a set of input calibration</dt><dd><p>images. Calibration is performed using OpenCV’s chessboard calibration 
+<dd><p>Function for calibrating a camera from a set of input calibration
+images. Calibration is performed using OpenCV’s chessboard calibration 
 functions. Input images (imageFile) need to be of a chessboard with 
 regular dimensions and a known number of corner features (xy).   
 Please note that OpenCV’s calibrateCamera function is incompatible 
 between different versions of OpenCV. Included here is the function
 for version 3. Please see OpenCV’s documentation for older versions.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param imageFiles</dt>
-<dd class="field-odd"><p>List of image file names</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imageFiles</strong> (<em>list</em>) – List of image file names</p></li>
+<li><p><strong>xy</strong> (<em>list</em><em>)</em>) – Chessboard corner dimensions [rows, columns]</p></li>
+<li><p><strong>refine</strong> (<em>int</em><em>, </em><em>optional</em>) – OpenCV camera model refinement method - cv2.CALIB_FIX_PRINCIPAL_POINT (fix principal point), cv2.CALIB_FIX_ASPECT_RATIO (Fix aspect ratio), cv2.CALIB_FIX_FOCAL_LENGTH (Fix focal length), cv2.CALIB_FIX_INTRINSIC (Fix camera model), cv2.CALIB_FIX_K1…6 (Fix radial coefficient 1-6), cv2.CALIB_FIX_TANGENT_DIST (Fix tangential coefficients), cv2.CALIB_USE_INTRINSIC_GUESS (Use initial intrinsic values), cv2.CALIB_ZERO_TANGENT_DIST (Set tangential distortion coefficients to zero), cv2.CALIB_RATIONAL_MODEL (Calculate radial distortion coefficients k4, k5, and k6). Default to None</p></li>
+</ul>
 </dd>
-<dt class="field-even">type imageFiles</dt>
-<dd class="field-even"><p>list</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list containing the camera intrinsic matrix (arr), and tangential (arr) and radial distortion coefficents (arr), and the Camera calibration error (int)</p>
 </dd>
-<dt class="field-odd">param xy</dt>
-<dd class="field-odd"><p>Chessboard corner dimensions [rows, columns]</p>
-</dd>
-<dt class="field-even">type xy</dt>
-<dd class="field-even"><p>list)</p>
-</dd>
-<dt class="field-odd">param refine</dt>
-<dd class="field-odd"><p>OpenCV camera model refinement method -</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr/int</p>
 </dd>
 </dl>
-</dd>
-</dl>
-<p>cv2.CALIB_FIX_PRINCIPAL_POINT (fix principal point), 
-cv2.CALIB_FIX_ASPECT_RATIO (Fix aspect ratio), cv2.CALIB_FIX_FOCAL_LENGTH (Fix 
-focal length), cv2.CALIB_FIX_INTRINSIC (Fix camera model), 
-cv2.CALIB_FIX_K1…6 (Fix radial coefficient 1-6), cv2.CALIB_FIX_TANGENT_DIST 
-(Fix tangential coefficients), cv2.CALIB_USE_INTRINSIC_GUESS (Use initial 
-intrinsic values), cv2.CALIB_ZERO_TANGENT_DIST (Set tangential distortion 
-coefficients to zero), cv2.CALIB_RATIONAL_MODEL (Calculate radial distortion 
-coefficients k4, k5, and k6). Default to None</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type refine</dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-<dt class="field-even">returns</dt>
-<dd class="field-even"><p>A list containing the camera intrinsic matrix (arr), and</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>tangential (arr) and radial distortion coefficents (arr), and the Camera 
-calibration error (int)</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyTrx.CamEnv.computeResidualsUV">
 <code class="sig-prename descclassname">PyTrx.CamEnv.</code><code class="sig-name descname">computeResidualsUV</code><span class="sig-paren">(</span><em class="sig-param">params</em>, <em class="sig-param">stable</em>, <em class="sig-param">GCPxyz</em>, <em class="sig-param">GCPuv</em>, <em class="sig-param">refimg</em>, <em class="sig-param">optimise='YPR'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#computeResidualsUV"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.computeResidualsUV" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Function for computing the pixel difference between GCP image points</dt><dd><p>and GCP projected XYZ points. This function is used in the optimisation 
+<dd><p>Function for computing the pixel difference between GCP image points
+and GCP projected XYZ points. This function is used in the optimisation 
 function (optimiseCamera), with parameters for optimising defined in the
 first variable and stable parameters defined in the second. If no 
 optimisable parameters are given and the optimise flag is set to None then 
 residuals are computed for the original parameters (i.e. no optimisation).</p>
 <dl class="field-list simple">
-<dt class="field-odd">param params</dt>
-<dd class="field-odd"><p>Optimisable parameters, given as a 1-D array of shape (m, )</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<em>arr</em>) – Optimisable parameters, given as a 1-D array of shape (m, )</p></li>
+<li><p><strong>stable</strong> (<em>list</em>) – Stable parameters that will not be optimised</p></li>
+<li><p><strong>GCPxyz</strong> (<em>arr</em>) – GCPs in scene space (x,y,z)</p></li>
+<li><p><strong>GCPuv</strong> (<em>arr</em>) – GCPs in image space (u,v)</p></li>
+<li><p><strong>refimg</strong> (<a class="reference internal" href="#PyTrx.Images.CamImage" title="PyTrx.Images.CamImage"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.Images.CamImage</span></code></a>/str/arr) – Reference image, given as a CamImage object, file path string, or image array</p></li>
+<li><p><strong>optimise</strong> (<em>str</em>) – Flag denoting which variables will be optimised: YPR (camera pose only), INT (internal camera parameters), EXT (external camera parameters), LOC (all parameters except camera location), or ALL (all projection parameters)</p></li>
+</ul>
 </dd>
-<dt class="field-even">type params</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param stable</dt>
-<dd class="field-odd"><p>Stable parameters that will not be optimised</p>
-</dd>
-<dt class="field-even">type stable</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param GCPxyz</dt>
-<dd class="field-odd"><p>GCPs in scene space (x,y,z)</p>
-</dd>
-<dt class="field-even">type GCPxyz</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param GCPuv</dt>
-<dd class="field-odd"><p>GCPs in image space (u,v)</p>
-</dd>
-<dt class="field-even">type GCPuv</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param refimg</dt>
-<dd class="field-odd"><p>Reference image, given as a CamImage object, file path</p>
-</dd>
-</dl>
-</dd>
-<dt>string, or image array</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type refimg</dt>
-<dd class="field-odd"><p>:class:’PyTrx.Images.CamImage’/str/arr</p>
-</dd>
-<dt class="field-even">param optimise</dt>
-<dd class="field-even"><p>Flag denoting which variables will be optimised: YPR</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>(camera pose only), INT (internal camera parameters), EXT (external camera 
-parameters), LOC (all parameters except camera location), or ALL (all 
-projection parameters)</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type optimise</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">returns</dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Pixel difference between UV and projected XYZ position of each GCP</p>
 </dd>
-<dt class="field-odd">rtype</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>arr</p>
 </dd>
 </dl>
-</div></blockquote>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyTrx.CamEnv.computeResidualsXYZ">
 <code class="sig-prename descclassname">PyTrx.CamEnv.</code><code class="sig-name descname">computeResidualsXYZ</code><span class="sig-paren">(</span><em class="sig-param">invprojvars</em>, <em class="sig-param">GCPxyz</em>, <em class="sig-param">GCPuv</em>, <em class="sig-param">dem</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#computeResidualsXYZ"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.computeResidualsXYZ" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Function for computing the pixel difference between GCP image points</dt><dd><p>and GCP projected XYZ points. This function is used in the optimisation 
+<dd><p>Function for computing the pixel difference between GCP image points
+and GCP projected XYZ points. This function is used in the optimisation 
 function (optimiseCamera), with parameters for optimising defined in the
 first variable and stable parameters defined in the second. If no 
 optimisable parameters are given and the optimise flag is set to None then 
 residuals are computed for the original parameters (i.e. no optimisation).</p>
 <dl class="field-list simple">
-<dt class="field-odd">param params</dt>
-<dd class="field-odd"><p>Optimisable parameters, given as a 1-D array of shape (m, )</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<em>arr</em>) – Optimisable parameters, given as a 1-D array of shape (m, )</p></li>
+<li><p><strong>stable</strong> (<em>list</em>) – Stable parameters that will not be optimised</p></li>
+<li><p><strong>GCPxyz</strong> (<em>arr</em>) – GCPs in scene space (x,y,z)</p></li>
+<li><p><strong>GCPuv</strong> (<em>arr</em>) – GCPs in image space (u,v)</p></li>
+<li><p><strong>refimg</strong> (<a class="reference internal" href="#PyTrx.Images.CamImage" title="PyTrx.Images.CamImage"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.Images.CamImage</span></code></a>/str/arr) – Reference image, given as a CamImage object, file path string, or image array</p></li>
+<li><p><strong>optimise</strong> (<em>str</em>) – Flag denoting which variables will be optimised: YPR (camera pose only), INT (internal camera parameters), EXT (external camera parameters), LOC (all parameters except camera location), or ALL (all projection parameters)</p></li>
+</ul>
 </dd>
-<dt class="field-even">type params</dt>
-<dd class="field-even"><p>arr</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Array denoting pixel difference between UV and projected XYZ position of each GCP</p>
 </dd>
-<dt class="field-odd">param stable</dt>
-<dd class="field-odd"><p>Stable parameters that will not be optimised</p>
-</dd>
-<dt class="field-even">type stable</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param GCPxyz</dt>
-<dd class="field-odd"><p>GCPs in scene space (x,y,z)</p>
-</dd>
-<dt class="field-even">type GCPxyz</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param GCPuv</dt>
-<dd class="field-odd"><p>GCPs in image space (u,v)</p>
-</dd>
-<dt class="field-even">type GCPuv</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param refimg</dt>
-<dd class="field-odd"><p>Reference image, given as a CamImage object, file path</p>
-</dd>
-</dl>
-</dd>
-<dt>string, or image array</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type refimg</dt>
-<dd class="field-odd"><p>:class:’PyTrx.Images.CamImage’/str/arr</p>
-</dd>
-<dt class="field-even">param optimise</dt>
-<dd class="field-even"><p>Flag denoting which variables will be optimised: YPR</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>(camera pose only), INT (internal camera parameters), EXT (external camera 
-parameters), LOC (all parameters except camera location), or ALL (all 
-projection parameters)</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type optimise</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">returns</dt>
-<dd class="field-even"><p>Array denoting pixel difference between UV and projected XYZ</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>position of each GCP</dt><dd><dl class="field-list simple">
-<dt class="field-odd">rtype</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>arr</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -1036,14 +659,17 @@ direction.</p>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Rotation matrix as array</p>
 </dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr</p>
+</dd>
 </dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyTrx.CamEnv.optimiseCamera">
 <code class="sig-prename descclassname">PyTrx.CamEnv.</code><code class="sig-name descname">optimiseCamera</code><span class="sig-paren">(</span><em class="sig-param">optimise</em>, <em class="sig-param">projvars</em>, <em class="sig-param">GCPxyz</em>, <em class="sig-param">GCPuv</em>, <em class="sig-param">optmethod='trf'</em>, <em class="sig-param">show=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#optimiseCamera"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.optimiseCamera" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Optimise camera parameters using the pixel differences between a set</dt><dd><p>of image GCPs and projected XYZ GCPs. The optimisation routine adopts the
+<dd><p>Optimise camera parameters using the pixel differences between a set
+of image GCPs and projected XYZ GCPs. The optimisation routine adopts the
 least_square function in scipy’s optimize tools, using either the Trust 
 Region Reflective algorithm, the dogleg algorithm or the 
 Levenberg-Marquardt algorithm to refine a set group of projection 
@@ -1061,62 +687,25 @@ calculated and refined within the optimisation function, performing
 iterations until an optimum solution is reached. A new set of optimised 
 projection parameters are returned.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param optimise</dt>
-<dd class="field-odd"><p>Flag denoting which variables will be optimised: YPR</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>optimise</strong> (<em>str</em>) – Flag denoting which variables will be optimised: YPR (camera pose only), INT (internal camera parameters), EXT (external camera parameters), LOC (all parameters except camera location), or ALL (all projection parameters)</p></li>
+<li><p><strong>projvars</strong> – Projection parameters [camera location, camera pose, radial distortion, tangential distortion, focal length, principal point, reference image]</p></li>
+<li><p><strong>GCPuv</strong> (<em>arr</em>) – UV positions for GCPs, as shape (m, 2)</p></li>
+<li><p><strong>optmethod</strong> (<em>str</em>) – Optimisation method: ‘trf’ (Trust Region Reflective algorithm), ‘dogbox’ (dogleg algorithm), or ‘lm’ (Levenberg-Marquardt algorithm)</p></li>
+<li><p><strong>show</strong> (<em>bool                                           .</em>) – Flag denoting whether plot of residuals should be shown</p></li>
+</ul>
+</dd>
+<dt class="field-even">Typeprojvars</dt>
+<dd class="field-even"><p>list</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A list containing the optimised projection parameters. If optimisation fails then None is returned</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
 </dd>
 </dl>
-</dd>
-</dl>
-<p>(camera pose only), INT (internal camera parameters), EXT (external camera 
-parameters), LOC (all parameters except camera location), or ALL (all 
-projection parameters)</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type optimise</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param projvars</dt>
-<dd class="field-even"><p>Projection parameters [camera location, camera pose,</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>radial distortion, tangential distortion, focal length, principal point, 
-reference image]</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">typeprojvars</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-<dt class="field-even">param GCPuv</dt>
-<dd class="field-even"><p>UV positions for GCPs, as shape (m, 2)</p>
-</dd>
-<dt class="field-odd">type GCPuv</dt>
-<dd class="field-odd"><p>arr</p>
-</dd>
-<dt class="field-even">param optmethod</dt>
-<dd class="field-even"><p>Optimisation method: ‘trf’ (Trust Region Reflective</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>algorithm), ‘dogbox’ (dogleg algorithm), or ‘lm’ (Levenberg-Marquardt 
-algorithm)</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type optmethod</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param show</dt>
-<dd class="field-even"><p>Flag denoting whether plot of residuals should be shown</p>
-</dd>
-<dt class="field-odd">type show</dt>
-<dd class="field-odd"><p>bool                                           .</p>
-</dd>
-<dt class="field-even">returns</dt>
-<dd class="field-even"><p>A list containing the optimised projection parameters. If</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>optimisation fails then None is returned</p>
 </dd></dl>
 
 <dl class="function">
@@ -1145,138 +734,54 @@ found in camera.m: uv,depth,inframe=cam.project(xyz)</p>
 <dl class="function">
 <dt id="PyTrx.CamEnv.projectXYZ">
 <code class="sig-prename descclassname">PyTrx.CamEnv.</code><code class="sig-name descname">projectXYZ</code><span class="sig-paren">(</span><em class="sig-param">camloc</em>, <em class="sig-param">camdirection</em>, <em class="sig-param">radial</em>, <em class="sig-param">tangen</em>, <em class="sig-param">foclen</em>, <em class="sig-param">camcen</em>, <em class="sig-param">refimg</em>, <em class="sig-param">xyz</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#projectXYZ"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.projectXYZ" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Project the xyz world coordinates into the corresponding image </dt><dd><p>coordinates (uv). This is primarily executed using the ImGRAFT projection 
+<dd><p>Project the xyz world coordinates into the corresponding image 
+coordinates (uv). This is primarily executed using the ImGRAFT projection 
 function found in camera.m: uv,depth,inframe=cam.project(xyz)</p>
 <dl class="field-list simple">
-<dt class="field-odd">param camloc</dt>
-<dd class="field-odd"><p>Camera location [X,Y,Z]</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>camloc</strong> (<em>arr</em>) – Camera location [X,Y,Z]</p></li>
+<li><p><strong>camdirection</strong> (<em>arr</em>) – Camera pose (yaw, pitch, roll)</p></li>
+<li><p><strong>radial</strong> (<em>arr</em>) – Radial distortion coefficients</p></li>
+<li><p><strong>tangen</strong> (<em>arr</em>) – Tangential distortion coefficients</p></li>
+<li><p><strong>foclen</strong> (<em>arr</em>) – Camera focal length</p></li>
+<li><p><strong>camcen</strong> (<em>arr</em>) – Camera principal point</p></li>
+<li><p><strong>refimg</strong> (<em>arr</em>) – Reference image (function only uses the image dimensions)</p></li>
+<li><p><strong>xyz</strong> (<em>arr</em>) – world coordinates</p></li>
+</ul>
 </dd>
-<dt class="field-even">type camloc</dt>
-<dd class="field-even"><p>arr</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Pixel coordinates in image (arr), view depth (int), and a Boolean vector containing whether each projected 3D point is inside the frame</p>
 </dd>
-<dt class="field-odd">param camdirection</dt>
-<dd class="field-odd"><p>Camera pose (yaw, pitch, roll)</p>
-</dd>
-<dt class="field-even">type camdirection</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param radial</dt>
-<dd class="field-odd"><p>Radial distortion coefficients</p>
-</dd>
-<dt class="field-even">type radial</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param tangen</dt>
-<dd class="field-odd"><p>Tangential distortion coefficients</p>
-</dd>
-<dt class="field-even">type tangen</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param foclen</dt>
-<dd class="field-odd"><p>Camera focal length</p>
-</dd>
-<dt class="field-even">type foclen</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param camcen</dt>
-<dd class="field-odd"><p>Camera principal point</p>
-</dd>
-<dt class="field-even">type camcen</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param refimg</dt>
-<dd class="field-odd"><p>Reference image (function only uses the image dimensions)</p>
-</dd>
-<dt class="field-even">type refimg</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param xyz</dt>
-<dd class="field-odd"><p>world coordinates</p>
-</dd>
-<dt class="field-even">type xyz</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">returns</dt>
-<dd class="field-odd"><p>Pixel coordinates in image (arr), view depth (int), and a</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr/int</p>
 </dd>
 </dl>
-</dd>
-</dl>
-<p>Boolean vector containing whether each projected 3D point is inside the frame</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyTrx.CamEnv.setProjection">
 <code class="sig-prename descclassname">PyTrx.CamEnv.</code><code class="sig-name descname">setProjection</code><span class="sig-paren">(</span><em class="sig-param">dem</em>, <em class="sig-param">camloc</em>, <em class="sig-param">camdir</em>, <em class="sig-param">radial</em>, <em class="sig-param">tangen</em>, <em class="sig-param">foclen</em>, <em class="sig-param">camcen</em>, <em class="sig-param">refimg</em>, <em class="sig-param">viewshed=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/CamEnv.html#setProjection"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.CamEnv.setProjection" title="Permalink to this definition">¶</a></dt>
 <dd><p>Set the inverse projection variables.</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">param dem</dt>
-<dd class="field-odd"><p>DEM object</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dem</strong> (<a class="reference internal" href="#PyTrx.DEM.ExplicitRaster" title="PyTrx.DEM.ExplicitRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.DEM.ExplicitRaster</span></code></a>) – DEM object</p></li>
+<li><p><strong>camloc</strong> (<em>arr</em>) – Camera location (X,Y,Z)</p></li>
+<li><p><strong>camdir</strong> (<em>arr</em>) – Camera pose [yaw, pitch, roll]</p></li>
+<li><p><strong>radial</strong> (<em>arr</em>) – Radial distortion coefficients</p></li>
+<li><p><strong>tangen</strong> (<em>arr</em>) – Tangential distortion coefficients</p></li>
+<li><p><strong>foclen</strong> (<em>arr</em>) – Camera focal length</p></li>
+<li><p><strong>camcen</strong> (<em>arr</em>) – Camera principal point</p></li>
+<li><p><strong>refimg</strong> (<em>arr</em>) – Reference image (function only uses the image dimensions)</p></li>
+<li><p><strong>viewshed</strong> (<em>bool</em>) – Flag to denote if viewshed from camera should be determined before projection</p></li>
+</ul>
 </dd>
-<dt class="field-even">type dem</dt>
-<dd class="field-even"><p>:class:’PyTrx.DEM.ExplicitRaster’</p>
-</dd>
-<dt class="field-odd">param camloc</dt>
-<dd class="field-odd"><p>Camera location (X,Y,Z)</p>
-</dd>
-<dt class="field-even">type camloc</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param camdir</dt>
-<dd class="field-odd"><p>Camera pose [yaw, pitch, roll]</p>
-</dd>
-<dt class="field-even">type camdir</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param radial</dt>
-<dd class="field-odd"><p>Radial distortion coefficients</p>
-</dd>
-<dt class="field-even">type radial</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param tangen</dt>
-<dd class="field-odd"><p>Tangential distortion coefficients</p>
-</dd>
-<dt class="field-even">type tangen</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param foclen</dt>
-<dd class="field-odd"><p>Camera focal length</p>
-</dd>
-<dt class="field-even">type foclen</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param camcen</dt>
-<dd class="field-odd"><p>Camera principal point</p>
-</dd>
-<dt class="field-even">type camcen</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param refimg</dt>
-<dd class="field-odd"><p>Reference image (function only uses the image dimensions)</p>
-</dd>
-<dt class="field-even">type refimg</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param viewshed</dt>
-<dd class="field-odd"><p>Flag to denote if viewshed from camera should be</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>determined before projection</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type viewshed</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-<dt class="field-even">returns</dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Inverse projection coefficients [X,Y,Z,uv0]</p>
 </dd>
-<dt class="field-odd">rtype</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>list</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -1285,7 +790,7 @@ function found in camera.m: uv,depth,inframe=cam.project(xyz)</p>
 <div class="section" id="module-PyTrx.DEM">
 <span id="pytrx-dem-module"></span><h2>PyTrx.DEM module<a class="headerlink" href="#module-PyTrx.DEM" title="Permalink to this headline">¶</a></h2>
 <p>The DEM module contains functionality for handling DEM data and implementing
-this data into the :class:’PyTrx.CamEnv.CamEnv’ object class.</p>
+this data into the <a class="reference internal" href="#PyTrx.CamEnv.CamEnv" title="PyTrx.CamEnv.CamEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.CamEnv.CamEnv</span></code></a> object class.</p>
 <dl class="function">
 <dt id="PyTrx.DEM.DEM_FromMat">
 <code class="sig-prename descclassname">PyTrx.DEM.</code><code class="sig-name descname">DEM_FromMat</code><span class="sig-paren">(</span><em class="sig-param">matfile</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/DEM.html#DEM_FromMat"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.DEM.DEM_FromMat" title="Permalink to this definition">¶</a></dt>
@@ -1299,7 +804,7 @@ separate X, Y, Z matrices.</p>
 <dd class="field-even"><p>A DEM object</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>:class:’PyTrx.DEM.ExplicitRaster’</p>
+<dd class="field-odd"><p><a class="reference internal" href="#PyTrx.DEM.ExplicitRaster" title="PyTrx.DEM.ExplicitRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.DEM.ExplicitRaster</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1311,13 +816,13 @@ separate X, Y, Z matrices.</p>
 raster-formatted data. The tiff data importing is handled by GDAL.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>tifffile</strong> (<em>str</em>) – DEM .tif filepath</p>
+<dd class="field-odd"><p><strong>tiffFile</strong> (<em>str</em>) – DEM .tif filepath</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>A DEM object</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>:class:’PyTrx.DEM.ExplicitRaster’</p>
+<dd class="field-odd"><p><a class="reference internal" href="#PyTrx.DEM.ExplicitRaster" title="PyTrx.DEM.ExplicitRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.DEM.ExplicitRaster</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1354,7 +859,7 @@ meaning that the size of the DEM array is doubled.</p>
 <dd class="field-even"><p>Densified DEM</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>:class:’PyTrx.DEM.ExplicitRaster’</p>
+<dd class="field-odd"><p><a class="reference internal" href="#PyTrx.DEM.ExplicitRaster" title="PyTrx.DEM.ExplicitRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.DEM.ExplicitRaster</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1506,7 +1011,7 @@ data extent coordinates.</p>
 <dd class="field-even"><p>Subset of DEM</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>:class:’PyTrx.DEM.ExplicitRaster’</p>
+<dd class="field-odd"><p><a class="reference internal" href="#PyTrx.DEM.ExplicitRaster" title="PyTrx.DEM.ExplicitRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.DEM.ExplicitRaster</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1526,7 +1031,7 @@ automatically detected. Recognised file types: .mat and .tif.</p>
 <dd class="field-even"><p>A DEM object</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>:class:’PyTrx.DEM.ExplicitRaster’</p>
+<dd class="field-odd"><p><a class="reference internal" href="#PyTrx.DEM.ExplicitRaster" title="PyTrx.DEM.ExplicitRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.DEM.ExplicitRaster</span></code></a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1536,13 +1041,12 @@ automatically detected. Recognised file types: .mat and .tif.</p>
 <code class="sig-prename descclassname">PyTrx.DEM.</code><code class="sig-name descname">voxelviewshed</code><span class="sig-paren">(</span><em class="sig-param">dem</em>, <em class="sig-param">viewpoint</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/DEM.html#voxelviewshed"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.DEM.voxelviewshed" title="Permalink to this definition">¶</a></dt>
 <dd><p>Calculate a viewshed over a DEM from a given viewpoint in the DEM scene.
 This function is based on the viewshed function (voxelviewshed.m) available 
-in ImGRAFT.   
-The ImGRAFT voxelviewshed.m script is available at:
+in ImGRAFT. The ImGRAFT voxelviewshed.m script is available at:
 <a class="reference external" href="http://github.com/grinsted/ImGRAFT/blob/master/voxelviewshed.m">http://github.com/grinsted/ImGRAFT/blob/master/voxelviewshed.m</a></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>dem</strong> (<em>:class:'PyTrx.DEM.ExplicitRaster'</em>) – A DEM object</p></li>
+<li><p><strong>dem</strong> (<a class="reference internal" href="#PyTrx.DEM.ExplicitRaster" title="PyTrx.DEM.ExplicitRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.DEM.ExplicitRaster</span></code></a>) – A DEM object</p></li>
 <li><p><strong>viewpoint</strong> (<em>list</em>) – 3-element vector specifying the viewpoint</p></li>
 </ul>
 </dd>
@@ -1586,38 +1090,34 @@ intrinsic matrix to the correct format for calibration with OpenCV.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>xyzfile</strong> (<em>str</em>) – File directory to xyz coordinates</p></li>
-<li><p><strong>pxfile</strong> – File directory to uv coordinates</p></li>
+<li><p><strong>pxfile</strong> (<em>str</em>) – File directory to uv coordinates</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Coordinates and areas of detected areas</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
 </dl>
-<p>:type pxfile str
-:returns: Coordinates and areas of detected areas
-:rtype: list</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyTrx.FileHandler.importAreaFile">
 <code class="sig-prename descclassname">PyTrx.FileHandler.</code><code class="sig-name descname">importAreaFile</code><span class="sig-paren">(</span><em class="sig-param">fname</em>, <em class="sig-param">dimension</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/FileHandler.html#importAreaFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.FileHandler.importAreaFile" title="Permalink to this definition">¶</a></dt>
 <dd><p>Import pixel polygon data from text file and compute pixel extents.</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">param fname</dt>
-<dd class="field-odd"><p>Path to the text file containing the UV coordinate data</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<em>str</em>) – Path to the text file containing the UV coordinate data</p></li>
+<li><p><strong>dimension</strong> (<em>int</em>) – Integer denoting the number of dimensions in coordinates</p></li>
+</ul>
 </dd>
-<dt class="field-even">type fname</dt>
-<dd class="field-even"><p>str</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Two lists, containing the UV coordinates for polygons and the pixel areas for polygons</p>
 </dd>
-<dt class="field-odd">returns</dt>
-<dd class="field-odd"><p>Two lists, containing the UV coordinates for polygons and the</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>pixel areas for polygons</dt><dd><dl class="field-list simple">
-<dt class="field-odd">rtype</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>list</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -1630,13 +1130,16 @@ intrinsic matrix to the correct format for calibration with OpenCV.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>xyzfile</strong> (<em>str</em>) – File directory to xyz coordinates</p></li>
-<li><p><strong>pxfile</strong> – File directory to uv coordinates</p></li>
+<li><p><strong>pxfile</strong> (<em>str</em>) – File directory to uv coordinates</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Coordinates and lengths of detected lines</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
+</dd>
 </dl>
-<p>:type pxfile str
-:returns: Coordinates and lengths of detected lines
-:rtype: list</p>
 </dd></dl>
 
 <dl class="function">
@@ -1683,44 +1186,25 @@ to search within the file, this will return the line numbers of the data.</p>
 <dl class="function">
 <dt id="PyTrx.FileHandler.readCalib">
 <code class="sig-prename descclassname">PyTrx.FileHandler.</code><code class="sig-name descname">readCalib</code><span class="sig-paren">(</span><em class="sig-param">fileName</em>, <em class="sig-param">paramList</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/FileHandler.html#readCalib"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.FileHandler.readCalib" title="Permalink to this definition">¶</a></dt>
-<dd><dl>
-<dt>Function to find camera calibrations from a file given a list or </dt><dd><p>Matlab file containing the required parameters. Returns the parameters as a
-dictionary object.
-Compatible file structures:
-.txt file:   “RadialDistortion [k1,k2,k3…k8]</p>
-<blockquote>
-<div><p>TangentialDistortion [p1,p2]
-IntrinsicMatrix [fx 0. 0.][s fy 0.][cx cy 1]
-End”</p>
-</div></blockquote>
-<dl class="simple">
-<dt>.mat file:   Camera calibration file output from the Matlab Camera </dt><dd><p>Calibration App (available in the Computer Vision Systems 
-toolbox).</p>
-</dd>
-</dl>
+<dd><p>Function to find camera calibrations from a file given a list or 
+Matlab file containing the required parameters. Returns the parameters as a
+dictionary object. Compatible file structures: 1) .txt file 
+(“RadialDistortion [k1,k2,k3…k8], TangentialDistortion [p1,p2],
+IntrinsicMatrix [fx 0. 0.][s fy 0.][cx cy 1] End”); 2) .mat file
+(Camera calibration file output from the Matlab Camera Calibration App 
+(available in the Computer Vision Systems toolbox).</p>
 <dl class="field-list simple">
-<dt class="field-odd">param fileName</dt>
-<dd class="field-odd"><p>File directory for calibration file</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fileName</strong> (<em>str</em>) – File directory for calibration file</p></li>
+<li><p><strong>paramList</strong> (<em>list</em>) – List of strings denoting keywords to look for in calibration file</p></li>
+</ul>
 </dd>
-<dt class="field-even">type fileName</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">param paramList</dt>
-<dd class="field-odd"><p>List of strings denoting keywords to look for in</p>
-</dd>
-</dl>
-</dd>
-<dt>calibration file</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type paramList</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-<dt class="field-even">returns</dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Calibration parameters denoted by keywords</p>
 </dd>
-<dt class="field-odd">rtype</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>list</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -1728,26 +1212,18 @@ toolbox).</p>
 <dl class="function">
 <dt id="PyTrx.FileHandler.readGCPs">
 <code class="sig-prename descclassname">PyTrx.FileHandler.</code><code class="sig-name descname">readGCPs</code><span class="sig-paren">(</span><em class="sig-param">fileName</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/FileHandler.html#readGCPs"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.FileHandler.readGCPs" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Function to read ground control points from a .txt file. The data in the</dt><dd><p>file is referenced to under a header line. Data is appended by skipping the
+<dd><p>Function to read ground control points from a .txt file. The data in the
+file is referenced to under a header line. Data is appended by skipping the
 header line and finding the world and image coordinates from each line.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param fileName</dt>
-<dd class="field-odd"><p>File path directory for GCP file</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>fileName</strong> (<em>str</em>) – File path directory for GCP file</p>
 </dd>
-<dt class="field-even">type fileName</dt>
-<dd class="field-even"><p>str</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Two arrays containing the GCPs in xyz coordinates, and the GCPs in image coordinates</p>
 </dd>
-<dt class="field-odd">returns</dt>
-<dd class="field-odd"><p>Two arrays containing the GCPs in xyz coordinates, and the GCPs</p>
-</dd>
-</dl>
-</dd>
-<dt>in image coordinates</dt><dd><dl class="field-list simple">
-<dt class="field-odd">rtype</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>array</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -1755,40 +1231,21 @@ header line and finding the world and image coordinates from each line.</p>
 <dl class="function">
 <dt id="PyTrx.FileHandler.readImg">
 <code class="sig-prename descclassname">PyTrx.FileHandler.</code><code class="sig-name descname">readImg</code><span class="sig-paren">(</span><em class="sig-param">path</em>, <em class="sig-param">band='L'</em>, <em class="sig-param">equal=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/FileHandler.html#readImg"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.FileHandler.readImg" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Function to prepare an image by opening, equalising, converting to </dt><dd><p>either grayscale or a specified band, then returning a copy.</p>
+<dd><p>Function to prepare an image by opening, equalising, converting to 
+either grayscale or a specified band, then returning a copy.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param path</dt>
-<dd class="field-odd"><p>Image file path directory</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>path</strong> (<em>str</em>) – Image file path directory</p></li>
+<li><p><strong>band</strong> (<em>str</em>) – Desired band output - ‘R’: red band; ‘B’: blue band; ‘G’: green band; ‘L’: grayscale (default).</p></li>
+<li><p><strong>equal</strong> (<em>bool</em>) – Flag to denote if histogram equalisation should be applied, defaults to True</p></li>
+</ul>
 </dd>
-<dt class="field-even">type path</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">param band</dt>
-<dd class="field-odd"><p>Desired band output - ‘R’: red band; ‘B’: blue band; ‘G’:</p>
-</dd>
-</dl>
-</dd>
-<dt>green band; ‘L’: grayscale (default).</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type band</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param equal</dt>
-<dd class="field-even"><p>Flag to denote if histogram equalisation should be applied,</p>
-</dd>
-</dl>
-</dd>
-<dt>defaults to True</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type equal</dt>
-<dd class="field-odd"><p>bool</p>
-</dd>
-<dt class="field-even">returns</dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Image array</p>
 </dd>
-<dt class="field-odd">rtype</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>arr</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -1796,35 +1253,23 @@ header line and finding the world and image coordinates from each line.</p>
 <dl class="function">
 <dt id="PyTrx.FileHandler.readMask">
 <code class="sig-prename descclassname">PyTrx.FileHandler.</code><code class="sig-name descname">readMask</code><span class="sig-paren">(</span><em class="sig-param">img</em>, <em class="sig-param">writeMask=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/FileHandler.html#readMask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.FileHandler.readMask" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Function to create a mask for point seeding using PIL to rasterize </dt><dd><p>polygon. The mask is manually defined by the user using the pyplot ginput 
+<dd><p>Function to create a mask for point seeding using PIL to rasterize 
+polygon. The mask is manually defined by the user using the pyplot ginput 
 function. This subsequently returns the manually defined area as a .jpg 
-mask.     
-The writeMask file path is used to either open the existing mask at that 
-path or to write the generated mask to this path.</p>
+mask. The writeMask file path is used to either open the existing mask at 
+that path or to write the generated mask to this path.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param img</dt>
-<dd class="field-odd"><p>Image to define mask in</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>arr</em>) – Image to define mask in</p></li>
+<li><p><strong>writeMask</strong> (<em>str</em><em>, </em><em>optional</em>) – File destination that mask output is written to, default to None</p></li>
+</ul>
 </dd>
-<dt class="field-even">type img</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param writeMask</dt>
-<dd class="field-odd"><p>File destination that mask output is written to, default</p>
-</dd>
-</dl>
-</dd>
-<dt>to None</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type writeMask</dt>
-<dd class="field-odd"><p>str, optional</p>
-</dd>
-<dt class="field-even">returns</dt>
+<dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Array defining the image mask</p>
 </dd>
-<dt class="field-odd">rtype</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>arr</p>
-</dd>
-</dl>
 </dd>
 </dl>
 </dd></dl>
@@ -1832,32 +1277,20 @@ path or to write the generated mask to this path.</p>
 <dl class="function">
 <dt id="PyTrx.FileHandler.readMatrixDistortion">
 <code class="sig-prename descclassname">PyTrx.FileHandler.</code><code class="sig-name descname">readMatrixDistortion</code><span class="sig-paren">(</span><em class="sig-param">path</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/FileHandler.html#readMatrixDistortion"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.FileHandler.readMatrixDistortion" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Function to support the calibrate function. Returns the </dt><dd><p>intrinsic matrix and distortion parameters required for calibration from a
+<dd><p>Function to support the calibrate function. Returns the 
+intrinsic matrix and distortion parameters required for calibration from a
 given file.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param path</dt>
-<dd class="field-odd"><p>Directory of calibration file</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>path</strong> (<em>str</em>) – Directory of calibration file</p>
 </dd>
-<dt class="field-even">type path</dt>
-<dd class="field-even"><p>str</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Three camera matrix parameters: 1) the intrinsic matrix as a 3x3 array, including focal length, principal point, and skew (arr); 2) Tangential distortion values (p1, p2) (arr); and 3) Radial distortion values (k1, k2… k6)</p>
 </dd>
-<dt class="field-odd">returns</dt>
-<dd class="field-odd"><p>Three camera matrix parameters: 1) the intrinsic matrix as a 3x3</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>array, including focal length, principal point, and skew (arr); 2) Tangential 
-distortion values (p1, p2) (arr); and 3) Radial distortion values 
-(k1, k2… k6)</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">rtype</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>arr</p>
 </dd>
 </dl>
-</div></blockquote>
 </dd></dl>
 
 <dl class="function">
@@ -1885,43 +1318,17 @@ will return the data.</p>
 <dl class="function">
 <dt id="PyTrx.FileHandler.writeAreaCoords">
 <code class="sig-prename descclassname">PyTrx.FileHandler.</code><code class="sig-name descname">writeAreaCoords</code><span class="sig-paren">(</span><em class="sig-param">pxpts</em>, <em class="sig-param">xyzpts</em>, <em class="sig-param">imn</em>, <em class="sig-param">pxdestination</em>, <em class="sig-param">xyzdestination</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/FileHandler.html#writeAreaCoords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.FileHandler.writeAreaCoords" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Write UV and XYZ area coordinates to text files. These file types are </dt><dd><p>compatible with the importing tools (importAreaPX, importAreaXYZ).</p>
+<dd><p>Write UV and XYZ area coordinates to text files. These file types are 
+compatible with the importing tools (importAreaPX, importAreaXYZ).</p>
 <dl class="field-list simple">
-<dt class="field-odd">param xyzarea</dt>
-<dd class="field-odd"><p>XYZ areas</p>
-</dd>
-<dt class="field-even">type xyzarea</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param xyzpts</dt>
-<dd class="field-odd"><p>XYZ coordinates</p>
-</dd>
-<dt class="field-even">type xyzpts</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param imn</dt>
-<dd class="field-odd"><p>Image names</p>
-</dd>
-<dt class="field-even">type imn</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param pxdestination</dt>
-<dd class="field-odd"><p>File directory where UV coordinates will be written to</p>
-</dd>
-<dt class="field-even">type pxdestination</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">param xyzdestination</dt>
-<dd class="field-odd"><p>File directory where XYZ coordinates will be written</p>
-</dd>
-</dl>
-</dd>
-<dt>to</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type xyzdestination</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xyzarea</strong> (<em>list</em>) – XYZ areas</p></li>
+<li><p><strong>xyzpts</strong> (<em>list</em>) – XYZ coordinates</p></li>
+<li><p><strong>imn</strong> (<em>list</em>) – Image names</p></li>
+<li><p><strong>pxdestination</strong> (<em>str</em>) – File directory where UV coordinates will be written to</p></li>
+<li><p><strong>xyzdestination</strong> (<em>str</em>) – File directory where XYZ coordinates will be written to</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -1945,46 +1352,18 @@ will return the data.</p>
 <dl class="function">
 <dt id="PyTrx.FileHandler.writeAreaSHP">
 <code class="sig-prename descclassname">PyTrx.FileHandler.</code><code class="sig-name descname">writeAreaSHP</code><span class="sig-paren">(</span><em class="sig-param">xyzpts</em>, <em class="sig-param">imn</em>, <em class="sig-param">fileDirectory</em>, <em class="sig-param">projection=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/FileHandler.html#writeAreaSHP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.FileHandler.writeAreaSHP" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Write OGR real polygon areas (from ALL images) to file in a .shp</dt><dd><p>file type that is compatible with ESRI mapping software.</p>
+<dd><p>Write OGR real polygon areas (from ALL images) to file in a .shp
+file type that is compatible with ESRI mapping software.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param xyzpts</dt>
-<dd class="field-odd"><p>XYZ coordinates for polygons</p>
-</dd>
-<dt class="field-even">type xyzpts</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param imn</dt>
-<dd class="field-odd"><p>Image name</p>
-</dd>
-<dt class="field-even">type imn</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param fileDirectory</dt>
-<dd class="field-odd"><p>Destination that shapefiles will be written to e.g.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xyzpts</strong> (<em>list</em>) – XYZ coordinates for polygons</p></li>
+<li><p><strong>imn</strong> (<em>list</em>) – Image name</p></li>
+<li><p><strong>fileDirectory</strong> (<em>str</em>) – Destination that shapefiles will be written to</p></li>
+<li><p><strong>projection</strong> (<em>int/str</em>) – Coordinate projection that the shapefile will exist in. This can either be an ESPG number (expressed as an integer) or a well-known geographical coordinate system (expressed as a string). Well-known geographical coordinate systems are: ‘WGS84’, ‘WGS72’, NAD83’ or ‘EPSG:n’</p></li>
+</ul>
 </dd>
 </dl>
-</dd>
-<dt>/python_workspace/Results/</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type fileDirectory</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param projection</dt>
-<dd class="field-even"><p>Coordinate projection that the shapefile will exist in.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>This can either be an ESPG number (expressed as an integer) or a well-known 
-geographical coordinate system (expressed as a string). Well-known geographical 
-coordinate systems are: ‘WGS84’, ‘WGS72’, NAD83’ or ‘EPSG:n’</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type projection</dt>
-<dd class="field-odd"><p>int/str</p>
-</dd>
-</dl>
-</div></blockquote>
 </dd></dl>
 
 <dl class="function">
@@ -2028,43 +1407,17 @@ Signal-to-noise ratio.</p>
 <dl class="function">
 <dt id="PyTrx.FileHandler.writeLineCoords">
 <code class="sig-prename descclassname">PyTrx.FileHandler.</code><code class="sig-name descname">writeLineCoords</code><span class="sig-paren">(</span><em class="sig-param">uvpts</em>, <em class="sig-param">xyzpts</em>, <em class="sig-param">imn</em>, <em class="sig-param">pxdestination</em>, <em class="sig-param">xyzdestination</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/FileHandler.html#writeLineCoords"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.FileHandler.writeLineCoords" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Write UV and XYZ line coordinates to text file. These file types are </dt><dd><p>compatible with the importing tools (importLinePX, importLineXYZ)</p>
+<dd><p>Write UV and XYZ line coordinates to text file. These file types are 
+compatible with the importing tools (importLinePX, importLineXYZ)</p>
 <dl class="field-list simple">
-<dt class="field-odd">param uvpts</dt>
-<dd class="field-odd"><p>Pixel coordinates</p>
-</dd>
-<dt class="field-even">type uvpts</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param xyzpts</dt>
-<dd class="field-odd"><p>XYZ coordinates</p>
-</dd>
-<dt class="field-even">type xyzpts</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param imn</dt>
-<dd class="field-odd"><p>Image names</p>
-</dd>
-<dt class="field-even">type imn</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param pxdestination</dt>
-<dd class="field-odd"><p>File directory where UV coordinates will be written to</p>
-</dd>
-<dt class="field-even">type pxdestination</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">param xyzdestination</dt>
-<dd class="field-odd"><p>File directory where XYZ coordinates will be written</p>
-</dd>
-</dl>
-</dd>
-<dt>to</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type xyzdestination</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-</dl>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>uvpts</strong> (<em>list</em>) – Pixel coordinates</p></li>
+<li><p><strong>xyzpts</strong> (<em>list</em>) – XYZ coordinates</p></li>
+<li><p><strong>imn</strong> (<em>list</em>) – Image names</p></li>
+<li><p><strong>pxdestination</strong> (<em>str</em>) – File directory where UV coordinates will be written to</p></li>
+<li><p><strong>xyzdestination</strong> (<em>str</em>) – File directory where XYZ coordinates will be written to</p></li>
+</ul>
 </dd>
 </dl>
 </dd></dl>
@@ -2088,46 +1441,18 @@ Signal-to-noise ratio.</p>
 <dl class="function">
 <dt id="PyTrx.FileHandler.writeLineSHP">
 <code class="sig-prename descclassname">PyTrx.FileHandler.</code><code class="sig-name descname">writeLineSHP</code><span class="sig-paren">(</span><em class="sig-param">xyzpts</em>, <em class="sig-param">imn</em>, <em class="sig-param">fileDirectory</em>, <em class="sig-param">projection=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/FileHandler.html#writeLineSHP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.FileHandler.writeLineSHP" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Write OGR real line features (from ALL images) to file in a .shp</dt><dd><p>file type that is compatible with ESRI mapping software.</p>
+<dd><p>Write OGR real line features (from ALL images) to file in a .shp
+file type that is compatible with ESRI mapping software.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param xyzpts</dt>
-<dd class="field-odd"><p>XYZ coordinates for polygons</p>
-</dd>
-<dt class="field-even">type xyzpts</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param imn</dt>
-<dd class="field-odd"><p>Image name</p>
-</dd>
-<dt class="field-even">type imn</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param fileDirectory</dt>
-<dd class="field-odd"><p>Destination that shapefiles will be written to e.g.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xyzpts</strong> (<em>list</em>) – XYZ coordinates for polygons</p></li>
+<li><p><strong>imn</strong> (<em>list</em>) – Image name</p></li>
+<li><p><strong>fileDirectory</strong> (<em>str</em>) – Destination that shapefiles will be written to</p></li>
+<li><p><strong>projection</strong> (<em>int/str</em>) – Coordinate projection that the shapefile will exist in. This can either be an ESPG number (expressed as an integer) or a well-known geographical coordinate system (expressed as a string). Well-known geographical coordinate systems are: ‘WGS84’, ‘WGS72’, NAD83’ or ‘EPSG:n’</p></li>
+</ul>
 </dd>
 </dl>
-</dd>
-<dt>/python_workspace/Results/</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type fileDirectory</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param projection</dt>
-<dd class="field-even"><p>Coordinate projection that the shapefile will exist in.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>This can either be an ESPG number (expressed as an integer) or a well-known 
-geographical coordinate system (expressed as a string). Well-known geographical 
-coordinate systems are: ‘WGS84’, ‘WGS72’, NAD83’ or ‘EPSG:n’</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type projection</dt>
-<dd class="field-odd"><p>int/str</p>
-</dd>
-</dl>
-</div></blockquote>
 </dd></dl>
 
 <dl class="function">
@@ -2155,52 +1480,19 @@ mean error (RMS), and Signal-to-noise ratio.</p>
 <dl class="function">
 <dt id="PyTrx.FileHandler.writeVeloSHP">
 <code class="sig-prename descclassname">PyTrx.FileHandler.</code><code class="sig-name descname">writeVeloSHP</code><span class="sig-paren">(</span><em class="sig-param">xyzvel</em>, <em class="sig-param">xyzerr</em>, <em class="sig-param">xyz0</em>, <em class="sig-param">imn</em>, <em class="sig-param">fileDirectory</em>, <em class="sig-param">projection=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/FileHandler.html#writeVeloSHP"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.FileHandler.writeVeloSHP" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Write OGR real velocity points (from ALL images) to file in a .shp</dt><dd><p>file type that is compatible with ESRI mapping software.</p>
+<dd><p>Write OGR real velocity points (from ALL images) to file in a .shp
+file type that is compatible with ESRI mapping software.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param xyzvel</dt>
-<dd class="field-odd"><p>XYZ velocities</p>
-</dd>
-<dt class="field-even">type xyzvel</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param xyz0</dt>
-<dd class="field-odd"><p>XYZ pt0</p>
-</dd>
-<dt class="field-even">type xyz0</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param imn</dt>
-<dd class="field-odd"><p>Image name</p>
-</dd>
-<dt class="field-even">type imn</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param fileDirectory</dt>
-<dd class="field-odd"><p>Destination that shapefiles will be written to e.g.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>xyzvel</strong> (<em>list</em>) – XYZ velocities</p></li>
+<li><p><strong>xyz0</strong> (<em>list</em>) – XYZ pt0</p></li>
+<li><p><strong>imn</strong> (<em>list</em>) – Image name</p></li>
+<li><p><strong>fileDirectory</strong> (<em>str</em>) – Destination that shapefiles will be written to</p></li>
+<li><p><strong>projection</strong> (<em>int/str</em>) – Coordinate projection that the shapefile will exist in. This can either be an ESPG number (expressed as an integer) or a well-known geographical coordinate system (expressed as a string). Well-known geographical coordinate systems are: ‘WGS84’, ‘WGS72’, NAD83’ or ‘EPSG:n’</p></li>
+</ul>
 </dd>
 </dl>
-</dd>
-<dt>/python_workspace/Results/</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type fileDirectory</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param projection</dt>
-<dd class="field-even"><p>Coordinate projection that the shapefile will exist in.</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>This can either be an ESPG number (expressed as an integer) or a well-known 
-geographical coordinate system (expressed as a string). Well-known geographical 
-coordinate systems are: ‘WGS84’, ‘WGS72’, NAD83’ or ‘EPSG:n’</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type projection</dt>
-<dd class="field-odd"><p>int/str</p>
-</dd>
-</dl>
-</div></blockquote>
 </dd></dl>
 
 </div>
@@ -2214,8 +1506,8 @@ images).</p>
 <dt id="PyTrx.Images.CamImage">
 <em class="property">class </em><code class="sig-prename descclassname">PyTrx.Images.</code><code class="sig-name descname">CamImage</code><span class="sig-paren">(</span><em class="sig-param">imagePath</em>, <em class="sig-param">band='l'</em>, <em class="sig-param">equal=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Images.html#CamImage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Images.CamImage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="simple">
-<dt>A class representing a raw single band (optical RGB or greyscale). This </dt><dd><p>CamImage object is used in subsequent timelapse analysis. The object 
+<p>A class representing a raw single band (optical RGB or greyscale). This 
+CamImage object is used in subsequent timelapse analysis. The object 
 contains the image data, image path, image dimensions and timestamp 
 (derived from the image Exif data, if available).       
 Optionally the user can specify whether the red, blue or green values 
@@ -2226,40 +1518,23 @@ on the image whereas the RGB splits are raw RGB. This could be modified
 to permit more sophisticated settings of RGB combinations and/or 
 filters with file reading.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param imagePath</dt>
-<dd class="field-odd"><p>The file path to a given image</p>
-</dd>
-<dt class="field-even">type imagePath</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">param band</dt>
-<dd class="field-odd"><p>Specified image band to pass forward: ‘r’ - red band; ‘b’ -</p>
-</dd>
-</dl>
-</dd>
-<dt>blue band; ‘g’ - green band; and ‘l’ - grayscale. Default to ‘l’</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type band</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param equal</dt>
-<dd class="field-even"><p>Flag denoting whether histogram equalisation is applied to</p>
-</dd>
-</dl>
-</dd>
-<dt>images (histogram equalisation is applied if True). Default to True</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type equal</dt>
-<dd class="field-odd"><p>bool, optional</p>
-</dd>
-</dl>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imagePath</strong> (<em>str</em>) – The file path to a given image</p></li>
+<li><p><strong>band</strong> (<em>str</em>) – Specified image band to pass forward: ‘r’ - red band; ‘b’ - blue band; ‘g’ - green band; and ‘l’ - grayscale. Default to ‘l’</p></li>
+<li><p><strong>equal</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True). Default to True</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="method">
 <dt id="PyTrx.Images.CamImage.changeBand">
 <code class="sig-name descname">changeBand</code><span class="sig-paren">(</span><em class="sig-param">band</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Images.html#CamImage.changeBand"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Images.CamImage.changeBand" title="Permalink to this definition">¶</a></dt>
-<dd><p>Change the band you want the image to represent (‘r’, ‘b’, ‘g’ or
-‘l’)
-:param band: Image band (‘r’, ‘b’, ‘g’, or ‘l’)
-:type band: str</p>
+<dd><p>Change the band you want the image to represent (‘r’, ‘b’, ‘g’ or ‘l’)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>band</strong> (<em>str</em>) – Image band (‘r’, ‘b’, ‘g’, or ‘l’)</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
@@ -2315,23 +1590,31 @@ camera matrix and distortion parameters.</p>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Image corrected for image distortion (arr)</p>
 </dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr</p>
+</dd>
 </dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="PyTrx.Images.CamImage.getImageEnhance">
 <code class="sig-name descname">getImageEnhance</code><span class="sig-paren">(</span><em class="sig-param">diff</em>, <em class="sig-param">phi</em>, <em class="sig-param">theta</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Images.html#CamImage.getImageEnhance"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Images.CamImage.getImageEnhance" title="Permalink to this definition">¶</a></dt>
-<dd><p>Return enhanced image using :func:’PyTrx.Images.enhanceImg’ function.</p>
+<dd><p>Return enhanced image using <code class="xref py py-func docutils literal notranslate"><span class="pre">PyTrx.Images.enhanceImg()</span></code> function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>diff</strong> (<em>str</em>) – </p></li>
-<li><p><strong>phi</strong> (<em>int</em>) – </p></li>
-<li><p><strong>theta</strong> – </p></li>
+<li><p><strong>diff</strong> (<em>str</em>) – Inputted as either ‘light or ‘dark’, signifying the intensity of the image pixels. ‘light’ increases the intensity such that dark pixels become much brighter and bright pixels become slightly brighter. ‘dark’ decreases the intensity such that dark pixels become much darker and bright pixels become slightly darker.</p></li>
+<li><p><strong>phi</strong> (<em>int</em>) – Defines the intensity of all pixel values</p></li>
+<li><p><strong>theta</strong> (<em>int</em>) – Defines the number of “colours” in the image, e.g. 3 signifies that all the pixels will be grouped into one of three pixel values</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Enhanced image</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr</p>
+</dd>
 </dl>
-<p>:type theta:int</p>
 </dd></dl>
 
 <dl class="method">
@@ -2384,41 +1667,15 @@ information).</p>
 <dt id="PyTrx.Images.ImageSequence">
 <em class="property">class </em><code class="sig-prename descclassname">PyTrx.Images.</code><code class="sig-name descname">ImageSequence</code><span class="sig-paren">(</span><em class="sig-param">imageList</em>, <em class="sig-param">band='L'</em>, <em class="sig-param">equal=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Images.html#ImageSequence"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Images.ImageSequence" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
-<dl class="simple">
-<dt>A class to model a raw collection of CamImage objects, which can </dt><dd><p>subsequently be used for making photogrammetric measurements from.</p>
+<p>A class to model a raw collection of CamImage objects, which can 
+subsequently be used for making photogrammetric measurements from.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param imageList</dt>
-<dd class="field-odd"><p>The list of images, which can be passed in 3 ways: 1) As</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>a list of :class:’PyTrx.Image.CamImage’ objects e.g. imageSet=ImageSet([ImageObject1, 
-ImageObject2]); 2) As a list of image paths e.g. 
-imageSet=ImageSet([“image1.JPG”,”image2.JPG”]); and 3) As a folder containing 
-images e.g. imageSet=ImageSet(“Folder/<a href="#id3"><span class="problematic" id="id4">*</span></a>”)</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type imageList</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param band</dt>
-<dd class="field-even"><p>Image band (‘r’, ‘b’, ‘g’, or ‘l’), default to ‘l’</p>
-</dd>
-<dt class="field-odd">type band</dt>
-<dd class="field-odd"><p>str, optional</p>
-</dd>
-<dt class="field-even">param equal</dt>
-<dd class="field-even"><p>Flag denoting whether histogram equalisation is applied to</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>images (histogram equalisation is applied if True). Default to True</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type equal</dt>
-<dd class="field-odd"><p>bool, optional</p>
-</dd>
-</dl>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imageList</strong> (<em>str</em>) – The list of images, which can be passed in 3 ways: 1) As a list of <code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.Image.CamImage</span></code> objects; 2) As a list of image paths; and 3) As a folder containing images</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – Image band (‘r’, ‘b’, ‘g’, or ‘l’), default to ‘l’</p></li>
+<li><p><strong>equal</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True). Default to True</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="method">
@@ -2431,6 +1688,9 @@ images e.g. imageSet=ImageSet(“Folder/<a href="#id3"><span class="problematic"
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Image array</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2450,13 +1710,16 @@ images e.g. imageSet=ImageSet(“Folder/<a href="#id3"><span class="problematic"
 <dl class="method">
 <dt id="PyTrx.Images.ImageSequence.getImageObj">
 <code class="sig-name descname">getImageObj</code><span class="sig-paren">(</span><em class="sig-param">i</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Images.html#ImageSequence.getImageObj"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Images.ImageSequence.getImageObj" title="Permalink to this definition">¶</a></dt>
-<dd><p>Get :class:’PyTrx.Images.CamImage’ object i from image sequence</p>
+<dd><p>Get <a class="reference internal" href="#PyTrx.Images.CamImage" title="PyTrx.Images.CamImage"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.Images.CamImage</span></code></a> object i from image sequence</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>i</strong> (<em>int</em>) – Image number in sequence</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>:class:’PyTrx.Images.CamImage’ object</p>
+<dd class="field-even"><p><a class="reference internal" href="#PyTrx.Images.CamImage" title="PyTrx.Images.CamImage"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.Images.CamImage</span></code></a></p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2478,45 +1741,22 @@ images e.g. imageSet=ImageSet(“Folder/<a href="#id3"><span class="problematic"
 <dl class="function">
 <dt id="PyTrx.Images.enhanceImage">
 <code class="sig-prename descclassname">PyTrx.Images.</code><code class="sig-name descname">enhanceImage</code><span class="sig-paren">(</span><em class="sig-param">img</em>, <em class="sig-param">diff</em>, <em class="sig-param">phi</em>, <em class="sig-param">theta</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Images.html#enhanceImage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Images.enhanceImage" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Change brightness and contrast of image using phi and theta </dt><dd><p>variables. Change phi and theta values accordingly.</p>
+<dd><p>Change brightness and contrast of image using phi and theta variables. 
+Change phi and theta values accordingly.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param img</dt>
-<dd class="field-odd"><p>Input image array for enhancement</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>arr</em>) – Input image array for enhancement</p></li>
+<li><p><strong>diff</strong> (<em>str</em>) – Inputted as either ‘light or ‘dark’, signifying the intensity of the image pixels. ‘light’ increases the intensity such that dark pixels become much brighter and bright pixels become slightly brighter. ‘dark’ decreases the intensity such that dark pixels become much darker and bright pixels become slightly darker.</p></li>
+<li><p><strong>phi</strong> (<em>int</em>) – Defines the intensity of all pixel values</p></li>
+<li><p><strong>theta</strong> (<em>int               .</em>) – Defines the number of “colours” in the image, e.g. 3 signifies that all the pixels will be grouped into one of three pixel values</p></li>
+</ul>
 </dd>
-<dt class="field-even">type img</dt>
-<dd class="field-even"><p>arr</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Enhanced image.</p>
 </dd>
-<dt class="field-odd">param diff</dt>
-<dd class="field-odd"><p>Inputted as either ‘light or ‘dark’, signifying the intensity</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>of the image pixels. ‘light’ increases the intensity such that dark pixels 
-become much brighter and bright pixels become slightly brighter. ‘dark’ 
-decreases the intensity such that dark pixels become much darker and bright 
-pixels become slightly darker.</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type diff</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param phi</dt>
-<dd class="field-even"><p>Defines the intensity of all pixel values</p>
-</dd>
-<dt class="field-odd">type phi</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-<dt class="field-even">param theta</dt>
-<dd class="field-even"><p>Defines the number of “colours” in the image, e.g. 3</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>signifies that all the pixels will be grouped into one of three pixel values</dt><dd><p>:type theta:int               .
-:returns img1: Enhanced image.
-:rtype: arr</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2532,63 +1772,20 @@ Determining real-world distances from oblique imagery.</p>
 <dt id="PyTrx.Line.Line">
 <em class="property">class </em><code class="sig-prename descclassname">PyTrx.Line.</code><code class="sig-name descname">Line</code><span class="sig-paren">(</span><em class="sig-param">imageList</em>, <em class="sig-param">cameraenv</em>, <em class="sig-param">hmatrix</em>, <em class="sig-param">calibFlag=True</em>, <em class="sig-param">band='L'</em>, <em class="sig-param">equal=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Line.html#Line"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Line.Line" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Images.ImageSequence</span></code></p>
-<dl class="simple">
-<dt>A class for handling lines/distances (e.g. glacier terminus position)</dt><dd><p>through an image sequence, with methods to manually define pixel lines in 
+<p>A class for handling lines/distances (e.g. glacier terminus position)
+through an image sequence, with methods to manually define pixel lines in 
 the image plane and georectify them to generate real-world coordinates and 
 distances. The Line class object primarily inherits from the Area class.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param imageList</dt>
-<dd class="field-odd"><p>List of images to be inputted into the</p>
-</dd>
-</dl>
-</dd>
-<dt>:class:’PyTrx.Images.ImageSequence’ object</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type imageList</dt>
-<dd class="field-odd"><p>str/list</p>
-</dd>
-<dt class="field-even">param cameraenv</dt>
-<dd class="field-even"><p>Camera environment parameters which can be read into the</p>
-</dd>
-</dl>
-</dd>
-<dt>:class:’PyTrx.CamEnv.CamEnv’ object as a text file</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type cameraenv</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">param hmatrix</dt>
-<dd class="field-even"><p>Homography matrix</p>
-</dd>
-<dt class="field-odd">type hmatrix</dt>
-<dd class="field-odd"><p>arr</p>
-</dd>
-<dt class="field-even">param calibFlag</dt>
-<dd class="field-even"><p>An indicator of whether images are calibrated, for the</p>
-</dd>
-</dl>
-</dd>
-<dt>:class:’PyTrx.Images.ImageSequence’ object, default to True</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type calibFlag</dt>
-<dd class="field-odd"><p>bool, optional         .</p>
-</dd>
-<dt class="field-even">param band</dt>
-<dd class="field-even"><p>String denoting the desired image band, default to ‘L’</p>
-</dd>
-</dl>
-</dd>
-<dt>(grayscale)</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type band</dt>
-<dd class="field-odd"><p>str                .</p>
-</dd>
-<dt class="field-even">param equal</dt>
-<dd class="field-even"><p>Flag denoting whether histogram equalisation is applied to</p>
-</dd>
-</dl>
-</dd>
-<dt>images (histogram equalisation is applied if True). Default to True.</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type equal</dt>
-<dd class="field-odd"><p>bool, optional</p>
-</dd>
-</dl>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imageList</strong> (<em>str/list</em>) – List of images to be inputted into the <a class="reference internal" href="#PyTrx.Images.ImageSequence" title="PyTrx.Images.ImageSequence"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.Images.ImageSequence</span></code></a> object</p></li>
+<li><p><strong>cameraenv</strong> (<em>str</em>) – Camera environment parameters which can be read into the <a class="reference internal" href="#PyTrx.CamEnv.CamEnv" title="PyTrx.CamEnv.CamEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.CamEnv.CamEnv</span></code></a> object as a text file</p></li>
+<li><p><strong>hmatrix</strong> (<em>arr</em>) – Homography matrix</p></li>
+<li><p><strong>calibFlag</strong> (<em>bool</em><em>, </em><em>optional         .</em>) – An indicator of whether images are calibrated, for the <a class="reference internal" href="#PyTrx.Images.ImageSequence" title="PyTrx.Images.ImageSequence"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.Images.ImageSequence</span></code></a> object, default to True</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional           .</em>) – String denoting the desired image band, default to ‘L’ (grayscale)</p></li>
+<li><p><strong>equal</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True). Default to True.</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="method">
@@ -2599,7 +1796,10 @@ lines are manually defined by the user on an image plot. Returns the
 line pixel coordinates and pixel length.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>XYZ and UV line lengths and coordinates (list)</p>
+<dd class="field-odd"><p>XYZ and UV line lengths and coordinates</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>list</p>
 </dd>
 </dl>
 </dd></dl>
@@ -2609,68 +1809,45 @@ line pixel coordinates and pixel length.</p>
 <dl class="function">
 <dt id="PyTrx.Line.calcManualLine">
 <code class="sig-prename descclassname">PyTrx.Line.</code><code class="sig-name descname">calcManualLine</code><span class="sig-paren">(</span><em class="sig-param">img</em>, <em class="sig-param">imn</em>, <em class="sig-param">hmatrix=None</em>, <em class="sig-param">invprojvars=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Line.html#calcManualLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Line.calcManualLine" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Manually define a line in a given image to produce XYZ and UV line </dt><dd><p>length and corresponding coordinates. Lines are defined through user input 
+<dd><p>Manually define a line in a given image to produce XYZ and UV line 
+length and corresponding coordinates. Lines are defined through user input 
 by clicking in the interactive image plot. This primarily operates via the 
 pyplot.ginput function which allows users to define coordinates through 
 plot interaction. If inverse projection variables are given, XYZ lines
 and coordinates are also calculated.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param img</dt>
-<dd class="field-odd"><p>Image array for plotting.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img</strong> (<em>arr</em>) – Image array for plotting.</p></li>
+<li><p><strong>imn</strong> (<em>str</em>) – Image name</p></li>
+<li><p><strong>hmatrix</strong> (<em>arr</em><em>, </em><em>optional</em>) – Homography matrix, default to None</p></li>
+<li><p><strong>invprojvars</strong> (<em>list</em><em>, </em><em>optional</em>) – Inverse projection variables [X,Y,Z,uv0], default to None</p></li>
+</ul>
 </dd>
-<dt class="field-even">type img</dt>
-<dd class="field-even"><p>arr</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Four list elements containing: line length in xyz (list), xyz coordinates of lines (list), line length in pixels (list), and uvcoordinates of lines (list)</p>
 </dd>
-<dt class="field-odd">param imn</dt>
-<dd class="field-odd"><p>Image name</p>
-</dd>
-<dt class="field-even">type imn</dt>
-<dd class="field-even"><p>str</p>
-</dd>
-<dt class="field-odd">param hmatrix</dt>
-<dd class="field-odd"><p>Homography matrix, default to None</p>
-</dd>
-<dt class="field-even">type hmatrix</dt>
-<dd class="field-even"><p>arr, optional</p>
-</dd>
-<dt class="field-odd">param invprojvars</dt>
-<dd class="field-odd"><p>Inverse projection variables [X,Y,Z,uv0], default to</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
-</dd>
-<dt>None</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type invprojvars</dt>
-<dd class="field-odd"><p>list, optional</p>
-</dd>
-<dt class="field-even">returns</dt>
-<dd class="field-even"><p>Four list elements containing: line length in xyz (list),</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>xyz coordinates of lines (list), line length in pixels (list), and uv
-coordinates of lines (list)</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyTrx.Line.getOGRLine">
 <code class="sig-prename descclassname">PyTrx.Line.</code><code class="sig-name descname">getOGRLine</code><span class="sig-paren">(</span><em class="sig-param">pts</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Line.html#getOGRLine"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Line.getOGRLine" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function to construct an OGR line from a set of uv coordinates.</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">param pts</dt>
-<dd class="field-odd"><p>A series of uv coordinates denoting a line</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>pts</strong> (<em>arr</em>) – A series of uv coordinates denoting a line</p>
 </dd>
-<dt class="field-even">type pts</dt>
-<dd class="field-even"><p>arr</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A line object (ogr.Geometry) constructed from the input coordinates</p>
 </dd>
-<dt class="field-odd">returns</dt>
-<dd class="field-odd"><p>A line object (ogr.Geometry) constructed from the input</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>ogr.Geometry</p>
 </dd>
 </dl>
-</div></blockquote>
-<p>coordinates</p>
 </dd></dl>
 
 </div>
@@ -2974,69 +2151,26 @@ method and a grid of evenly space points in the dense method.</p>
 <dt id="PyTrx.Velocity.Homography">
 <em class="property">class </em><code class="sig-prename descclassname">PyTrx.Velocity.</code><code class="sig-name descname">Homography</code><span class="sig-paren">(</span><em class="sig-param">imageList</em>, <em class="sig-param">camEnv</em>, <em class="sig-param">invmaskPath=None</em>, <em class="sig-param">calibFlag=True</em>, <em class="sig-param">band='L'</em>, <em class="sig-param">equal=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Velocity.html#Homography"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Velocity.Homography" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Images.ImageSequence</span></code></p>
-<dl class="simple">
-<dt>A class for the processing the homography of an image sequence to </dt><dd><p>determine motion in a camera platform. This class treats the images as a 
+<p>A class for the processing the homography of an image sequence to 
+determine motion in a camera platform. This class treats the images as a 
 contigous sequence of name references by default.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param imageList</dt>
-<dd class="field-odd"><p>List of images, for the ImageSet object</p>
-</dd>
-<dt class="field-even">type imageList</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param camEnv</dt>
-<dd class="field-odd"><p>The Camera Environment corresponding to the images, for the</p>
-</dd>
-</dl>
-</dd>
-<dt>:class:’PyTrx.Images.ImageSequence’ object</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type camEnv</dt>
-<dd class="field-odd"><p>:class:’PyTrx.CamEnv.CamEnv’</p>
-</dd>
-<dt class="field-even">param invmaskPath</dt>
-<dd class="field-even"><p>The mask for the stationary feature tracking (for</p>
-</dd>
-</dl>
-</dd>
-<dt>camera registration/determining camera homography), default to None</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type invmaskPath</dt>
-<dd class="field-odd"><p>arr, optional</p>
-</dd>
-<dt class="field-even">param calibFlag</dt>
-<dd class="field-even"><p>Flag denoting whether images should be corrected for</p>
-</dd>
-</dl>
-</dd>
-<dt>lens distortion, default to True</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type calibFlag</dt>
-<dd class="field-odd"><p>bool, optional</p>
-</dd>
-<dt class="field-even">param band</dt>
-<dd class="field-even"><p>String denoting the desired image band, default to ‘L’</p>
-</dd>
-</dl>
-</dd>
-<dt>(grayscale)</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type band</dt>
-<dd class="field-odd"><p>str, optional</p>
-</dd>
-<dt class="field-even">param equal</dt>
-<dd class="field-even"><p>Flag denoting whether histogram equalisation is applied to</p>
-</dd>
-</dl>
-</dd>
-<dt>images (histogram equalisation is applied if True); default is True.                        </dt><dd><dl class="field-list simple">
-<dt class="field-odd">type equal</dt>
-<dd class="field-odd"><p>bool, optional</p>
-</dd>
-</dl>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imageList</strong> (<em>list</em>) – List of images, for the ImageSet object</p></li>
+<li><p><strong>camEnv</strong> (<a class="reference internal" href="#PyTrx.CamEnv.CamEnv" title="PyTrx.CamEnv.CamEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.CamEnv.CamEnv</span></code></a>) – The Camera Environment corresponding to the images, for the <a class="reference internal" href="#PyTrx.Images.ImageSequence" title="PyTrx.Images.ImageSequence"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.Images.ImageSequence</span></code></a> object</p></li>
+<li><p><strong>invmaskPath</strong> (<em>arr</em><em>, </em><em>optional</em>) – The mask for the stationary feature tracking (for camera registration/determining camera homography), default to None</p></li>
+<li><p><strong>calibFlag</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag denoting whether images should be corrected for lens distortion, default to True</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – String denoting the desired image band, default to ‘L’ (grayscale)</p></li>
+<li><p><strong>equal</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True); default is True.</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="method">
 <dt id="PyTrx.Velocity.Homography.calcHomographies">
 <code class="sig-name descname">calcHomographies</code><span class="sig-paren">(</span><em class="sig-param">params</em>, <em class="sig-param">homogmethod=8</em>, <em class="sig-param">ransacReprojThreshold=5.0</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Velocity.html#Homography.calcHomographies"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Velocity.Homography.calcHomographies" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Function to generate a homography model through a sequence of </dt><dd><p>images, and perform for image registration. Points that are assumed 
+<dd><p>Function to generate a homography model through a sequence of 
+images, and perform for image registration. Points that are assumed 
 to be static in the image plane are tracked between image pairs, and 
 movement in these points are used to generate sequential homography 
 models.
@@ -3048,55 +2182,20 @@ For dense homographies:
 homog = Homography.calcHomographies([[‘dense’], [100,100], 
 [cv2.TM_CCORR_NORMED, 50, 100, 1.0, 4]])</p>
 <dl class="field-list simple">
-<dt class="field-odd">param params</dt>
-<dd class="field-odd"><p>List that defines the parameters for point matching:</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>params</strong> (<em>list</em>) – List that defines the parameters for point matching: Method: ‘sparse’ or ‘dense’ (str). Seed parameters: either containing the cornerparameters for the sparse method - max. number of corners (int), quality (int), and min. distance (int). Or the grid spacing (list) for the dense method. Tracking parameters: either containing the sparse method parameters - window size (tuple), backtracking threshold(int) and minimum tracked features (int). Or the dense method parameters - tracking method (int), template size (int), search window size (int), backtracking threshold (int), and minimum tracked features (int)</p></li>
+<li><p><strong>homogmethod</strong> (<em>int</em><em>, </em><em>optional</em>) – Method used to calculate homography model, which plugs into the OpenCV function. This can either be cv2.RANSAC (a RANSAC-based robust method), cv2.LEAST_MEDIAN (a Least-Median robust method) or ‘0’ (a regular method using all the points); default to cv2.RANSAC</p></li>
+<li><p><strong>ransacReprojThreshold</strong> (<em>int</em>) – Maximum allowed reprojection error, default to 5.0</p></li>
+</ul>
 </dd>
-</dl>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A list of homography information for all image pairs in sequence</p>
 </dd>
-</dl>
-<p>Method: ‘sparse’ or ‘dense’ (str). Seed parameters: either containing the corner
-parameters for the sparse method - max. number of corners (int), quality (int),
-and min. distance (int). Or the grid spacing (list) for the dense method.
-Tracking parameters: either containing the sparse method parameters - window
-size (tuple), backtracking threshold(int) and minimum tracked features (int).
-Or the dense method parameters - tracking method (int), template size (int),
-search window size (int), backtracking threshold (int), and minimum tracked
-features (int)</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type params</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>list</p>
 </dd>
-<dt class="field-even">param homogmethod</dt>
-<dd class="field-even"><p>Method used to calculate homography model, which</p>
-</dd>
 </dl>
-</div></blockquote>
-<p>plugs into the OpenCV function. This can either be cv2.RANSAC (a RANSAC-based
-robust method), cv2.LEAST_MEDIAN (a Least-Median robust method) or ‘0’ (a
-regular method using all the points); default to cv2.RANSAC</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type homogmethod</dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-<dt class="field-even">param ransacReprojThreshold</dt>
-<dd class="field-even"><p>Maximum allowed reprojection error,</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>default to 5.0</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type ransacReprojThreshold</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-<dt class="field-even">returns</dt>
-<dd class="field-even"><p>A list of homography information for all image pairs in</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>sequence</p>
 </dd></dl>
 
 <dl class="method">
@@ -3111,89 +2210,29 @@ regular method using all the points); default to cv2.RANSAC</p>
 <dt id="PyTrx.Velocity.Velocity">
 <em class="property">class </em><code class="sig-prename descclassname">PyTrx.Velocity.</code><code class="sig-name descname">Velocity</code><span class="sig-paren">(</span><em class="sig-param">imageList</em>, <em class="sig-param">camEnv</em>, <em class="sig-param">homography=None</em>, <em class="sig-param">maskPath=None</em>, <em class="sig-param">calibFlag=True</em>, <em class="sig-param">band='L'</em>, <em class="sig-param">equal=True</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Velocity.html#Velocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Velocity.Velocity" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Images.ImageSequence</span></code></p>
-<dl class="simple">
-<dt>A class for the processing of an ImageSet to determine pixel </dt><dd><p>displacements and real-world velocities from a sparse set of points, with 
+<p>A class for the processing of an ImageSet to determine pixel 
+displacements and real-world velocities from a sparse set of points, with 
 methods to track in the xy image plane and project tracks to real-world 
 (xyz) coordinates. This class treats the images as a contigous sequence of 
 name references by default.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param imageList</dt>
-<dd class="field-odd"><p>List of images, for the :class:’PyTrx.Images.ImageSequence’</p>
-</dd>
-</dl>
-</dd>
-<dt>object</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type imageList</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-<dt class="field-even">param camEnv</dt>
-<dd class="field-even"><p>The Camera Environment object, :class:’PyTrx.CamEnv.CamEnv’</p>
-</dd>
-</dl>
-</dd>
-<dt>corresponding to the images</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type camEnv</dt>
-<dd class="field-odd"><p>:class:’PyTrx.CamEnv.CamEnv’</p>
-</dd>
-<dt class="field-even">param homography</dt>
-<dd class="field-even"><p>Homography model for the corresponding image, defaults</p>
-</dd>
-</dl>
-</dd>
-<dt>to None</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type homography</dt>
-<dd class="field-odd"><p>list, optional</p>
-</dd>
-<dt class="field-even">param maskPath</dt>
-<dd class="field-even"><p>The file path for the mask indicating the target area for</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>deriving velocities from. If this file exists, the mask will be loaded. If this 
-file does not exist, then the mask generation process will load, and the result 
-will be saved with this path; default to None</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type maskPath</dt>
-<dd class="field-odd"><p>str, optional</p>
-</dd>
-<dt class="field-even">param calibFlag</dt>
-<dd class="field-even"><p>Flag denoting whether images should be corrected for</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>lens distortion, default to True</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type calibFlag</dt>
-<dd class="field-odd"><p>bool, optional</p>
-</dd>
-<dt class="field-even">param band</dt>
-<dd class="field-even"><p>String denoting the desired image band, default to ‘L’</p>
-</dd>
-</dl>
-</dd>
-<dt>(grayscale)</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type band</dt>
-<dd class="field-odd"><p>str, optional</p>
-</dd>
-<dt class="field-even">param equal</dt>
-<dd class="field-even"><p>Flag denoting whether histogram equalisation is applied to</p>
-</dd>
-</dl>
-</dd>
-<dt>images (histogram equalisation is applied if True); default is True.                        </dt><dd><dl class="field-list simple">
-<dt class="field-odd">type equal</dt>
-<dd class="field-odd"><p>bool, optional</p>
-</dd>
-</dl>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>imageList</strong> (<em>list</em>) – List of images, for the <a class="reference internal" href="#PyTrx.Images.ImageSequence" title="PyTrx.Images.ImageSequence"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.Images.ImageSequence</span></code></a> object</p></li>
+<li><p><strong>camEnv</strong> (<a class="reference internal" href="#PyTrx.CamEnv.CamEnv" title="PyTrx.CamEnv.CamEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.CamEnv.CamEnv</span></code></a>) – The Camera Environment object, <a class="reference internal" href="#PyTrx.CamEnv.CamEnv" title="PyTrx.CamEnv.CamEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.CamEnv.CamEnv</span></code></a> corresponding to the images</p></li>
+<li><p><strong>homography</strong> (<em>list</em><em>, </em><em>optional</em>) – Homography model for the corresponding image, defaults to None</p></li>
+<li><p><strong>maskPath</strong> (<em>str</em><em>, </em><em>optional</em>) – The file path for the mask indicating the target area for deriving velocities from. If this file exists, the mask will be loaded. If this file does not exist, then the mask generation process will load, and the result will be saved with this path; default to None</p></li>
+<li><p><strong>calibFlag</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag denoting whether images should be corrected for lens distortion, default to True</p></li>
+<li><p><strong>band</strong> (<em>str</em><em>, </em><em>optional</em>) – String denoting the desired image band, default to ‘L’ (grayscale)</p></li>
+<li><p><strong>equal</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True); default is True.</p></li>
+</ul>
 </dd>
 </dl>
 <dl class="method">
 <dt id="PyTrx.Velocity.Velocity.calcVelocities">
 <code class="sig-name descname">calcVelocities</code><span class="sig-paren">(</span><em class="sig-param">params</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Velocity.html#Velocity.calcVelocities"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Velocity.Velocity.calcVelocities" title="Permalink to this definition">¶</a></dt>
-<dd><dl>
-<dt>Function to calculate velocities between succesive image pairs. </dt><dd><p>Image pairs are called from the ImageSequence object. Points are seeded
+<dd><p>Function to calculate velocities between succesive image pairs. 
+Image pairs are called from the ImageSequence object. Points are seeded
 in the first of these pairs using the Shi-Tomasi algorithm with 
 OpenCV’s goodFeaturesToTrack function.         
 The Lucas Kanade optical flow algorithm is applied using the OpenCV 
@@ -3209,51 +2248,18 @@ ImGRAFT (Messerli and Grinsted, 2015). Velocities are finally derived
 from these using a simple Pythagoras’ theorem method.
 This function returns the xyz velocities and points from each image 
 pair, and their corresponding uv velocities and points in the image 
-plane.
-Input example:
-For sparse velocities: 
-velocity = Velocity.calcVelocities([[‘sparse’], [50000, 0.1, 5.0],</p>
-<blockquote>
-<div><p>[(25,25), 1.0, 4]])</p>
-</div></blockquote>
-<p>For dense velocities:
-velocity = Velocity.calcVelocities([[‘dense’],[100,100],</p>
-<blockquote>
-<div><p>[‘cv2.TM_CCORR_NORMED’, 50, 100, 4]])</p>
-</div></blockquote>
+plane.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param params</dt>
-<dd class="field-odd"><p>List that defines the parameters for 
-deriving velocity: Method: ‘sparse’ or</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>params</strong> (<em>str</em>) – List that defines the parameters for deriving velocity: Method: ‘sparse’ or ‘dense’ (str). Seed parameters: either containing the corner parameters for the sparse method - max. number of corners (int), quality (int), and min. distance (int). Or the grid spacing (list) for the dense method. Tracking parameters: either containing the sparse method parameters - window size (tuple), backtracking threshold (int) and minimum tracked features (int). Or the dense method parameters - tracking method (int), template size (int), search window size (int), correlation threshold (int), and minimum tracked features (int)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A ist containing the xyz and uv velocities. The first element holds the xyz velocity for each point (xyz[0]), the xyz positions for the points in the first image (xyz[1]), and the xyz positions for the points in the second image(xyz[2]). The second element contains the uv velocities for each point (uv[0], the uv positions for the points in the first image (uv[1]), the uv positions for the points in the second image (uv[2]), and the corrected uv points in the second image if they have been calculated using the homography model for image registration (uv[3]). If the corrected points have not beencalculated then an empty list is merely returned</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
-</dd>
-</dl>
-<p>‘dense’ (str). Seed parameters: either containing the corner parameters for the 
-sparse method - max. number of corners (int), quality (int), and min. distance 
-(int). Or the grid spacing (list) for the dense method. Tracking parameters: 
-either containing the sparse method parameters - window size (tuple), 
-backtracking threshold (int) and minimum tracked features (int). Or the dense 
-method parameters - tracking method (int), template size (int), search window 
-size (int), correlation threshold (int), and minimum tracked features (int)</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type params</dt>
-<dd class="field-odd"><p>str</p>
-</dd>
-<dt class="field-even">returns</dt>
-<dd class="field-even"><p>A ist containing the xyz and uv velocities. The first element</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>holds the xyz velocity for each point (xyz[0]), the xyz positions for the 
-points in the first image (xyz[1]), and the xyz positions for the points in the 
-second image(xyz[2]). The second element contains the uv velocities for each 
-point (uv[0], the uv positions for the points in the first image (uv[1]), the 
-uv positions for the points in the second image (uv[2]), and the corrected uv 
-points in the second image if they have been calculated using the homography 
-model for image registration (uv[3]). If the corrected points have not been
-calculated then an empty list is merely returned.</p>
 </dd></dl>
 
 <dl class="method">
@@ -3273,37 +2279,24 @@ calculated then an empty list is merely returned.</p>
 <dl class="function">
 <dt id="PyTrx.Velocity.apply_persp_homographyPts">
 <code class="sig-prename descclassname">PyTrx.Velocity.</code><code class="sig-name descname">apply_persp_homographyPts</code><span class="sig-paren">(</span><em class="sig-param">pts</em>, <em class="sig-param">homog</em>, <em class="sig-param">inverse=False</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Velocity.html#apply_persp_homographyPts"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Velocity.apply_persp_homographyPts" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Funtion to apply a perspective homography to a sequence of 2D </dt><dd><p>values held in X and Y. The perspective homography is represented as a 
+<dd><p>Funtion to apply a perspective homography to a sequence of 2D 
+values held in X and Y. The perspective homography is represented as a 
 3 X 3 matrix (homog). The source points are inputted as an array. The 
 homography perspective matrix is modelled in the same manner as done so 
 in OpenCV.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param pts</dt>
-<dd class="field-odd"><p>Input point positions to correct</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>pts</strong> (<em>arr/list</em>) – Input point positions to correct</p></li>
+<li><p><strong>homog</strong> (<em>arr</em>) – Perspective homography matrix</p></li>
+<li><p><strong>inverse</strong> (<em>bool</em><em>, </em><em>optional</em>) – Flag to denote if perspective homography matrix needs inversing, default to False</p></li>
+</ul>
 </dd>
-<dt class="field-even">type pts</dt>
-<dd class="field-even"><p>arr/list</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>corrected point positions</p>
 </dd>
-<dt class="field-odd">param homog</dt>
-<dd class="field-odd"><p>Perspective homography matrix</p>
-</dd>
-<dt class="field-even">type homog</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param inverse</dt>
-<dd class="field-odd"><p>Flag to denote if perspective homography matrix needs</p>
-</dd>
-</dl>
-</dd>
-<dt>inversing, default to False</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type inverse</dt>
-<dd class="field-odd"><p>bool, optional</p>
-</dd>
-<dt class="field-even">return</dt>
-<dd class="field-even"><p>hpts (arr), corrected point positions</p>
-</dd>
-</dl>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3311,151 +2304,43 @@ in OpenCV.</p>
 <dl class="function">
 <dt id="PyTrx.Velocity.calcDenseHomography">
 <code class="sig-prename descclassname">PyTrx.Velocity.</code><code class="sig-name descname">calcDenseHomography</code><span class="sig-paren">(</span><em class="sig-param">img1</em>, <em class="sig-param">img2</em>, <em class="sig-param">mask</em>, <em class="sig-param">correct</em>, <em class="sig-param">griddistance</em>, <em class="sig-param">templatesize</em>, <em class="sig-param">searchsize</em>, <em class="sig-param">dem</em>, <em class="sig-param">projvars</em>, <em class="sig-param">trackmethod=3</em>, <em class="sig-param">homogmethod=8</em>, <em class="sig-param">ransacReprojThreshold=5.0</em>, <em class="sig-param">threshold=0.8</em>, <em class="sig-param">min_features=4</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Velocity.html#calcDenseHomography"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Velocity.calcDenseHomography" title="Permalink to this definition">¶</a></dt>
-<dd><dl>
-<dt>Function to supplement correction for movement in the camera </dt><dd><blockquote>
-<div><p>platform given an image pair (i.e. image registration). Returns the 
+<dd><p>Function to supplement correction for movement in the camera 
+platform given an image pair (i.e. image registration). Returns the 
 homography representing tracked image movement, and the tracked 
 features from each image.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param img1</dt>
-<dd class="field-odd"><p>Image 1 in the image pair</p>
-</dd>
-<dt class="field-even">type img1</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param img2</dt>
-<dd class="field-odd"><p>Image 2 in the image pair</p>
-</dd>
-<dt class="field-even">type img2</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param mask</dt>
-<dd class="field-odd"><p>Mask array for image points to be seeded</p>
-</dd>
-<dt class="field-even">type mask</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param correct</dt>
-<dd class="field-odd"><p>Calibration parameters for correcting image for</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>lens distortion</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type correct</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-<dt class="field-even">param griddistance</dt>
-<dd class="field-even"><p>Grid spacing, defined by two values representing pixel</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd>
-<dt>row and column spacing</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type griddistance</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-<dt class="field-even">param templatesize</dt>
-<dd class="field-even"><p>Template window size in im0 for matching</p>
-</dd>
-<dt class="field-odd">type templatesize</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-<dt class="field-even">param searchsize</dt>
-<dd class="field-even"><p>Search window size in im1 for matching</p>
-</dd>
-<dt class="field-odd">type searchsize</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-<dt class="field-even">param dem</dt>
-<dd class="field-even"><p>:class:’PyTrx.DEM.ExplicitRaster’ object</p>
-</dd>
-<dt class="field-odd">type dem</dt>
-<dd class="field-odd"><p>arr</p>
-</dd>
-<dt class="field-even">param projvars</dt>
-<dd class="field-even"><p>List containing projection parameters (camera location,</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>camera position, radial distortion coefficients, tangential distortion 
-coefficients, focal length, camera centre, and reference image)</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type projvars</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-<dt class="field-even">param trackmethod</dt>
-<dd class="field-even"><p>(str/int): Method for tmeplate matching: cv2.TM_CCOEFF -</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR 
-- Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF</p>
-<blockquote>
-<div><ul class="simple">
-<li><dl class="simple">
-<dt>Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type trackmethod</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-<dt class="field-even">param homogmethod</dt>
-<dd class="field-even"><p>Method used to calculate homography model: cv2.RANSAC -</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</li>
-</ul>
-</div></blockquote>
-<p>RANSAC-based robust method; cv2.LEAST_MEDIAN - Least-Median robust; 0 - a 
-regular method using all the points. Default to None</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type homogmethod</dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-<dt class="field-even">param ransacReprojThreshold</dt>
-<dd class="field-even"><p>default to 5.0</p>
-</dd>
-<dt class="field-odd">type ransacReprojThreshold</dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-<dt class="field-even">param theshold</dt>
-<dd class="field-even"><p>Threshold for template correlation; default to 0.8</p>
-</dd>
-<dt class="field-odd">type threshold</dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-<dt class="field-even">param min_features</dt>
-<dd class="field-even"><p>Minimum number of seeded points to track, default to 4</p>
-</dd>
-<dt class="field-odd">type min_features</dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-<dt class="field-even">returns</dt>
-<dd class="field-even"><p>homogMatrix (arr) - The calculated homographic shift for the</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>image pair; src_pts_corr (arr) - original homography points; dst_pts_corr (arr)</dt><dd><ul class="simple">
-<li><p>tracked homography points; homog_pts (arr) -back-tracked homography points;</p></li>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img1</strong> (<em>arr</em>) – Image 1 in the image pair</p></li>
+<li><p><strong>img2</strong> (<em>arr</em>) – Image 2 in the image pair</p></li>
+<li><p><strong>mask</strong> (<em>arr</em>) – Mask array for image points to be seeded</p></li>
+<li><p><strong>correct</strong> (<em>list</em>) – Calibration parameters for correcting image for lens distortion</p></li>
+<li><p><strong>griddistance</strong> (<em>list</em>) – Grid spacing, defined by two values representing pixel row and column spacing</p></li>
+<li><p><strong>templatesize</strong> (<em>int</em>) – Template window size in im0 for matching</p></li>
+<li><p><strong>searchsize</strong> (<em>int</em>) – Search window size in im1 for matching</p></li>
+<li><p><strong>dem</strong> (<em>arr</em>) – <a class="reference internal" href="#PyTrx.DEM.ExplicitRaster" title="PyTrx.DEM.ExplicitRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.DEM.ExplicitRaster</span></code></a> object</p></li>
+<li><p><strong>projvars</strong> (<em>list</em>) – List containing projection parameters (camera location, camera position, radial distortion coefficients, tangential distortion coefficients, focal length, camera centre, and reference image)</p></li>
+<li><p><strong>trackmethod</strong> (<em>int</em>) – (str/int): Method for tmeplate matching: cv2.TM_CCOEFF - Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR - Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF - Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff</p></li>
+<li><p><strong>homogmethod</strong> (<em>int</em><em>, </em><em>optional</em>) – Method used to calculate homography model: cv2.RANSAC - RANSAC-based robust method; cv2.LEAST_MEDIAN - Least-Median robust; 0 - a regular method using all the points. Default to None</p></li>
+<li><p><strong>ransacReprojThreshold</strong> (<em>int</em><em>, </em><em>optional</em>) – default to 5.0</p></li>
+<li><p><strong>theshold</strong> – Threshold for template correlation; default to 0.8</p></li>
+<li><p><strong>min_features</strong> (<em>int</em><em>, </em><em>optional</em>) – Minimum number of seeded points to track, default to 4</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>homogMatrix (arr) - The calculated homographic shift for the image pair; src_pts_corr (arr) - original homography points; dst_pts_corr (arr) -  tracked homography points; homog_pts (arr) -back-tracked homography points;  ptserror (list) - Difference between the original homography points and the back-tracked points; homogerror (list) -Difference between the interpolated homography matrix and the equivalent tracked points</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr/list</p>
+</dd>
 </dl>
-<p>ptserror (list) - Difference between the original homography points and the 
-back-tracked points; homogerror (list) -Difference between the interpolated 
-homography matrix and the equivalent tracked points</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyTrx.Velocity.calcDenseVelocity">
 <code class="sig-prename descclassname">PyTrx.Velocity.</code><code class="sig-name descname">calcDenseVelocity</code><span class="sig-paren">(</span><em class="sig-param">im0</em>, <em class="sig-param">im1</em>, <em class="sig-param">griddistance</em>, <em class="sig-param">method</em>, <em class="sig-param">templatesize</em>, <em class="sig-param">searchsize</em>, <em class="sig-param">mask</em>, <em class="sig-param">calib=None</em>, <em class="sig-param">homog=None</em>, <em class="sig-param">campars=None</em>, <em class="sig-param">threshold=0.8</em>, <em class="sig-param">min_features=4</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Velocity.html#calcDenseVelocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Velocity.calcDenseVelocity" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Function to calculate the velocity between a pair of images using </dt><dd><p>a gridded template matching approach. Gridded points are defined by grid 
+<dd><p>Function to calculate the velocity between a pair of images using 
+a gridded template matching approach. Gridded points are defined by grid 
 distance, which are then used to either generate templates for matching
 or tracked using the Lucas Kanade optical flow algorithm.    
 Tracked points are corrected for image distortion and camera platform
@@ -3467,243 +2352,67 @@ from these using a simple Pythagoras’ theorem method. This function returns
 the xyz velocities and points, and their corresponding uv velocities and 
 points in the image plane.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param im0</dt>
-<dd class="field-odd"><p>Image 1 in the image pair</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im0</strong> (<em>arr</em>) – Image 1 in the image pair</p></li>
+<li><p><strong>im1</strong> (<em>arr</em>) – Image 2 in the image pair</p></li>
+<li><p><strong>griddistance</strong> (<em>list</em>) – Grid spacing, defined by two values representing pixel row and column spacing.</p></li>
+<li><p><strong>method</strong> (<em>int</em>) – (str/int): Method for tmeplate matching: cv2.TM_CCOEFF - Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR - Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF - Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff</p></li>
+<li><p><strong>templatesize</strong> (<em>int</em>) – Template window size in im0 for matching</p></li>
+<li><p><strong>searchsize</strong> (<em>int</em>) – Search window size in im1 for matching</p></li>
+<li><p><strong>mask</strong> (<em>arr</em>) – Mask array for masking DEM</p></li>
+<li><p><strong>calib</strong> (<em>list</em><em>, </em><em>optional</em>) – Calibration parameters, default to None</p></li>
+<li><p><strong>homog</strong> (<em>list</em><em>, </em><em>optional</em>) – Homography parameters, hmatrix (arr) and hpts (arr), default to None</p></li>
+<li><p><strong>campars</strong> – List containing information for transforming between the image plane and 3D scene: 1. DEM (ExplicitRaster object); 2. Projection parameters (camera location, camera position, radial distortion coefficients, tangential distortion coefficients, focal length, camera centre, and reference image); 3. Inverse projection parameters (coordinate system  3D scene - X, Y, Z, uv0). Default to None</p></li>
+<li><p><strong>theshold</strong> – Threshold for template correlation; default to 0.8</p></li>
+<li><p><strong>min_features</strong> (<em>int</em><em>, </em><em>optional</em>) – Minimum number of seeded points to track, default to 4</p></li>
+</ul>
 </dd>
-<dt class="field-even">type im0</dt>
-<dd class="field-even"><p>arr</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Two lists, 1. containing the xyz velocities for each point (xyz[0]), the xyz positions for the points in the first image (xyz[1]), and the  xyz positions for the points in the second image(xyz[2]); amd 2. containing the uv velocities for each point (uv[0], the uv positions for the points in the first image (uv[1]), the uv positions for the points in the second image (uv[2]), and the corrected uv points in the second image if they have been calculated using the homography model for image registration (uv[3]). If the corrected points have not been calculated then an empty list is merely returned</p>
 </dd>
-<dt class="field-odd">param im1</dt>
-<dd class="field-odd"><p>Image 2 in the image pair</p>
-</dd>
-<dt class="field-even">type im1</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param griddistance</dt>
-<dd class="field-odd"><p>Grid spacing, defined by two values representing pixel</p>
-</dd>
-</dl>
-</dd>
-<dt>row and column spacing.</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type griddistance</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>list</p>
 </dd>
-<dt class="field-even">param method</dt>
-<dd class="field-even"><p>(str/int): Method for tmeplate matching: cv2.TM_CCOEFF -</p>
-</dd>
 </dl>
-</dd>
-</dl>
-<p>Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR 
-- Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF</p>
-<blockquote>
-<div><ul class="simple">
-<li><dl class="simple">
-<dt>Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type method</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-<dt class="field-even">param templatesize</dt>
-<dd class="field-even"><p>Template window size in im0 for matching</p>
-</dd>
-<dt class="field-odd">type templatesize</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-<dt class="field-even">param searchsize</dt>
-<dd class="field-even"><p>Search window size in im1 for matching</p>
-</dd>
-<dt class="field-odd">type searchsize</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-<dt class="field-even">param mask</dt>
-<dd class="field-even"><p>Mask array for masking DEM</p>
-</dd>
-<dt class="field-odd">type mask</dt>
-<dd class="field-odd"><p>arr</p>
-</dd>
-<dt class="field-even">param calib</dt>
-<dd class="field-even"><p>Calibration parameters, default to None</p>
-</dd>
-<dt class="field-odd">type calib</dt>
-<dd class="field-odd"><p>list, optional</p>
-</dd>
-<dt class="field-even">param homog</dt>
-<dd class="field-even"><p>Homography parameters, hmatrix (arr) and hpts (arr), default</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</li>
-</ul>
-</div></blockquote>
-<dl class="simple">
-<dt>to None</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type homog</dt>
-<dd class="field-odd"><p>list, optional</p>
-</dd>
-<dt class="field-even">param campars</dt>
-<dd class="field-even"><p>List containing information for transforming between the</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>image plane and 3D scene: 1. DEM (ExplicitRaster object); 2. Projection 
-parameters (camera location, camera position, radial distortion coefficients, 
-tangential distortion coefficients, focal length, camera centre, and reference 
-image); 3. Inverse projection parameters (coordinate system  3D scene - X, Y, 
-Z, uv0). Default to None</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type campar</dt>
-<dd class="field-odd"><p>list, optioanl</p>
-</dd>
-<dt class="field-even">param theshold</dt>
-<dd class="field-even"><p>Threshold for template correlation; default to 0.8</p>
-</dd>
-<dt class="field-odd">type threshold</dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-<dt class="field-even">param min_features</dt>
-<dd class="field-even"><p>Minimum number of seeded points to track, default to 4</p>
-</dd>
-<dt class="field-odd">type min_features</dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-<dt class="field-even">returns</dt>
-<dd class="field-even"><p>Two lists, 1. containing the xyz velocities for each point</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>(xyz[0]), the xyz positions for the points in the first image (xyz[1]), and the </dt><dd><p>xyz positions for the points in the second image(xyz[2]); amd 2. containing</p>
-</dd>
-</dl>
-<p>the uv velocities for each point (uv[0], the uv positions for the points in 
-the first image (uv[1]), the uv positions for the points in the second image 
-(uv[2]), and the corrected uv points in the second image if they have been 
-calculated using the homography model for image registration (uv[3]). If the 
-corrected points have not been calculated then an empty list is merely returned</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyTrx.Velocity.calcSparseHomography">
 <code class="sig-prename descclassname">PyTrx.Velocity.</code><code class="sig-name descname">calcSparseHomography</code><span class="sig-paren">(</span><em class="sig-param">img1, img2, mask, correct, method=8, ransacReprojThreshold=5.0, winsize=(25, 25), back_thresh=1.0, min_features=4, seedparams=[50000, 0.1, 5.0]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Velocity.html#calcSparseHomography"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Velocity.calcSparseHomography" title="Permalink to this definition">¶</a></dt>
-<dd><dl>
-<dt>Function to supplement correction for movement in the camera </dt><dd><blockquote>
-<div><p>platform given an image pair (i.e. image registration). Returns the 
+<dd><p>Function to supplement correction for movement in the camera 
+platform given an image pair (i.e. image registration). Returns the 
 homography representing tracked image movement, and the tracked 
 features from each image.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param img1</dt>
-<dd class="field-odd"><p>Image 1 in the image pair</p>
-</dd>
-<dt class="field-even">type img1</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param img2</dt>
-<dd class="field-odd"><p>Image 2 in the image pair</p>
-</dd>
-<dt class="field-even">type img2</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param mask</dt>
-<dd class="field-odd"><p>Mask array for image points to be seeded</p>
-</dd>
-<dt class="field-even">type mask</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param correct</dt>
-<dd class="field-odd"><p>Calibration parameters for correcting image for</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>lens distortion, default to None</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type correct</dt>
-<dd class="field-odd"><p>list, optional</p>
-</dd>
-<dt class="field-even">param method</dt>
-<dd class="field-even"><p>Method used to calculate homography model: cv2.RANSAC -</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>RANSAC-based robust method; cv2.LEAST_MEDIAN - Least-Median robust; 0 - a 
-regular method using all the points. Default to None</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type method</dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-<dt class="field-even">param ransacReprojThreshold</dt>
-<dd class="field-even"><p>default to 5.0</p>
-</dd>
-<dt class="field-odd">type ransacReprojThreshold</dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-<dt class="field-even">param winsize</dt>
-<dd class="field-even"><p>default to (25, 25)</p>
-</dd>
-<dt class="field-odd">type winsize</dt>
-<dd class="field-odd"><p>tuple, optional</p>
-</dd>
-<dt class="field-even">param back_thesh</dt>
-<dd class="field-even"><p>Threshold for back-tracking distance (i.e.the difference</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>between the original seeded point and the back-tracked point in im0); default
-to 1.0</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type back_thresh</dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-<dt class="field-even">param min_features</dt>
-<dd class="field-even"><p>Minimum number of seeded points to track, default to 4</p>
-</dd>
-<dt class="field-odd">type min_features</dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-<dt class="field-even">param seedparams</dt>
-<dd class="field-even"><p>Point seeding parameters, which indicate whether points</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>are generated based on corner features or a grid with defined spacing. The 
-three corner features parameters denote maximum number of corners detected, 
-corner quality, and minimum distance between corners; inputted as a list. For 
-grid generation, the only input parameter needed is the grid spacing; inputted 
-as a list containing the horizontal and vertical grid spacing. Default to
-[50000, 0.1, 5.0]</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type seedparams</dt>
-<dd class="field-odd"><p>list, optional</p>
-</dd>
-<dt class="field-even">returns</dt>
-<dd class="field-even"><p>homogMatrix (arr) - The calculated homographic shift for the</p>
-</dd>
-</dl>
-</div></blockquote>
-<dl class="simple">
-<dt>image pair; src_pts_corr (arr) - original homography points; dst_pts_corr (arr)</dt><dd><ul class="simple">
-<li><p>tracked homography points; homog_pts (arr) -back-tracked homography points;</p></li>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img1</strong> (<em>arr</em>) – Image 1 in the image pair</p></li>
+<li><p><strong>img2</strong> (<em>arr</em>) – Image 2 in the image pair</p></li>
+<li><p><strong>mask</strong> (<em>arr</em>) – Mask array for image points to be seeded</p></li>
+<li><p><strong>correct</strong> (<em>list</em><em>, </em><em>optional</em>) – Calibration parameters for correcting image for lens distortion, default to None</p></li>
+<li><p><strong>method</strong> (<em>int</em><em>, </em><em>optional</em>) – Method used to calculate homography model: cv2.RANSAC - RANSAC-based robust method; cv2.LEAST_MEDIAN - Least-Median robust; 0 - a regular method using all the points. Default to None</p></li>
+<li><p><strong>ransacReprojThreshold</strong> (<em>int</em><em>, </em><em>optional</em>) – default to 5.0</p></li>
+<li><p><strong>winsize</strong> (<em>tuple</em><em>, </em><em>optional</em>) – default to (25, 25)</p></li>
+<li><p><strong>back_thesh</strong> – Threshold for back-tracking distance (i.e.the difference between the original seeded point and the back-tracked point in im0); default to 1.0</p></li>
+<li><p><strong>min_features</strong> (<em>int</em><em>, </em><em>optional</em>) – Minimum number of seeded points to track, default to 4</p></li>
+<li><p><strong>seedparams</strong> (<em>list</em><em>, </em><em>optional</em>) – Point seeding parameters, which indicate whether points are generated based on corner features or a grid with defined spacing. The three corner features parameters denote maximum number of corners detected, corner quality, and minimum distance between corners; inputted as a list. For grid generation, the only input parameter needed is the grid spacing; inputted as a list containing the horizontal and vertical grid spacing. Default to [50000, 0.1, 5.0]</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>homogMatrix (arr) - The calculated homographic shift for the image pair; src_pts_corr (arr) - original homography points; dst_pts_corr (arr) - tracked homography points; homog_pts (arr) -back-tracked homography points; ptserror (list) - Difference between the original homography points and the back-tracked points; homogerror (list) -Difference between the interpolated homography matrix and the equivalent tracked points</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr/list</p>
+</dd>
 </dl>
-<p>ptserror (list) - Difference between the original homography points and the 
-back-tracked points; homogerror (list) -Difference between the interpolated 
-homography matrix and the equivalent tracked points</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyTrx.Velocity.calcSparseVelocity">
 <code class="sig-prename descclassname">PyTrx.Velocity.</code><code class="sig-name descname">calcSparseVelocity</code><span class="sig-paren">(</span><em class="sig-param">img1, img2, mask, calib=None, homog=None, invprojvars=None, winsize=(25, 25), back_thresh=1.0, min_features=4, seedparams=[50000, 0.1, 5.0]</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Velocity.html#calcSparseVelocity"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Velocity.calcSparseVelocity" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Function to calculate the velocity between a pair of images. Points </dt><dd><p>are seeded in the first of these either by a defined grid spacing, or using 
+<dd><p>Function to calculate the velocity between a pair of images. Points 
+are seeded in the first of these either by a defined grid spacing, or using 
 the Shi-Tomasi algorithm with OpenCV’s goodFeaturesToTrack function.  
 The Lucas Kanade optical flow algorithm is applied using the OpenCV 
 function calcOpticalFlowPyrLK to find these tracked points in the 
@@ -3713,163 +2422,69 @@ validation measure.
 Tracked points are corrected for image distortion and camera platform
 motion (if needed). The points in the image pair are georectified 
 subsequently to obtain xyz points.  The georectification functions are 
-called from the :class:’PyTrx.CamEnv.CamEnv’ object, and are based on those 
+called from the <a class="reference internal" href="#PyTrx.CamEnv.CamEnv" title="PyTrx.CamEnv.CamEnv"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.CamEnv.CamEnv</span></code></a> object, and are based on those 
 in ImGRAFT (Messerli and Grinsted, 2015). Velocities are finally derived
 from these using a simple Pythagoras’ theorem method. This function returns 
 the xyz velocities and points, and their corresponding uv velocities and 
 points in the image plane.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param img1</dt>
-<dd class="field-odd"><p>Image 1 in the image pair</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>img1</strong> (<em>arr</em>) – Image 1 in the image pair</p></li>
+<li><p><strong>img2</strong> (<em>arr</em>) – Image 2 in the image pair</p></li>
+<li><p><strong>mask</strong> (<em>arr</em>) – </p></li>
+<li><p><strong>calib</strong> (<em>list</em><em>, </em><em>optional</em>) – default to None</p></li>
+<li><p><strong>homog</strong> (<em>list</em><em>, </em><em>optional</em>) – default to None</p></li>
+<li><p><strong>invprojvars</strong> (<em>list</em><em>, </em><em>optional</em>) – default to None</p></li>
+<li><p><strong>winsize</strong> (<em>tuple</em><em>, </em><em>optional</em>) – default to (25, 25)</p></li>
+<li><p><strong>back_thesh</strong> – Threshold for back-tracking distance (i.e.the difference between the original seeded point and the back-tracked point in im0); default to 1.0</p></li>
+<li><p><strong>min_features</strong> (<em>int</em><em>, </em><em>optional</em>) – Minimum number of seeded points to track, default to 4</p></li>
+<li><p><strong>seedparams</strong> (<em>list</em><em>, </em><em>optional</em>) – Point seeding parameters, which indicate whether points are generated based on corner features or a grid with defined spacing. The three corner features parameters denote maximum number of corners detected, corner quality, and minimum distance between corners; inputted as a list. For grid generation, the only input parameter needed is the grid spacing; inputted as a list containing the horizontal and vertical grid spacing. Default to [50000, 0.1, 5.0]</p></li>
+</ul>
 </dd>
-<dt class="field-even">type img1</dt>
-<dd class="field-even"><p>arr</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Two lists, 1. The xyz velocities for each point (xyz[0]), the xyz positions for the points in the first image (xyz[1]), and the xyz positions for the points in the second image(xyz[2]); 2. The uv velocities for each point (uv[0], the uv positions for the points in the first image (uv[1]), the uv positions for the points in the second image (uv[2]), and the corrected uv points in the second image if they have been calculated using the homography model for image registration (uv[3]). If the corrected points have not been calculated then an empty list is merely returned</p>
 </dd>
-<dt class="field-odd">param img2</dt>
-<dd class="field-odd"><p>Image 2 in the image pair</p>
-</dd>
-<dt class="field-even">type img2</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param mask</dt>
-<dd class="field-odd"><p></p></dd>
-<dt class="field-even">type mask</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param calib</dt>
-<dd class="field-odd"><p>default to None</p>
-</dd>
-<dt class="field-even">type calib</dt>
-<dd class="field-even"><p>list, optional</p>
-</dd>
-<dt class="field-odd">param homog</dt>
-<dd class="field-odd"><p>default to None</p>
-</dd>
-<dt class="field-even">type homog</dt>
-<dd class="field-even"><p>list, optional</p>
-</dd>
-<dt class="field-odd">param invprojvars</dt>
-<dd class="field-odd"><p>default to None</p>
-</dd>
-<dt class="field-even">type invprojvars</dt>
-<dd class="field-even"><p>list, optional</p>
-</dd>
-<dt class="field-odd">param winsize</dt>
-<dd class="field-odd"><p>default to (25, 25)</p>
-</dd>
-<dt class="field-even">type winsize</dt>
-<dd class="field-even"><p>tuple, optional</p>
-</dd>
-<dt class="field-odd">param back_thesh</dt>
-<dd class="field-odd"><p>Threshold for back-tracking distance (i.e.the difference</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>list</p>
 </dd>
 </dl>
-</dd>
-</dl>
-<p>between the original seeded point and the back-tracked point in im0); default
-to 1.0</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type back_thresh</dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-<dt class="field-even">param min_features</dt>
-<dd class="field-even"><p>Minimum number of seeded points to track, default to 4</p>
-</dd>
-<dt class="field-odd">type min_features</dt>
-<dd class="field-odd"><p>int, optional</p>
-</dd>
-<dt class="field-even">param seedparams</dt>
-<dd class="field-even"><p>Point seeding parameters, which indicate whether points</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>are generated based on corner features or a grid with defined spacing. The 
-three corner features parameters denote maximum number of corners detected, 
-corner quality, and minimum distance between corners; inputted as a list. For 
-grid generation, the only input parameter needed is the grid spacing; inputted 
-as a list containing the horizontal and vertical grid spacing. Default to
-[50000, 0.1, 5.0]</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type seedparams</dt>
-<dd class="field-odd"><p>list, optional</p>
-</dd>
-<dt class="field-even">returns</dt>
-<dd class="field-even"><p>Two lists, 1. The xyz velocities for each point (xyz[0]), the xyz</p>
-</dd>
-</dl>
-</div></blockquote>
-<p>positions for the points in the first image (xyz[1]), and the xyz positions for 
-the points in the second image(xyz[2]); 2. The uv velocities for each point 
-(uv[0], the uv positions for the points in the first image (uv[1]), the uv 
-positions for the points in the second image (uv[2]), and the corrected uv 
-points in the second image if they have been calculated using the homography 
-model for image registration (uv[3]). If the corrected points have not been 
-calculated then an empty list is merely returned</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyTrx.Velocity.opticalMatch">
 <code class="sig-prename descclassname">PyTrx.Velocity.</code><code class="sig-name descname">opticalMatch</code><span class="sig-paren">(</span><em class="sig-param">i0</em>, <em class="sig-param">iN</em>, <em class="sig-param">p0</em>, <em class="sig-param">winsize</em>, <em class="sig-param">back_thresh</em>, <em class="sig-param">min_features</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Velocity.html#opticalMatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Velocity.opticalMatch" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Function to match between two masked images using Optical Flow. The </dt><dd><p>Lucas Kanade optical flow algorithm is applied using the OpenCV function 
+<dd><p>Function to match between two masked images using Optical Flow. The 
+Lucas Kanade optical flow algorithm is applied using the OpenCV function 
 calcOpticalFlowPyrLK to find these tracked points in the second image. A 
 backward tracking then tracks back from these to the original points, 
 checking if this is within a given number of pixels as a validation 
 measure. The resulting error is the difference between the original feature 
 point and the backtracked feature point.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param i0</dt>
-<dd class="field-odd"><p>Image 1 in the image pair</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>i0</strong> (<em>arr</em>) – Image 1 in the image pair</p></li>
+<li><p><strong>iN</strong> (<em>arr</em>) – Image 2 in the image pair</p></li>
+<li><p><strong>winsize</strong> (<em>tuple</em>) – Window size for tracking e.g. (25,25)</p></li>
+<li><p><strong>back_thesh</strong> – Threshold for back-tracking distance (i.e. the difference between the original seeded point and the back-tracked point in im0)</p></li>
+<li><p><strong>min_features</strong> (<em>int</em>) – Minimum number of seeded points to track</p></li>
+</ul>
 </dd>
-<dt class="field-even">type i0</dt>
-<dd class="field-even"><p>arr</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Point coordinates for points tracked to image 2 (arr), Point coordinates for points back-tracked from image 2 to image 1 (arr), and SNR measurements for the corresponding tracked point. The signal is the magnitude of the displacement from p0 to p1, and the noise is the magnitude of the displacement from p0r to p0 (arr)</p>
 </dd>
-<dt class="field-odd">param iN</dt>
-<dd class="field-odd"><p>Image 2 in the image pair</p>
-</dd>
-<dt class="field-even">type iN</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param winsize</dt>
-<dd class="field-odd"><p>Window size for tracking e.g. (25,25)</p>
-</dd>
-<dt class="field-even">type winsize</dt>
-<dd class="field-even"><p>tuple</p>
-</dd>
-<dt class="field-odd">param back_thesh</dt>
-<dd class="field-odd"><p>Threshold for back-tracking distance (i.e. the</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr</p>
 </dd>
 </dl>
-</dd>
-<dt>difference between the original seeded point and the back-tracked point in im0)</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type back_thresh</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-<dt class="field-even">param min_features</dt>
-<dd class="field-even"><p>Minimum number of seeded points to track</p>
-</dd>
-<dt class="field-odd">type min_features</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-<dt class="field-even">return</dt>
-<dd class="field-even"><p>Point coordinates for points tracked to image 2 (arr), Point</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>coordinates for points back-tracked from image 2 to image 1 (arr), and SNR 
-measurements for the corresponding tracked point. The signal is the magnitude 
-of the displacement from p0 to p1, and the noise is the magnitude of the 
-displacement from p0r to p0 (arr)</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyTrx.Velocity.readDEMmask">
 <code class="sig-prename descclassname">PyTrx.Velocity.</code><code class="sig-name descname">readDEMmask</code><span class="sig-paren">(</span><em class="sig-param">dem</em>, <em class="sig-param">img</em>, <em class="sig-param">invprojvars</em>, <em class="sig-param">demMaskPath=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Velocity.html#readDEMmask"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Velocity.readDEMmask" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Read/generate DEM mask for subsequent grid generation. If a valid </dt><dd><p>filename is given then the DEM mask is loaded from file. If the filename
+<dd><p>Read/generate DEM mask for subsequent grid generation. If a valid 
+filename is given then the DEM mask is loaded from file. If the filename
 does not exist, then the mask is defined. To define the DEM mask, a mask is
 first defined in the image plane (using point and click, facilitated 
 through Matplotlib Pyplot’s ginput function), and then projected to the 
@@ -3880,37 +2495,21 @@ given. This DEM mask can be used for dense feature-tracking/template
 matching, where masked regions of the DEM are reassigned to 
 NaN using Numpy’s ma.mask function.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param dem</dt>
-<dd class="field-odd"><p>:class:’PyTrx.DEM.ExplicitRaster’ DEM object</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dem</strong> (<em>arr</em>) – <a class="reference internal" href="#PyTrx.DEM.ExplicitRaster" title="PyTrx.DEM.ExplicitRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.DEM.ExplicitRaster</span></code></a> DEM object</p></li>
+<li><p><strong>img</strong> (<em>arr</em>) – Image to initially define mask in</p></li>
+<li><p><strong>invprojvars</strong> (<em>list</em>) – Inverse projection variables [X,Y,Z,uv0]</p></li>
+<li><p><strong>demMaskPath</strong> (<em>str</em><em>, </em><em>optional</em>) – File path to outputted mask file, default to None</p></li>
+</ul>
 </dd>
-<dt class="field-even">type dem</dt>
-<dd class="field-even"><p>arr</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A Boolean visibility matrix (which is the same dimensions as the dem)</p>
 </dd>
-<dt class="field-odd">param img</dt>
-<dd class="field-odd"><p>Image to initially define mask in</p>
-</dd>
-<dt class="field-even">type img</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param invprojvars</dt>
-<dd class="field-odd"><p>Inverse projection variables [X,Y,Z,uv0]</p>
-</dd>
-<dt class="field-even">type invprojvars</dt>
-<dd class="field-even"><p>list</p>
-</dd>
-<dt class="field-odd">param demMaskPath</dt>
-<dd class="field-odd"><p>File path to outputted mask file, default to None</p>
-</dd>
-<dt class="field-even">type demMaskPath</dt>
-<dd class="field-even"><p>str, optional</p>
-</dd>
-<dt class="field-odd">returns</dt>
-<dd class="field-odd"><p>A Boolean visibility matrix (which is the same dimensions as the</p>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr</p>
 </dd>
 </dl>
-</dd>
-</dl>
-<p>dem)</p>
 </dd></dl>
 
 <dl class="function">
@@ -3930,7 +2529,10 @@ detection method in OpenCV’s goodFeaturesToTrack function.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Point coordinates for corner features seeded in image (arr)</p>
+<dd class="field-even"><p>Point coordinates for corner features seeded in image</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr</p>
 </dd>
 </dl>
 </dd></dl>
@@ -3938,127 +2540,55 @@ detection method in OpenCV’s goodFeaturesToTrack function.</p>
 <dl class="function">
 <dt id="PyTrx.Velocity.seedGrid">
 <code class="sig-prename descclassname">PyTrx.Velocity.</code><code class="sig-name descname">seedGrid</code><span class="sig-paren">(</span><em class="sig-param">dem</em>, <em class="sig-param">griddistance</em>, <em class="sig-param">projvars</em>, <em class="sig-param">mask</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Velocity.html#seedGrid"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Velocity.seedGrid" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Define pixel grid at a specified grid distance, taking into </dt><dd><p>consideration the image size and image mask.</p>
+<dd><p>Define pixel grid at a specified grid distance, taking into 
+consideration the image size and image mask.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param dem</dt>
-<dd class="field-odd"><p>:class:’PyTrx.DEM.ExplicitRaster’ DEM object</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dem</strong> (<em>arr</em>) – <a class="reference internal" href="#PyTrx.DEM.ExplicitRaster" title="PyTrx.DEM.ExplicitRaster"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyTrx.DEM.ExplicitRaster</span></code></a> DEM object</p></li>
+<li><p><strong>griddistance</strong> (<em>list</em>) – Grid spacing, defined by two values representing pixel row and column spacing.</p></li>
+<li><p><strong>projvars</strong> (<em>list</em>) – Projection parameters (camera location, camera position, radial distortion coefficients, tangential distortion coefficients, focal length, camera centre, and reference image)</p></li>
+<li><p><strong>mask</strong> (<em>arr</em>) – Mask array for masking DEM</p></li>
+</ul>
 </dd>
-<dt class="field-even">type dem</dt>
-<dd class="field-even"><p>arr</p>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Two arrays containing the grid point positions in the DEM coordinate system (arr), and the grid point positions in the image coordinate system (arr)</p>
 </dd>
-<dt class="field-odd">param griddistance</dt>
-<dd class="field-odd"><p>Grid spacing, defined by two values representing pixel</p>
-</dd>
-</dl>
-</dd>
-<dt>row and column spacing.</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type griddistance</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-<dt class="field-even">param projvars</dt>
-<dd class="field-even"><p>Projection parameters (camera location, camera position,</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>radial distortion coefficients, tangential distortion coefficients, focal 
-length, camera centre, and reference image)</p>
-<blockquote>
-<div><dl class="field-list simple">
-<dt class="field-odd">type projvars</dt>
-<dd class="field-odd"><p>list</p>
-</dd>
-<dt class="field-even">param mask</dt>
-<dd class="field-even"><p>Mask array for masking DEM</p>
-</dd>
-<dt class="field-odd">type mask</dt>
+<dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>arr</p>
 </dd>
-<dt class="field-even">returns</dt>
-<dd class="field-even"><p>Two arrays containing the grid point positions in the DEM</p>
-</dd>
 </dl>
-</div></blockquote>
-<p>coordinate system (arr), and the grid point positions in the image coordinate 
-system (arr)</p>
 </dd></dl>
 
 <dl class="function">
 <dt id="PyTrx.Velocity.templateMatch">
 <code class="sig-prename descclassname">PyTrx.Velocity.</code><code class="sig-name descname">templateMatch</code><span class="sig-paren">(</span><em class="sig-param">im0</em>, <em class="sig-param">im1</em>, <em class="sig-param">uv0</em>, <em class="sig-param">templatesize</em>, <em class="sig-param">searchsize</em>, <em class="sig-param">threshold=0.8</em>, <em class="sig-param">min_features=4</em>, <em class="sig-param">method=3</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/PyTrx/Velocity.html#templateMatch"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#PyTrx.Velocity.templateMatch" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="simple">
-<dt>Function to template match between two images. Templates in the first</dt><dd><p>image (im0) are generated from a given set of points (uv0) and matched to 
+<dd><p>Function to template match between two images. Templates in the first
+image (im0) are generated from a given set of points (uv0) and matched to 
 the search window in image 2 (im1). There are a series of methods that can
 be used for matching, in adherence with those offered with OpenCV’s 
 matchTemplate function. After matching, the origin point of each matched 
 template in image 2 is returned, along with the average correlation in 
 each template.</p>
 <dl class="field-list simple">
-<dt class="field-odd">param im0</dt>
-<dd class="field-odd"><p>Image 1 in the image pair</p>
-</dd>
-<dt class="field-even">type im0</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param im1</dt>
-<dd class="field-odd"><p>Image 2 in the image pair</p>
-</dd>
-<dt class="field-even">type im1</dt>
-<dd class="field-even"><p>arr</p>
-</dd>
-<dt class="field-odd">param uv0</dt>
-<dd class="field-odd"><p>Grid points for image 1</p>
-</dd>
-<dt class="field-even">type uv0</dt>
-<dd class="field-even"><p>tuple</p>
-</dd>
-<dt class="field-odd">param templatesize</dt>
-<dd class="field-odd"><p>Template window size in im0 for matching</p>
-</dd>
-<dt class="field-even">type templatesize</dt>
-<dd class="field-even"><p>int</p>
-</dd>
-<dt class="field-odd">param searchsize</dt>
-<dd class="field-odd"><p>Search window size in im1 for matching</p>
-</dd>
-<dt class="field-even">type searchsize</dt>
-<dd class="field-even"><p>int</p>
-</dd>
-<dt class="field-odd">param min_features</dt>
-<dd class="field-odd"><p>Minimum number of seeded points to track, default to 4</p>
-</dd>
-<dt class="field-even">type min_features</dt>
-<dd class="field-even"><p>int, optional</p>
-</dd>
-<dt class="field-odd">param method</dt>
-<dd class="field-odd"><p>(str/int): Method for tmeplate matching: cv2.TM_CCOEFF -</p>
-</dd>
-</dl>
-</dd>
-</dl>
-<p>Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR 
-- Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF</p>
-<blockquote>
-<div><ul class="simple">
-<li><dl class="simple">
-<dt>Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff</dt><dd><dl class="field-list simple">
-<dt class="field-odd">type method</dt>
-<dd class="field-odd"><p>int</p>
-</dd>
-<dt class="field-even">returns</dt>
-<dd class="field-even"><p>Point coordinates for points tracked to image 2 (arr), Point</p>
-</dd>
-</dl>
-</dd>
-</dl>
-</li>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>im0</strong> (<em>arr</em>) – Image 1 in the image pair</p></li>
+<li><p><strong>im1</strong> (<em>arr</em>) – Image 2 in the image pair</p></li>
+<li><p><strong>uv0</strong> (<em>tuple</em>) – Grid points for image 1</p></li>
+<li><p><strong>templatesize</strong> (<em>int</em>) – Template window size in im0 for matching</p></li>
+<li><p><strong>searchsize</strong> (<em>int</em>) – Search window size in im1 for matching</p></li>
+<li><p><strong>min_features</strong> (<em>int</em><em>, </em><em>optional</em>) – Minimum number of seeded points to track, default to 4</p></li>
+<li><p><strong>method</strong> (<em>int</em>) – (str/int): Method for tmeplate matching: cv2.TM_CCOEFF - Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR - Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF - Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff</p></li>
 </ul>
-</div></blockquote>
-<p>coordinates for points back-tracked from image 2 to image 1 (arr), and SNR 
-measurements for the corresponding tracked point where the signal is the 
-magnitude of the displacement from p0 to p1, and the noise is the magnitude of 
-the displacement from p0r to p0 (arr)</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Point coordinates for points tracked to image 2 (arr), Point coordinates for points back-tracked from image 2 to image 1 (arr), and SNR measurements for the corresponding tracked point where the signal is the magnitude of the displacement from p0 to p1, and the noise is the magnitude of the displacement from p0r to p0 (arr)</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>arr</p>
+</dd>
+</dl>
 </dd></dl>
 
 </div>

@@ -44,14 +44,14 @@
 <span class="c1">#You should have received a copy of the license along with this</span>
 <span class="c1">#work. If not, see &lt;https://choosealicense.com/licenses/mit/&gt;.</span>
 
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">The Camera Environment module contains the object-constructors and functions </span>
 <span class="sd">for: (1) Representing a camera model in three-dimensional space; and (2) </span>
 <span class="sd">Effective translation of measurements in an XY image plane to XYZ real-world </span>
 <span class="sd">coordinates. The projection and inverse transformation functions are based on </span>
 <span class="sd">those available in the ImGRAFT toolbox for Matlab. Translations from</span>
 <span class="sd">ImGRAFT are noted in related script comments.              </span>
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1">#Import PyTrx packages</span>
 <span class="kn">from</span> <span class="nn">Utilities</span> <span class="k">import</span> <span class="n">plotGCPs</span><span class="p">,</span> <span class="n">plotCalib</span><span class="p">,</span> <span class="n">plotResiduals</span><span class="p">,</span> <span class="n">plotPrincipalPoint</span>
@@ -70,20 +70,18 @@
 <span class="c1">#------------------------------------------------------------------------------</span>
 
 <div class="viewcode-block" id="GCPs"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.GCPs">[docs]</a><span class="k">class</span> <span class="nc">GCPs</span><span class="p">():</span>    
-    <span class="sd">&#39;&#39;&#39;A class representing the geography of the camera scene. Contains</span>
+    <span class="sd">&quot;&quot;&quot;A class representing the geography of the camera scene. Contains</span>
 <span class="sd">    ground control points, as the world and image points, the DEM data and </span>
 <span class="sd">    extent, and the image the ground control points correspond to, as an </span>
 <span class="sd">    Image object. </span>
 <span class="sd">    </span>
 <span class="sd">    :param dem: The file path of the ASCII DEM</span>
 <span class="sd">    :type dem: str</span>
-<span class="sd">    :param GCPpath: The file path of the GCP text file, with a header line, and</span>
-<span class="sd">tab delimited x, y, z world coordinates and xy image on each line</span>
+<span class="sd">    :param GCPpath: The file path of the GCP text file, with a header line, and tab delimited x, y, z world coordinates and xy image on each line</span>
 <span class="sd">    :type GCPpath: str</span>
 <span class="sd">    :param imagePath: The file path of the image the GCPs correspond to</span>
 <span class="sd">    :type imagePath: str</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">GCPpath</span><span class="p">,</span> <span class="n">imagePath</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Constructor to initiate the GCP object.&#39;&#39;&#39;</span>                
         <span class="c1">#DEM handling</span>
@@ -101,24 +99,24 @@
 
         
 <div class="viewcode-block" id="GCPs.getGCPs"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.GCPs.getGCPs">[docs]</a>    <span class="k">def</span> <span class="nf">getGCPs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return the world and image GCPs.&#39;&#39;&#39;</span>       
+        <span class="sd">&quot;&quot;&quot;Return the world and image GCPs.&quot;&quot;&quot;</span>      
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcpxyz</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcpuv</span></div>
 
         
 <div class="viewcode-block" id="GCPs.getDEM"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.GCPs.getDEM">[docs]</a>    <span class="k">def</span> <span class="nf">getDEM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return the dem object.&#39;&#39;&#39;</span>       
+        <span class="sd">&quot;&quot;&quot;Return the dem object.&quot;&quot;&quot;</span>       
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dem</span></div>
 
     
 <div class="viewcode-block" id="GCPs.getImage"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.GCPs.getImage">[docs]</a>    <span class="k">def</span> <span class="nf">getImage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return the GCP reference image.&#39;&#39;&#39;</span>        
+        <span class="sd">&quot;&quot;&quot;Return the GCP reference image.&quot;&quot;&quot;</span>        
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcpImage</span></div></div>
 
                 
 <span class="c1">#------------------------------------------------------------------------------        </span>
    
 <div class="viewcode-block" id="CamCalib"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamCalib">[docs]</a><span class="k">class</span> <span class="nc">CamCalib</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;This base class models a standard camera calibration matrix as per </span>
+    <span class="sd">&quot;&quot;&quot;This base class models a standard camera calibration matrix as per </span>
 <span class="sd">    OpenCV, MatLab and ImGRAFT. The class uses a standard pinhole camera model, </span>
 <span class="sd">    drawing on the functions within OpenCV. A scene view is formed by </span>
 <span class="sd">    projecting 3D points into the image plane using a perspective </span>
@@ -138,13 +136,11 @@
 <span class="sd">    file (.mat or .txt) containing the calibration data in a pre-designated </span>
 <span class="sd">    format.</span>
 <span class="sd">    </span>
-<span class="sd">    :param *args: Either a calibration text file, a series of calibration text </span>
-<span class="sd">files, a list of raw parameters, or a set of calibration images (along with </span>
-<span class="sd">calibration chessboard dimensions) </span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    
+<span class="sd">    :param args: Either a calibration text file, a series of calibration text files, a list of raw parameters, or a set of calibration images (along with calibration chessboard dimensions)</span>
+<span class="sd">    :type args: str </span>
+<span class="sd">    &quot;&quot;&quot;</span>    
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span> 
-        <span class="sd">&#39;&#39;&#39;Constructor to initiate the camera calibration object.&#39;&#39;&#39;</span>            
+        <span class="sd">&quot;&quot;&quot;Constructor to initiate the camera calibration object.&quot;&quot;&quot;</span>         
         <span class="n">failed</span><span class="o">=</span><span class="kc">False</span> 
             
         <span class="c1">#Read calibration from file</span>
@@ -237,29 +233,21 @@
                 
             
 <div class="viewcode-block" id="CamCalib.getCalibdata"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamCalib.getCalibdata">[docs]</a>    <span class="k">def</span> <span class="nf">getCalibdata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return camera matrix, and tangential and radial distortion </span>
+        <span class="sd">&quot;&quot;&quot;Return camera matrix, and tangential and radial distortion </span>
 <span class="sd">        coefficients.</span>
-<span class="sd">        </span>
-<span class="sd">        :returns: The object&#39;s intrinsic matrix, tangential distortion and</span>
-<span class="sd">radial distortion information</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tanCorr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span></div>
 
         
 <div class="viewcode-block" id="CamCalib.getCamMatrix"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamCalib.getCamMatrix">[docs]</a>    <span class="k">def</span> <span class="nf">getCamMatrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return camera matrix.</span>
-<span class="sd">        </span>
-<span class="sd">        :returns: The object&#39;s intrinsic matrix</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;Return camera matrix.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span></div>
 
     
 <div class="viewcode-block" id="CamCalib.getDistortCoeffsCV2"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamCalib.getDistortCoeffsCV2">[docs]</a>    <span class="k">def</span> <span class="nf">getDistortCoeffsCV2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return radial and tangential distortion coefficients.</span>
-<span class="sd">        </span>
-<span class="sd">        :returns: The object&#39;s tangential distortion and radial distortion </span>
-<span class="sd">information</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;Return radial and tangential distortion coefficients.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#Returns certain number of values depending on number of coefficients</span>
         <span class="c1">#inputted  </span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_radCorr</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
@@ -270,11 +258,9 @@
 
         
 <div class="viewcode-block" id="CamCalib.getCamMatrixCV2"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamCalib.getCamMatrixCV2">[docs]</a>    <span class="k">def</span> <span class="nf">getCamMatrixCV2</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return camera matrix in a structure that is compatible with </span>
-<span class="sd">        subsequent photogrammetric processing using OpenCV.</span>
-<span class="sd">        </span>
-<span class="sd">        :returns: The object&#39;s intrinsic matrix, compatiable with OpenCV   </span>
-<span class="sd">        &#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;Return camera matrix in a structure that is compatible with </span>
+<span class="sd">        subsequent photogrammetric processing using OpenCV. </span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intrMatCV2</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             
             <span class="c1"># Transpose if 0&#39;s are not in correct places</span>
@@ -296,7 +282,7 @@
 
         
 <div class="viewcode-block" id="CamCalib.reportCalibData"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamCalib.reportCalibData">[docs]</a>    <span class="k">def</span> <span class="nf">reportCalibData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Self reporter for Camera Calibration object data.&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;Self reporter for Camera Calibration object data.&quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">DATA FROM CAMERA CALIBRATION OBJECT&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Intrinsic Matrix:&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_intrMat</span><span class="p">:</span>
@@ -315,14 +301,14 @@
 
 
 <div class="viewcode-block" id="CamCalib.checkMatrix"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamCalib.checkMatrix">[docs]</a>    <span class="k">def</span> <span class="nf">checkMatrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">matrix</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Function to support the calibrate function. Checks and converts the </span>
+        <span class="sd">&quot;&quot;&quot;Function to support the calibrate function. Checks and converts the </span>
 <span class="sd">        intrinsic matrix to the correct format for calibration with opencv.</span>
 <span class="sd">        </span>
 <span class="sd">        :param matrix: Intrinsic camera matrix</span>
 <span class="sd">        :type matrix: arr</span>
-<span class="sd">        :returns: The object&#39;s intrinsic matrix (checked), tangential </span>
-<span class="sd">distortion and radial distortion information</span>
-<span class="sd">        &#39;&#39;&#39;</span>  
+<span class="sd">        :returns: The object&#39;s intrinsic matrix (checked), tangential distortion and radial distortion information</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>  
         <span class="c1">###This is moved over from readfile. Need to check calibration matrices</span>
         <span class="k">if</span> <span class="n">matrix</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
@@ -346,9 +332,9 @@
 <span class="c1">#------------------------------------------------------------------------------</span>
                           
 <div class="viewcode-block" id="CamEnv"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv">[docs]</a><span class="k">class</span> <span class="nc">CamEnv</span><span class="p">(</span><span class="n">CamCalib</span><span class="p">):</span>    
-    <span class="sd">&#39;&#39;&#39; A class to represent the camera object, containing the intrinsic</span>
+    <span class="sd">&quot;&quot;&quot;A class to represent the camera object, containing the intrinsic</span>
 <span class="sd">    matrix, distortion parameters and camera pose (position and direction).    </span>
-<span class="sd">    Also inherits from the :class:&#39;PyTrx.CamEnv.CamCalib&#39; object, representing </span>
+<span class="sd">    Also inherits from the :class:`PyTrx.CamEnv.CamCalib` object, representing </span>
 <span class="sd">    the intrinsic camera information.</span>
 <span class="sd">    This object can be initialised either through an environment file (and</span>
 <span class="sd">    passed to the initialiser as a filepath), or with the set intput parameters</span>
@@ -359,21 +345,17 @@
 <span class="sd">    :type GCPpath: str</span>
 <span class="sd">    :param DEMpath: The file path for the DEM, for the GCPs object</span>
 <span class="sd">    :type DEMpath: str    </span>
-<span class="sd">    :param imagePath: The file path for the GCP reference image, for the GCPs </span>
-<span class="sd">object</span>
+<span class="sd">    :param imagePath: The file path for the GCP reference image, for the GCPs object</span>
 <span class="sd">    :type imagePath: str </span>
-<span class="sd">    :param calibPath: The file path for the calibration file. This can be</span>
-<span class="sd">either as a .mat Matlab file or a text file. The text file should be of the </span>
-<span class="sd">following tab delimited format: RadialDistortion [k1 k2 k3...k7], </span>
-<span class="sd">TangentialDistortion [p1 p2], IntrinsicMatrix [x y z][x y z][x y z], End</span>
+<span class="sd">    :param calibPath: The file path for the calibration file. This can be either as a .mat Matlab file or a text file. The text file should be of the following tab delimited format: RadialDistortion [k1 k2 k3...k7], TangentialDistortion [p1 p2], IntrinsicMatrix [x y z][x y z][x y z], End</span>
 <span class="sd">    :type calibPath: str</span>
 <span class="sd">    :param coords: The x,y,z coordinates of the camera location, as a list</span>
 <span class="sd">    :type coords: list   </span>
 <span class="sd">    :param ypr: The yaw, pitch and roll of the camera, as a list</span>
 <span class="sd">    :type ypr: list</span>
-<span class="sd">    &#39;&#39;&#39;</span>    
+<span class="sd">    &quot;&quot;&quot;</span>   
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">envFile</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Constructor to initiate Camera Environment object.&#39;&#39;&#39;</span> 
+        <span class="sd">&quot;&quot;&quot;Constructor to initiate Camera Environment object.&quot;&quot;&quot;</span> 
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">INITIALISING CAMERA ENVIRONMENT&#39;</span><span class="p">)</span>
  
         <span class="c1">#Read camera environment from text file        </span>
@@ -436,15 +418,14 @@
         
        
 <div class="viewcode-block" id="CamEnv.dataFromFile"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.dataFromFile">[docs]</a>    <span class="k">def</span> <span class="nf">dataFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Read CamEnv data from .txt file containing keywords and filepaths</span>
+        <span class="sd">&quot;&quot;&quot;Read CamEnv data from .txt file containing keywords and filepaths</span>
 <span class="sd">        to associated data.</span>
 <span class="sd">        </span>
 <span class="sd">        :param filename: Environment file path</span>
 <span class="sd">        :type filename: str</span>
-<span class="sd">        :returns: Camera environment information (name, GCP filepath, </span>
-<span class="sd">DEM filepath, image filepath, calibration file path, camera coordinates, </span>
-<span class="sd">camera pose (ypr) and DEM densification factor)</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        :returns: Camera environment information (name, GCP filepath, DEM filepath, image filepath, calibration file path, camera coordinates, camera pose (ypr) and DEM densification factor)</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#Define keywords to search for in file        </span>
         <span class="bp">self</span><span class="o">.</span><span class="n">key_labels</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;camera_environment_name&#39;</span><span class="p">,</span>
                          <span class="s1">&#39;GCPpath&#39;</span><span class="p">:</span><span class="s1">&#39;gcp_path&#39;</span><span class="p">,</span>
@@ -556,19 +537,16 @@
 
 
 <div class="viewcode-block" id="CamEnv.optimiseCamEnv"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.optimiseCamEnv">[docs]</a>    <span class="k">def</span> <span class="nf">optimiseCamEnv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">optimise</span><span class="p">,</span> <span class="n">optmethod</span><span class="o">=</span><span class="s1">&#39;trf&#39;</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Optimise projection variables in the camera environment. The precise </span>
+        <span class="sd">&quot;&quot;&quot;Optimise projection variables in the camera environment. The precise </span>
 <span class="sd">        parameters to optimise are defined by the optimise variable.</span>
 <span class="sd">        </span>
-<span class="sd">        :param optimise: Parameters to optimise - &#39;YPR&#39; (optimise camera pose </span>
-<span class="sd">only), &#39;EXT&#39; (optimise external camera parameters), &#39;INT&#39; (optimise internal </span>
-<span class="sd">camera parameters), or &#39;ALL&#39; (optimise all projection parameters)</span>
+<span class="sd">        :param optimise: Parameters to optimise - &#39;YPR&#39; (optimise camera pose only), &#39;EXT&#39; (optimise external camera parameters), &#39;INT&#39; (optimise internal camera parameters), or &#39;ALL&#39; (optimise all projection parameters)</span>
 <span class="sd">        :type optimise: str</span>
 <span class="sd">        :param optmethod: Optimisation method, default to &#39;trf&#39;</span>
 <span class="sd">        :type optmethod: str, optional</span>
-<span class="sd">        :param show: Flag to denote if optimisation output should be plotted,</span>
-<span class="sd">default to False</span>
+<span class="sd">        :param show: Flag to denote if optimisation output should be plotted, default to False</span>
 <span class="sd">        :type show: bool, optional</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#Get GCPs</span>
         <span class="n">xyz</span><span class="p">,</span> <span class="n">uv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcp</span><span class="o">.</span><span class="n">getGCPs</span><span class="p">()</span>
 
@@ -589,7 +567,7 @@
 
     
     <span class="k">def</span> <span class="nf">__getFileDataLine__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">lineNo</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return a data line from the Camera Environment Specification file.</span>
+        <span class="sd">&quot;&quot;&quot;Return a data line from the Camera Environment Specification file.</span>
 <span class="sd">        </span>
 <span class="sd">        :param lines: Line string</span>
 <span class="sd">        :type lines: str</span>
@@ -597,25 +575,25 @@
 <span class="sd">        :type lineNo: int</span>
 <span class="sd">        :returns: Data line</span>
 <span class="sd">        :rtype: str</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">lines</span><span class="p">[</span><span class="n">lineNo</span><span class="o">+</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
 
         
 <div class="viewcode-block" id="CamEnv.getRefImageSize"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.getRefImageSize">[docs]</a>    <span class="k">def</span> <span class="nf">getRefImageSize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return the dimensions of the reference image.</span>
+        <span class="sd">&quot;&quot;&quot;Return the dimensions of the reference image.</span>
 <span class="sd">        </span>
 <span class="sd">        :returns: Image size</span>
 <span class="sd">        :rtype: arr</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_refImage</span><span class="o">.</span><span class="n">getImageSize</span><span class="p">()</span></div>
       
         
 <div class="viewcode-block" id="CamEnv.getDEM"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.getDEM">[docs]</a>    <span class="k">def</span> <span class="nf">getDEM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return DEM as :class:&#39;PyTrx.DEM.ExplicitRaster&#39; object.</span>
+        <span class="sd">&quot;&quot;&quot;Return DEM as :class:`PyTrx.DEM.ExplicitRaster` object.</span>
 <span class="sd">        </span>
 <span class="sd">        :returns: DEM object</span>
-<span class="sd">        :rtype: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        :rtype: :class:`PyTrx.DEM.ExplicitRaster`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DEM</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dem</span> <span class="o">=</span> <span class="n">load_DEM</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_DEMpath</span><span class="p">)</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_DEMdensify</span><span class="o">&gt;</span><span class="mi">1</span><span class="p">:</span>
@@ -628,7 +606,7 @@
 
 
 <div class="viewcode-block" id="CamEnv.showGCPs"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.showGCPs">[docs]</a>    <span class="k">def</span> <span class="nf">showGCPs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Plot GCPs in image plane and DEM scene.&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;Plot GCPs in image plane and DEM scene.&quot;&quot;&quot;</span>
         <span class="n">xyz</span><span class="p">,</span> <span class="n">uv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcp</span><span class="o">.</span><span class="n">getGCPs</span><span class="p">()</span>               <span class="c1">#Get GCP positions</span>
         <span class="n">dem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDEM</span><span class="p">()</span>                         <span class="c1">#Get DEM        </span>
         <span class="n">refimage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_refImage</span>
@@ -640,7 +618,7 @@
 
 
 <div class="viewcode-block" id="CamEnv.showPrincipalPoint"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.showPrincipalPoint">[docs]</a>    <span class="k">def</span> <span class="nf">showPrincipalPoint</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Plot Principal Point on reference image.&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;Plot Principal Point on reference image.&quot;&quot;&quot;</span>
         <span class="n">refimage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_refImage</span>
         <span class="n">img</span> <span class="o">=</span> <span class="n">refimage</span><span class="o">.</span><span class="n">getImageArray</span><span class="p">()</span>              <span class="c1">#Get image array</span>
         <span class="n">imn</span> <span class="o">=</span> <span class="n">refimage</span><span class="o">.</span><span class="n">getImageName</span><span class="p">()</span>               <span class="c1">#Get image name</span>
@@ -650,7 +628,7 @@
 
 
 <div class="viewcode-block" id="CamEnv.showCalib"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.showCalib">[docs]</a>    <span class="k">def</span> <span class="nf">showCalib</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Plot corrected and uncorrected reference image.&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;Plot corrected and uncorrected reference image.&quot;&quot;&quot;</span>
         <span class="n">refimage</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_refImage</span>
         <span class="n">img</span> <span class="o">=</span> <span class="n">refimage</span><span class="o">.</span><span class="n">getImageArray</span><span class="p">()</span>              <span class="c1">#Get image array</span>
         <span class="n">imn</span> <span class="o">=</span> <span class="n">refimage</span><span class="o">.</span><span class="n">getImageName</span><span class="p">()</span>               <span class="c1">#Get image name        </span>
@@ -662,9 +640,10 @@
 
 
 <div class="viewcode-block" id="CamEnv.showResiduals"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.showResiduals">[docs]</a>    <span class="k">def</span> <span class="nf">showResiduals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Show positions of xyz GCPs and projected GCPs, and residual </span>
+        <span class="sd">&quot;&quot;&quot;Show positions of xyz GCPs and projected GCPs, and residual </span>
 <span class="sd">        differences between their positions. This can be used as a measure of</span>
-<span class="sd">        a error in the georectification of measurements.&#39;&#39;&#39;</span>        
+<span class="sd">        a error in the georectification of measurements.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="n">xyz</span><span class="p">,</span> <span class="n">uv</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gcp</span><span class="o">.</span><span class="n">getGCPs</span><span class="p">()</span>               <span class="c1">#Get GCPs</span>
         <span class="n">dem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getDEM</span><span class="p">()</span>                         <span class="c1">#Get DEM</span>
 
@@ -678,12 +657,11 @@
 
 
 <div class="viewcode-block" id="CamEnv.reportCamData"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.CamEnv.reportCamData">[docs]</a>    <span class="k">def</span> <span class="nf">reportCamData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Reporter for testing that the relevant data has been successfully </span>
+        <span class="sd">&quot;&quot;&quot;Reporter for testing that the relevant data has been successfully </span>
 <span class="sd">        imported. Testing for camera Environment name, camera location (xyz),</span>
 <span class="sd">        reference image, DEM, DEM densification, GCPs, yaw pitch roll, camera </span>
 <span class="sd">        matrix, and distortion coefficients.</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        
+<span class="sd">        &quot;&quot;&quot;</span> 
         <span class="c1">#Camera name and location</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">CAMERA ENVIRONMENT REPORT&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Camera Environment name: &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">))</span> 
@@ -750,7 +728,7 @@
 
 
 <div class="viewcode-block" id="calibrateImages"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.calibrateImages">[docs]</a><span class="k">def</span> <span class="nf">calibrateImages</span><span class="p">(</span><span class="n">imageFiles</span><span class="p">,</span> <span class="n">xy</span><span class="p">,</span> <span class="n">refine</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Function for calibrating a camera from a set of input calibration</span>
+    <span class="sd">&quot;&quot;&quot;Function for calibrating a camera from a set of input calibration</span>
 <span class="sd">    images. Calibration is performed using OpenCV&#39;s chessboard calibration </span>
 <span class="sd">    functions. Input images (imageFile) need to be of a chessboard with </span>
 <span class="sd">    regular dimensions and a known number of corner features (xy).   </span>
@@ -762,20 +740,11 @@
 <span class="sd">    :type imageFiles: list</span>
 <span class="sd">    :param xy: Chessboard corner dimensions [rows, columns]</span>
 <span class="sd">    :type xy: list)           </span>
-<span class="sd">    :param refine: OpenCV camera model refinement method - </span>
-<span class="sd">cv2.CALIB_FIX_PRINCIPAL_POINT (fix principal point), </span>
-<span class="sd">cv2.CALIB_FIX_ASPECT_RATIO (Fix aspect ratio), cv2.CALIB_FIX_FOCAL_LENGTH (Fix </span>
-<span class="sd">focal length), cv2.CALIB_FIX_INTRINSIC (Fix camera model), </span>
-<span class="sd">cv2.CALIB_FIX_K1...6 (Fix radial coefficient 1-6), cv2.CALIB_FIX_TANGENT_DIST </span>
-<span class="sd">(Fix tangential coefficients), cv2.CALIB_USE_INTRINSIC_GUESS (Use initial </span>
-<span class="sd">intrinsic values), cv2.CALIB_ZERO_TANGENT_DIST (Set tangential distortion </span>
-<span class="sd">coefficients to zero), cv2.CALIB_RATIONAL_MODEL (Calculate radial distortion </span>
-<span class="sd">coefficients k4, k5, and k6). Default to None</span>
+<span class="sd">    :param refine: OpenCV camera model refinement method - cv2.CALIB_FIX_PRINCIPAL_POINT (fix principal point), cv2.CALIB_FIX_ASPECT_RATIO (Fix aspect ratio), cv2.CALIB_FIX_FOCAL_LENGTH (Fix focal length), cv2.CALIB_FIX_INTRINSIC (Fix camera model), cv2.CALIB_FIX_K1...6 (Fix radial coefficient 1-6), cv2.CALIB_FIX_TANGENT_DIST (Fix tangential coefficients), cv2.CALIB_USE_INTRINSIC_GUESS (Use initial intrinsic values), cv2.CALIB_ZERO_TANGENT_DIST (Set tangential distortion coefficients to zero), cv2.CALIB_RATIONAL_MODEL (Calculate radial distortion coefficients k4, k5, and k6). Default to None</span>
 <span class="sd">    :type refine: int, optional</span>
-<span class="sd">    :returns: A list containing the camera intrinsic matrix (arr), and </span>
-<span class="sd">tangential (arr) and radial distortion coefficents (arr), and the Camera </span>
-<span class="sd">calibration error (int)</span>
-<span class="sd">    &#39;&#39;&#39;</span>   
+<span class="sd">    :returns: A list containing the camera intrinsic matrix (arr), and tangential (arr) and radial distortion coefficents (arr), and the Camera calibration error (int)</span>
+<span class="sd">    :rtype: arr/int</span>
+<span class="sd">    &quot;&quot;&quot;</span>   
     <span class="c1">#Define shape of array</span>
     <span class="n">objp</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">*</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">3</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span>           
     <span class="n">objp</span><span class="p">[:,:</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mgrid</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">xy</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="mi">0</span><span class="p">:</span><span class="n">xy</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> 
@@ -855,13 +824,13 @@
         
 
 <div class="viewcode-block" id="constructDEM"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.constructDEM">[docs]</a><span class="k">def</span> <span class="nf">constructDEM</span><span class="p">(</span><span class="n">dempath</span><span class="p">,</span> <span class="n">densefactor</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Construct DEM from a given file path and densification factor.</span>
+    <span class="sd">&quot;&quot;&quot;Construct DEM from a given file path and densification factor.</span>
 <span class="sd">    </span>
 <span class="sd">    :param dempath: DEM filepath</span>
 <span class="sd">    :type dempath: str</span>
 <span class="sd">    :param densefactor: Densification factor</span>
 <span class="sd">    :type densefactor: int</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#Prepare DEM from file</span>
     <span class="n">dem</span><span class="o">=</span><span class="n">load_DEM</span><span class="p">(</span><span class="n">dempath</span><span class="p">)</span>
         
@@ -874,10 +843,10 @@
             
 <div class="viewcode-block" id="setProjection"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.setProjection">[docs]</a><span class="k">def</span> <span class="nf">setProjection</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">camloc</span><span class="p">,</span> <span class="n">camdir</span><span class="p">,</span> <span class="n">radial</span><span class="p">,</span> <span class="n">tangen</span><span class="p">,</span> <span class="n">foclen</span><span class="p">,</span> <span class="n">camcen</span><span class="p">,</span> <span class="n">refimg</span><span class="p">,</span>
                   <span class="n">viewshed</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Set the inverse projection variables.</span>
+    <span class="sd">&quot;&quot;&quot;Set the inverse projection variables.</span>
 <span class="sd">    </span>
 <span class="sd">    :param dem: DEM object</span>
-<span class="sd">    :type dem: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
+<span class="sd">    :type dem: :class:`PyTrx.DEM.ExplicitRaster`</span>
 <span class="sd">    :param camloc: Camera location (X,Y,Z)</span>
 <span class="sd">    :type camloc: arr</span>
 <span class="sd">    :param camdir: Camera pose [yaw, pitch, roll]</span>
@@ -892,12 +861,11 @@
 <span class="sd">    :type camcen: arr</span>
 <span class="sd">    :param refimg: Reference image (function only uses the image dimensions)</span>
 <span class="sd">    :type refimg: arr</span>
-<span class="sd">    :param viewshed: Flag to denote if viewshed from camera should be </span>
-<span class="sd">determined before projection</span>
+<span class="sd">    :param viewshed: Flag to denote if viewshed from camera should be determined before projection</span>
 <span class="sd">    :type viewshed: bool</span>
 <span class="sd">    :returns: Inverse projection coefficients [X,Y,Z,uv0]</span>
 <span class="sd">    :rtype: list</span>
-<span class="sd">    &#39;&#39;&#39;</span>             
+<span class="sd">    &quot;&quot;&quot;</span>             
     <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Setting inverse projection coefficients&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
@@ -941,7 +909,7 @@
 
 <div class="viewcode-block" id="projectXYZ"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.projectXYZ">[docs]</a><span class="k">def</span> <span class="nf">projectXYZ</span><span class="p">(</span><span class="n">camloc</span><span class="p">,</span> <span class="n">camdirection</span><span class="p">,</span> <span class="n">radial</span><span class="p">,</span> <span class="n">tangen</span><span class="p">,</span> <span class="n">foclen</span><span class="p">,</span> <span class="n">camcen</span><span class="p">,</span> <span class="n">refimg</span><span class="p">,</span> 
                <span class="n">xyz</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Project the xyz world coordinates into the corresponding image </span>
+    <span class="sd">&quot;&quot;&quot;Project the xyz world coordinates into the corresponding image </span>
 <span class="sd">    coordinates (uv). This is primarily executed using the ImGRAFT projection </span>
 <span class="sd">    function found in camera.m: uv,depth,inframe=cam.project(xyz)</span>
 <span class="sd">    </span>
@@ -961,9 +929,9 @@
 <span class="sd">    :type refimg: arr</span>
 <span class="sd">    :param xyz: world coordinates            </span>
 <span class="sd">    :type xyz: arr     </span>
-<span class="sd">    :returns: Pixel coordinates in image (arr), view depth (int), and a</span>
-<span class="sd">Boolean vector containing whether each projected 3D point is inside the frame        </span>
-<span class="sd">    &#39;&#39;&#39;</span>   
+<span class="sd">    :returns: Pixel coordinates in image (arr), view depth (int), and a Boolean vector containing whether each projected 3D point is inside the frame  </span>
+<span class="sd">    :rtype: arr/int      </span>
+<span class="sd">    &quot;&quot;&quot;</span>  
     <span class="c1">#This was in ImGRAFT/Matlab to transpose the input array if it&#39;s </span>
     <span class="c1">#ordered differently </span>
     <span class="c1">#if size(xyz,2)&gt;3                                                 (MAT)</span>
@@ -1043,7 +1011,7 @@
 
  
 <div class="viewcode-block" id="projectUV"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.projectUV">[docs]</a><span class="k">def</span> <span class="nf">projectUV</span><span class="p">(</span><span class="n">uv</span><span class="p">,</span> <span class="n">invprojvars</span><span class="p">):</span>  
-    <span class="sd">&#39;&#39;&#39;Inverse project image coordinates (uv) to xyz world coordinates</span>
+    <span class="sd">&quot;&quot;&quot;Inverse project image coordinates (uv) to xyz world coordinates</span>
 <span class="sd">    using inverse projection variables (set using setProjection function).         </span>
 <span class="sd">    This function is primarily adopted from the ImGRAFT projection function </span>
 <span class="sd">    found in camera.m: uv,depth,inframe=cam.project(xyz)</span>
@@ -1054,7 +1022,7 @@
 <span class="sd">    :type invprojvars: list       </span>
 <span class="sd">    :returns: World coordinates </span>
 <span class="sd">    :rtype: arr</span>
-<span class="sd">    &#39;&#39;&#39;</span>                  
+<span class="sd">    &quot;&quot;&quot;</span>                 
     <span class="c1">#Create empty numpy array</span>
     <span class="n">xyz</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">([</span><span class="n">uv</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="mi">3</span><span class="p">])</span>
     <span class="n">xyz</span><span class="p">[::]</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;NaN&#39;</span><span class="p">)</span>
@@ -1077,7 +1045,7 @@
 
 <div class="viewcode-block" id="optimiseCamera"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.optimiseCamera">[docs]</a><span class="k">def</span> <span class="nf">optimiseCamera</span><span class="p">(</span><span class="n">optimise</span><span class="p">,</span> <span class="n">projvars</span><span class="p">,</span> <span class="n">GCPxyz</span><span class="p">,</span> <span class="n">GCPuv</span><span class="p">,</span> <span class="n">optmethod</span><span class="o">=</span><span class="s1">&#39;trf&#39;</span><span class="p">,</span> 
                    <span class="n">show</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Optimise camera parameters using the pixel differences between a set</span>
+    <span class="sd">&quot;&quot;&quot;Optimise camera parameters using the pixel differences between a set</span>
 <span class="sd">    of image GCPs and projected XYZ GCPs. The optimisation routine adopts the</span>
 <span class="sd">    least_square function in scipy&#39;s optimize tools, using either the Trust </span>
 <span class="sd">    Region Reflective algorithm, the dogleg algorithm or the </span>
@@ -1096,26 +1064,19 @@
 <span class="sd">    iterations until an optimum solution is reached. A new set of optimised </span>
 <span class="sd">    projection parameters are returned.</span>
 <span class="sd">    </span>
-<span class="sd">    :param optimise: Flag denoting which variables will be optimised: YPR </span>
-<span class="sd">(camera pose only), INT (internal camera parameters), EXT (external camera </span>
-<span class="sd">parameters), LOC (all parameters except camera location), or ALL (all </span>
-<span class="sd">projection parameters)</span>
+<span class="sd">    :param optimise: Flag denoting which variables will be optimised: YPR (camera pose only), INT (internal camera parameters), EXT (external camera parameters), LOC (all parameters except camera location), or ALL (all projection parameters)</span>
 <span class="sd">    :type optimise: str             </span>
-<span class="sd">    :param projvars: Projection parameters [camera location, camera pose, </span>
-<span class="sd">radial distortion, tangential distortion, focal length, principal point, </span>
-<span class="sd">reference image]</span>
+<span class="sd">    :param projvars: Projection parameters [camera location, camera pose, radial distortion, tangential distortion, focal length, principal point, reference image]</span>
 <span class="sd">    :typeprojvars: list</span>
 <span class="sd">    :param GCPuv: UV positions for GCPs, as shape (m, 2)</span>
 <span class="sd">    :type GCPuv: arr</span>
-<span class="sd">    :param optmethod: Optimisation method: &#39;trf&#39; (Trust Region Reflective </span>
-<span class="sd">algorithm), &#39;dogbox&#39; (dogleg algorithm), or &#39;lm&#39; (Levenberg-Marquardt </span>
-<span class="sd">algorithm)</span>
+<span class="sd">    :param optmethod: Optimisation method: &#39;trf&#39; (Trust Region Reflective algorithm), &#39;dogbox&#39; (dogleg algorithm), or &#39;lm&#39; (Levenberg-Marquardt algorithm)</span>
 <span class="sd">    :type optmethod: str                           </span>
 <span class="sd">    :param show: Flag denoting whether plot of residuals should be shown</span>
 <span class="sd">    :type show: bool                                           .                                 </span>
-<span class="sd">    :returns: A list containing the optimised projection parameters. If </span>
-<span class="sd">optimisation fails then None is returned    </span>
-<span class="sd">    &#39;&#39;&#39;</span>    
+<span class="sd">    :returns: A list containing the optimised projection parameters. If optimisation fails then None is returned </span>
+<span class="sd">    :rtype: list   </span>
+<span class="sd">    &quot;&quot;&quot;</span>   
     <span class="c1">#Get projectiion parameters from projvars</span>
     <span class="n">camloc</span><span class="p">,</span> <span class="n">campose</span><span class="p">,</span> <span class="n">radcorr</span><span class="p">,</span> <span class="n">tancorr</span><span class="p">,</span> <span class="n">focal</span><span class="p">,</span> <span class="n">camcen</span><span class="p">,</span> <span class="n">refimg</span> <span class="o">=</span> <span class="n">projvars</span>
 
@@ -1222,13 +1183,14 @@
     
 
 <div class="viewcode-block" id="getRotation"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.getRotation">[docs]</a><span class="k">def</span> <span class="nf">getRotation</span><span class="p">(</span><span class="n">camDirection</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Calculates camera rotation matrix calculated from view </span>
+    <span class="sd">&quot;&quot;&quot;Calculates camera rotation matrix calculated from view </span>
 <span class="sd">    direction.</span>
 <span class="sd">    </span>
 <span class="sd">    :param camDirection: Camera pose (yaw,pitch,roll)</span>
 <span class="sd">    :type camDirection: arr             </span>
 <span class="sd">    :returns: Rotation matrix as array</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    :rtype: arr</span>
+<span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">C</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">cos</span><span class="p">(</span><span class="n">camDirection</span><span class="p">)</span> 
     <span class="n">S</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">camDirection</span><span class="p">)</span>
@@ -1244,7 +1206,7 @@
 
 
 <div class="viewcode-block" id="computeResidualsXYZ"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.computeResidualsXYZ">[docs]</a><span class="k">def</span> <span class="nf">computeResidualsXYZ</span><span class="p">(</span><span class="n">invprojvars</span><span class="p">,</span> <span class="n">GCPxyz</span><span class="p">,</span> <span class="n">GCPuv</span><span class="p">,</span> <span class="n">dem</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Function for computing the pixel difference between GCP image points</span>
+    <span class="sd">&quot;&quot;&quot;Function for computing the pixel difference between GCP image points</span>
 <span class="sd">    and GCP projected XYZ points. This function is used in the optimisation </span>
 <span class="sd">    function (optimiseCamera), with parameters for optimising defined in the</span>
 <span class="sd">    first variable and stable parameters defined in the second. If no </span>
@@ -1259,18 +1221,13 @@
 <span class="sd">    :type GCPxyz: arr</span>
 <span class="sd">    :param GCPuv: GCPs in image space (u,v)</span>
 <span class="sd">    :type GCPuv: arr</span>
-<span class="sd">    :param refimg: Reference image, given as a CamImage object, file path </span>
-<span class="sd">string, or image array</span>
-<span class="sd">    :type refimg: :class:&#39;PyTrx.Images.CamImage&#39;/str/arr</span>
-<span class="sd">    :param optimise: Flag denoting which variables will be optimised: YPR </span>
-<span class="sd">(camera pose only), INT (internal camera parameters), EXT (external camera </span>
-<span class="sd">parameters), LOC (all parameters except camera location), or ALL (all </span>
-<span class="sd">projection parameters)</span>
+<span class="sd">    :param refimg: Reference image, given as a CamImage object, file path string, or image array</span>
+<span class="sd">    :type refimg: :class:`PyTrx.Images.CamImage`/str/arr</span>
+<span class="sd">    :param optimise: Flag denoting which variables will be optimised: YPR (camera pose only), INT (internal camera parameters), EXT (external camera parameters), LOC (all parameters except camera location), or ALL (all projection parameters)</span>
 <span class="sd">    :type optimise: str</span>
-<span class="sd">    :returns: Array denoting pixel difference between UV and projected XYZ</span>
-<span class="sd">position of each GCP</span>
+<span class="sd">    :returns: Array denoting pixel difference between UV and projected XYZ position of each GCP</span>
 <span class="sd">    :rtype: arr</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">GCPxyz_proj</span> <span class="o">=</span> <span class="n">projectUV</span><span class="p">(</span><span class="n">GCPuv</span><span class="p">,</span> <span class="n">invprojvars</span><span class="p">)</span>  
         
     <span class="c1">#Compute residuals using pythag theorem (i.e. pixel difference between pts)</span>
@@ -1309,7 +1266,7 @@
 
 <div class="viewcode-block" id="computeResidualsUV"><a class="viewcode-back" href="../../Modules.html#PyTrx.CamEnv.computeResidualsUV">[docs]</a><span class="k">def</span> <span class="nf">computeResidualsUV</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">stable</span><span class="p">,</span> <span class="n">GCPxyz</span><span class="p">,</span> <span class="n">GCPuv</span><span class="p">,</span> <span class="n">refimg</span><span class="p">,</span> 
                        <span class="n">optimise</span><span class="o">=</span><span class="s1">&#39;YPR&#39;</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Function for computing the pixel difference between GCP image points</span>
+    <span class="sd">&quot;&quot;&quot;Function for computing the pixel difference between GCP image points</span>
 <span class="sd">    and GCP projected XYZ points. This function is used in the optimisation </span>
 <span class="sd">    function (optimiseCamera), with parameters for optimising defined in the</span>
 <span class="sd">    first variable and stable parameters defined in the second. If no </span>
@@ -1324,19 +1281,13 @@
 <span class="sd">    :type GCPxyz: arr</span>
 <span class="sd">    :param GCPuv: GCPs in image space (u,v)</span>
 <span class="sd">    :type GCPuv: arr</span>
-<span class="sd">    :param refimg: Reference image, given as a CamImage object, file path </span>
-<span class="sd">string, or image array</span>
-<span class="sd">    :type refimg: :class:&#39;PyTrx.Images.CamImage&#39;/str/arr</span>
-<span class="sd">    :param optimise: Flag denoting which variables will be optimised: YPR </span>
-<span class="sd">(camera pose only), INT (internal camera parameters), EXT (external camera </span>
-<span class="sd">parameters), LOC (all parameters except camera location), or ALL (all </span>
-<span class="sd">projection parameters)</span>
+<span class="sd">    :param refimg: Reference image, given as a CamImage object, file path string, or image array</span>
+<span class="sd">    :type refimg: :class:`PyTrx.Images.CamImage`/str/arr</span>
+<span class="sd">    :param optimise: Flag denoting which variables will be optimised: YPR (camera pose only), INT (internal camera parameters), EXT (external camera parameters), LOC (all parameters except camera location), or ALL (all projection parameters)</span>
 <span class="sd">    :type optimise: str</span>
 <span class="sd">    :returns: Pixel difference between UV and projected XYZ position of each GCP</span>
 <span class="sd">    :rtype: arr</span>
-
-<span class="sd">    &#39;&#39;&#39;</span>
-    
+<span class="sd">    &quot;&quot;&quot;</span>   
     <span class="c1">#Assign optimisable and stable parameters depending on optimise flag</span>
     <span class="k">if</span> <span class="n">optimise</span> <span class="o">==</span> <span class="s1">&#39;YPR&#39;</span><span class="p">:</span>
         <span class="n">campose</span> <span class="o">=</span> <span class="n">params</span>      

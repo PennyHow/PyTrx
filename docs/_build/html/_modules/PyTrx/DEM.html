@@ -44,10 +44,10 @@
 <span class="c1">#You should have received a copy of the license along with this</span>
 <span class="c1">#work. If not, see &lt;https://choosealicense.com/licenses/mit/&gt;.</span>
 
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">The DEM module contains functionality for handling DEM data and implementing</span>
-<span class="sd">this data into the :class:&#39;PyTrx.CamEnv.CamEnv&#39; object class.</span>
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">this data into the :class:`PyTrx.CamEnv.CamEnv` object class.</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1">#Import packages</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -62,7 +62,7 @@
 <span class="c1">#------------------------------------------------------------------------------</span>
 
 <div class="viewcode-block" id="ExplicitRaster"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster">[docs]</a><span class="k">class</span> <span class="nc">ExplicitRaster</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>   
-    <span class="sd">&#39;&#39;&#39;A class to represent a numeric Raster with explicit XY cell referencing</span>
+    <span class="sd">&quot;&quot;&quot;A class to represent a numeric Raster with explicit XY cell referencing</span>
 <span class="sd">    in each grid cell.</span>
 <span class="sd">    </span>
 <span class="sd">    :param X: X data</span>
@@ -73,7 +73,7 @@
 <span class="sd">    :type Z: arr</span>
 <span class="sd">    :param nodata: Condition for NaN data values, default to &#39;nan&#39;</span>
 <span class="sd">    :type nodata: int, optional</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     
     <span class="c1">#Basic constuctor method</span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">X</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">Z</span><span class="p">,</span> <span class="n">nodata</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;nan&#39;</span><span class="p">)):</span>
@@ -95,14 +95,14 @@
     
     
 <div class="viewcode-block" id="ExplicitRaster.getData"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getData">[docs]</a>    <span class="k">def</span> <span class="nf">getData</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">dim</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return DEM data. XYZ dimensions can be individually called with the</span>
+        <span class="sd">&quot;&quot;&quot;Return DEM data. XYZ dimensions can be individually called with the</span>
 <span class="sd">        dim input variable (integer: 0, 1, or 2).</span>
 
 <span class="sd">        :param dim: Dimension to retrieve (0, 1, or 2), default to None</span>
 <span class="sd">        :type dim: int</span>
 <span class="sd">        :returns: DEM dimension as array</span>
 <span class="sd">        :rtype: arr</span>
-<span class="sd">        &#39;&#39;&#39;</span>        
+<span class="sd">        &quot;&quot;&quot;</span>        
         <span class="c1">#Return all DEM data if no dimension is specified</span>
         <span class="k">if</span> <span class="n">dim</span><span class="o">==</span><span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span>
@@ -117,15 +117,16 @@
 
             
 <div class="viewcode-block" id="ExplicitRaster.getZ"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getZ">[docs]</a>    <span class="k">def</span> <span class="nf">getZ</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return height (Z) data of DEM.</span>
+        <span class="sd">&quot;&quot;&quot;Return height (Z) data of DEM.</span>
 <span class="sd">        </span>
 <span class="sd">        :returns: DEM Z values</span>
-<span class="sd">        :rtype: arr&#39;&#39;&#39;</span>
+<span class="sd">        :rtype: arr</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span></div>
             
         
 <div class="viewcode-block" id="ExplicitRaster.getZcoord"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getZcoord">[docs]</a>    <span class="k">def</span> <span class="nf">getZcoord</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return height (Z) at a given XY coordinate in DEM.</span>
+        <span class="sd">&quot;&quot;&quot;Return height (Z) at a given XY coordinate in DEM.</span>
 <span class="sd">        </span>
 <span class="sd">        :param x: X coordinate</span>
 <span class="sd">        :type x: int</span>
@@ -133,8 +134,7 @@
 <span class="sd">        :type y: int        </span>
 <span class="sd">        :returns: DEM Z value for given coordinate</span>
 <span class="sd">        :rtype: int</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        
+<span class="sd">        &quot;&quot;&quot;</span>      
         <span class="n">rowcoords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">0</span><span class="p">)[</span><span class="mi">0</span><span class="p">,:]</span>    
         <span class="n">colcoords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">1</span><span class="p">)[:,</span><span class="mi">0</span><span class="p">]</span>
         
@@ -147,52 +147,52 @@
             
             
 <div class="viewcode-block" id="ExplicitRaster.getShape"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getShape">[docs]</a>    <span class="k">def</span> <span class="nf">getShape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return the shape of the DEM data array.</span>
+        <span class="sd">&quot;&quot;&quot;Return the shape of the DEM data array.</span>
 <span class="sd">        </span>
 <span class="sd">        :returns: DEM shape</span>
 <span class="sd">        :rtype: arr</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span></div>
 
     
 <div class="viewcode-block" id="ExplicitRaster.getRows"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getRows">[docs]</a>    <span class="k">def</span> <span class="nf">getRows</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return the number of rows in the DEM data array.</span>
+        <span class="sd">&quot;&quot;&quot;Return the number of rows in the DEM data array.</span>
 <span class="sd">        </span>
 <span class="sd">        :returns: DEM row count</span>
 <span class="sd">        :rtype: int</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
         
 <div class="viewcode-block" id="ExplicitRaster.getCols"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getCols">[docs]</a>    <span class="k">def</span> <span class="nf">getCols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return the number of columns in the DEM data array.</span>
+        <span class="sd">&quot;&quot;&quot;Return the number of columns in the DEM data array.</span>
 <span class="sd">        </span>
 <span class="sd">        :returns: DEM column count</span>
 <span class="sd">        :rtype: int</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span></div>
 
     
 <div class="viewcode-block" id="ExplicitRaster.getNoData"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getNoData">[docs]</a>    <span class="k">def</span> <span class="nf">getNoData</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return fill value for no data in DEM array.</span>
+        <span class="sd">&quot;&quot;&quot;Return fill value for no data in DEM array.</span>
 <span class="sd">        </span>
 <span class="sd">        :returns: DEM nan fill value</span>
 <span class="sd">        :rtype: int</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodata</span></div>
  
        
 <div class="viewcode-block" id="ExplicitRaster.getExtent"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.getExtent">[docs]</a>    <span class="k">def</span> <span class="nf">getExtent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return DEM extent.</span>
+        <span class="sd">&quot;&quot;&quot;Return DEM extent.</span>
 <span class="sd">        </span>
 <span class="sd">        :returns: DEM extent</span>
 <span class="sd">        :rtype: list</span>
-<span class="sd">        &#39;&#39;&#39;</span>     
+<span class="sd">        &quot;&quot;&quot;</span>     
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extents</span></div>
  
        
 <div class="viewcode-block" id="ExplicitRaster.subset"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.subset">[docs]</a>    <span class="k">def</span> <span class="nf">subset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">cmin</span><span class="p">,</span><span class="n">cmax</span><span class="p">,</span><span class="n">rmin</span><span class="p">,</span><span class="n">rmax</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Return a specified subset of the DEM array.</span>
+        <span class="sd">&quot;&quot;&quot;Return a specified subset of the DEM array.</span>
 <span class="sd">        </span>
 <span class="sd">        :param cmin: Column minimum extent</span>
 <span class="sd">        :type cmin: int</span>
@@ -203,9 +203,8 @@
 <span class="sd">        :param rmax: Row maximum extent</span>
 <span class="sd">        :type rmax: int </span>
 <span class="sd">        :returns: Subset of DEM</span>
-<span class="sd">        :rtype: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        
+<span class="sd">        :rtype: :class:`PyTrx.DEM.ExplicitRaster`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#Find minimum extent value</span>
         <span class="n">cmin</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">cmin</span><span class="p">))</span>
         <span class="n">rmin</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">rmin</span><span class="p">))</span>
@@ -224,7 +223,7 @@
  
        
 <div class="viewcode-block" id="ExplicitRaster.densify"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.densify">[docs]</a>    <span class="k">def</span> <span class="nf">densify</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">densefac</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Function to densify the DEM array by a given densification factor.</span>
+        <span class="sd">&quot;&quot;&quot;Function to densify the DEM array by a given densification factor.</span>
 <span class="sd">        The array is multiplied by the given densification factor and then</span>
 <span class="sd">        subsequently values are interpolated using the SciPy function </span>
 <span class="sd">        RectBivariateSpline. The densification factor is set to 2 by default,</span>
@@ -233,9 +232,8 @@
 <span class="sd">        :param densefac: Densification factor</span>
 <span class="sd">        :type densefac: int</span>
 <span class="sd">        :returns: Densified DEM</span>
-<span class="sd">        :rtype: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
-<span class="sd">        &#39;&#39;&#39;</span>
-        
+<span class="sd">        :rtype: :class:`PyTrx.DEM.ExplicitRaster`</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#Get XYZ dem data</span>
         <span class="n">x</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">,:]</span>
         <span class="n">y</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">[</span><span class="mi">1</span><span class="p">,:,</span><span class="mi">0</span><span class="p">]</span>        
@@ -278,10 +276,10 @@
                
         
 <div class="viewcode-block" id="ExplicitRaster.reportDEM"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.ExplicitRaster.reportDEM">[docs]</a>    <span class="k">def</span> <span class="nf">reportDEM</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Self reporter for DEM class object. Returns the number of rows and</span>
+        <span class="sd">&quot;&quot;&quot;Self reporter for DEM class object. Returns the number of rows and</span>
 <span class="sd">        columns in the array, how NaN values in the array are filled, and the</span>
 <span class="sd">        data extent coordinates.</span>
-<span class="sd">        &#39;&#39;&#39;</span>      
+<span class="sd">        &quot;&quot;&quot;</span>   
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">DEM object reporting:</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Data has &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getRows</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39; rows by &#39;</span> <span class="o">+</span> 
               <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">getCols</span><span class="p">())</span> <span class="o">+</span> <span class="s1">&#39; columns&#39;</span><span class="p">)</span>
@@ -291,14 +289,14 @@
  
     
 <div class="viewcode-block" id="load_DEM"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.load_DEM">[docs]</a><span class="k">def</span> <span class="nf">load_DEM</span><span class="p">(</span><span class="n">demfile</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Function for loading DEM data from different file types, which is </span>
+    <span class="sd">&quot;&quot;&quot;Function for loading DEM data from different file types, which is </span>
 <span class="sd">    automatically detected. Recognised file types: .mat and .tif.</span>
 <span class="sd">    </span>
 <span class="sd">    :param demfile: DEM filepath</span>
 <span class="sd">    :type demfile: str </span>
 <span class="sd">    :returns: A DEM object</span>
-<span class="sd">    :rtype: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
-<span class="sd">    &#39;&#39;&#39;</span>    
+<span class="sd">    :rtype: :class:`PyTrx.DEM.ExplicitRaster`</span>
+<span class="sd">    &quot;&quot;&quot;</span>   
     <span class="c1">#Determine file type based on filename suffix</span>
     <span class="n">suffix</span><span class="o">=</span><span class="n">demfile</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
     
@@ -318,15 +316,14 @@
 
     
 <div class="viewcode-block" id="DEM_FromMat"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.DEM_FromMat">[docs]</a><span class="k">def</span> <span class="nf">DEM_FromMat</span><span class="p">(</span><span class="n">matfile</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Function for loading a DEM array from a Matlab (.mat) file containing</span>
+    <span class="sd">&quot;&quot;&quot;Function for loading a DEM array from a Matlab (.mat) file containing</span>
 <span class="sd">    separate X, Y, Z matrices.</span>
 
 <span class="sd">    :param matfile: DEM .mat filepath</span>
 <span class="sd">    :type matfile: str</span>
 <span class="sd">    :returns: A DEM object</span>
-<span class="sd">    :rtype: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    
+<span class="sd">    :rtype: :class:`PyTrx.DEM.ExplicitRaster`</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#Load Matlab file and XYZ matrices as arrays</span>
     <span class="n">mat</span> <span class="o">=</span> <span class="n">sio</span><span class="o">.</span><span class="n">loadmat</span><span class="p">(</span><span class="n">matfile</span><span class="p">)</span>
     <span class="n">X</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">ascontiguousarray</span><span class="p">(</span><span class="n">mat</span><span class="p">[</span><span class="s1">&#39;X&#39;</span><span class="p">])</span>
@@ -346,15 +343,14 @@
 
 
 <div class="viewcode-block" id="DEM_FromTiff"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.DEM_FromTiff">[docs]</a><span class="k">def</span> <span class="nf">DEM_FromTiff</span><span class="p">(</span><span class="n">tiffFile</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Function for loading a DEM array from a .tiff file containing</span>
+    <span class="sd">&quot;&quot;&quot;Function for loading a DEM array from a .tiff file containing</span>
 <span class="sd">    raster-formatted data. The tiff data importing is handled by GDAL.</span>
 
-<span class="sd">    :param tifffile: DEM .tif filepath</span>
-<span class="sd">    :type tifffile: str</span>
+<span class="sd">    :param tiffFile: DEM .tif filepath</span>
+<span class="sd">    :type tiffFile: str</span>
 <span class="sd">    :returns: A DEM object</span>
-<span class="sd">    :rtype: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    
+<span class="sd">    :rtype: :class:`PyTrx.DEM.ExplicitRaster`</span>
+<span class="sd">    &quot;&quot;&quot;</span>  
     <span class="c1">#Open tiff file with GDAL</span>
     <span class="n">dataset</span> <span class="o">=</span> <span class="n">gdal</span><span class="o">.</span><span class="n">Open</span><span class="p">(</span><span class="n">tiffFile</span><span class="p">,</span> <span class="n">GA_ReadOnly</span><span class="p">)</span>
     
@@ -400,20 +396,18 @@
 
             
 <div class="viewcode-block" id="voxelviewshed"><a class="viewcode-back" href="../../Modules.html#PyTrx.DEM.voxelviewshed">[docs]</a><span class="k">def</span> <span class="nf">voxelviewshed</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">viewpoint</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Calculate a viewshed over a DEM from a given viewpoint in the DEM scene.</span>
+    <span class="sd">&quot;&quot;&quot;Calculate a viewshed over a DEM from a given viewpoint in the DEM scene.</span>
 <span class="sd">    This function is based on the viewshed function (voxelviewshed.m) available </span>
-<span class="sd">    in ImGRAFT.   </span>
-<span class="sd">    The ImGRAFT voxelviewshed.m script is available at:</span>
+<span class="sd">    in ImGRAFT. The ImGRAFT voxelviewshed.m script is available at:</span>
 <span class="sd">    http://github.com/grinsted/ImGRAFT/blob/master/voxelviewshed.m</span>
 <span class="sd">    </span>
 <span class="sd">    :param dem: A DEM object</span>
-<span class="sd">    :type dem: :class:&#39;PyTrx.DEM.ExplicitRaster&#39;</span>
+<span class="sd">    :type dem: :class:`PyTrx.DEM.ExplicitRaster`</span>
 <span class="sd">    :param viewpoint: 3-element vector specifying the viewpoint</span>
 <span class="sd">    :type viewpoint: list</span>
-<span class="sd">    </span>
 <span class="sd">    :returns: Boolean visibility matrix (which is the same size as dem)</span>
 <span class="sd">    :rtype: arr</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#Get XYZ arrays    </span>
     <span class="n">X</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">Y</span><span class="o">=</span><span class="n">dem</span><span class="o">.</span><span class="n">getData</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>

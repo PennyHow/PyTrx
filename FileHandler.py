@@ -6,10 +6,10 @@
 #You should have received a copy of the license along with this
 #work. If not, see <https://choosealicense.com/licenses/mit/>.
 
-'''
+"""
 Th FileHandler module contains all the functions called by a PyTrx object to 
 load and export data.
-'''
+"""
 
 #Import packages
 from PIL import Image, ImageDraw
@@ -24,21 +24,19 @@ from functools import reduce
 #------------------------------------------------------------------------------   
 
 def readMask(img, writeMask=None):
-    '''Function to create a mask for point seeding using PIL to rasterize 
+    """Function to create a mask for point seeding using PIL to rasterize 
     polygon. The mask is manually defined by the user using the pyplot ginput 
     function. This subsequently returns the manually defined area as a .jpg 
-    mask.     
-    The writeMask file path is used to either open the existing mask at that 
-    path or to write the generated mask to this path.
+    mask. The writeMask file path is used to either open the existing mask at 
+    that path or to write the generated mask to this path.
     
     :param img: Image to define mask in
     :type img: arr
-    :param writeMask: File destination that mask output is written to, default
-to None
+    :param writeMask: File destination that mask output is written to, default to None
     :type writeMask: str, optional
     :returns: Array defining the image mask
     :rtype: arr      
-    '''
+    """
     #Check if a mask already exists, if not enter digitising
     if writeMask!=None:
         try:
@@ -93,26 +91,21 @@ to None
 
 
 def readCalib(fileName, paramList):
-    '''Function to find camera calibrations from a file given a list or 
+    """Function to find camera calibrations from a file given a list or 
     Matlab file containing the required parameters. Returns the parameters as a
-    dictionary object.
-    Compatible file structures:
-    .txt file:   "RadialDistortion [k1,k2,k3...k8]
-                 TangentialDistortion [p1,p2]
-                 IntrinsicMatrix [fx 0. 0.][s fy 0.][cx cy 1]
-                 End"
-    .mat file:   Camera calibration file output from the Matlab Camera 
-                 Calibration App (available in the Computer Vision Systems 
-                 toolbox).
+    dictionary object. Compatible file structures: 1) .txt file 
+    ("RadialDistortion [k1,k2,k3...k8], TangentialDistortion [p1,p2],
+    IntrinsicMatrix [fx 0. 0.][s fy 0.][cx cy 1] End"); 2) .mat file
+    (Camera calibration file output from the Matlab Camera Calibration App 
+    (available in the Computer Vision Systems toolbox).
     
     :param fileName: File directory for calibration file
     :type fileName: str    
-    :param paramList: List of strings denoting keywords to look for in 
-calibration file
+    :param paramList: List of strings denoting keywords to look for in calibration file
     :type paramList: list       
     :returns: Calibration parameters denoted by keywords
     :rtype: list    
-    '''    
+    """    
     #Load as text file if txt format
     if fileName[-3:] == 'txt':            
         #Open file
@@ -154,7 +147,7 @@ calibration file
 
 
 def lineSearch(lineList, search):
-    '''Function to supplement the readCalib function. Given an input parameter 
+    """Function to supplement the readCalib function. Given an input parameter 
     to search within the file, this will return the line numbers of the data.
     
     :param lineList: List of strings within a file line
@@ -163,7 +156,7 @@ def lineSearch(lineList, search):
     :type search: str
     :returns:  Line numbers with keyword match
     :rtype: list      
-    '''
+    """
     #Find line matching the parameter
     for i, line in enumerate(lineList):
         if search in line: 
@@ -185,7 +178,7 @@ def lineSearch(lineList, search):
 
 
 def returnData(lines, data):
-    '''Function to supplement the importCalibration function. Given the line 
+    """Function to supplement the importCalibration function. Given the line 
     numbers of the parameter data (the ouput of the lineSearch function), this 
     will return the data.
     
@@ -195,7 +188,7 @@ def returnData(lines, data):
     :type data: list        
     :returns: Extracted data
     :rtype: arr
-    '''    
+    """ 
     #Create empty list for output data
     D=[]
     
@@ -221,18 +214,15 @@ def returnData(lines, data):
 
 
 def readMatrixDistortion(path):
-    '''Function to support the calibrate function. Returns the 
+    """Function to support the calibrate function. Returns the 
     intrinsic matrix and distortion parameters required for calibration from a
     given file.
     
     :param path: Directory of calibration file
     :type path: str
-    :returns: Three camera matrix parameters: 1) the intrinsic matrix as a 3x3 
-array, including focal length, principal point, and skew (arr); 2) Tangential 
-distortion values (p1, p2) (arr); and 3) Radial distortion values 
-(k1, k2... k6)
+    :returns: Three camera matrix parameters: 1) the intrinsic matrix as a 3x3 array, including focal length, principal point, and skew (arr); 2) Tangential distortion values (p1, p2) (arr); and 3) Radial distortion values (k1, k2... k6)
     :rtype: arr
-    '''   
+    """   
     #Find the calibration parameters from the list
     ls = ['IntrinsicMatrix', 'RadialDistortion', 'TangentialDistortion']
     calibDict = readCalib(path, ls)
@@ -250,14 +240,14 @@ distortion values (p1, p2) (arr); and 3) Radial distortion values
 
 
 def checkMatrix(matrix):
-    '''Function to support the calibrate function. Checks and converts the 
+    """Function to support the calibrate function. Checks and converts the 
     intrinsic matrix to the correct format for calibration with OpenCV.
     
     :param matrix: Inputted matrix for checking
     :type matrix: arr
     :returns: Validated matrix
     :rtype: arr          
-    '''  
+    """  
     # Transpose if zeros in matrix are not in correct places
     if matrix[2,0]!=0 and matrix[2,1]!=0 and matrix[0,2]==0 and matrix[1,2]==0:
         mat = matrix.transpose()
@@ -277,20 +267,18 @@ def checkMatrix(matrix):
 
 
 def readImg(path, band='L', equal=True):
-    '''Function to prepare an image by opening, equalising, converting to 
+    """Function to prepare an image by opening, equalising, converting to 
     either grayscale or a specified band, then returning a copy.
 
     :param path: Image file path directory
     :type path: str
-    :param band: Desired band output - 'R': red band; 'B': blue band; 'G': 
-green band; 'L': grayscale (default).
+    :param band: Desired band output - 'R': red band; 'B': blue band; 'G': green band; 'L': grayscale (default).
     :type band: str 
-    :param equal: Flag to denote if histogram equalisation should be applied,
-defaults to True
+    :param equal: Flag to denote if histogram equalisation should be applied, defaults to True
     :type equal: bool    
     :returns: Image array
     :rtype: arr
-    '''   
+    """  
     # Open image file
     band=band.upper()
     im=Image.open(path)
@@ -333,16 +321,15 @@ defaults to True
 
 
 def readGCPs(fileName):
-    '''Function to read ground control points from a .txt file. The data in the
+    """Function to read ground control points from a .txt file. The data in the
     file is referenced to under a header line. Data is appended by skipping the
     header line and finding the world and image coordinates from each line.
     
     :param fileName: File path directory for GCP file
     :type fileName: str
-    :returns: Two arrays containing the GCPs in xyz coordinates, and the GCPs
-in image coordinates
+    :returns: Two arrays containing the GCPs in xyz coordinates, and the GCPs in image coordinates
     :rtype: array    
-    '''    
+    """   
     # Open the file and read the first line (i.e. the header line)
     myFile=open(fileName,'r')  
     myFile.readline()
@@ -378,7 +365,7 @@ in image coordinates
 
     
 def writeCalibFile(intrMat, tanDis, radDis, fname):
-    '''Write camera calibration data to .txt file, including camera matrix, and 
+    """Write camera calibration data to .txt file, including camera matrix, and 
     radial and tangential distortion parameters. 
 
     :param intrMat: Intrinsic camera matrix
@@ -389,7 +376,7 @@ def writeCalibFile(intrMat, tanDis, radDis, fname):
     :type radDis: arr           
     :param fname: Directory to write file to
     :type fname: str            
-    '''         
+    """         
     #Write camera calibration variables to text file
     f=open(fname,'w')                            
     f.write('RadialDistortion' + '\n' + str(radDis) + '\n' +
@@ -399,7 +386,7 @@ def writeCalibFile(intrMat, tanDis, radDis, fname):
             
 
 def writeVeloFile(xyzvel, uvvel, homog, imn, fname):
-    '''Function to write all velocity data from a given timeLapse sequence to 
+    """Function to write all velocity data from a given timeLapse sequence to 
     .csv file. Data is formatted as sequential columns containing the following
     information: Image pair 1 name, Image pair 2 name, Average xyz velocity,
     Number of features tracked, Average pixel velocity, Homography residual 
@@ -415,7 +402,7 @@ def writeVeloFile(xyzvel, uvvel, homog, imn, fname):
     :param imn: list
     :param fname: Filename for output file. File destination can also specified
     :type fname: str
-    '''        
+    """        
     #Initialise file writing
     f=open(fname,'w')
 
@@ -495,7 +482,7 @@ def writeVeloFile(xyzvel, uvvel, homog, imn, fname):
         
    
 def writeHomogFile(homog, imn, fname):
-    '''Function to write all homography data from a given timeLapse sequence to 
+    """Function to write all homography data from a given timeLapse sequence to 
     .csv file. Data is formatted as sequential columns containing the following 
     information: Image pair 1 name, Image pair 2 name, Homography matrix (i.e. 
     all values in the 3x3 matrix), Number of features tracked, X mean 
@@ -509,7 +496,7 @@ def writeHomogFile(homog, imn, fname):
     :type imn: list 
     :param fname: Directory for file to be written to
     :type fname: str 
-    '''
+    """
     #Initialise file writing
     f=open(fname,'w')
     
@@ -588,7 +575,7 @@ def writeHomogFile(homog, imn, fname):
 
 
 def writeAreaFile(pxareas, xyzareas, imn, destination):
-    '''Write UV and XYZ areas to csv file.
+    """Write UV and XYZ areas to csv file.
 
     :param pxarea: Pixel extents
     :type pxarea: list
@@ -598,7 +585,7 @@ def writeAreaFile(pxareas, xyzareas, imn, destination):
     :type imn: list
     :param destination: File directory where csv file will be written to
     :type destination: str
-    ''' 
+    """ 
     #Create file location
     f = open(destination, 'w')
     
@@ -615,7 +602,7 @@ def writeAreaFile(pxareas, xyzareas, imn, destination):
             
 
 def writeAreaCoords(pxpts, xyzpts, imn, pxdestination, xyzdestination):
-    '''Write UV and XYZ area coordinates to text files. These file types are 
+    """Write UV and XYZ area coordinates to text files. These file types are 
     compatible with the importing tools (importAreaPX, importAreaXYZ).
 
     :param xyzarea: XYZ areas
@@ -626,10 +613,9 @@ def writeAreaCoords(pxpts, xyzpts, imn, pxdestination, xyzdestination):
     :type imn: list
     :param pxdestination: File directory where UV coordinates will be written to
     :type pxdestination: str
-    :param xyzdestination: File directory where XYZ coordinates will be written 
-to
+    :param xyzdestination: File directory where XYZ coordinates will be written to
     :type xyzdestination: str
-    '''     
+    """    
     #Pixel cooridnates of all pixel extents
     if pxpts is not None:       
         f = open(pxdestination, 'w')
@@ -664,7 +650,7 @@ to
                                         
 
 def writeLineFile(pxline, xyzline, imn, destination):
-    '''Write UV and XYZ line lengths to csv file.
+    """Write UV and XYZ line lengths to csv file.
 
     :param pxline: Pixel line lengths
     :type pxline: list   
@@ -674,7 +660,7 @@ def writeLineFile(pxline, xyzline, imn, destination):
     :type imn: list
     :param destination: File directory where output will be written to 
     :type destination: str
-    '''
+    """
     #Create file
     f = open(destination, 'w')
     
@@ -690,7 +676,7 @@ def writeLineFile(pxline, xyzline, imn, destination):
     
 
 def writeLineCoords(uvpts, xyzpts, imn, pxdestination, xyzdestination):
-    '''Write UV and XYZ line coordinates to text file. These file types are 
+    """Write UV and XYZ line coordinates to text file. These file types are 
     compatible with the importing tools (importLinePX, importLineXYZ)
     
     :param uvpts: Pixel coordinates
@@ -701,10 +687,9 @@ def writeLineCoords(uvpts, xyzpts, imn, pxdestination, xyzdestination):
     :type imn: list
     :param pxdestination: File directory where UV coordinates will be written to
     :type pxdestination: str
-    :param xyzdestination: File directory where XYZ coordinates will be written 
-to
+    :param xyzdestination: File directory where XYZ coordinates will be written to
     :type xyzdestination: str    
-    '''    
+    """  
     #Pixel line coordinates file generation             
     if uvpts is not None:            
         f = open(pxdestination, 'w')
@@ -726,7 +711,7 @@ to
                 
             
 def writeVeloSHP(xyzvel, xyzerr, xyz0, imn, fileDirectory, projection=None): 
-    '''Write OGR real velocity points (from ALL images) to file in a .shp
+    """Write OGR real velocity points (from ALL images) to file in a .shp
     file type that is compatible with ESRI mapping software.
     
     :param xyzvel: XYZ velocities
@@ -735,15 +720,11 @@ def writeVeloSHP(xyzvel, xyzerr, xyz0, imn, fileDirectory, projection=None):
     :type xyz0: list
     :param imn: Image name
     :type imn: list
-    :param fileDirectory: Destination that shapefiles will be written to e.g. 
-/python_workspace/Results/
+    :param fileDirectory: Destination that shapefiles will be written to 
     :type fileDirectory: str
-    :param projection: Coordinate projection that the shapefile will exist in. 
-This can either be an ESPG number (expressed as an integer) or a well-known 
-geographical coordinate system (expressed as a string). Well-known geographical 
-coordinate systems are: 'WGS84', 'WGS72', NAD83' or 'EPSG:n'
+    :param projection: Coordinate projection that the shapefile will exist in. This can either be an ESPG number (expressed as an integer) or a well-known geographical coordinate system (expressed as a string). Well-known geographical coordinate systems are: 'WGS84', 'WGS72', NAD83' or 'EPSG:n'
     :type projection: int/str
-    ''' 
+    """ 
     #Make directory if it does not exist
     if not os.path.exists(fileDirectory):
         os.makedirs(fileDirectory)
@@ -842,22 +823,18 @@ coordinate systems are: 'WGS84', 'WGS72', NAD83' or 'EPSG:n'
         
 
 def writeAreaSHP(xyzpts, imn, fileDirectory, projection=None):
-    '''Write OGR real polygon areas (from ALL images) to file in a .shp
+    """Write OGR real polygon areas (from ALL images) to file in a .shp
     file type that is compatible with ESRI mapping software.
     
     :param xyzpts: XYZ coordinates for polygons
     :type xyzpts: list
     :param imn: Image name
     :type imn: list
-    :param fileDirectory: Destination that shapefiles will be written to e.g. 
-/python_workspace/Results/
+    :param fileDirectory: Destination that shapefiles will be written to
     :type fileDirectory: str
-    :param projection: Coordinate projection that the shapefile will exist in. 
-This can either be an ESPG number (expressed as an integer) or a well-known 
-geographical coordinate system (expressed as a string). Well-known geographical 
-coordinate systems are: 'WGS84', 'WGS72', NAD83' or 'EPSG:n'
+    :param projection: Coordinate projection that the shapefile will exist in. This can either be an ESPG number (expressed as an integer) or a well-known geographical coordinate system (expressed as a string). Well-known geographical coordinate systems are: 'WGS84', 'WGS72', NAD83' or 'EPSG:n'
     :type projection: int/str
-    ''' 
+    """
     #Make directory if it does not exist
     if not os.path.exists(fileDirectory):
         os.makedirs(fileDirectory)
@@ -926,22 +903,18 @@ coordinate systems are: 'WGS84', 'WGS72', NAD83' or 'EPSG:n'
         
         
 def writeLineSHP(xyzpts, imn, fileDirectory, projection=None):
-    '''Write OGR real line features (from ALL images) to file in a .shp
+    """Write OGR real line features (from ALL images) to file in a .shp
     file type that is compatible with ESRI mapping software.
     
     :param xyzpts: XYZ coordinates for polygons
     :type xyzpts: list
     :param imn: Image name
     :type imn: list
-    :param fileDirectory: Destination that shapefiles will be written to e.g. 
-/python_workspace/Results/
+    :param fileDirectory: Destination that shapefiles will be written to    
     :type fileDirectory: str
-    :param projection: Coordinate projection that the shapefile will exist in. 
-This can either be an ESPG number (expressed as an integer) or a well-known 
-geographical coordinate system (expressed as a string). Well-known geographical 
-coordinate systems are: 'WGS84', 'WGS72', NAD83' or 'EPSG:n'
+    :param projection: Coordinate projection that the shapefile will exist in. This can either be an ESPG number (expressed as an integer) or a well-known geographical coordinate system (expressed as a string). Well-known geographical coordinate systems are: 'WGS84', 'WGS72', NAD83' or 'EPSG:n'
     :type projection: int/str
-    ''' 
+    """
     #Make directory if it does not exist
     if not os.path.exists(fileDirectory):
         os.makedirs(fileDirectory)
@@ -1002,15 +975,15 @@ coordinate systems are: 'WGS84', 'WGS72', NAD83' or 'EPSG:n'
 
 
 def importAreaData(xyzfile, pxfile):
-    '''Import xyz and px data from text files.
+    """Import xyz and px data from text files.
     
     :param xyzfile: File directory to xyz coordinates
     :type xyzfile: str
     :param pxfile: File directory to uv coordinates
-    :type pxfile str
+    :type pxfile: str
     :returns: Coordinates and areas of detected areas
     :rtype: list
-    '''
+    """
     #Get real-world coordinates and areas       
     xyz = importAreaFile(xyzfile,3)
 
@@ -1027,15 +1000,15 @@ def importAreaData(xyzfile, pxfile):
 
 
 def importLineData(xyzfile, pxfile):
-    '''Import xyz and px data from text files.
+    """Import xyz and px data from text files.
 
     :param xyzfile: File directory to xyz coordinates
     :type xyzfile: str
     :param pxfile: File directory to uv coordinates
-    :type pxfile str
+    :type pxfile: str
     :returns: Coordinates and lengths of detected lines
     :rtype: list
-    '''
+    """
     #Get real-world coordinates and distances
     xyz = importLineFile(xyzfile, 3)
     
@@ -1052,14 +1025,15 @@ def importLineData(xyzfile, pxfile):
    
 
 def importAreaFile(fname, dimension):
-    '''Import pixel polygon data from text file and compute pixel extents.
+    """Import pixel polygon data from text file and compute pixel extents.
       
     :param fname: Path to the text file containing the UV coordinate data
     :type fname: str
-    :returns: Two lists, containing the UV coordinates for polygons and the
-pixel areas for polygons
+    :param dimension: Integer denoting the number of dimensions in coordinates
+    :type dimension: int
+    :returns: Two lists, containing the UV coordinates for polygons and the pixel areas for polygons
     :rtype: list                
-    '''
+    """
     #Read file and detect number of images based on number of lines
     f=open(fname,'r')      
     alllines=[]
@@ -1108,7 +1082,7 @@ pixel areas for polygons
      
      
 def importLineFile(fname, dimension):
-    '''Import XYZ line data from text file and compute line lengths.
+    """Import XYZ line data from text file and compute line lengths.
         
     :param fname: Path to the text file containing the XYZ coordinate data
     :type fname: str
@@ -1116,7 +1090,7 @@ def importLineFile(fname, dimension):
     :type dimension: int    
     :returns: List containing line coordinates and lengths
     :rtype: list 
-    '''
+    """
     #Read file and detect number of images based on number of lines
     f=open(fname,'r')      
     alllines=[]

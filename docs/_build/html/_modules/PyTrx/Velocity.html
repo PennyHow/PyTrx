@@ -44,7 +44,7 @@
 <span class="c1">#You should have received a copy of the license along with this</span>
 <span class="c1">#work. If not, see &lt;https://choosealicense.com/licenses/mit/&gt;.</span>
 
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">The Velocity module handles the functionality for obtaining velocity and </span>
 <span class="sd">homography measurements from oblique time-lapse imagery. Specifically, this </span>
 <span class="sd">module contains functions for: (1) Performing camera registration from static </span>
@@ -53,7 +53,7 @@
 <span class="sd">signal-to-noise ratio calculated. These functions can be performed with either</span>
 <span class="sd">a sparse or dense method, using corner features for tracking in the sparse</span>
 <span class="sd">method and a grid of evenly space points in the dense method.</span>
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1">#Import packages</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -72,28 +72,23 @@
 
 <span class="c1">#------------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="Homography"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.Homography">[docs]</a><span class="k">class</span> <span class="nc">Homography</span><span class="p">(</span><span class="n">ImageSequence</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;A class for the processing the homography of an image sequence to </span>
+    <span class="sd">&quot;&quot;&quot;A class for the processing the homography of an image sequence to </span>
 <span class="sd">    determine motion in a camera platform. This class treats the images as a </span>
 <span class="sd">    contigous sequence of name references by default.</span>
 <span class="sd">    </span>
 <span class="sd">    :param imageList: List of images, for the ImageSet object</span>
 <span class="sd">    :type imageList: list</span>
-<span class="sd">    :param camEnv: The Camera Environment corresponding to the images, for the </span>
-<span class="sd">:class:&#39;PyTrx.Images.ImageSequence&#39; object</span>
-<span class="sd">    :type camEnv: :class:&#39;PyTrx.CamEnv.CamEnv&#39;</span>
-<span class="sd">    :param invmaskPath: The mask for the stationary feature tracking (for </span>
-<span class="sd">camera registration/determining camera homography), default to None</span>
+<span class="sd">    :param camEnv: The Camera Environment corresponding to the images, for the :class:`PyTrx.Images.ImageSequence` object</span>
+<span class="sd">    :type camEnv: :class:`PyTrx.CamEnv.CamEnv`</span>
+<span class="sd">    :param invmaskPath: The mask for the stationary feature tracking (for camera registration/determining camera homography), default to None</span>
 <span class="sd">    :type invmaskPath: arr, optional</span>
-<span class="sd">    :param calibFlag: Flag denoting whether images should be corrected for</span>
-<span class="sd">lens distortion, default to True</span>
+<span class="sd">    :param calibFlag: Flag denoting whether images should be corrected for lens distortion, default to True</span>
 <span class="sd">    :type calibFlag: bool, optional</span>
-<span class="sd">    :param band: String denoting the desired image band, default to &#39;L&#39; </span>
-<span class="sd">(grayscale)</span>
+<span class="sd">    :param band: String denoting the desired image band, default to &#39;L&#39; (grayscale)</span>
 <span class="sd">    :type band: str, optional</span>
-<span class="sd">    :param equal: Flag denoting whether histogram equalisation is applied to </span>
-<span class="sd">images (histogram equalisation is applied if True); default is True.                        </span>
+<span class="sd">    :param equal: Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True); default is True.                        </span>
 <span class="sd">    :type equal: bool, optional    </span>
-<span class="sd">    &#39;&#39;&#39;</span>        
+<span class="sd">    &quot;&quot;&quot;</span>      
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imageList</span><span class="p">,</span> <span class="n">camEnv</span><span class="p">,</span> <span class="n">invmaskPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">calibFlag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
                  <span class="n">band</span><span class="o">=</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">equal</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Homography object initialisation&#39;&#39;&#39;</span>
@@ -114,7 +109,7 @@
 
 <div class="viewcode-block" id="Homography.calcHomographies"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.Homography.calcHomographies">[docs]</a>    <span class="k">def</span> <span class="nf">calcHomographies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">homogmethod</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">RANSAC</span><span class="p">,</span> 
                          <span class="n">ransacReprojThreshold</span><span class="o">=</span><span class="mf">5.0</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Function to generate a homography model through a sequence of </span>
+        <span class="sd">&quot;&quot;&quot;Function to generate a homography model through a sequence of </span>
 <span class="sd">        images, and perform for image registration. Points that are assumed </span>
 <span class="sd">        to be static in the image plane are tracked between image pairs, and </span>
 <span class="sd">        movement in these points are used to generate sequential homography </span>
@@ -127,27 +122,15 @@
 <span class="sd">        homog = Homography.calcHomographies([[&#39;dense&#39;], [100,100], </span>
 <span class="sd">        [cv2.TM_CCORR_NORMED, 50, 100, 1.0, 4]])</span>
 <span class="sd">        </span>
-<span class="sd">        :param params: List that defines the parameters for point matching:</span>
-<span class="sd">Method: &#39;sparse&#39; or &#39;dense&#39; (str). Seed parameters: either containing the corner</span>
-<span class="sd">parameters for the sparse method - max. number of corners (int), quality (int),</span>
-<span class="sd">and min. distance (int). Or the grid spacing (list) for the dense method.</span>
-<span class="sd">Tracking parameters: either containing the sparse method parameters - window</span>
-<span class="sd">size (tuple), backtracking threshold(int) and minimum tracked features (int).</span>
-<span class="sd">Or the dense method parameters - tracking method (int), template size (int),</span>
-<span class="sd">search window size (int), backtracking threshold (int), and minimum tracked</span>
-<span class="sd">features (int)</span>
+<span class="sd">        :param params: List that defines the parameters for point matching: Method: &#39;sparse&#39; or &#39;dense&#39; (str). Seed parameters: either containing the cornerparameters for the sparse method - max. number of corners (int), quality (int), and min. distance (int). Or the grid spacing (list) for the dense method. Tracking parameters: either containing the sparse method parameters - window size (tuple), backtracking threshold(int) and minimum tracked features (int). Or the dense method parameters - tracking method (int), template size (int), search window size (int), backtracking threshold (int), and minimum tracked features (int)</span>
 <span class="sd">        :type params: list              </span>
-<span class="sd">        :param homogmethod: Method used to calculate homography model, which</span>
-<span class="sd">plugs into the OpenCV function. This can either be cv2.RANSAC (a RANSAC-based</span>
-<span class="sd">robust method), cv2.LEAST_MEDIAN (a Least-Median robust method) or &#39;0&#39; (a</span>
-<span class="sd">regular method using all the points); default to cv2.RANSAC</span>
+<span class="sd">        :param homogmethod: Method used to calculate homography model, which plugs into the OpenCV function. This can either be cv2.RANSAC (a RANSAC-based robust method), cv2.LEAST_MEDIAN (a Least-Median robust method) or &#39;0&#39; (a regular method using all the points); default to cv2.RANSAC</span>
 <span class="sd">        :type homogmethod: int, optional                                  </span>
-<span class="sd">        :param ransacReprojThreshold: Maximum allowed reprojection error,</span>
-<span class="sd">default to 5.0</span>
+<span class="sd">        :param ransacReprojThreshold: Maximum allowed reprojection error, default to 5.0</span>
 <span class="sd">        :type ransacReprojThreshold: int                                     </span>
-<span class="sd">        :returns: A list of homography information for all image pairs in </span>
-<span class="sd">sequence</span>
-<span class="sd">        &#39;&#39;&#39;</span> 
+<span class="sd">        :returns: A list of homography information for all image pairs in sequence</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span> 
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">CALCULATING HOMOGRAPHY&#39;</span><span class="p">)</span>
 
         <span class="n">homog</span><span class="o">=</span><span class="p">[]</span>   
@@ -219,36 +202,27 @@
 
             
 <div class="viewcode-block" id="Velocity"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.Velocity">[docs]</a><span class="k">class</span> <span class="nc">Velocity</span><span class="p">(</span><span class="n">ImageSequence</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;A class for the processing of an ImageSet to determine pixel </span>
+    <span class="sd">&quot;&quot;&quot;A class for the processing of an ImageSet to determine pixel </span>
 <span class="sd">    displacements and real-world velocities from a sparse set of points, with </span>
 <span class="sd">    methods to track in the xy image plane and project tracks to real-world </span>
 <span class="sd">    (xyz) coordinates. This class treats the images as a contigous sequence of </span>
 <span class="sd">    name references by default.</span>
 <span class="sd">    </span>
-<span class="sd">    :param imageList: List of images, for the :class:&#39;PyTrx.Images.ImageSequence&#39; </span>
-<span class="sd">object</span>
+<span class="sd">    :param imageList: List of images, for the :class:`PyTrx.Images.ImageSequence` object</span>
 <span class="sd">    :type imageList: list</span>
-<span class="sd">    :param camEnv:  The Camera Environment object, :class:&#39;PyTrx.CamEnv.CamEnv&#39; </span>
-<span class="sd">corresponding to the images</span>
-<span class="sd">    :type camEnv: :class:&#39;PyTrx.CamEnv.CamEnv&#39;</span>
-<span class="sd">    :param homography: Homography model for the corresponding image, defaults</span>
-<span class="sd">to None</span>
+<span class="sd">    :param camEnv:  The Camera Environment object, :class:`PyTrx.CamEnv.CamEnv` corresponding to the images</span>
+<span class="sd">    :type camEnv: :class:`PyTrx.CamEnv.CamEnv`</span>
+<span class="sd">    :param homography: Homography model for the corresponding image, defaults to None</span>
 <span class="sd">    :type homography: list, optional</span>
-<span class="sd">    :param maskPath: The file path for the mask indicating the target area for </span>
-<span class="sd">deriving velocities from. If this file exists, the mask will be loaded. If this </span>
-<span class="sd">file does not exist, then the mask generation process will load, and the result </span>
-<span class="sd">will be saved with this path; default to None</span>
+<span class="sd">    :param maskPath: The file path for the mask indicating the target area for deriving velocities from. If this file exists, the mask will be loaded. If this file does not exist, then the mask generation process will load, and the result will be saved with this path; default to None</span>
 <span class="sd">    :type maskPath: str, optional</span>
-<span class="sd">    :param calibFlag: Flag denoting whether images should be corrected for</span>
-<span class="sd">lens distortion, default to True</span>
+<span class="sd">    :param calibFlag: Flag denoting whether images should be corrected for lens distortion, default to True</span>
 <span class="sd">    :type calibFlag: bool, optional</span>
-<span class="sd">    :param band: String denoting the desired image band, default to &#39;L&#39; </span>
-<span class="sd">(grayscale)</span>
+<span class="sd">    :param band: String denoting the desired image band, default to &#39;L&#39; (grayscale)</span>
 <span class="sd">    :type band: str, optional</span>
-<span class="sd">    :param equal: Flag denoting whether histogram equalisation is applied to </span>
-<span class="sd">images (histogram equalisation is applied if True); default is True.                        </span>
+<span class="sd">    :param equal: Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True); default is True.                        </span>
 <span class="sd">    :type equal: bool, optional </span>
-<span class="sd">    &#39;&#39;&#39;</span>        
+<span class="sd">    &quot;&quot;&quot;</span>        
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imageList</span><span class="p">,</span> <span class="n">camEnv</span><span class="p">,</span> <span class="n">homography</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">maskPath</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                  <span class="n">calibFlag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">band</span><span class="o">=</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">equal</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&#39;&#39;&#39;Velocity object initialisation&#39;&#39;&#39;</span>        
@@ -269,7 +243,7 @@
 
 
 <div class="viewcode-block" id="Velocity.calcVelocities"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.Velocity.calcVelocities">[docs]</a>    <span class="k">def</span> <span class="nf">calcVelocities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Function to calculate velocities between succesive image pairs. </span>
+        <span class="sd">&quot;&quot;&quot;Function to calculate velocities between succesive image pairs. </span>
 <span class="sd">        Image pairs are called from the ImageSequence object. Points are seeded</span>
 <span class="sd">        in the first of these pairs using the Shi-Tomasi algorithm with </span>
 <span class="sd">        OpenCV&#39;s goodFeaturesToTrack function.         </span>
@@ -287,34 +261,12 @@
 <span class="sd">        This function returns the xyz velocities and points from each image </span>
 <span class="sd">        pair, and their corresponding uv velocities and points in the image </span>
 <span class="sd">        plane.</span>
-<span class="sd">        Input example:</span>
-<span class="sd">        For sparse velocities: </span>
-<span class="sd">        velocity = Velocity.calcVelocities([[&#39;sparse&#39;], [50000, 0.1, 5.0], </span>
-<span class="sd">                                          [(25,25), 1.0, 4]])</span>
-<span class="sd">        For dense velocities:</span>
-<span class="sd">        velocity = Velocity.calcVelocities([[&#39;dense&#39;],[100,100],</span>
-<span class="sd">                                            [&#39;cv2.TM_CCORR_NORMED&#39;, 50, 100, 4]])</span>
 <span class="sd">        </span>
-<span class="sd">        :param params:              List that defines the parameters for </span>
-<span class="sd">                                    deriving velocity: Method: &#39;sparse&#39; or </span>
-<span class="sd">&#39;dense&#39; (str). Seed parameters: either containing the corner parameters for the </span>
-<span class="sd">sparse method - max. number of corners (int), quality (int), and min. distance </span>
-<span class="sd">(int). Or the grid spacing (list) for the dense method. Tracking parameters: </span>
-<span class="sd">either containing the sparse method parameters - window size (tuple), </span>
-<span class="sd">backtracking threshold (int) and minimum tracked features (int). Or the dense </span>
-<span class="sd">method parameters - tracking method (int), template size (int), search window </span>
-<span class="sd">size (int), correlation threshold (int), and minimum tracked features (int)</span>
+<span class="sd">        :param params: List that defines the parameters for deriving velocity: Method: &#39;sparse&#39; or &#39;dense&#39; (str). Seed parameters: either containing the corner parameters for the sparse method - max. number of corners (int), quality (int), and min. distance (int). Or the grid spacing (list) for the dense method. Tracking parameters: either containing the sparse method parameters - window size (tuple), backtracking threshold (int) and minimum tracked features (int). Or the dense method parameters - tracking method (int), template size (int), search window size (int), correlation threshold (int), and minimum tracked features (int)</span>
 <span class="sd">        :type params: str</span>
-<span class="sd">        :returns: A ist containing the xyz and uv velocities. The first element </span>
-<span class="sd">holds the xyz velocity for each point (xyz[0]), the xyz positions for the </span>
-<span class="sd">points in the first image (xyz[1]), and the xyz positions for the points in the </span>
-<span class="sd">second image(xyz[2]). The second element contains the uv velocities for each </span>
-<span class="sd">point (uv[0], the uv positions for the points in the first image (uv[1]), the </span>
-<span class="sd">uv positions for the points in the second image (uv[2]), and the corrected uv </span>
-<span class="sd">points in the second image if they have been calculated using the homography </span>
-<span class="sd">model for image registration (uv[3]). If the corrected points have not been</span>
-<span class="sd">calculated then an empty list is merely returned.</span>
-<span class="sd">        &#39;&#39;&#39;</span>           
+<span class="sd">        :returns: A ist containing the xyz and uv velocities. The first element holds the xyz velocity for each point (xyz[0]), the xyz positions for the points in the first image (xyz[1]), and the xyz positions for the points in the second image(xyz[2]). The second element contains the uv velocities for each point (uv[0], the uv positions for the points in the first image (uv[1]), the uv positions for the points in the second image (uv[2]), and the corrected uv points in the second image if they have been calculated using the homography model for image registration (uv[3]). If the corrected points have not beencalculated then an empty list is merely returned</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>         
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">CALCULATING VELOCITIES&#39;</span><span class="p">)</span>
         <span class="n">velocity</span><span class="o">=</span><span class="p">[]</span>
 
@@ -404,12 +356,12 @@
        
         
 <div class="viewcode-block" id="Velocity.getMask"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.Velocity.getMask">[docs]</a>    <span class="k">def</span> <span class="nf">getMask</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Returns the image mask.&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;Returns the image mask.&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mask</span></div>
  
  
 <div class="viewcode-block" id="Velocity.getCamEnv"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.Velocity.getCamEnv">[docs]</a>    <span class="k">def</span> <span class="nf">getCamEnv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Returns the camera environment object (CamEnv).&#39;&#39;&#39;</span>
+        <span class="sd">&quot;&quot;&quot;Returns the camera environment object (CamEnv).&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_camEnv</span></div></div>
     
 
@@ -418,7 +370,7 @@
 <div class="viewcode-block" id="calcSparseVelocity"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.calcSparseVelocity">[docs]</a><span class="k">def</span> <span class="nf">calcSparseVelocity</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">img2</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">calib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">homog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                        <span class="n">invprojvars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">winsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="mi">25</span><span class="p">),</span> <span class="n">back_thresh</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> 
                        <span class="n">min_features</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">seedparams</span><span class="o">=</span><span class="p">[</span><span class="mi">50000</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">]):</span>
-    <span class="sd">&#39;&#39;&#39;Function to calculate the velocity between a pair of images. Points </span>
+    <span class="sd">&quot;&quot;&quot;Function to calculate the velocity between a pair of images. Points </span>
 <span class="sd">    are seeded in the first of these either by a defined grid spacing, or using </span>
 <span class="sd">    the Shi-Tomasi algorithm with OpenCV&#39;s goodFeaturesToTrack function.  </span>
 <span class="sd">    The Lucas Kanade optical flow algorithm is applied using the OpenCV </span>
@@ -429,7 +381,7 @@
 <span class="sd">    Tracked points are corrected for image distortion and camera platform</span>
 <span class="sd">    motion (if needed). The points in the image pair are georectified </span>
 <span class="sd">    subsequently to obtain xyz points.  The georectification functions are </span>
-<span class="sd">    called from the :class:&#39;PyTrx.CamEnv.CamEnv&#39; object, and are based on those </span>
+<span class="sd">    called from the :class:`PyTrx.CamEnv.CamEnv` object, and are based on those </span>
 <span class="sd">    in ImGRAFT (Messerli and Grinsted, 2015). Velocities are finally derived</span>
 <span class="sd">    from these using a simple Pythagoras&#39; theorem method. This function returns </span>
 <span class="sd">    the xyz velocities and points, and their corresponding uv velocities and </span>
@@ -449,29 +401,15 @@
 <span class="sd">    :type invprojvars: list, optional</span>
 <span class="sd">    :param winsize: default to (25, 25)</span>
 <span class="sd">    :type winsize: tuple, optional</span>
-<span class="sd">    :param back_thesh: Threshold for back-tracking distance (i.e.the difference </span>
-<span class="sd">between the original seeded point and the back-tracked point in im0); default</span>
-<span class="sd">to 1.0</span>
+<span class="sd">    :param back_thesh: Threshold for back-tracking distance (i.e.the difference between the original seeded point and the back-tracked point in im0); default to 1.0</span>
 <span class="sd">    :type back_thresh: int, optional</span>
 <span class="sd">    :param min_features: Minimum number of seeded points to track, default to 4</span>
 <span class="sd">    :type min_features: int, optional</span>
-<span class="sd">    :param seedparams: Point seeding parameters, which indicate whether points </span>
-<span class="sd">are generated based on corner features or a grid with defined spacing. The </span>
-<span class="sd">three corner features parameters denote maximum number of corners detected, </span>
-<span class="sd">corner quality, and minimum distance between corners; inputted as a list. For </span>
-<span class="sd">grid generation, the only input parameter needed is the grid spacing; inputted </span>
-<span class="sd">as a list containing the horizontal and vertical grid spacing. Default to</span>
-<span class="sd">[50000, 0.1, 5.0]</span>
+<span class="sd">    :param seedparams: Point seeding parameters, which indicate whether points are generated based on corner features or a grid with defined spacing. The three corner features parameters denote maximum number of corners detected, corner quality, and minimum distance between corners; inputted as a list. For grid generation, the only input parameter needed is the grid spacing; inputted as a list containing the horizontal and vertical grid spacing. Default to [50000, 0.1, 5.0]</span>
 <span class="sd">    :type seedparams: list, optional                           </span>
-<span class="sd">    :returns: Two lists, 1. The xyz velocities for each point (xyz[0]), the xyz </span>
-<span class="sd">positions for the points in the first image (xyz[1]), and the xyz positions for </span>
-<span class="sd">the points in the second image(xyz[2]); 2. The uv velocities for each point </span>
-<span class="sd">(uv[0], the uv positions for the points in the first image (uv[1]), the uv </span>
-<span class="sd">positions for the points in the second image (uv[2]), and the corrected uv </span>
-<span class="sd">points in the second image if they have been calculated using the homography </span>
-<span class="sd">model for image registration (uv[3]). If the corrected points have not been </span>
-<span class="sd">calculated then an empty list is merely returned                                 </span>
-<span class="sd">    &#39;&#39;&#39;</span>       
+<span class="sd">    :returns: Two lists, 1. The xyz velocities for each point (xyz[0]), the xyz positions for the points in the first image (xyz[1]), and the xyz positions for the points in the second image(xyz[2]); 2. The uv velocities for each point (uv[0], the uv positions for the points in the first image (uv[1]), the uv positions for the points in the second image (uv[2]), and the corrected uv points in the second image if they have been calculated using the homography model for image registration (uv[3]). If the corrected points have not been calculated then an empty list is merely returned </span>
+<span class="sd">    :rtype: list                                </span>
+<span class="sd">    &quot;&quot;&quot;</span>      
     <span class="c1">#Set threshold difference for homography correction</span>
     <span class="n">displacement_tolerance_rel</span><span class="o">=</span><span class="mf">2.0</span>
     
@@ -605,7 +543,7 @@
 <div class="viewcode-block" id="calcDenseVelocity"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.calcDenseVelocity">[docs]</a><span class="k">def</span> <span class="nf">calcDenseVelocity</span><span class="p">(</span><span class="n">im0</span><span class="p">,</span> <span class="n">im1</span><span class="p">,</span> <span class="n">griddistance</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">templatesize</span><span class="p">,</span> 
                       <span class="n">searchsize</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">calib</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">homog</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">campars</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                       <span class="n">threshold</span><span class="o">=</span> <span class="mf">0.8</span><span class="p">,</span> <span class="n">min_features</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Function to calculate the velocity between a pair of images using </span>
+    <span class="sd">&quot;&quot;&quot;Function to calculate the velocity between a pair of images using </span>
 <span class="sd">    a gridded template matching approach. Gridded points are defined by grid </span>
 <span class="sd">    distance, which are then used to either generate templates for matching</span>
 <span class="sd">    or tracked using the Lucas Kanade optical flow algorithm.    </span>
@@ -622,13 +560,9 @@
 <span class="sd">    :type im0: arr</span>
 <span class="sd">    :param im1: Image 2 in the image pair                  </span>
 <span class="sd">    :type im1: arr                  </span>
-<span class="sd">    :param griddistance: Grid spacing, defined by two values representing pixel </span>
-<span class="sd">row and column spacing.</span>
+<span class="sd">    :param griddistance: Grid spacing, defined by two values representing pixel row and column spacing.</span>
 <span class="sd">    :type griddistance: list</span>
-<span class="sd">    :param method: (str/int): Method for tmeplate matching: cv2.TM_CCOEFF - </span>
-<span class="sd">Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR </span>
-<span class="sd">- Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF</span>
-<span class="sd"> - Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff</span>
+<span class="sd">    :param method: (str/int): Method for tmeplate matching: cv2.TM_CCOEFF - Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR - Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF - Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff</span>
 <span class="sd">    :type method: int</span>
 <span class="sd">    :param templatesize: Template window size in im0 for matching</span>
 <span class="sd">    :type templatesize: int</span>
@@ -638,29 +572,17 @@
 <span class="sd">    :type mask: arr</span>
 <span class="sd">    :param calib: Calibration parameters, default to None</span>
 <span class="sd">    :type calib: list, optional</span>
-<span class="sd">    :param homog: Homography parameters, hmatrix (arr) and hpts (arr), default </span>
-<span class="sd">to None</span>
+<span class="sd">    :param homog: Homography parameters, hmatrix (arr) and hpts (arr), default to None</span>
 <span class="sd">    :type homog: list, optional</span>
-<span class="sd">    :param campars: List containing information for transforming between the </span>
-<span class="sd">image plane and 3D scene: 1. DEM (ExplicitRaster object); 2. Projection </span>
-<span class="sd">parameters (camera location, camera position, radial distortion coefficients, </span>
-<span class="sd">tangential distortion coefficients, focal length, camera centre, and reference </span>
-<span class="sd">image); 3. Inverse projection parameters (coordinate system  3D scene - X, Y, </span>
-<span class="sd">Z, uv0). Default to None    </span>
+<span class="sd">    :param campars: List containing information for transforming between the image plane and 3D scene: 1. DEM (ExplicitRaster object); 2. Projection parameters (camera location, camera position, radial distortion coefficients, tangential distortion coefficients, focal length, camera centre, and reference image); 3. Inverse projection parameters (coordinate system  3D scene - X, Y, Z, uv0). Default to None    </span>
 <span class="sd">    :type campar: list, optioanl    </span>
 <span class="sd">    :param theshold: Threshold for template correlation; default to 0.8</span>
 <span class="sd">    :type threshold: int, optional</span>
 <span class="sd">    :param min_features: Minimum number of seeded points to track, default to 4</span>
 <span class="sd">    :type min_features: int, optional</span>
-<span class="sd">    :returns: Two lists, 1. containing the xyz velocities for each point </span>
-<span class="sd">(xyz[0]), the xyz positions for the points in the first image (xyz[1]), and the </span>
-<span class="sd"> xyz positions for the points in the second image(xyz[2]); amd 2. containing </span>
-<span class="sd">the uv velocities for each point (uv[0], the uv positions for the points in </span>
-<span class="sd">the first image (uv[1]), the uv positions for the points in the second image </span>
-<span class="sd">(uv[2]), and the corrected uv points in the second image if they have been </span>
-<span class="sd">calculated using the homography model for image registration (uv[3]). If the </span>
-<span class="sd">corrected points have not been calculated then an empty list is merely returned                                 </span>
-<span class="sd">    &#39;&#39;&#39;</span>       
+<span class="sd">    :returns: Two lists, 1. containing the xyz velocities for each point (xyz[0]), the xyz positions for the points in the first image (xyz[1]), and the  xyz positions for the points in the second image(xyz[2]); amd 2. containing the uv velocities for each point (uv[0], the uv positions for the points in the first image (uv[1]), the uv positions for the points in the second image (uv[2]), and the corrected uv points in the second image if they have been calculated using the homography model for image registration (uv[3]). If the corrected points have not been calculated then an empty list is merely returned </span>
+<span class="sd">    :rtype: list                                </span>
+<span class="sd">    &quot;&quot;&quot;</span>       
     <span class="c1">#Set threshold difference for point tracks</span>
     <span class="n">displacement_tolerance_rel</span><span class="o">=</span><span class="mf">2.0</span>
     
@@ -792,7 +714,7 @@
                          <span class="n">ransacReprojThreshold</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> <span class="n">winsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="mi">25</span><span class="p">),</span> 
                          <span class="n">back_thresh</span><span class="o">=</span><span class="mf">1.0</span><span class="p">,</span> <span class="n">min_features</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> 
                          <span class="n">seedparams</span><span class="o">=</span><span class="p">[</span><span class="mi">50000</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="mf">5.0</span><span class="p">]):</span>
-    <span class="sd">&#39;&#39;&#39;Function to supplement correction for movement in the camera </span>
+    <span class="sd">&quot;&quot;&quot;Function to supplement correction for movement in the camera </span>
 <span class="sd">    platform given an image pair (i.e. image registration). Returns the </span>
 <span class="sd">    homography representing tracked image movement, and the tracked </span>
 <span class="sd">    features from each image.</span>
@@ -803,38 +725,23 @@
 <span class="sd">    :type img2: arr</span>
 <span class="sd">    :param mask: Mask array for image points to be seeded</span>
 <span class="sd">    :type mask: arr</span>
-<span class="sd">    :param correct: Calibration parameters for correcting image for </span>
-<span class="sd"> lens distortion, default to None</span>
+<span class="sd">    :param correct: Calibration parameters for correcting image for lens distortion, default to None</span>
 <span class="sd">    :type correct: list, optional</span>
-<span class="sd">    :param method: Method used to calculate homography model: cv2.RANSAC - </span>
-<span class="sd">RANSAC-based robust method; cv2.LEAST_MEDIAN - Least-Median robust; 0 - a </span>
-<span class="sd">regular method using all the points. Default to None</span>
+<span class="sd">    :param method: Method used to calculate homography model: cv2.RANSAC - RANSAC-based robust method; cv2.LEAST_MEDIAN - Least-Median robust; 0 - a regular method using all the points. Default to None</span>
 <span class="sd">    :type method: int, optional</span>
 <span class="sd">    :param ransacReprojThreshold: default to 5.0</span>
 <span class="sd">    :type ransacReprojThreshold: int, optional</span>
 <span class="sd">    :param winsize: default to (25, 25)</span>
 <span class="sd">    :type winsize: tuple, optional</span>
-<span class="sd">    :param back_thesh: Threshold for back-tracking distance (i.e.the difference </span>
-<span class="sd">between the original seeded point and the back-tracked point in im0); default</span>
-<span class="sd">to 1.0</span>
+<span class="sd">    :param back_thesh: Threshold for back-tracking distance (i.e.the difference between the original seeded point and the back-tracked point in im0); default to 1.0</span>
 <span class="sd">    :type back_thresh: int, optional</span>
 <span class="sd">    :param min_features: Minimum number of seeded points to track, default to 4</span>
 <span class="sd">    :type min_features: int, optional</span>
-<span class="sd">    :param seedparams: Point seeding parameters, which indicate whether points </span>
-<span class="sd">are generated based on corner features or a grid with defined spacing. The </span>
-<span class="sd">three corner features parameters denote maximum number of corners detected, </span>
-<span class="sd">corner quality, and minimum distance between corners; inputted as a list. For </span>
-<span class="sd">grid generation, the only input parameter needed is the grid spacing; inputted </span>
-<span class="sd">as a list containing the horizontal and vertical grid spacing. Default to</span>
-<span class="sd">[50000, 0.1, 5.0]</span>
+<span class="sd">    :param seedparams: Point seeding parameters, which indicate whether points are generated based on corner features or a grid with defined spacing. The three corner features parameters denote maximum number of corners detected, corner quality, and minimum distance between corners; inputted as a list. For grid generation, the only input parameter needed is the grid spacing; inputted as a list containing the horizontal and vertical grid spacing. Default to [50000, 0.1, 5.0]</span>
 <span class="sd">    :type seedparams: list, optional                           </span>
-<span class="sd">    :returns: homogMatrix (arr) - The calculated homographic shift for the </span>
-<span class="sd">image pair; src_pts_corr (arr) - original homography points; dst_pts_corr (arr)</span>
-<span class="sd"> -  tracked homography points; homog_pts (arr) -back-tracked homography points;  </span>
-<span class="sd">ptserror (list) - Difference between the original homography points and the </span>
-<span class="sd">back-tracked points; homogerror (list) -Difference between the interpolated </span>
-<span class="sd">homography matrix and the equivalent tracked points</span>
-<span class="sd">    &#39;&#39;&#39;</span>           
+<span class="sd">    :returns: homogMatrix (arr) - The calculated homographic shift for the image pair; src_pts_corr (arr) - original homography points; dst_pts_corr (arr) - tracked homography points; homog_pts (arr) -back-tracked homography points; ptserror (list) - Difference between the original homography points and the back-tracked points; homogerror (list) -Difference between the interpolated homography matrix and the equivalent tracked points</span>
+<span class="sd">    :rtype: arr/list</span>
+<span class="sd">    &quot;&quot;&quot;</span>          
     <span class="c1">#Seed corner features</span>
     <span class="n">p0</span> <span class="o">=</span> <span class="n">seedCorners</span><span class="p">(</span><span class="n">img1</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">seedparams</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">seedparams</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">seedparams</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> 
                      <span class="n">min_features</span><span class="p">)</span>
@@ -905,7 +812,7 @@
                         <span class="n">searchsize</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">projvars</span><span class="p">,</span> <span class="n">trackmethod</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">TM_CCORR_NORMED</span><span class="p">,</span> 
                         <span class="n">homogmethod</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">RANSAC</span><span class="p">,</span> <span class="n">ransacReprojThreshold</span><span class="o">=</span><span class="mf">5.0</span><span class="p">,</span> 
                         <span class="n">threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span> <span class="n">min_features</span><span class="o">=</span><span class="mi">4</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Function to supplement correction for movement in the camera </span>
+    <span class="sd">&quot;&quot;&quot;Function to supplement correction for movement in the camera </span>
 <span class="sd">    platform given an image pair (i.e. image registration). Returns the </span>
 <span class="sd">    homography representing tracked image movement, and the tracked </span>
 <span class="sd">    features from each image.</span>
@@ -916,30 +823,21 @@
 <span class="sd">    :type img2: arr </span>
 <span class="sd">    :param mask: Mask array for image points to be seeded</span>
 <span class="sd">    :type mask: arr</span>
-<span class="sd">    :param correct: Calibration parameters for correcting image for </span>
-<span class="sd"> lens distortion</span>
+<span class="sd">    :param correct: Calibration parameters for correcting image for lens distortion</span>
 <span class="sd">    :type correct: list               </span>
-<span class="sd">    :param griddistance: Grid spacing, defined by two values representing pixel </span>
-<span class="sd">row and column spacing</span>
+<span class="sd">    :param griddistance: Grid spacing, defined by two values representing pixel row and column spacing</span>
 <span class="sd">    :type griddistance: list</span>
 <span class="sd">    :param templatesize: Template window size in im0 for matching</span>
 <span class="sd">    :type templatesize: int</span>
 <span class="sd">    :param searchsize: Search window size in im1 for matching</span>
 <span class="sd">    :type searchsize: int  </span>
-<span class="sd">    :param dem: :class:&#39;PyTrx.DEM.ExplicitRaster&#39; object</span>
+<span class="sd">    :param dem: :class:`PyTrx.DEM.ExplicitRaster` object</span>
 <span class="sd">    :type dem: arr</span>
-<span class="sd">    :param projvars: List containing projection parameters (camera location, </span>
-<span class="sd">camera position, radial distortion coefficients, tangential distortion </span>
-<span class="sd">coefficients, focal length, camera centre, and reference image)</span>
+<span class="sd">    :param projvars: List containing projection parameters (camera location, camera position, radial distortion coefficients, tangential distortion coefficients, focal length, camera centre, and reference image)</span>
 <span class="sd">    :type projvars: list    </span>
-<span class="sd">    :param trackmethod: (str/int): Method for tmeplate matching: cv2.TM_CCOEFF - </span>
-<span class="sd">Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR </span>
-<span class="sd">- Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF</span>
-<span class="sd"> - Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff</span>
+<span class="sd">    :param trackmethod: (str/int): Method for tmeplate matching: cv2.TM_CCOEFF - Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR - Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF - Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff</span>
 <span class="sd">    :type trackmethod: int</span>
-<span class="sd">    :param homogmethod: Method used to calculate homography model: cv2.RANSAC - </span>
-<span class="sd">RANSAC-based robust method; cv2.LEAST_MEDIAN - Least-Median robust; 0 - a </span>
-<span class="sd">regular method using all the points. Default to None</span>
+<span class="sd">    :param homogmethod: Method used to calculate homography model: cv2.RANSAC - RANSAC-based robust method; cv2.LEAST_MEDIAN - Least-Median robust; 0 - a regular method using all the points. Default to None</span>
 <span class="sd">    :type homogmethod: int, optional    </span>
 <span class="sd">    :param ransacReprojThreshold: default to 5.0</span>
 <span class="sd">    :type ransacReprojThreshold: int, optional       </span>
@@ -947,13 +845,9 @@
 <span class="sd">    :type threshold: int, optional</span>
 <span class="sd">    :param min_features: Minimum number of seeded points to track, default to 4</span>
 <span class="sd">    :type min_features: int, optional                          </span>
-<span class="sd">    :returns: homogMatrix (arr) - The calculated homographic shift for the </span>
-<span class="sd">image pair; src_pts_corr (arr) - original homography points; dst_pts_corr (arr)</span>
-<span class="sd"> -  tracked homography points; homog_pts (arr) -back-tracked homography points;  </span>
-<span class="sd">ptserror (list) - Difference between the original homography points and the </span>
-<span class="sd">back-tracked points; homogerror (list) -Difference between the interpolated </span>
-<span class="sd">homography matrix and the equivalent tracked points</span>
-<span class="sd">    &#39;&#39;&#39;</span>          
+<span class="sd">    :returns: homogMatrix (arr) - The calculated homographic shift for the image pair; src_pts_corr (arr) - original homography points; dst_pts_corr (arr) -  tracked homography points; homog_pts (arr) -back-tracked homography points;  ptserror (list) - Difference between the original homography points and the back-tracked points; homogerror (list) -Difference between the interpolated homography matrix and the equivalent tracked points</span>
+<span class="sd">    :rtype: arr/list</span>
+<span class="sd">    &quot;&quot;&quot;</span>         
     <span class="c1">#Generate grid for tracking</span>
     <span class="n">xyz0</span><span class="p">,</span> <span class="n">uv0</span> <span class="o">=</span> <span class="n">seedGrid</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">griddistance</span><span class="p">,</span> <span class="n">projvars</span><span class="p">,</span> <span class="n">mask</span><span class="p">)</span>
             
@@ -1020,7 +914,7 @@
     
 
 <div class="viewcode-block" id="apply_persp_homographyPts"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.apply_persp_homographyPts">[docs]</a><span class="k">def</span> <span class="nf">apply_persp_homographyPts</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span> <span class="n">homog</span><span class="p">,</span> <span class="n">inverse</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>        
-    <span class="sd">&#39;&#39;&#39;Funtion to apply a perspective homography to a sequence of 2D </span>
+    <span class="sd">&quot;&quot;&quot;Funtion to apply a perspective homography to a sequence of 2D </span>
 <span class="sd">    values held in X and Y. The perspective homography is represented as a </span>
 <span class="sd">    3 X 3 matrix (homog). The source points are inputted as an array. The </span>
 <span class="sd">    homography perspective matrix is modelled in the same manner as done so </span>
@@ -1030,11 +924,11 @@
 <span class="sd">    :type pts: arr/list             </span>
 <span class="sd">    :param homog: Perspective homography matrix </span>
 <span class="sd">    :type homog: arr                                                 </span>
-<span class="sd">    :param inverse:  Flag to denote if perspective homography matrix needs </span>
-<span class="sd">inversing, default to False</span>
+<span class="sd">    :param inverse:  Flag to denote if perspective homography matrix needs inversing, default to False</span>
 <span class="sd">    :type inverse: bool, optional            </span>
-<span class="sd">    :return: hpts (arr), corrected point positions</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    :returns: corrected point positions</span>
+<span class="sd">    :rtype: arr</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#If input is array         </span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pts</span><span class="p">,</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
         <span class="n">n</span><span class="o">=</span><span class="n">pts</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -1076,7 +970,7 @@
         
 
 <div class="viewcode-block" id="opticalMatch"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.opticalMatch">[docs]</a><span class="k">def</span> <span class="nf">opticalMatch</span><span class="p">(</span><span class="n">i0</span><span class="p">,</span> <span class="n">iN</span><span class="p">,</span> <span class="n">p0</span><span class="p">,</span> <span class="n">winsize</span><span class="p">,</span> <span class="n">back_thresh</span><span class="p">,</span> <span class="n">min_features</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Function to match between two masked images using Optical Flow. The </span>
+    <span class="sd">&quot;&quot;&quot;Function to match between two masked images using Optical Flow. The </span>
 <span class="sd">    Lucas Kanade optical flow algorithm is applied using the OpenCV function </span>
 <span class="sd">    calcOpticalFlowPyrLK to find these tracked points in the second image. A </span>
 <span class="sd">    backward tracking then tracks back from these to the original points, </span>
@@ -1090,17 +984,13 @@
 <span class="sd">    :type iN: arr</span>
 <span class="sd">    :param winsize: Window size for tracking e.g. (25,25)</span>
 <span class="sd">    :type winsize: tuple</span>
-<span class="sd">    :param back_thesh: Threshold for back-tracking distance (i.e. the </span>
-<span class="sd">difference between the original seeded point and the back-tracked point in im0)</span>
+<span class="sd">    :param back_thesh: Threshold for back-tracking distance (i.e. the difference between the original seeded point and the back-tracked point in im0)</span>
 <span class="sd">    :type back_thresh: int</span>
 <span class="sd">    :param min_features: Minimum number of seeded points to track</span>
 <span class="sd">    :type min_features: int   </span>
-<span class="sd">    :return: Point coordinates for points tracked to image 2 (arr), Point </span>
-<span class="sd">coordinates for points back-tracked from image 2 to image 1 (arr), and SNR </span>
-<span class="sd">measurements for the corresponding tracked point. The signal is the magnitude </span>
-<span class="sd">of the displacement from p0 to p1, and the noise is the magnitude of the </span>
-<span class="sd">displacement from p0r to p0 (arr)</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    :return: Point coordinates for points tracked to image 2 (arr), Point coordinates for points back-tracked from image 2 to image 1 (arr), and SNR measurements for the corresponding tracked point. The signal is the magnitude of the displacement from p0 to p1, and the noise is the magnitude of the displacement from p0r to p0 (arr)</span>
+<span class="sd">    :rtype: arr</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#Feature tracking set-up parameters</span>
     <span class="n">lk_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span> <span class="n">winSize</span>  <span class="o">=</span> <span class="n">winsize</span><span class="p">,</span>
                       <span class="n">maxLevel</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
@@ -1145,7 +1035,7 @@
 
 <div class="viewcode-block" id="templateMatch"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.templateMatch">[docs]</a><span class="k">def</span> <span class="nf">templateMatch</span><span class="p">(</span><span class="n">im0</span><span class="p">,</span> <span class="n">im1</span><span class="p">,</span> <span class="n">uv0</span><span class="p">,</span> <span class="n">templatesize</span><span class="p">,</span> <span class="n">searchsize</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="mf">0.8</span><span class="p">,</span>
                   <span class="n">min_features</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">cv2</span><span class="o">.</span><span class="n">TM_CCORR_NORMED</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Function to template match between two images. Templates in the first</span>
+    <span class="sd">&quot;&quot;&quot;Function to template match between two images. Templates in the first</span>
 <span class="sd">    image (im0) are generated from a given set of points (uv0) and matched to </span>
 <span class="sd">    the search window in image 2 (im1). There are a series of methods that can</span>
 <span class="sd">    be used for matching, in adherence with those offered with OpenCV&#39;s </span>
@@ -1165,17 +1055,11 @@
 <span class="sd">    :type searchsize: int   </span>
 <span class="sd">    :param min_features: Minimum number of seeded points to track, default to 4</span>
 <span class="sd">    :type min_features: int, optional   </span>
-<span class="sd">    :param method: (str/int): Method for tmeplate matching: cv2.TM_CCOEFF - </span>
-<span class="sd">Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR </span>
-<span class="sd">- Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF</span>
-<span class="sd"> - Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff</span>
+<span class="sd">    :param method: (str/int): Method for tmeplate matching: cv2.TM_CCOEFF - Cross-coefficient; cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR - Cross correlation; cv2.TM_CCORR_NORMED - Normalised cross-corr; cv2.TM_SQDIFF - Square difference; cv2.TM_SQDIFF_NORMED - Normalised square diff</span>
 <span class="sd">    :type method: int</span>
-<span class="sd">    :returns: Point coordinates for points tracked to image 2 (arr), Point </span>
-<span class="sd">coordinates for points back-tracked from image 2 to image 1 (arr), and SNR </span>
-<span class="sd">measurements for the corresponding tracked point where the signal is the </span>
-<span class="sd">magnitude of the displacement from p0 to p1, and the noise is the magnitude of </span>
-<span class="sd">the displacement from p0r to p0 (arr)</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    :returns: Point coordinates for points tracked to image 2 (arr), Point coordinates for points back-tracked from image 2 to image 1 (arr), and SNR measurements for the corresponding tracked point where the signal is the magnitude of the displacement from p0 to p1, and the noise is the magnitude of the displacement from p0r to p0 (arr)</span>
+<span class="sd">    :rtype: arr</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#Create empty outputs</span>
     <span class="n">avercorr</span><span class="o">=</span><span class="p">[]</span>
     <span class="n">pu1</span><span class="o">=</span><span class="p">[]</span>
@@ -1271,7 +1155,7 @@
 
 
 <div class="viewcode-block" id="seedCorners"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.seedCorners">[docs]</a><span class="k">def</span> <span class="nf">seedCorners</span><span class="p">(</span><span class="n">im</span><span class="p">,</span> <span class="n">mask</span><span class="p">,</span> <span class="n">maxpoints</span><span class="p">,</span> <span class="n">quality</span><span class="p">,</span> <span class="n">mindist</span><span class="p">,</span> <span class="n">min_features</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Function to seed corner features using the Shi-Tomasi corner feature </span>
+    <span class="sd">&quot;&quot;&quot;Function to seed corner features using the Shi-Tomasi corner feature </span>
 <span class="sd">    detection method in OpenCV&#39;s goodFeaturesToTrack function. </span>
 <span class="sd">        </span>
 <span class="sd">    :param img: Image for seeding corner points</span>
@@ -1286,8 +1170,9 @@
 <span class="sd">    :type mindist: int </span>
 <span class="sd">    :param min_features: Minimum number of seeded points to track</span>
 <span class="sd">    :type min_features: int</span>
-<span class="sd">    :returns: Point coordinates for corner features seeded in image (arr)</span>
-<span class="sd">    &#39;&#39;&#39;</span>    
+<span class="sd">    :returns: Point coordinates for corner features seeded in image </span>
+<span class="sd">    :rtype: arr</span>
+<span class="sd">    &quot;&quot;&quot;</span>    
     <span class="c1">#Find corners of the first image. p0 is returned as an array of shape </span>
     <span class="c1">#(n,1,2), where n is the number of features identified </span>
     <span class="k">if</span> <span class="n">mask</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>       
@@ -1307,24 +1192,20 @@
 
 
 <div class="viewcode-block" id="seedGrid"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.seedGrid">[docs]</a><span class="k">def</span> <span class="nf">seedGrid</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">griddistance</span><span class="p">,</span> <span class="n">projvars</span><span class="p">,</span> <span class="n">mask</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Define pixel grid at a specified grid distance, taking into </span>
+    <span class="sd">&quot;&quot;&quot;Define pixel grid at a specified grid distance, taking into </span>
 <span class="sd">    consideration the image size and image mask.</span>
 <span class="sd">    </span>
-<span class="sd">    :param dem: :class:&#39;PyTrx.DEM.ExplicitRaster&#39; DEM object</span>
+<span class="sd">    :param dem: :class:`PyTrx.DEM.ExplicitRaster` DEM object</span>
 <span class="sd">    :type dem: arr          </span>
-<span class="sd">    :param griddistance: Grid spacing, defined by two values representing pixel </span>
-<span class="sd">row and column spacing.</span>
+<span class="sd">    :param griddistance: Grid spacing, defined by two values representing pixel row and column spacing.</span>
 <span class="sd">    :type griddistance: list</span>
-<span class="sd">    :param projvars: Projection parameters (camera location, camera position, </span>
-<span class="sd">radial distortion coefficients, tangential distortion coefficients, focal </span>
-<span class="sd">length, camera centre, and reference image)</span>
+<span class="sd">    :param projvars: Projection parameters (camera location, camera position, radial distortion coefficients, tangential distortion coefficients, focal length, camera centre, and reference image)</span>
 <span class="sd">    :type projvars: list         </span>
 <span class="sd">    :param mask: Mask array for masking DEM</span>
 <span class="sd">    :type mask: arr</span>
-<span class="sd">    :returns: Two arrays containing the grid point positions in the DEM </span>
-<span class="sd">coordinate system (arr), and the grid point positions in the image coordinate </span>
-<span class="sd">system (arr)</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    :returns: Two arrays containing the grid point positions in the DEM coordinate system (arr), and the grid point positions in the image coordinate system (arr)</span>
+<span class="sd">    :rtype: arr</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#Get DEM z values</span>
     <span class="n">demz</span> <span class="o">=</span> <span class="n">dem</span><span class="o">.</span><span class="n">getZ</span><span class="p">()</span>
 
@@ -1387,7 +1268,7 @@
     <span class="k">return</span> <span class="n">xyz</span><span class="p">,</span> <span class="n">uv</span></div>
 
 <div class="viewcode-block" id="readDEMmask"><a class="viewcode-back" href="../../Modules.html#PyTrx.Velocity.readDEMmask">[docs]</a><span class="k">def</span> <span class="nf">readDEMmask</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">img</span><span class="p">,</span> <span class="n">invprojvars</span><span class="p">,</span> <span class="n">demMaskPath</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Read/generate DEM mask for subsequent grid generation. If a valid </span>
+    <span class="sd">&quot;&quot;&quot;Read/generate DEM mask for subsequent grid generation. If a valid </span>
 <span class="sd">    filename is given then the DEM mask is loaded from file. If the filename</span>
 <span class="sd">    does not exist, then the mask is defined. To define the DEM mask, a mask is</span>
 <span class="sd">    first defined in the image plane (using point and click, facilitated </span>
@@ -1399,7 +1280,7 @@
 <span class="sd">    matching, where masked regions of the DEM are reassigned to </span>
 <span class="sd">    NaN using Numpy&#39;s ma.mask function.</span>
 <span class="sd">    </span>
-<span class="sd">    :param dem: :class:&#39;PyTrx.DEM.ExplicitRaster&#39; DEM object</span>
+<span class="sd">    :param dem: :class:`PyTrx.DEM.ExplicitRaster` DEM object</span>
 <span class="sd">    :type dem: arr          </span>
 <span class="sd">    :param img: Image to initially define mask in</span>
 <span class="sd">    :type img: arr</span>
@@ -1407,9 +1288,9 @@
 <span class="sd">    :type invprojvars: list         </span>
 <span class="sd">    :param demMaskPath: File path to outputted mask file, default to None</span>
 <span class="sd">    :type demMaskPath: str, optional</span>
-<span class="sd">    :returns: A Boolean visibility matrix (which is the same dimensions as the </span>
-<span class="sd">dem)</span>
-<span class="sd">    &#39;&#39;&#39;</span>    
+<span class="sd">    :returns: A Boolean visibility matrix (which is the same dimensions as the dem)</span>
+<span class="sd">    :rtype: arr</span>
+<span class="sd">    &quot;&quot;&quot;</span>   
     <span class="c1">#Check if a DEM mask already exists, if not enter digitising</span>
     <span class="k">if</span> <span class="n">demMaskPath</span><span class="o">!=</span><span class="kc">None</span><span class="p">:</span>
         <span class="k">try</span><span class="p">:</span>

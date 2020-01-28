@@ -44,12 +44,12 @@
 <span class="c1">#You should have received a copy of the license along with this</span>
 <span class="c1">#work. If not, see &lt;https://choosealicense.com/licenses/mit/&gt;.</span>
 
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">The Line module handles the functionality for obtaining line measurements from </span>
 <span class="sd">oblique time-lapse imagery. Specifically, this module contains functions for:</span>
 <span class="sd">(1) Performing manual detection of lines in oblique imagery; and (2) </span>
 <span class="sd">Determining real-world distances from oblique imagery.</span>
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1">#Import packages</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -64,29 +64,24 @@
 <span class="c1">#------------------------------------------------------------------------------</span>
 
 <div class="viewcode-block" id="Line"><a class="viewcode-back" href="../../Modules.html#PyTrx.Line.Line">[docs]</a><span class="k">class</span> <span class="nc">Line</span><span class="p">(</span><span class="n">ImageSequence</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;A class for handling lines/distances (e.g. glacier terminus position)</span>
+    <span class="sd">&quot;&quot;&quot;A class for handling lines/distances (e.g. glacier terminus position)</span>
 <span class="sd">    through an image sequence, with methods to manually define pixel lines in </span>
 <span class="sd">    the image plane and georectify them to generate real-world coordinates and </span>
 <span class="sd">    distances. The Line class object primarily inherits from the Area class.</span>
 <span class="sd">    </span>
-<span class="sd">    :param imageList: List of images to be inputted into the </span>
-<span class="sd">:class:&#39;PyTrx.Images.ImageSequence&#39; object</span>
+<span class="sd">    :param imageList: List of images to be inputted into the :class:`PyTrx.Images.ImageSequence` object</span>
 <span class="sd">    :type imageList: str/list            </span>
-<span class="sd">    :param cameraenv: Camera environment parameters which can be read into the </span>
-<span class="sd">:class:&#39;PyTrx.CamEnv.CamEnv&#39; object as a text file</span>
+<span class="sd">    :param cameraenv: Camera environment parameters which can be read into the :class:`PyTrx.CamEnv.CamEnv` object as a text file</span>
 <span class="sd">    :type cameraenv: str </span>
 <span class="sd">    :param hmatrix: Homography matrix</span>
 <span class="sd">    :type hmatrix: arr          </span>
-<span class="sd">    :param calibFlag: An indicator of whether images are calibrated, for the </span>
-<span class="sd">:class:&#39;PyTrx.Images.ImageSequence&#39; object, default to True</span>
+<span class="sd">    :param calibFlag: An indicator of whether images are calibrated, for the :class:`PyTrx.Images.ImageSequence` object, default to True</span>
 <span class="sd">    :type calibFlag: bool, optional         .          </span>
-<span class="sd">    :param band: String denoting the desired image band, default to &#39;L&#39; </span>
-<span class="sd">(grayscale)</span>
-<span class="sd">    :type band: str                .</span>
-<span class="sd">    :param equal: Flag denoting whether histogram equalisation is applied to </span>
-<span class="sd">images (histogram equalisation is applied if True). Default to True.</span>
+<span class="sd">    :param band: String denoting the desired image band, default to &#39;L&#39; (grayscale)</span>
+<span class="sd">    :type band: str, optional           .</span>
+<span class="sd">    :param equal: Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True). Default to True.</span>
 <span class="sd">    :type equal: bool, optional              </span>
-<span class="sd">    &#39;&#39;&#39;</span>     
+<span class="sd">    &quot;&quot;&quot;</span>     
     <span class="c1">#Object initialisation        </span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imageList</span><span class="p">,</span> <span class="n">cameraenv</span><span class="p">,</span> <span class="n">hmatrix</span><span class="p">,</span> <span class="n">calibFlag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">band</span><span class="o">=</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> 
                  <span class="n">equal</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -107,12 +102,13 @@
         
         
 <div class="viewcode-block" id="Line.calcManualLines"><a class="viewcode-back" href="../../Modules.html#PyTrx.Line.Line.calcManualLines">[docs]</a>    <span class="k">def</span> <span class="nf">calcManualLines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Method to manually define pixel lines from an image sequence. The </span>
+        <span class="sd">&quot;&quot;&quot;Method to manually define pixel lines from an image sequence. The </span>
 <span class="sd">        lines are manually defined by the user on an image plot. Returns the </span>
 <span class="sd">        line pixel coordinates and pixel length.</span>
 <span class="sd">        </span>
-<span class="sd">        :returns: XYZ and UV line lengths and coordinates (list)</span>
-<span class="sd">        &#39;&#39;&#39;</span> 
+<span class="sd">        :returns: XYZ and UV line lengths and coordinates</span>
+<span class="sd">        :rtype: list</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">COMMENCING LINE DETECTION&#39;</span><span class="p">)</span>                        
             
         <span class="c1">#Set up output dataset</span>
@@ -161,7 +157,7 @@
 <span class="c1">#------------------------------------------------------------------------------</span>
 
 <div class="viewcode-block" id="calcManualLine"><a class="viewcode-back" href="../../Modules.html#PyTrx.Line.calcManualLine">[docs]</a><span class="k">def</span> <span class="nf">calcManualLine</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">hmatrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">invprojvars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Manually define a line in a given image to produce XYZ and UV line </span>
+    <span class="sd">&quot;&quot;&quot;Manually define a line in a given image to produce XYZ and UV line </span>
 <span class="sd">    length and corresponding coordinates. Lines are defined through user input </span>
 <span class="sd">    by clicking in the interactive image plot. This primarily operates via the </span>
 <span class="sd">    pyplot.ginput function which allows users to define coordinates through </span>
@@ -174,13 +170,11 @@
 <span class="sd">    :type imn: str</span>
 <span class="sd">    :param hmatrix: Homography matrix, default to None</span>
 <span class="sd">    :type hmatrix: arr, optional</span>
-<span class="sd">    :param invprojvars: Inverse projection variables [X,Y,Z,uv0], default to</span>
-<span class="sd">None</span>
+<span class="sd">    :param invprojvars: Inverse projection variables [X,Y,Z,uv0], default to None</span>
 <span class="sd">    :type invprojvars: list, optional    </span>
-<span class="sd">    :returns: Four list elements containing: line length in xyz (list), </span>
-<span class="sd">xyz coordinates of lines (list), line length in pixels (list), and uv</span>
-<span class="sd">coordinates of lines (list)</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    :returns: Four list elements containing: line length in xyz (list), xyz coordinates of lines (list), line length in pixels (list), and uvcoordinates of lines (list)</span>
+<span class="sd">    :rtype: list</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#Initialise figure window</span>
     <span class="n">fig</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="n">imn</span> <span class="o">+</span> <span class="s1">&#39;: Define line. &#39;</span> 
@@ -236,13 +230,13 @@
 
 
 <div class="viewcode-block" id="getOGRLine"><a class="viewcode-back" href="../../Modules.html#PyTrx.Line.getOGRLine">[docs]</a><span class="k">def</span> <span class="nf">getOGRLine</span><span class="p">(</span><span class="n">pts</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Function to construct an OGR line from a set of uv coordinates.</span>
+    <span class="sd">&quot;&quot;&quot;Function to construct an OGR line from a set of uv coordinates.</span>
 <span class="sd">    </span>
 <span class="sd">    :param pts: A series of uv coordinates denoting a line</span>
 <span class="sd">    :type pts: arr</span>
-<span class="sd">    :returns: A line object (ogr.Geometry) constructed from the input </span>
-<span class="sd">coordinates</span>
-<span class="sd">    &#39;&#39;&#39;</span> 
+<span class="sd">    :returns: A line object (ogr.Geometry) constructed from the input coordinates</span>
+<span class="sd">    :rtype: ogr.Geometry</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#Initially construct geometry object             </span>
     <span class="n">line</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">Geometry</span><span class="p">(</span><span class="n">ogr</span><span class="o">.</span><span class="n">wkbLineString</span><span class="p">)</span>
     

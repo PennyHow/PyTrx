@@ -5,12 +5,12 @@
 #You should have received a copy of the license along with this
 #work. If not, see <https://choosealicense.com/licenses/mit/>.
 
-'''
+"""
 The Line module handles the functionality for obtaining line measurements from 
 oblique time-lapse imagery. Specifically, this module contains functions for:
 (1) Performing manual detection of lines in oblique imagery; and (2) 
 Determining real-world distances from oblique imagery.
-'''
+"""
 
 #Import packages
 import matplotlib.pyplot as plt
@@ -25,29 +25,24 @@ from CamEnv import projectUV, setProjection
 #------------------------------------------------------------------------------
 
 class Line(ImageSequence):
-    '''A class for handling lines/distances (e.g. glacier terminus position)
+    """A class for handling lines/distances (e.g. glacier terminus position)
     through an image sequence, with methods to manually define pixel lines in 
     the image plane and georectify them to generate real-world coordinates and 
     distances. The Line class object primarily inherits from the Area class.
     
-    :param imageList: List of images to be inputted into the 
-:class:'PyTrx.Images.ImageSequence' object
+    :param imageList: List of images to be inputted into the :class:`PyTrx.Images.ImageSequence` object
     :type imageList: str/list            
-    :param cameraenv: Camera environment parameters which can be read into the 
-:class:'PyTrx.CamEnv.CamEnv' object as a text file
+    :param cameraenv: Camera environment parameters which can be read into the :class:`PyTrx.CamEnv.CamEnv` object as a text file
     :type cameraenv: str 
     :param hmatrix: Homography matrix
     :type hmatrix: arr          
-    :param calibFlag: An indicator of whether images are calibrated, for the 
-:class:'PyTrx.Images.ImageSequence' object, default to True
+    :param calibFlag: An indicator of whether images are calibrated, for the :class:`PyTrx.Images.ImageSequence` object, default to True
     :type calibFlag: bool, optional         .          
-    :param band: String denoting the desired image band, default to 'L' 
-(grayscale)
-    :type band: str                .
-    :param equal: Flag denoting whether histogram equalisation is applied to 
-images (histogram equalisation is applied if True). Default to True.
+    :param band: String denoting the desired image band, default to 'L' (grayscale)
+    :type band: str, optional           .
+    :param equal: Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True). Default to True.
     :type equal: bool, optional              
-    '''     
+    """     
     #Object initialisation        
     def __init__(self, imageList, cameraenv, hmatrix, calibFlag=True, band='L', 
                  equal=True):
@@ -68,12 +63,13 @@ images (histogram equalisation is applied if True). Default to True.
         
         
     def calcManualLines(self):
-        '''Method to manually define pixel lines from an image sequence. The 
+        """Method to manually define pixel lines from an image sequence. The 
         lines are manually defined by the user on an image plot. Returns the 
         line pixel coordinates and pixel length.
         
-        :returns: XYZ and UV line lengths and coordinates (list)
-        ''' 
+        :returns: XYZ and UV line lengths and coordinates
+        :rtype: list
+        """
         print('\n\nCOMMENCING LINE DETECTION')                        
             
         #Set up output dataset
@@ -122,7 +118,7 @@ images (histogram equalisation is applied if True). Default to True.
 #------------------------------------------------------------------------------
 
 def calcManualLine(img, imn, hmatrix=None, invprojvars=None):
-    '''Manually define a line in a given image to produce XYZ and UV line 
+    """Manually define a line in a given image to produce XYZ and UV line 
     length and corresponding coordinates. Lines are defined through user input 
     by clicking in the interactive image plot. This primarily operates via the 
     pyplot.ginput function which allows users to define coordinates through 
@@ -135,13 +131,11 @@ def calcManualLine(img, imn, hmatrix=None, invprojvars=None):
     :type imn: str
     :param hmatrix: Homography matrix, default to None
     :type hmatrix: arr, optional
-    :param invprojvars: Inverse projection variables [X,Y,Z,uv0], default to
-None
+    :param invprojvars: Inverse projection variables [X,Y,Z,uv0], default to None
     :type invprojvars: list, optional    
-    :returns: Four list elements containing: line length in xyz (list), 
-xyz coordinates of lines (list), line length in pixels (list), and uv
-coordinates of lines (list)
-    '''
+    :returns: Four list elements containing: line length in xyz (list), xyz coordinates of lines (list), line length in pixels (list), and uvcoordinates of lines (list)
+    :rtype: list
+    """
     #Initialise figure window
     fig=plt.gcf()
     fig.canvas.set_window_title(imn + ': Define line. ' 
@@ -197,13 +191,13 @@ coordinates of lines (list)
 
 
 def getOGRLine(pts):
-    '''Function to construct an OGR line from a set of uv coordinates.
+    """Function to construct an OGR line from a set of uv coordinates.
     
     :param pts: A series of uv coordinates denoting a line
     :type pts: arr
-    :returns: A line object (ogr.Geometry) constructed from the input 
-coordinates
-    ''' 
+    :returns: A line object (ogr.Geometry) constructed from the input coordinates
+    :rtype: ogr.Geometry
+    """
     #Initially construct geometry object             
     line = ogr.Geometry(ogr.wkbLineString)
     

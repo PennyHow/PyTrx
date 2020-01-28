@@ -209,7 +209,7 @@ def plotAreaPX(uv, img, show=True, save=None):
     :type show: bool, optional 
     :param save: Destination file to save figure to, defaults to None
     :type save: str, optional
-    :returns: A figure with plotted area measurements overlaid onto a given image    
+    :returns: A figure with plotted area measurements overlaid onto a given image 
     """          
     #Get image size
     imsz = img.shape

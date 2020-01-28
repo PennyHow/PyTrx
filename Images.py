@@ -5,12 +5,12 @@
 #You should have received a copy of the license along with this
 #work. If not, see <https://choosealicense.com/licenses/mit/>.
 
-'''
+"""
 The Images module contains the object-constructors and functions for: (1) 
 Importing and handling image data, specifically RBG, one-band (R, B or G), and 
 grayscale images; and (2) Handling image sequences (i.e. a set of multiple 
 images).
-'''
+"""
 
 #Import packages
 from pathlib import Path
@@ -29,7 +29,7 @@ import cv2
 #------------------------------------------------------------------------------
 
 class CamImage(object):    
-    '''A class representing a raw single band (optical RGB or greyscale). This 
+    """A class representing a raw single band (optical RGB or greyscale). This 
     CamImage object is used in subsequent timelapse analysis. The object 
     contains the image data, image path, image dimensions and timestamp 
     (derived from the image Exif data, if available).       
@@ -43,13 +43,11 @@ class CamImage(object):
     
     :param imagePath: The file path to a given image
     :type imagePath: str
-    :param band: Specified image band to pass forward: 'r' - red band; 'b' - 
-blue band; 'g' - green band; and 'l' - grayscale. Default to 'l'
+    :param band: Specified image band to pass forward: 'r' - red band; 'b' - blue band; 'g' - green band; and 'l' - grayscale. Default to 'l'
     :type band: str
-    :param equal: Flag denoting whether histogram equalisation is applied to 
-images (histogram equalisation is applied if True). Default to True
+    :param equal: Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True). Default to True
     :type equal: bool, optional
-    '''   
+    """   
     def __init__(self, imagePath, band='l', equal=True):
         '''CamImage constructor to set image path, read in image data in the 
         specified band and access Exif data.         
@@ -72,28 +70,28 @@ images (histogram equalisation is applied if True). Default to True
 
                     
     def imageGood(self):
-        '''Return image file path status.'''
+        """Return image file path status."""
         return self._imageGood
 
         
     def clearImage(self):
-        '''Clear memory of image data.'''
+        """Clear memory of image data."""
         self._image=None
 
 
     def clearImageArray(self):
-        '''Clear memory of image array data.'''
+        """Clear memory of image array data."""
         self._imageArray=None     
 
         
     def clearAll(self):
-        '''Clear memory of all retained data.'''
+        """Clear memory of all retained data."""
         self._image=None
         self._imageArray=None      
 
      
     def _checkImage(self, path):
-        '''Check that the given image file path is correct.'''
+        """Check that the given image file path is correct."""
         print('\nChecking image file ' + str(path))
         
         #Check file path using os package
@@ -115,38 +113,40 @@ images (histogram equalisation is applied if True). Default to True
 
         
     def getImageType(self):
-        '''Return the image file type.'''
+        """Return the image file type."""
         return imghdr.what(self._impath)        
 
 
     def getImagePath(self):
-        '''Return the file path of the image.'''        
+        """Return the file path of the image."""        
         return self._impath
 
 
     def getImageName(self):
-        '''Return image name.'''
+        """Return image name."""
         imn = self.getImagePath()
         imn = Path(imn)
         return imn.name   
 
 
     def getImage(self):
-        '''Return the image.'''
+        """Return the image."""
         if self._image is None:
             self._readImage()
         return self._image
 
     
     def getImageCorr(self, cameraMatrix, distortP):
-        '''Return the image array that is corrected for the specificied 
+        """Return the image array that is corrected for the specificied 
         camera matrix and distortion parameters.
         
         :param cameraMatrix: Intrinsic camera matrix
         :type cameraMatrix: arr
         :param distortP: Lens distortion parameters
         :type distortP: arr
-        :returns: Image corrected for image distortion (arr)'''
+        :returns: Image corrected for image distortion (arr)
+        :rtype: arr
+        """
         #Get image array        
         if self._imageArray is None:
             self._readImageData()
@@ -170,47 +170,49 @@ images (histogram equalisation is applied if True). Default to True
 
         
     def getImageArray(self):
-        '''Return the image as an array.'''
+        """Return the image as an array."""
         if self._imageArray is None:
             self._readImageData()   
         return self._imageArray
  
 
     def getImageEnhance(self, diff, phi, theta):
-        '''Return enhanced image using :func:'PyTrx.Images.enhanceImg' function.
-        
-        :param diff:
+        """Return enhanced image using :func:`PyTrx.Images.enhanceImg` function.
+
+        :param diff: Inputted as either 'light or 'dark', signifying the intensity of the image pixels. 'light' increases the intensity such that dark pixels become much brighter and bright pixels become slightly brighter. 'dark' decreases the intensity such that dark pixels become much darker and bright pixels become slightly darker.
         :type diff: str
-        :param phi:
+        :param phi: Defines the intensity of all pixel values
         :type phi: int
-        :param theta:
-        :type theta:int
-        '''
+        :param theta: Defines the number of "colours" in the image, e.g. 3 signifies that all the pixels will be grouped into one of three pixel values
+        :type theta: int         
+        :returns: Enhanced image
+        :rtype: arr
+        """
         image = self.getImageArray()
         image1 = enhanceImage(image, diff, phi, theta)
         return image1
 
        
     def getImageSize(self):
-        '''Return the size of the image (which is obtained from the image Exif 
-        information).'''        
+        """Return the size of the image (which is obtained from the image Exif 
+        information)."""        
         if self._imsize is None:
             self._imsize,self._timestamp=self.getExif()
         return self._imsize
 
         
     def getImageTime(self):
-        '''Return the time of the image (which is obtained from the image Exif
-        information).'''        
+        """Return the time of the image (which is obtained from the image Exif
+        information)."""       
         if self._timestamp is None:
             self._imsize,self._timestamp=self.getExif()
         return self._timestamp
  
        
     def getExif(self):
-        '''Return the exif image size and time stamp data from the image. Image
+        """Return the exif image size and time stamp data from the image. Image
         size is returned as a string (height, width). The time stamp is
-        returned as a Python datetime object.'''
+        returned as a Python datetime object."""
         #Get the Exif data
         exif = {}
         if self._image is None:
@@ -241,30 +243,30 @@ images (histogram equalisation is applied if True). Default to True
 
         
     def changeBand(self,band):
-        '''Change the band you want the image to represent ('r', 'b', 'g' or
-        'l')
+        """Change the band you want the image to represent ('r', 'b', 'g' or 'l')
+        
         :param band: Image band ('r', 'b', 'g', or 'l')
         :type band: str
-        '''
+        """
         self._band=band.upper()
         self._readImageData()
         
         
     def reportCamImageData(self):
-        '''Report image data (file path, image size and datetime).'''
+        """Report image data (file path, image size and datetime)."""
         print('\nImage source path: ' + str(self.getImagePath()))
         print('Image size: ' + str(self.getImageSize()))
         print('Image datetime: ' + str(self.getImageTime()))
 
         
     def _readImage(self):
-        '''Read image from file path using PIL.'''
+        """Read image from file path using PIL."""
         self._image=Image.open(self._impath)
     
     
     def _readImageData(self):
-        '''Function to prepare an image by opening, equalising, converting to 
-        a desired band or grayscale, then returning a copy.'''                
+        """Function to prepare an image by opening, equalising, converting to 
+        a desired band or grayscale, then returning a copy."""               
         #Open image from file using PIL        
         if self._image is None:
             self._image = Image.open(self._impath)
@@ -304,21 +306,16 @@ images (histogram equalisation is applied if True). Default to True
 #------------------------------------------------------------------------------
         
 class ImageSequence(object):
-    '''A class to model a raw collection of CamImage objects, which can 
+    """A class to model a raw collection of CamImage objects, which can 
     subsequently be used for making photogrammetric measurements from.
       
-    :param imageList: The list of images, which can be passed in 3 ways: 1) As 
-a list of :class:'PyTrx.Image.CamImage' objects e.g. imageSet=ImageSet([ImageObject1, 
-ImageObject2]); 2) As a list of image paths e.g. 
-imageSet=ImageSet(["image1.JPG","image2.JPG"]); and 3) As a folder containing 
-images e.g. imageSet=ImageSet("Folder/*")
+    :param imageList: The list of images, which can be passed in 3 ways: 1) As a list of :class:`PyTrx.Image.CamImage` objects; 2) As a list of image paths; and 3) As a folder containing images
     :type imageList: str
     :param band: Image band ('r', 'b', 'g', or 'l'), default to 'l'
     :type band: str, optional
-    :param equal: Flag denoting whether histogram equalisation is applied to 
-images (histogram equalisation is applied if True). Default to True
+    :param equal: Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True). Default to True
     :type equal: bool, optional
-    '''
+    """
     def __init__(self, imageList, band='L', equal=True):
         print('\n\nCONSTRUCTING IMAGE SEQUENCE')
         
@@ -364,11 +361,13 @@ images (histogram equalisation is applied if True). Default to True
             
             
     def getImageArrNo(self,i):
-        '''Get image array i from image sequence
+        """Get image array i from image sequence
         
         :param i: Image number in sequence
         :type i: int
-        :returns: Image array'''
+        :returns: Image array
+        :rtype: arr
+        """
         im=self._imageSet[i]
         arr=im.getImageArray()
         im.clearAll()
@@ -376,18 +375,20 @@ images (histogram equalisation is applied if True). Default to True
 
     
     def getImageObj(self,i):
-        '''Get :class:'PyTrx.Images.CamImage' object i from image sequence
+        """Get :class:`PyTrx.Images.CamImage` object i from image sequence
         
         :param i: Image number in sequence
         :type i: int
-        :returns: :class:'PyTrx.Images.CamImage' object '''
+        :returns: :class:`PyTrx.Images.CamImage` 
+        :rtype: arr
+	    """
         imo=self._imageSet[i] 
         return imo
 
         
     def _loadImageStringSequence(self,imageList):
-        '''Function for generating an image set (of :class:'PyTrx.Images.CamImage' 
-        objects) from a list of images'''       
+        """Function for generating an image set (of :class:`PyTrx.Images.CamImage`
+        objects) from a list of images."""      
         #Construct CamImage objects
         self._imageSet = []
         for imageStr in imageList:
@@ -403,17 +404,17 @@ images (histogram equalisation is applied if True). Default to True
 
                 
     def getImages(self):
-        '''Return image set (i.e. a sequence of CamImage objects).'''
+        """Return image set (i.e. a sequence of CamImage objects)."""
         return self._imageSet
 
         
     def getImageFileList(self):
-        '''Return list of image file paths.'''
+        """Return list of image file paths."""
         return self._imageList
 
 
     def getImageNames(self):
-        '''Return list of image file names.'''
+        """Return list of image file names."""
         imgf = self.getImageFileList()
         imns = []
         for i in imgf:
@@ -423,30 +424,25 @@ images (histogram equalisation is applied if True). Default to True
 
         
     def getLength(self):
-        '''Return length of image set.'''
+        """Return length of image set."""
         return len(self._imageSet)
 
 
 def enhanceImage(img, diff, phi, theta):
-    '''Change brightness and contrast of image using phi and theta 
-    variables. Change phi and theta values accordingly.
+    """Change brightness and contrast of image using phi and theta variables. 
+    Change phi and theta values accordingly.
     
     :param img: Input image array for enhancement
     :type img: arr
-    :param diff: Inputted as either 'light or 'dark', signifying the intensity 
-of the image pixels. 'light' increases the intensity such that dark pixels 
-become much brighter and bright pixels become slightly brighter. 'dark' 
-decreases the intensity such that dark pixels become much darker and bright 
-pixels become slightly darker.
+    :param diff: Inputted as either 'light or 'dark', signifying the intensity of the image pixels. 'light' increases the intensity such that dark pixels become much brighter and bright pixels become slightly brighter. 'dark' decreases the intensity such that dark pixels become much darker and bright pixels become slightly darker.
     :type diff: str
     :param phi: Defines the intensity of all pixel values
     :type phi: int
-    :param theta: Defines the number of "colours" in the image, e.g. 3 
-signifies that all the pixels will be grouped into one of three pixel values
-    :type theta:int               .
-    :returns img1: Enhanced image.
+    :param theta: Defines the number of "colours" in the image, e.g. 3 signifies that all the pixels will be grouped into one of three pixel values
+    :type theta: int               .
+    :returns: Enhanced image.
     :rtype: arr
-    '''                          
+    """                          
     #Define maximum pixel intensity
     maxIntensity = 255.0 #depends on dtype of image data 
     

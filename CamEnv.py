@@ -5,14 +5,14 @@
 #You should have received a copy of the license along with this
 #work. If not, see <https://choosealicense.com/licenses/mit/>.
 
-'''
+"""
 The Camera Environment module contains the object-constructors and functions 
 for: (1) Representing a camera model in three-dimensional space; and (2) 
 Effective translation of measurements in an XY image plane to XYZ real-world 
 coordinates. The projection and inverse transformation functions are based on 
 those available in the ImGRAFT toolbox for Matlab. Translations from
 ImGRAFT are noted in related script comments.              
-'''
+"""
 
 #Import PyTrx packages
 from Utilities import plotGCPs, plotCalib, plotResiduals, plotPrincipalPoint
@@ -31,20 +31,18 @@ import glob
 #------------------------------------------------------------------------------
 
 class GCPs():    
-    '''A class representing the geography of the camera scene. Contains
+    """A class representing the geography of the camera scene. Contains
     ground control points, as the world and image points, the DEM data and 
     extent, and the image the ground control points correspond to, as an 
     Image object. 
     
     :param dem: The file path of the ASCII DEM
     :type dem: str
-    :param GCPpath: The file path of the GCP text file, with a header line, and
-tab delimited x, y, z world coordinates and xy image on each line
+    :param GCPpath: The file path of the GCP text file, with a header line, and tab delimited x, y, z world coordinates and xy image on each line
     :type GCPpath: str
     :param imagePath: The file path of the image the GCPs correspond to
     :type imagePath: str
-    '''
-    
+    """
     def __init__(self, dem, GCPpath, imagePath):
         '''Constructor to initiate the GCP object.'''                
         #DEM handling
@@ -62,24 +60,24 @@ tab delimited x, y, z world coordinates and xy image on each line
 
         
     def getGCPs(self):
-        '''Return the world and image GCPs.'''       
+        """Return the world and image GCPs."""      
         return self._gcpxyz, self._gcpuv
 
         
     def getDEM(self):
-        '''Return the dem object.'''       
+        """Return the dem object."""       
         return self._dem
 
     
     def getImage(self):
-        '''Return the GCP reference image.'''        
+        """Return the GCP reference image."""        
         return self._gcpImage
 
                 
 #------------------------------------------------------------------------------        
    
 class CamCalib(object):
-    '''This base class models a standard camera calibration matrix as per 
+    """This base class models a standard camera calibration matrix as per 
     OpenCV, MatLab and ImGRAFT. The class uses a standard pinhole camera model, 
     drawing on the functions within OpenCV. A scene view is formed by 
     projecting 3D points into the image plane using a perspective 
@@ -99,13 +97,11 @@ class CamCalib(object):
     file (.mat or .txt) containing the calibration data in a pre-designated 
     format.
     
-    :param *args: Either a calibration text file, a series of calibration text 
-files, a list of raw parameters, or a set of calibration images (along with 
-calibration chessboard dimensions) 
-    '''
-    
+    :param args: Either a calibration text file, a series of calibration text files, a list of raw parameters, or a set of calibration images (along with calibration chessboard dimensions)
+    :type args: str 
+    """    
     def __init__(self, *args): 
-        '''Constructor to initiate the camera calibration object.'''            
+        """Constructor to initiate the camera calibration object."""         
         failed=False 
             
         #Read calibration from file
@@ -198,29 +194,21 @@ calibration chessboard dimensions)
                 
             
     def getCalibdata(self):
-        '''Return camera matrix, and tangential and radial distortion 
+        """Return camera matrix, and tangential and radial distortion 
         coefficients.
-        
-        :returns: The object's intrinsic matrix, tangential distortion and
-radial distortion information
-        '''
+        """
         return self._intrMat, self._tanCorr, self._radCorr
 
         
     def getCamMatrix(self):
-        '''Return camera matrix.
-        
-        :returns: The object's intrinsic matrix
-        '''
+        """Return camera matrix.
+        """
         return self._intrMat
 
     
     def getDistortCoeffsCV2(self):
-        '''Return radial and tangential distortion coefficients.
-        
-        :returns: The object's tangential distortion and radial distortion 
-information
-        '''
+        """Return radial and tangential distortion coefficients.
+        """
         #Returns certain number of values depending on number of coefficients
         #inputted  
         if len(self._radCorr)==2:
@@ -231,11 +219,9 @@ information
 
         
     def getCamMatrixCV2(self):
-        '''Return camera matrix in a structure that is compatible with 
-        subsequent photogrammetric processing using OpenCV.
-        
-        :returns: The object's intrinsic matrix, compatiable with OpenCV   
-        '''
+        """Return camera matrix in a structure that is compatible with 
+        subsequent photogrammetric processing using OpenCV. 
+        """
         if self._intrMatCV2 is None:
             
             # Transpose if 0's are not in correct places
@@ -257,7 +243,7 @@ information
 
         
     def reportCalibData(self):
-        '''Self reporter for Camera Calibration object data.'''
+        """Self reporter for Camera Calibration object data."""
         print('\nDATA FROM CAMERA CALIBRATION OBJECT')
         print('Intrinsic Matrix:')
         for row in self._intrMat:
@@ -276,14 +262,14 @@ information
 
 
     def checkMatrix(self, matrix):
-        '''Function to support the calibrate function. Checks and converts the 
+        """Function to support the calibrate function. Checks and converts the 
         intrinsic matrix to the correct format for calibration with opencv.
         
         :param matrix: Intrinsic camera matrix
         :type matrix: arr
-        :returns: The object's intrinsic matrix (checked), tangential 
-distortion and radial distortion information
-        '''  
+        :returns: The object's intrinsic matrix (checked), tangential distortion and radial distortion information
+        :rtype: list
+        """  
         ###This is moved over from readfile. Need to check calibration matrices
         if matrix==None:
             return None
@@ -307,9 +293,9 @@ distortion and radial distortion information
 #------------------------------------------------------------------------------
                           
 class CamEnv(CamCalib):    
-    ''' A class to represent the camera object, containing the intrinsic
+    """A class to represent the camera object, containing the intrinsic
     matrix, distortion parameters and camera pose (position and direction).    
-    Also inherits from the :class:'PyTrx.CamEnv.CamCalib' object, representing 
+    Also inherits from the :class:`PyTrx.CamEnv.CamCalib` object, representing 
     the intrinsic camera information.
     This object can be initialised either through an environment file (and
     passed to the initialiser as a filepath), or with the set intput parameters
@@ -320,21 +306,17 @@ class CamEnv(CamCalib):
     :type GCPpath: str
     :param DEMpath: The file path for the DEM, for the GCPs object
     :type DEMpath: str    
-    :param imagePath: The file path for the GCP reference image, for the GCPs 
-object
+    :param imagePath: The file path for the GCP reference image, for the GCPs object
     :type imagePath: str 
-    :param calibPath: The file path for the calibration file. This can be
-either as a .mat Matlab file or a text file. The text file should be of the 
-following tab delimited format: RadialDistortion [k1 k2 k3...k7], 
-TangentialDistortion [p1 p2], IntrinsicMatrix [x y z][x y z][x y z], End
+    :param calibPath: The file path for the calibration file. This can be either as a .mat Matlab file or a text file. The text file should be of the following tab delimited format: RadialDistortion [k1 k2 k3...k7], TangentialDistortion [p1 p2], IntrinsicMatrix [x y z][x y z][x y z], End
     :type calibPath: str
     :param coords: The x,y,z coordinates of the camera location, as a list
     :type coords: list   
     :param ypr: The yaw, pitch and roll of the camera, as a list
     :type ypr: list
-    '''    
+    """   
     def __init__(self, envFile):
-        '''Constructor to initiate Camera Environment object.''' 
+        """Constructor to initiate Camera Environment object.""" 
         print('\nINITIALISING CAMERA ENVIRONMENT')
  
         #Read camera environment from text file        
@@ -397,15 +379,14 @@ TangentialDistortion [p1 p2], IntrinsicMatrix [x y z][x y z][x y z], End
         
        
     def dataFromFile(self, filename):
-        '''Read CamEnv data from .txt file containing keywords and filepaths
+        """Read CamEnv data from .txt file containing keywords and filepaths
         to associated data.
         
         :param filename: Environment file path
         :type filename: str
-        :returns: Camera environment information (name, GCP filepath, 
-DEM filepath, image filepath, calibration file path, camera coordinates, 
-camera pose (ypr) and DEM densification factor)
-        '''
+        :returns: Camera environment information (name, GCP filepath, DEM filepath, image filepath, calibration file path, camera coordinates, camera pose (ypr) and DEM densification factor)
+        :rtype: list
+        """
         #Define keywords to search for in file        
         self.key_labels={'name':'camera_environment_name',
                          'GCPpath':'gcp_path',
@@ -517,19 +498,16 @@ camera pose (ypr) and DEM densification factor)
 
 
     def optimiseCamEnv(self, optimise, optmethod='trf', show=False):
-        '''Optimise projection variables in the camera environment. The precise 
+        """Optimise projection variables in the camera environment. The precise 
         parameters to optimise are defined by the optimise variable.
         
-        :param optimise: Parameters to optimise - 'YPR' (optimise camera pose 
-only), 'EXT' (optimise external camera parameters), 'INT' (optimise internal 
-camera parameters), or 'ALL' (optimise all projection parameters)
+        :param optimise: Parameters to optimise - 'YPR' (optimise camera pose only), 'EXT' (optimise external camera parameters), 'INT' (optimise internal camera parameters), or 'ALL' (optimise all projection parameters)
         :type optimise: str
         :param optmethod: Optimisation method, default to 'trf'
         :type optmethod: str, optional
-        :param show: Flag to denote if optimisation output should be plotted,
-default to False
+        :param show: Flag to denote if optimisation output should be plotted, default to False
         :type show: bool, optional
-        '''
+        """
         #Get GCPs
         xyz, uv = self._gcp.getGCPs()
 
@@ -550,7 +528,7 @@ default to False
 
     
     def __getFileDataLine__(self, lines, lineNo):
-        '''Return a data line from the Camera Environment Specification file.
+        """Return a data line from the Camera Environment Specification file.
         
         :param lines: Line string
         :type lines: str
@@ -558,25 +536,25 @@ default to False
         :type lineNo: int
         :returns: Data line
         :rtype: str
-        '''
+        """
         return lines[lineNo+1].split('#')[0].strip()
 
         
     def getRefImageSize(self):
-        '''Return the dimensions of the reference image.
+        """Return the dimensions of the reference image.
         
         :returns: Image size
         :rtype: arr
-        '''
+        """
         return self._refImage.getImageSize()
       
         
     def getDEM(self):
-        '''Return DEM as :class:'PyTrx.DEM.ExplicitRaster' object.
+        """Return DEM as :class:`PyTrx.DEM.ExplicitRaster` object.
         
         :returns: DEM object
-        :rtype: :class:'PyTrx.DEM.ExplicitRaster'
-        '''
+        :rtype: :class:`PyTrx.DEM.ExplicitRaster`
+        """
         if self._DEM is None:
             dem = load_DEM(self._DEMpath)
             if self._DEMdensify>1:
@@ -589,7 +567,7 @@ default to False
 
 
     def showGCPs(self):
-        '''Plot GCPs in image plane and DEM scene.'''
+        """Plot GCPs in image plane and DEM scene."""
         xyz, uv = self._gcp.getGCPs()               #Get GCP positions
         dem = self.getDEM()                         #Get DEM        
         refimage=self._refImage
@@ -601,7 +579,7 @@ default to False
 
 
     def showPrincipalPoint(self):
-        '''Plot Principal Point on reference image.'''
+        """Plot Principal Point on reference image."""
         refimage=self._refImage
         img = refimage.getImageArray()              #Get image array
         imn = refimage.getImageName()               #Get image name
@@ -611,7 +589,7 @@ default to False
 
 
     def showCalib(self):
-        '''Plot corrected and uncorrected reference image.'''
+        """Plot corrected and uncorrected reference image."""
         refimage=self._refImage
         img = refimage.getImageArray()              #Get image array
         imn = refimage.getImageName()               #Get image name        
@@ -623,9 +601,10 @@ default to False
 
 
     def showResiduals(self):
-        '''Show positions of xyz GCPs and projected GCPs, and residual 
+        """Show positions of xyz GCPs and projected GCPs, and residual 
         differences between their positions. This can be used as a measure of
-        a error in the georectification of measurements.'''        
+        a error in the georectification of measurements.
+        """        
         xyz, uv = self._gcp.getGCPs()               #Get GCPs
         dem = self.getDEM()                         #Get DEM
 
@@ -639,12 +618,11 @@ default to False
 
 
     def reportCamData(self):
-        '''Reporter for testing that the relevant data has been successfully 
+        """Reporter for testing that the relevant data has been successfully 
         imported. Testing for camera Environment name, camera location (xyz),
         reference image, DEM, DEM densification, GCPs, yaw pitch roll, camera 
         matrix, and distortion coefficients.
-        '''
-        
+        """ 
         #Camera name and location
         print('\nCAMERA ENVIRONMENT REPORT')
         print('Camera Environment name: ' + str(self._name)) 
@@ -711,7 +689,7 @@ default to False
 
 
 def calibrateImages(imageFiles, xy, refine=None):
-    '''Function for calibrating a camera from a set of input calibration
+    """Function for calibrating a camera from a set of input calibration
     images. Calibration is performed using OpenCV's chessboard calibration 
     functions. Input images (imageFile) need to be of a chessboard with 
     regular dimensions and a known number of corner features (xy).   
@@ -723,20 +701,11 @@ def calibrateImages(imageFiles, xy, refine=None):
     :type imageFiles: list
     :param xy: Chessboard corner dimensions [rows, columns]
     :type xy: list)           
-    :param refine: OpenCV camera model refinement method - 
-cv2.CALIB_FIX_PRINCIPAL_POINT (fix principal point), 
-cv2.CALIB_FIX_ASPECT_RATIO (Fix aspect ratio), cv2.CALIB_FIX_FOCAL_LENGTH (Fix 
-focal length), cv2.CALIB_FIX_INTRINSIC (Fix camera model), 
-cv2.CALIB_FIX_K1...6 (Fix radial coefficient 1-6), cv2.CALIB_FIX_TANGENT_DIST 
-(Fix tangential coefficients), cv2.CALIB_USE_INTRINSIC_GUESS (Use initial 
-intrinsic values), cv2.CALIB_ZERO_TANGENT_DIST (Set tangential distortion 
-coefficients to zero), cv2.CALIB_RATIONAL_MODEL (Calculate radial distortion 
-coefficients k4, k5, and k6). Default to None
+    :param refine: OpenCV camera model refinement method - cv2.CALIB_FIX_PRINCIPAL_POINT (fix principal point), cv2.CALIB_FIX_ASPECT_RATIO (Fix aspect ratio), cv2.CALIB_FIX_FOCAL_LENGTH (Fix focal length), cv2.CALIB_FIX_INTRINSIC (Fix camera model), cv2.CALIB_FIX_K1...6 (Fix radial coefficient 1-6), cv2.CALIB_FIX_TANGENT_DIST (Fix tangential coefficients), cv2.CALIB_USE_INTRINSIC_GUESS (Use initial intrinsic values), cv2.CALIB_ZERO_TANGENT_DIST (Set tangential distortion coefficients to zero), cv2.CALIB_RATIONAL_MODEL (Calculate radial distortion coefficients k4, k5, and k6). Default to None
     :type refine: int, optional
-    :returns: A list containing the camera intrinsic matrix (arr), and 
-tangential (arr) and radial distortion coefficents (arr), and the Camera 
-calibration error (int)
-    '''   
+    :returns: A list containing the camera intrinsic matrix (arr), and tangential (arr) and radial distortion coefficents (arr), and the Camera calibration error (int)
+    :rtype: arr/int
+    """   
     #Define shape of array
     objp = np.zeros((xy[0]*xy[1],3), np.float32)           
     objp[:,:2] = np.mgrid[0:xy[1],0:xy[0]].T.reshape(-1,2) 
@@ -816,13 +785,13 @@ calibration error (int)
         
 
 def constructDEM(dempath, densefactor):
-    '''Construct DEM from a given file path and densification factor.
+    """Construct DEM from a given file path and densification factor.
     
     :param dempath: DEM filepath
     :type dempath: str
     :param densefactor: Densification factor
     :type densefactor: int
-    '''
+    """
     #Prepare DEM from file
     dem=load_DEM(dempath)
         
@@ -835,10 +804,10 @@ def constructDEM(dempath, densefactor):
             
 def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg,
                   viewshed=True):
-    '''Set the inverse projection variables.
+    """Set the inverse projection variables.
     
     :param dem: DEM object
-    :type dem: :class:'PyTrx.DEM.ExplicitRaster'
+    :type dem: :class:`PyTrx.DEM.ExplicitRaster`
     :param camloc: Camera location (X,Y,Z)
     :type camloc: arr
     :param camdir: Camera pose [yaw, pitch, roll]
@@ -853,12 +822,11 @@ def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg,
     :type camcen: arr
     :param refimg: Reference image (function only uses the image dimensions)
     :type refimg: arr
-    :param viewshed: Flag to denote if viewshed from camera should be 
-determined before projection
+    :param viewshed: Flag to denote if viewshed from camera should be determined before projection
     :type viewshed: bool
     :returns: Inverse projection coefficients [X,Y,Z,uv0]
     :rtype: list
-    '''             
+    """             
     print('\nSetting inverse projection coefficients')
 
     if isinstance(dem, list):
@@ -902,7 +870,7 @@ determined before projection
 
 def projectXYZ(camloc, camdirection, radial, tangen, foclen, camcen, refimg, 
                xyz):
-    '''Project the xyz world coordinates into the corresponding image 
+    """Project the xyz world coordinates into the corresponding image 
     coordinates (uv). This is primarily executed using the ImGRAFT projection 
     function found in camera.m: uv,depth,inframe=cam.project(xyz)
     
@@ -922,9 +890,9 @@ def projectXYZ(camloc, camdirection, radial, tangen, foclen, camcen, refimg,
     :type refimg: arr
     :param xyz: world coordinates            
     :type xyz: arr     
-    :returns: Pixel coordinates in image (arr), view depth (int), and a
-Boolean vector containing whether each projected 3D point is inside the frame        
-    '''   
+    :returns: Pixel coordinates in image (arr), view depth (int), and a Boolean vector containing whether each projected 3D point is inside the frame  
+    :rtype: arr/int      
+    """  
     #This was in ImGRAFT/Matlab to transpose the input array if it's 
     #ordered differently 
     #if size(xyz,2)>3                                                 (MAT)
@@ -1004,7 +972,7 @@ Boolean vector containing whether each projected 3D point is inside the frame
 
  
 def projectUV(uv, invprojvars):  
-    '''Inverse project image coordinates (uv) to xyz world coordinates
+    """Inverse project image coordinates (uv) to xyz world coordinates
     using inverse projection variables (set using setProjection function).         
     This function is primarily adopted from the ImGRAFT projection function 
     found in camera.m: uv,depth,inframe=cam.project(xyz)
@@ -1015,7 +983,7 @@ def projectUV(uv, invprojvars):
     :type invprojvars: list       
     :returns: World coordinates 
     :rtype: arr
-    '''                  
+    """                 
     #Create empty numpy array
     xyz=np.zeros([uv.shape[0],3])
     xyz[::]=float('NaN')
@@ -1038,7 +1006,7 @@ def projectUV(uv, invprojvars):
 
 def optimiseCamera(optimise, projvars, GCPxyz, GCPuv, optmethod='trf', 
                    show=False):
-    '''Optimise camera parameters using the pixel differences between a set
+    """Optimise camera parameters using the pixel differences between a set
     of image GCPs and projected XYZ GCPs. The optimisation routine adopts the
     least_square function in scipy's optimize tools, using either the Trust 
     Region Reflective algorithm, the dogleg algorithm or the 
@@ -1057,26 +1025,19 @@ def optimiseCamera(optimise, projvars, GCPxyz, GCPuv, optmethod='trf',
     iterations until an optimum solution is reached. A new set of optimised 
     projection parameters are returned.
     
-    :param optimise: Flag denoting which variables will be optimised: YPR 
-(camera pose only), INT (internal camera parameters), EXT (external camera 
-parameters), LOC (all parameters except camera location), or ALL (all 
-projection parameters)
+    :param optimise: Flag denoting which variables will be optimised: YPR (camera pose only), INT (internal camera parameters), EXT (external camera parameters), LOC (all parameters except camera location), or ALL (all projection parameters)
     :type optimise: str             
-    :param projvars: Projection parameters [camera location, camera pose, 
-radial distortion, tangential distortion, focal length, principal point, 
-reference image]
+    :param projvars: Projection parameters [camera location, camera pose, radial distortion, tangential distortion, focal length, principal point, reference image]
     :typeprojvars: list
     :param GCPuv: UV positions for GCPs, as shape (m, 2)
     :type GCPuv: arr
-    :param optmethod: Optimisation method: 'trf' (Trust Region Reflective 
-algorithm), 'dogbox' (dogleg algorithm), or 'lm' (Levenberg-Marquardt 
-algorithm)
+    :param optmethod: Optimisation method: 'trf' (Trust Region Reflective algorithm), 'dogbox' (dogleg algorithm), or 'lm' (Levenberg-Marquardt algorithm)
     :type optmethod: str                           
     :param show: Flag denoting whether plot of residuals should be shown
     :type show: bool                                           .                                 
-    :returns: A list containing the optimised projection parameters. If 
-optimisation fails then None is returned    
-    '''    
+    :returns: A list containing the optimised projection parameters. If optimisation fails then None is returned 
+    :rtype: list   
+    """   
     #Get projectiion parameters from projvars
     camloc, campose, radcorr, tancorr, focal, camcen, refimg = projvars
 
@@ -1183,13 +1144,14 @@ optimisation fails then None is returned
     
 
 def getRotation(camDirection):
-    '''Calculates camera rotation matrix calculated from view 
+    """Calculates camera rotation matrix calculated from view 
     direction.
     
     :param camDirection: Camera pose (yaw,pitch,roll)
     :type camDirection: arr             
     :returns: Rotation matrix as array
-    '''
+    :rtype: arr
+    """
 
     C = np.cos(camDirection) 
     S = np.sin(camDirection)
@@ -1205,7 +1167,7 @@ def getRotation(camDirection):
 
 
 def computeResidualsXYZ(invprojvars, GCPxyz, GCPuv, dem):
-    '''Function for computing the pixel difference between GCP image points
+    """Function for computing the pixel difference between GCP image points
     and GCP projected XYZ points. This function is used in the optimisation 
     function (optimiseCamera), with parameters for optimising defined in the
     first variable and stable parameters defined in the second. If no 
@@ -1220,18 +1182,13 @@ def computeResidualsXYZ(invprojvars, GCPxyz, GCPuv, dem):
     :type GCPxyz: arr
     :param GCPuv: GCPs in image space (u,v)
     :type GCPuv: arr
-    :param refimg: Reference image, given as a CamImage object, file path 
-string, or image array
-    :type refimg: :class:'PyTrx.Images.CamImage'/str/arr
-    :param optimise: Flag denoting which variables will be optimised: YPR 
-(camera pose only), INT (internal camera parameters), EXT (external camera 
-parameters), LOC (all parameters except camera location), or ALL (all 
-projection parameters)
+    :param refimg: Reference image, given as a CamImage object, file path string, or image array
+    :type refimg: :class:`PyTrx.Images.CamImage`/str/arr
+    :param optimise: Flag denoting which variables will be optimised: YPR (camera pose only), INT (internal camera parameters), EXT (external camera parameters), LOC (all parameters except camera location), or ALL (all projection parameters)
     :type optimise: str
-    :returns: Array denoting pixel difference between UV and projected XYZ
-position of each GCP
+    :returns: Array denoting pixel difference between UV and projected XYZ position of each GCP
     :rtype: arr
-    '''
+    """
     GCPxyz_proj = projectUV(GCPuv, invprojvars)  
         
     #Compute residuals using pythag theorem (i.e. pixel difference between pts)
@@ -1270,7 +1227,7 @@ position of each GCP
 
 def computeResidualsUV(params, stable, GCPxyz, GCPuv, refimg, 
                        optimise='YPR'):
-    '''Function for computing the pixel difference between GCP image points
+    """Function for computing the pixel difference between GCP image points
     and GCP projected XYZ points. This function is used in the optimisation 
     function (optimiseCamera), with parameters for optimising defined in the
     first variable and stable parameters defined in the second. If no 
@@ -1285,19 +1242,13 @@ def computeResidualsUV(params, stable, GCPxyz, GCPuv, refimg,
     :type GCPxyz: arr
     :param GCPuv: GCPs in image space (u,v)
     :type GCPuv: arr
-    :param refimg: Reference image, given as a CamImage object, file path 
-string, or image array
-    :type refimg: :class:'PyTrx.Images.CamImage'/str/arr
-    :param optimise: Flag denoting which variables will be optimised: YPR 
-(camera pose only), INT (internal camera parameters), EXT (external camera 
-parameters), LOC (all parameters except camera location), or ALL (all 
-projection parameters)
+    :param refimg: Reference image, given as a CamImage object, file path string, or image array
+    :type refimg: :class:`PyTrx.Images.CamImage`/str/arr
+    :param optimise: Flag denoting which variables will be optimised: YPR (camera pose only), INT (internal camera parameters), EXT (external camera parameters), LOC (all parameters except camera location), or ALL (all projection parameters)
     :type optimise: str
     :returns: Pixel difference between UV and projected XYZ position of each GCP
     :rtype: arr
-
-    '''
-    
+    """   
     #Assign optimisable and stable parameters depending on optimise flag
     if optimise == 'YPR':
         campose = params      

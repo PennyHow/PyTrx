@@ -44,12 +44,12 @@
 <span class="c1">#You should have received a copy of the license along with this</span>
 <span class="c1">#work. If not, see &lt;https://choosealicense.com/licenses/mit/&gt;.</span>
 
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">The Area module handles the functionality for obtaining areal measurements from </span>
 <span class="sd">oblique time-lapse imagery. Specifically, this module contains functions for:</span>
 <span class="sd">(1) Performing automated and manual detection of areal extents in oblique </span>
 <span class="sd">imagery; and (2) Determining real-world surface areas from oblique imagery.                                                                                                                                </span>
-<span class="sd">&#39;&#39;&#39;</span>
+<span class="sd">&quot;&quot;&quot;</span>
 
 <span class="c1">#Import packages</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
@@ -67,29 +67,23 @@
 
 <span class="c1">#------------------------------------------------------------------------------</span>
 <div class="viewcode-block" id="Area"><a class="viewcode-back" href="../../Modules.html#PyTrx.Area.Area">[docs]</a><span class="k">class</span> <span class="nc">Area</span><span class="p">(</span><span class="n">ImageSequence</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;A class for processing change in area (i.e. a lake or plume) through an </span>
+    <span class="sd">&quot;&quot;&quot;A class for processing change in area (i.e. a lake or plume) through an </span>
 <span class="sd">    image sequence, with methods to calculate extent change in an image plane </span>
 <span class="sd">    (px) and real areal change via georectification.</span>
 <span class="sd">       </span>
-<span class="sd">    :param imageList: List of images, for the </span>
-<span class="sd">:class:&#39;PyTrx.Images.ImageSequence&#39; object</span>
+<span class="sd">    :param imageList: List of images, for the :class:`PyTrx.Images.ImageSequence` object</span>
 <span class="sd">    :type imageList: str/list            </span>
-<span class="sd">    :param cameraenv: Camera environment parameters which can be read into the </span>
-<span class="sd">:class:&#39;PyTrx.CamEnv.CamEnv&#39; object as a text file</span>
+<span class="sd">    :param cameraenv: Camera environment parameters which can be read into the :class:`PyTrx.CamEnv.CamEnv` object as a text file</span>
 <span class="sd">    :type cameraenv: str           </span>
 <span class="sd">    :param hmatrix: Homography matrix </span>
 <span class="sd">    :type hmatrix: arr</span>
-<span class="sd">    :param calibFlag: An indicator of whether images are calibrated, for the </span>
-<span class="sd">:class:&#39;PyTrx.Images.ImageSequence&#39; object</span>
+<span class="sd">    :param calibFlag: An indicator of whether images are calibrated, for the :class:`PyTrx.Images.ImageSequence` object</span>
 <span class="sd">    :type calibFlag: bool          </span>
-<span class="sd">    :param band: String denoting the desired image band, default to &#39;L&#39; </span>
-<span class="sd">(grayscale)</span>
+<span class="sd">    :param band: String denoting the desired image band, default to &#39;L&#39; (grayscale)</span>
 <span class="sd">    :type band: str, optional</span>
-<span class="sd">    :param equal: Flag denoting whether histogram equalisation is applied to </span>
-<span class="sd">images (histogram equalisation is applied if True). Default to True. </span>
+<span class="sd">    :param equal: Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True). Default to True. </span>
 <span class="sd">    :type equal: bool, optional                          </span>
-<span class="sd">    &#39;&#39;&#39;</span>
-    
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#Initialisation of Area class object          </span>
     <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">imageList</span><span class="p">,</span> <span class="n">cameraenv</span><span class="p">,</span> <span class="n">hmatrix</span><span class="p">,</span> <span class="n">calibFlag</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> 
                  <span class="n">band</span><span class="o">=</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">equal</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
@@ -114,18 +108,16 @@
             
             
 <div class="viewcode-block" id="Area.calcAutoAreas"><a class="viewcode-back" href="../../Modules.html#PyTrx.Area.Area.calcAutoAreas">[docs]</a>    <span class="k">def</span> <span class="nf">calcAutoAreas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">colour</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">verify</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Detects areas of interest from a sequence of images, and returns </span>
+        <span class="sd">&quot;&quot;&quot;Detects areas of interest from a sequence of images, and returns </span>
 <span class="sd">        pixel and xyz areas. </span>
 <span class="sd">        </span>
-<span class="sd">        :param colour: Flag to denote whether colour range for detection should </span>
-<span class="sd">be defined for each image or only once, default to False</span>
+<span class="sd">        :param colour: Flag to denote whether colour range for detection should be defined for each image or only once, default to False</span>
 <span class="sd">        :type colour: bool, optional </span>
-<span class="sd">        :param verify: Flag to denote whether detected polygons should be </span>
-<span class="sd">manually verified by user, default to False</span>
+<span class="sd">        :param verify: Flag to denote whether detected polygons should be manually verified by user, default to False</span>
 <span class="sd">        :type verify: bool, optional           </span>
 <span class="sd">        :returns: XYZ and UV area information</span>
 <span class="sd">        :rtype: list</span>
-<span class="sd">        &#39;&#39;&#39;</span>               
+<span class="sd">        &quot;&quot;&quot;</span>               
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">COMMENCING AUTOMATED AREA DETECTION&#39;</span><span class="p">)</span>
 
         <span class="c1">#Get DEM from camera environment</span>
@@ -238,13 +230,13 @@
 
 
 <div class="viewcode-block" id="Area.calcManualAreas"><a class="viewcode-back" href="../../Modules.html#PyTrx.Area.Area.calcManualAreas">[docs]</a>    <span class="k">def</span> <span class="nf">calcManualAreas</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Manually define areas of interest in a sequence of images. User </span>
+        <span class="sd">&quot;&quot;&quot;Manually define areas of interest in a sequence of images. User </span>
 <span class="sd">        input is facilitated through an interactive plot to click around the </span>
 <span class="sd">        area of interest</span>
 <span class="sd">        </span>
 <span class="sd">        :returns: XYZ and UV area information</span>
 <span class="sd">        :rtype: list</span>
-<span class="sd">        &#39;&#39;&#39;</span>                
+<span class="sd">        &quot;&quot;&quot;</span>               
         <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">COMMENCING MANUAL AREA DETECTION&#39;</span>            
         <span class="c1">#Set up output dataset</span>
         <span class="n">area</span><span class="o">=</span><span class="p">[]</span>
@@ -292,7 +284,7 @@
     
         
 <div class="viewcode-block" id="Area.verifyAreas"><a class="viewcode-back" href="../../Modules.html#PyTrx.Area.Area.verifyAreas">[docs]</a>    <span class="k">def</span> <span class="nf">verifyAreas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">areas</span><span class="p">,</span> <span class="n">invprojvars</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Method to manually verify all polygons in images. Plots sequential</span>
+        <span class="sd">&quot;&quot;&quot;Method to manually verify all polygons in images. Plots sequential</span>
 <span class="sd">        images with detected polygons and the user manually verifies them by </span>
 <span class="sd">        clicking them.</span>
 <span class="sd">        </span>
@@ -302,7 +294,7 @@
 <span class="sd">        :type invprojvars: list</span>
 <span class="sd">        :param verified: Verified XYZ and UV area information</span>
 <span class="sd">        :type verified: list </span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#Create output</span>
         <span class="n">verified</span> <span class="o">=</span> <span class="p">[]</span>
         
@@ -427,14 +419,14 @@
         
 
 <div class="viewcode-block" id="Area.setMax"><a class="viewcode-back" href="../../Modules.html#PyTrx.Area.Area.setMax">[docs]</a>    <span class="k">def</span> <span class="nf">setMax</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">maxMaskPath</span><span class="p">,</span> <span class="n">maxim</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Set image in sequence which pictures the maximum extent of the area</span>
+        <span class="sd">&quot;&quot;&quot;Set image in sequence which pictures the maximum extent of the area</span>
 <span class="sd">        of interest.</span>
 <span class="sd">        </span>
 <span class="sd">        :param maxMaskPath: File path to mask with maximum extent</span>
 <span class="sd">        :type maxMaskPath: str</span>
 <span class="sd">        :param maxim: Image with maximum extent</span>
 <span class="sd">        :type maxim: arr</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1">#Calibrate image if calibration flag is true</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calibFlag</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">cameraMatrix</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_camEnv</span><span class="o">.</span><span class="n">getCamMatrixCV2</span><span class="p">()</span>
@@ -452,7 +444,7 @@
 
 
 <div class="viewcode-block" id="Area.setPXExt"><a class="viewcode-back" href="../../Modules.html#PyTrx.Area.Area.setPXExt">[docs]</a>    <span class="k">def</span> <span class="nf">setPXExt</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">xmin</span><span class="p">,</span><span class="n">xmax</span><span class="p">,</span><span class="n">ymin</span><span class="p">,</span><span class="n">ymax</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Set plotting extent. Setting the plot extent will make it easier to </span>
+        <span class="sd">&quot;&quot;&quot;Set plotting extent. Setting the plot extent will make it easier to </span>
 <span class="sd">        define colour ranges and verify areas.</span>
 <span class="sd">        </span>
 <span class="sd">        :param xmin: X-axis minimum value.</span>
@@ -463,29 +455,28 @@
 <span class="sd">        :type ymin: int</span>
 <span class="sd">        :param ymax: Y-axis maximum value.</span>
 <span class="sd">        :type ymax: int</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_pxplot</span> <span class="o">=</span> <span class="p">[</span><span class="n">xmin</span><span class="p">,</span><span class="n">xmax</span><span class="p">,</span><span class="n">ymin</span><span class="p">,</span><span class="n">ymax</span><span class="p">]</span></div>
 
 
 <div class="viewcode-block" id="Area.setThreshold"><a class="viewcode-back" href="../../Modules.html#PyTrx.Area.Area.setThreshold">[docs]</a>    <span class="k">def</span> <span class="nf">setThreshold</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">number</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Set threshold for number of polgons kept from an image.</span>
+        <span class="sd">&quot;&quot;&quot;Set threshold for number of polgons kept from an image.</span>
 <span class="sd">        </span>
-<span class="sd">        :param number: Number denoting the number of detected polygons that </span>
-<span class="sd">will be retained</span>
+<span class="sd">        :param number: Number denoting the number of detected polygons that will be retained</span>
 <span class="sd">        :type number: int </span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_threshold</span> <span class="o">=</span> <span class="n">number</span></div>
                                 
 
 <div class="viewcode-block" id="Area.setColourrange"><a class="viewcode-back" href="../../Modules.html#PyTrx.Area.Area.setColourrange">[docs]</a>    <span class="k">def</span> <span class="nf">setColourrange</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="n">lower</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Manually define the RBG colour range that will be used to filter</span>
+        <span class="sd">&quot;&quot;&quot;Manually define the RBG colour range that will be used to filter</span>
 <span class="sd">        the image/images.</span>
 <span class="sd">        </span>
 <span class="sd">        :param upper: Upper value of colour range</span>
 <span class="sd">        :type upper: int</span>
 <span class="sd">        :param lower: Lower value of colour range</span>
 <span class="sd">        :type lower: int</span>
-<span class="sd">        &#39;&#39;&#39;</span>      
+<span class="sd">        &quot;&quot;&quot;</span>    
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Colour range defined from given values:&#39;</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Upper RBG boundary: &#39;</span><span class="p">,</span> <span class="n">upper</span><span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Lower RBG boundary: &#39;</span><span class="p">,</span> <span class="n">lower</span><span class="p">)</span>
@@ -495,23 +486,18 @@
         
 
 <div class="viewcode-block" id="Area.setEnhance"><a class="viewcode-back" href="../../Modules.html#PyTrx.Area.Area.setEnhance">[docs]</a>    <span class="k">def</span> <span class="nf">setEnhance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">diff</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">theta</span><span class="p">):</span>
-        <span class="sd">&#39;&#39;&#39;Set image enhancement parameters. Change brightness and contrast of </span>
-<span class="sd">        image using phi and theta variables.</span>
-<span class="sd">        Change phi and theta values accordingly. See enhanceImg function for </span>
-<span class="sd">        detailed explanation of the parameters.</span>
+        <span class="sd">&quot;&quot;&quot;Set image enhancement parameters. Change brightness and contrast of </span>
+<span class="sd">        image using phi and theta variables. Change phi and theta values </span>
+<span class="sd">        accordingly. See enhanceImg function for detailed explanation of the </span>
+<span class="sd">        parameters.</span>
 <span class="sd">        </span>
-<span class="sd">        :param diff: Inputted as either &#39;light or &#39;dark&#39;, signifying the intensity </span>
-<span class="sd">    of the image pixels. &#39;light&#39; increases the intensity such that dark pixels </span>
-<span class="sd">    become much brighter and bright pixels become slightly brighter. &#39;dark&#39; </span>
-<span class="sd">    decreases the intensity such that dark pixels become much darker and bright </span>
-<span class="sd">    pixels become slightly darker.</span>
+<span class="sd">        :param diff: Inputted as either &#39;light or &#39;dark&#39;, signifying the intensity of the image pixels. &#39;light&#39; increases the intensity such that dark pixels become much brighter and bright pixels become slightly brighter. &#39;dark&#39; decreases the intensity such that dark pixels become much darker and bright pixels become slightly darker.</span>
 <span class="sd">        :type diff: str</span>
 <span class="sd">        :param phi: Defines the intensity of all pixel values</span>
 <span class="sd">        :type phi: int</span>
-<span class="sd">        :param theta: Defines the number of &quot;colours&quot; in the image, e.g. 3 </span>
-<span class="sd">    signifies that all the pixels will be grouped into one of three pixel values</span>
-<span class="sd">        :type theta:int               .</span>
-<span class="sd">        &#39;&#39;&#39;</span>
+<span class="sd">        :param theta: Defines the number of &quot;colours&quot; in the image, e.g. 3 signifies that all the pixels will be grouped into one of three pixel values</span>
+<span class="sd">        :type theta: int               .</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_enhance</span> <span class="o">=</span> <span class="n">diff</span><span class="p">,</span> <span class="n">phi</span><span class="p">,</span> <span class="n">theta</span></div></div>
  
 
@@ -519,7 +505,7 @@
 
 <div class="viewcode-block" id="calcAutoArea"><a class="viewcode-back" href="../../Modules.html#PyTrx.Area.calcAutoArea">[docs]</a><span class="k">def</span> <span class="nf">calcAutoArea</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">colourrange</span><span class="p">,</span> <span class="n">hmatrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> 
                  <span class="n">invprojvars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Detects areas of interest from a given image, and returns pixel and xyz </span>
+    <span class="sd">&quot;&quot;&quot;Detects areas of interest from a given image, and returns pixel and xyz </span>
 <span class="sd">    areas along with polygon coordinates. Detection is performed from the image </span>
 <span class="sd">    using a predefined RBG colour range. The colour range is then used to </span>
 <span class="sd">    extract pixels within that range using the OpenCV function inRange. If a </span>
@@ -539,11 +525,9 @@
 <span class="sd">    :type threshold: int, optional</span>
 <span class="sd">    :param invprojvars: Inverse projection variables [X,Y,Z,uv0], default to None</span>
 <span class="sd">    :type invprojvars: list, optional</span>
-<span class="sd">    :returns: Four list items containing 1) the sum of total detected areas </span>
-<span class="sd">(xyz), 2) XYZ coordinates of detected areas, 3) Sum of total detected areas </span>
-<span class="sd">(px), and 4) UV coordinates of detected areas</span>
+<span class="sd">    :returns: Four list items containing 1) the sum of total detected areas (xyz), 2) XYZ coordinates of detected areas, 3) Sum of total detected areas (px), and 4) UV coordinates of detected areas</span>
 <span class="sd">    :rtype: list</span>
-<span class="sd">    &#39;&#39;&#39;</span>                       
+<span class="sd">    &quot;&quot;&quot;</span>                       
     <span class="c1">#Get upper and lower RBG boundaries from colour range</span>
     <span class="n">upper_boundary</span> <span class="o">=</span> <span class="n">colourrange</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">lower_boundary</span> <span class="o">=</span> <span class="n">colourrange</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -633,7 +617,7 @@
         
 
 <div class="viewcode-block" id="calcManualArea"><a class="viewcode-back" href="../../Modules.html#PyTrx.Area.calcManualArea">[docs]</a><span class="k">def</span> <span class="nf">calcManualArea</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">hmatrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">pxplot</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">invprojvars</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Manually define an area in a given image. User input is facilitated</span>
+    <span class="sd">&quot;&quot;&quot;Manually define an area in a given image. User input is facilitated</span>
 <span class="sd">    through an interactive plot to click around the area of interest. XYZ areas</span>
 <span class="sd">    are calculated if a set of inverse projection variables are given.</span>
 <span class="sd">    </span>
@@ -647,12 +631,9 @@
 <span class="sd">    :type pxplot: list, optional</span>
 <span class="sd">    :param invprojvars: Inverse projection variables [X,Y,Z,uv0], default to None</span>
 <span class="sd">    :type invprojvars: list, optional</span>
-<span class="sd">    :returns: Four list items containing 1) the sum of total detected areas </span>
-<span class="sd">(xyz), 2) XYZ coordinates of detected areas, 3) Sum of total detected areas </span>
-<span class="sd">(px), and 4) UV coordinates of detected areas</span>
+<span class="sd">    :returns: Four list items containing 1) the sum of total detected areas (xyz), 2) XYZ coordinates of detected areas, 3) Sum of total detected areas (px), and 4) UV coordinates of detected areas</span>
 <span class="sd">    :rtype: list</span>
-
-<span class="sd">    &#39;&#39;&#39;</span>    
+<span class="sd">    &quot;&quot;&quot;</span>   
     <span class="c1">#Initialise figure window and plot image</span>
     <span class="n">fig</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="n">imn</span> <span class="o">+</span> <span class="s1">&#39;: Click around region. Press enter &#39;</span>
@@ -724,7 +705,7 @@
 
 
 <div class="viewcode-block" id="defineColourrange"><a class="viewcode-back" href="../../Modules.html#PyTrx.Area.defineColourrange">[docs]</a><span class="k">def</span> <span class="nf">defineColourrange</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">pxplot</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Define colour range manually by clicking on the lightest and </span>
+    <span class="sd">&quot;&quot;&quot;Define colour range manually by clicking on the lightest and </span>
 <span class="sd">    darkest regions of the target extent that will be defined. Plot interaction </span>
 <span class="sd">    information: Left click to select, right click to undo selection, close the </span>
 <span class="sd">    image window to continue, and the window automatically times out after two </span>
@@ -738,7 +719,7 @@
 <span class="sd">    :type pxplot: list, optional</span>
 <span class="sd">    :returns: List containing the upper and lower boundary for pixel detection</span>
 <span class="sd">    :rtype: list</span>
-<span class="sd">    &#39;&#39;&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1">#Initialise figure window</span>
     <span class="n">fig</span><span class="o">=</span><span class="n">plt</span><span class="o">.</span><span class="n">gcf</span><span class="p">()</span>
     <span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="n">imn</span> <span class="o">+</span> <span class="s1">&#39;: Click lightest colour and darkest&#39;</span> 
@@ -788,14 +769,14 @@
    
     
 <div class="viewcode-block" id="getOGRArea"><a class="viewcode-back" href="../../Modules.html#PyTrx.Area.getOGRArea">[docs]</a><span class="k">def</span> <span class="nf">getOGRArea</span><span class="p">(</span><span class="n">pts</span><span class="p">):</span>
-    <span class="sd">&#39;&#39;&#39;Get real world OGR polygons (.shp) from xyz poly pts with real world </span>
+    <span class="sd">&quot;&quot;&quot;Get real world OGR polygons (.shp) from xyz poly pts with real world </span>
 <span class="sd">    points which are compatible with mapping software (e.g. ArcGIS).</span>
 
 <span class="sd">    :param pts: UV/XYZ coordinates of a given area shape</span>
 <span class="sd">    :type pts: arr </span>
 <span class="sd">    :returns: List of OGR geometry polygons</span>
 <span class="sd">    :rtype: list                           </span>
-<span class="sd">    &#39;&#39;&#39;</span>                       
+<span class="sd">    &quot;&quot;&quot;</span>                      
     <span class="c1">#Create geometries from uv/xyz coordinates using ogr                     </span>
     <span class="n">ring</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">Geometry</span><span class="p">(</span><span class="n">ogr</span><span class="o">.</span><span class="n">wkbLinearRing</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pts</span><span class="p">:</span>
