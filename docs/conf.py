@@ -12,10 +12,15 @@
 #
 import os
 import sys
-sys.path.insert(0, os.path.abspath('../../../'))
 sys.path.insert(0, os.path.abspath('../../'))
-sys.path.insert(0, os.path.abspath('../'))
-
+sys.path.insert(0, os.path.abspath('../Area'))
+sys.path.insert(0, os.path.abspath('../CamEnv'))
+sys.path.insert(0, os.path.abspath('../DEM'))
+sys.path.insert(0, os.path.abspath('../FileHandler'))
+sys.path.insert(0, os.path.abspath('../Images'))
+sys.path.insert(0, os.path.abspath('../Line'))
+sys.path.insert(0, os.path.abspath('../Utilities'))
+sys.path.insert(0, os.path.abspath('../Velocity'))
 
 # -- Project information -----------------------------------------------------
 
