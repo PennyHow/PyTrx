@@ -3,5 +3,9 @@ channels:
   - defaults
 dependencies:
   - gdal=2.3.2=py37h2924dbc_0
+  - glob2=0.7=py_0
+  - matplotlib=3.1.1=py37h5429711_0
+  - numpy=1.17.2=py37haad9e8e_0
   - opencv=3.4.2=py37h6fd60c2_1
-
+  - pillow=6.2.0=py37h34e0f95_0
+  - scipy=1.3.1=py37h7c811a0_0
