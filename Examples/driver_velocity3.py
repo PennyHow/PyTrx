@@ -31,19 +31,28 @@ allows flexible intervention and adaptation where needed.
 '''
 
 #Import packages
-import sys
 import cv2
 import glob
 import numpy as np
 from pathlib import Path
 
-#Import PyTrx packages
+#Import PyTrx modules (from PyTrx file directory)
+import sys
 sys.path.append('../')
 from CamEnv import setProjection, optimiseCamera, computeResidualsXYZ
 from DEM import load_DEM
 import Velocity
 import FileHandler
 import Utilities 
+
+##If you have pip/conda installed PyTrx then comment out the PyTrx module
+##imports above and uncomment these ones below
+#from PyTrx.CamEnv import setProjection, optimiseCamera, computeResidualsXYZ
+#from PyTrx.DEM import load_DEM
+#from PyTrx import Velocity
+#from PyTrx import FileHandler
+#from PyTrx import Utilities 
+
  
 #------------------------   Define inputs/outputs   ---------------------------
 
