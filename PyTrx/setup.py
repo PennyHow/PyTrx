@@ -8,7 +8,7 @@ work. If not, see <https://choosealicense.com/licenses/mit/>.
 
 
 PYTRX SETUP FILE
-This file is needed for the PyTrx package initialisation.
+This file is needed for the PyTrx package installation.
 '''
 
 import setuptools
