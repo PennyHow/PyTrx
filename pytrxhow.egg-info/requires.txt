@@ -1,0 +1,6 @@
+gdal>=2
+glob2
+matplotlib
+numpy
+pillow
+scipy

@@ -23,16 +23,21 @@ registration).
 '''
 
 #Import packages
-import sys
 import os
 import numpy as np
 
-#Import PyTrx packages
-sys.path.append('../')
-from CamEnv import CamEnv
-from Velocity import Velocity, Homography
-from FileHandler import writeHomogFile, writeVeloFile, writeVeloSHP, writeCalibFile
-from Utilities import plotVeloPX, plotVeloXYZ, interpolateHelper, plotInterpolate
+#Import PyTrx modules (from PyTrx package)
+from PyTrx.CamEnv import CamEnv
+from PyTrx.Velocity import Velocity, Homography
+from PyTrx.FileHandler import writeHomogFile, writeVeloFile, writeVeloSHP, writeCalibFile
+from PyTrx.Utilities import plotVeloPX, plotVeloXYZ, interpolateHelper, plotInterpolate
+
+##If you have downloaded PyTrx directly from GitHub then comment out the PyTrx
+##module imports above and use these uncomment these ones below
+#from CamEnv import CamEnv
+#from Velocity import Velocity, Homography
+#from FileHandler import writeHomogFile, writeVeloFile, writeVeloSHP, writeCalibFile
+#from Utilities import plotVeloPX, plotVeloXYZ, interpolateHelper, plotInterpolate
 
 #-------------------------   Map data sources   -------------------------------
 

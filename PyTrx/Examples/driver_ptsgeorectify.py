@@ -23,17 +23,18 @@ and as a shape file (.shp).
 
 #Import packages
 import numpy as np
-import sys
 import os
 import osgeo.ogr as ogr
 import osgeo.osr as osr
 import matplotlib.pyplot as plt
 
               
-#Import PyTrx packages
-sys.path.append('../')
-from CamEnv import CamEnv, setProjection, projectUV
+#Import PyTrx modules (from PyTrx package)
+from PyTrx.CamEnv import CamEnv, setProjection, projectUV
 
+##If you have downloaded PyTrx directly from GitHub then comment out the PyTrx
+##module imports above and use these uncomment these ones below
+#from CamEnv import CamEnv, setProjection, projectUV
 
 #-----------------------------   Map data files   -----------------------------
 

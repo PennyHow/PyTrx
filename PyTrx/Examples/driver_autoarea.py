@@ -25,17 +25,22 @@ this script).
 '''
 
 #Import packages
-import sys
 import os
 
-#Import PyTrx packages
-sys.path.append('../')
-from Area import Area
-import FileHandler
-from Velocity import Homography
-from CamEnv import CamEnv
-from Utilities import plotAreaPX, plotAreaXYZ
+#Import PyTrx modules (from PyTrx package)
+from PyTrx.Area import Area
+import PyTrx.FileHandler as FileHandler
+from PyTrx.Velocity import Homography
+from PyTrx.CamEnv import CamEnv
+from PyTrx.Utilities import plotAreaPX, plotAreaXYZ
 
+##If you have downloaded PyTrx directly from GitHub then comment out the PyTrx
+##module imports above and use these uncomment these ones below
+#from Area import Area
+#import FileHandler as FileHandler
+#from Velocity import Homography
+#from CamEnv import CamEnv
+#from Utilities import plotAreaPX, plotAreaXYZ
 
 #-----------------------------   Map data files   -----------------------------
 

@@ -25,17 +25,22 @@ section of this script).
 '''
 
 #Import packages
-import sys
 import os
 
-#Import PyTrx packages
-sys.path.append('../')
-from Line import Line
-from Velocity import Homography
-from CamEnv import CamEnv, optimiseCamera
-import FileHandler
-from Utilities import plotLinePX, plotLineXYZ
+#Import PyTrx modules (from PyTrx package)
+from PyTrx.Line import Line
+from PyTrx.Velocity import Homography
+from PyTrx.CamEnv import CamEnv
+from PyTrx import FileHandler
+from PyTrx.Utilities import plotLinePX, plotLineXYZ
 
+##If you have downloaded PyTrx directly from GitHub then comment out the PyTrx
+##module imports above and use these uncomment these ones below
+#from Line import Line
+#from Velocity import Homography
+#from CamEnv import CamEnv
+#import FileHandler
+#from Utilities import plotLinePX, plotLineXYZ
 
 #---------------------------   Initialisation   -------------------------------
 
