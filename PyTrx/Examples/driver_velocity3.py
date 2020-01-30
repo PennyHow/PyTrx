@@ -44,7 +44,9 @@ from PyTrx import FileHandler
 from PyTrx import Utilities 
 
 ##If you have downloaded PyTrx directly from GitHub then comment out the PyTrx
-##module imports above and use these uncomment these ones below
+##module imports above and uncomment these ones below
+#import sys
+#sys.path.append('../')
 #from CamEnv import setProjection, optimiseCamera, computeResidualsXYZ
 #from DEM import load_DEM
 #import Velocity

@@ -33,7 +33,9 @@ from PyTrx.FileHandler import writeHomogFile, writeVeloFile, writeVeloSHP, write
 from PyTrx.Utilities import plotVeloPX, plotVeloXYZ, interpolateHelper, plotInterpolate
 
 ##If you have downloaded PyTrx directly from GitHub then comment out the PyTrx
-##module imports above and use these uncomment these ones below
+##module imports above and uncomment these ones below
+#import sys
+#sys.path.append('../')
 #from CamEnv import CamEnv
 #from Velocity import Velocity, Homography
 #from FileHandler import writeHomogFile, writeVeloFile, writeVeloSHP, writeCalibFile

@@ -37,7 +37,9 @@ from PyTrx import FileHandler
 from PyTrx.Utilities import plotAreaPX, plotAreaXYZ
 
 ##If you have downloaded PyTrx directly from GitHub then comment out the PyTrx
-##module imports above and use these uncomment these ones below
+##module imports above and uncomment these ones below
+#import sys
+#sys.path.append('../')
 #from Area import Area
 #from Velocity import Homography
 #from CamEnv import CamEnv
