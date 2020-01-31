@@ -1,40 +1,77 @@
 Quickstart
 ==========
 
-Installation
+PyTrx set-up
 ------------
 
-PyTrx v1.1 can be installed through pip with the following simple command:
+PyTrx has been coded with Python 3 and has been tested on Linux and Windows operating systems (it should also work on Apple operating systems too, it just hasn't been tested). PyTrx was originally written using a Linux operating system, so the inputted file path structures given in the example scripts may differ between operating systems and it is therefore advised to check file path structures before running these.
+
+PyTrx v1.1 can either be downloaded directly from the `GitHub repository <https://github.com/PennyHow/PyTrx>`_, or installed through one of two package managers (conda or pip). If installing with a package manager, **we recommend using conda**.
+
+
+Downloading PyTrx from GitHub
+-----------------------------
+
+PyTrx can be downloaded directly through the 'clone or download' icon on `PyTrx's GitHub repository <https://github.com/PennyHow/PyTrx>`_. To use PyTrx, you will need a working distribution of Python and the following key packages, which PyTrx strongly depends on:
+
+* OpenCV (v3 and above): `<https://opencv.org>`_
+
+* GDAL (v2 and above): `<https://gisinternals.com>`_
+
+* Pillow (PIL) (v5 and above): `<https://pythonware.com>`_
+
+Be aware that these dependencies may not necessarily be installed with your distribution of Python (e.g. PythonXY, Anaconda), so you may have to install them separately. The .yml environment file provided in the GitHub repository can be used to `set up an environment <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_ that holds all of the necessary Python packages to run PyTrx. 
+
+PyTrx has been tried and tested with the following dependency version configuration: *OpenCV=3.4.2*, *GDAL=2.3.2*, and *PIL=5.3*. PyTrx also needs other packages, which are commonly included with distributions of Python: *datetime*, *glob*, *imghdr*, *math*, *Matplotlib*, *NumPy*, *operator*, *os*, *pathlib*, *PyLab*, *SciPy*, *struct*, and *sys*. Compatibility with all newer versions of these packages are highly likely.
+
+
+Installing PyTrx through conda
+------------------------------
+
+To install PyTrx with conda, make sure that you have conda installed in your Python environment (or download the `Anaconda Python distribution <https://www.anaconda.com/distribution/>`_). Open up `Anaconda Prompt <https://docs.anaconda.com/anaconda/user-guide/getting-started/>`_ and start by creating a new environment that holds all of the same packages from the base environment: 
+
+.. code-block:: python
+   conda create --clone base --name pytrx_env
+
+We have now created a new environment called 'pytrx_env'. To activate it, run the following command:
+
+.. code-block:: python
+   activate pytrx_env
+
+We have now activated our 'pytrx_env' environment, where we are going to install PyTrx. *If this does not work, write 'conda activate pytrx_env' instead. The activate environment commands differ between operating systems.* Next, to install PyTrx, run the command:
+
+.. code-block:: python
+   conda install pytrx
+
+Conda will prompt us to check and confirm any forseen changes to our environment (e.g. package upgrades or downgrades). Type 'y' if you are happy with the changes. If there are no warnings or errors flagged, PyTrx should now be installed in our environment. To check it has installed, run the command:
+
+.. code-block:: python
+   conda list
+
+This produces a list of all the packages installed in our 'pytrx_env' environment. PyTrx should be listed here. 
+
+PyTrx can be used with an IDE such as Spyder. Spyder comes with Anaconda and you should be able to open it with the command:
+
+.. code-block:: python
+   spyder
+
+To check that PyTrx is working, type in the Python console 'import PyTrx' and hit enter, followed by 'help(PyTrx)'. If PyTrx is working correctly, this should print PyTrx's metadata, including PyTrx's license, a brief description of the toolset, and its structure. Now you are all set up to use PyTrx!
+
+Be aware that the PyTrx example scripts are not included with the conda distribution of PyTrx given the size of the example dataset files. If you wish to use/adapt them, feel free to download them from the `PyTrx GitHub repository <https://github.com/PennyHow/PyTrx>`_ and use them with your installed version of PyTrx.
+
+
+Installing PyTrx through pip
+----------------------------
+
+PyTrx is also available through pip and can be installed with the following simple command:
 
 .. code-block:: python
 
    pip install pytrx
 
-Or through conda:
+**WARNING** There are difficulties with the GDAL package on pip, meaning that GDAL could not be declared explicitly as a PyTrx dependency. Please ensure that GDAL is installed separately if installing PyTrx through pip.
 
-.. code-block:: python
-
-   conda install pytrx
-
-The most recent version of PyTrx can also be downloaded through the `GitHub repository <https://github.com/PennyHow/PyTrx>`_ (under the 'master' branch). The .yml environment file provided in the PyTrx GitHub repository contains an environment suitable for set-up in a Linux or Windows operating system. 
-
-
-Requirements
-------------
-
-PyTrx was originally written using a Linux operating system. Inputted file path structures may differ between operating systems and it is therefore advised to check file path structures before running scripts.
-
-PyTrx has been coded with Python 3 and has the following key dependencies:
-
-* OpenCV (v3.4.2): `<https://opencv.org>`_
-
-* GDAL (v2.3.2): `<https://gisinternals.com>`_
-
-* Pillow (PIL) (v5.3.0): `<https://pythonware.com>`_
-
-If installed with pip or conda, these dependencies will be accounted for and installed if necessary. If building yourself, these packages may not be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to download them from the given links or with a package installer. It is important to download the package versions specified as we cannot guarantee that all others are compatible with PyTrx. PyTrx also needs other packages, which are commonly included with distributions of Python. Compatibility with all versions of these packages are highly likely: *datetime*, *glob*, *imghdr*, *math*, *Matplotlib*, *NumPy*, *operator*, *os*, *pathlib*, *PyLab*, *SciPy*, *struct*, and *sys*.
-
-
+ 
 PyTrx Structure 
 ---------------
 

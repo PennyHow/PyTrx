@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
-Name: pytrxhow
-Version: 1.1.6
+Name: pytrx
+Version: 1.1.0
 Summary: An object-oriented toolset for calculating velocities, surface areas and distances from oblique imagery of glacial environments
 Home-page: https://github.com/PennyHow/PyTrx
 Author: Penelope How
@@ -11,6 +11,8 @@ Description: # PyTrx
             <img src='https://readthedocs.org/projects/pytrx/badge/?version=latest' alt='Documentation Status' />
         </a> <br>
         PyTrx (short for 'Python Tracking') is a Python object-oriented toolbox created for the purpose of calculating real-world measurements from oblique images and time-lapse image series. Its primary purpose is to obtain velocities, surface areas, and distances from imagery of glacial environments. <br>
+        
+        This branch contains the PyTrx toolset along with the distribution setup for sharing documentation with PyTrx's <a href="https://pytrx.readthedocs.io/">readthedocs webpages</a>, and the pip package installer. 
         
         Authors: Penelope How (how@asiaq.gl), Nick Hulton, and Lynne Buie (née Addison)<br>
         
@@ -85,18 +87,15 @@ Description: # PyTrx
         <hr>
         
         <h3>PyTrx set-up and requirements</h3>
+        PyTrx has been coded with Python 3 and has been tested on Linux and Windows operating systems (it should also work on Apple operating systems too, it just hasn't been tested). PyTrx has the following key dependencies: <br><br>
         
-        PyTrx has been coded with Python 3 and has the following key dependencies: <br><br>
+        <b>OpenCV (v3 and above):</b> <a href="https://opencv.org/releases.html">opencv.org</a><br>
+        <b>GDAL (v2 and above):</b> <a href="http://www.gisinternals.com/archive.php">gisinternals.com</a><br>
+        <b>Pillow (PIL) (v5 and above):</b> <a href="http://www.pythonware.com/products/pil/">pythonware.com</a><br><br>
         
-        <b>OpenCV (v3.4.2):</b> <a href="https://opencv.org/releases.html">opencv.org</a><br>
-        <b>GDAL (v2.3.2):</b> <a href="http://www.gisinternals.com/archive.php">gisinternals.com</a><br>
-        <b>Pillow (PIL) (v5.3.0):</b> <a href="http://www.pythonware.com/products/pil/">pythonware.com</a><br><br>
+        PyTrx can either be downloaded directly from the GitHub repository, or installed using a package manager such as conda or pip. If downloading directly from GitHub, be aware that these dependencies may not necessarily be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to install them. These can be specified using the .yml environment file provided in this repository. PyTrx has been tried and tested with the following dependency version configuration: <b>OpenCV=3.4.2</b>, <b>GDAL=2.3.2</b>, and <b>PIL=5.3</b>. PyTrx also needs other packages, which are commonly included with distributions of Python: <b>datetime</b>, <b>glob</b>, <b>imghdr</b>, <b>math</b>, <b>Matplotlib</b>, <b>NumPy</b>, <b>operator</b>, <b>os</b>, <b>pathlib</b>, <b>PyLab</b>, <b>SciPy</b>, <b>struct</b>, and <b>sys</b>. Compatibility with all newer versions of these packages are highly likely.<br>
         
-        These packages may not necessarily be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to download them from the given links or with a package installer (e.g. pip, conda). It is important to download the package versions specified as we cannot guarantee that all others are compatible with PyTrx. <br>
-        
-        PyTrx also needs other packages, which are commonly included with distributions of Python. Compatibility with all versions of these packages are highly likely: <b>datetime</b>, <b>glob</b>, <b>imghdr</b>, <b>math</b>, <b>Matplotlib</b>, <b>NumPy</b>, <b>operator</b>, <b>os</b>, <b>pathlib</b>, <b>PyLab</b>, <b>SciPy</b>, <b>struct</b>, and <b>sys</b> <br>
-        
-        The .yml environment file provided with PyTrx contains an environment suitable for set-up in a Linux or Windows operating system. PyTrx was originally written using a Linux operating system. Inputted file path structures may differ between operating systems and it is therefore advised to check file path structures before running scripts.
+        If you are installing PyTrx through a package manager, <b>we recommend using <a href="https://docs.conda.io/en/latest/">conda</a>. Be aware that the PyTrx example scripts are not included with this distribution of PyTrx given the size of the example dataset files. PyTrx is also available through pip, although difficulties with the GDAL package on pip meant that GDAL could not be declared explicitly as a PyTrx dependency. Please ensure that GDAL is installed separately if installing PyTrx through pip. Please see our <a href="https://pytrx.readthedocs.io/en/latest/Installation.html">readthedocs page on setting up PyTrx</a> for more details.
         
         <hr>
         

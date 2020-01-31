@@ -9,8 +9,8 @@ PyTrx/Line.py
 PyTrx/Utilities.py
 PyTrx/Velocity.py
 PyTrx/__init__.py
-pytrxhow.egg-info/PKG-INFO
-pytrxhow.egg-info/SOURCES.txt
-pytrxhow.egg-info/dependency_links.txt
-pytrxhow.egg-info/requires.txt
-pytrxhow.egg-info/top_level.txt
+pytrx.egg-info/PKG-INFO
+pytrx.egg-info/SOURCES.txt
+pytrx.egg-info/dependency_links.txt
+pytrx.egg-info/requires.txt
+pytrx.egg-info/top_level.txt

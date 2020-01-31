@@ -15,6 +15,7 @@ Authors: Penelope How (how@asiaq.gl), Nick Hulton, and Lynne Buie (née Addison)
    :caption: Contents:
 
    Installation
+   Guide
    Packages
    Examples
    Links

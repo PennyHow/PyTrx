@@ -1,6 +1,6 @@
-gdal>=2
 glob2
 matplotlib
 numpy
+opencv-python>=3
 pillow
 scipy
