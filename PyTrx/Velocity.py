@@ -27,9 +27,9 @@ from PIL import Image
 import numpy.ma as ma
 
 #Import PyTrx functions and classes
-from PyTrx.FileHandler import readMask
-from PyTrx.Images import ImageSequence
-from PyTrx.CamEnv import projectUV, projectXYZ, setProjection
+from FileHandler import readMask
+from Images import ImageSequence
+from CamEnv import projectUV, projectXYZ, setProjection
 
 #------------------------------------------------------------------------------
 class Homography(ImageSequence):

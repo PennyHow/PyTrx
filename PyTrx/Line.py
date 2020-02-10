@@ -18,9 +18,9 @@ import numpy as np
 import ogr
 
 #Import PyTrx functions and classes
-from PyTrx import Velocity
-from PyTrx.Images import ImageSequence
-from PyTrx.CamEnv import projectUV, setProjection
+import Velocity
+from Images import ImageSequence
+from CamEnv import projectUV, setProjection
 
 #------------------------------------------------------------------------------
 

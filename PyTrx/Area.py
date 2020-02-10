@@ -21,10 +21,10 @@ from PIL import Image
 import ogr
 
 #Import PyTrx functions and classes
-from PyTrx.FileHandler import readMask
-from PyTrx.Images import ImageSequence, enhanceImage
-from PyTrx import Velocity
-from PyTrx.CamEnv import projectUV, setProjection
+from FileHandler import readMask
+from Images import ImageSequence, enhanceImage
+import Velocity
+from CamEnv import projectUV, setProjection
 
 #------------------------------------------------------------------------------
 class Area(ImageSequence):

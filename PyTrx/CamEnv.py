@@ -15,10 +15,10 @@ ImGRAFT are noted in related script comments.
 """
 
 #Import PyTrx packages
-from PyTrx.Utilities import plotGCPs, plotCalib, plotResiduals, plotPrincipalPoint
-from PyTrx.FileHandler import readImg, readGCPs, readMatrixDistortion 
-from PyTrx.DEM import ExplicitRaster,load_DEM,voxelviewshed
-from PyTrx.Images import CamImage
+from Utilities import plotGCPs, plotCalib, plotResiduals, plotPrincipalPoint
+from FileHandler import readImg, readGCPs, readMatrixDistortion 
+from DEM import ExplicitRaster,load_DEM,voxelviewshed
+from Images import CamImage
 
 #Import other packages
 import matplotlib.pyplot as plt
