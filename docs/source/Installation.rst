@@ -6,7 +6,7 @@ PyTrx set-up
 
 PyTrx has been coded with Python 3 and has been tested on Linux and Windows operating systems (it should also work on Apple operating systems too, it just hasn't been tested). PyTrx was originally written using a Linux operating system, so the inputted file path structures given in the example scripts may differ between operating systems and it is therefore advised to check file path structures before running these.
 
-PyTrx v1.1 can either be downloaded directly from the `GitHub repository <https://github.com/PennyHow/PyTrx>`_, or installed through one of two package managers (conda or pip). If installing with a package manager, **we recommend using conda**.
+PyTrx v1.1 can either be downloaded directly from the `GitHub repository <https://github.com/PennyHow/PyTrx>`_, or installed PyPI package manager (pip).
 
 
 Downloading PyTrx from GitHub
