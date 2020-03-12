@@ -19,6 +19,7 @@ import numpy as np
 import cv2
 from PIL import Image
 import ogr
+import sys
 
 #Import PyTrx functions and classes
 from FileHandler import readMask
@@ -499,13 +500,13 @@ def calcAutoArea(img, imn, colourrange, hmatrix=None, threshold=None,
 
     #Extract extent based on RBG range
     mask = cv2.inRange(img, lower_boundary, upper_boundary)
-
+        
 #    #Speckle filter to remove noise - needs fixing
 #    mask = cv2.filterSpeckles(mask, 1, 30, 2)
 
     #Polygonize extents using OpenCV findContours function        
-    polyimg, line, hier = cv2.findContours(mask, cv2.RETR_EXTERNAL, 
-                                           cv2.CHAIN_APPROX_NONE)
+    line, hier = cv2.findContours(mask, cv2.RETR_EXTERNAL, 
+                                  cv2.CHAIN_APPROX_NONE)
     
     print('\nDetected ' + str(len(line)) + ' regions in ' + str(imn))
     
@@ -609,7 +610,7 @@ def calcManualArea(img, imn, hmatrix=None, pxplot=None, invprojvars=None):
     #Manual input of points from clicking on plot using pyplot.ginput
     rawpx = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, 
                        mouse_pop=3, mouse_stop=2)
-    print('\n' + imn + ': you clicked ' + str(len(rawpx)) + ' points')
+    print('\n' + str(imn) + ': you clicked ' + str(len(rawpx)) + ' points')
     
     #Show plot
     plt.show()
@@ -697,19 +698,19 @@ def defineColourrange(img, imn, pxplot=None):
     colours = plt.ginput(n=2, timeout=0, show_clicks=True, mouse_add=1, 
                         mouse_pop=3, mouse_stop=2)
     
-    print('\n' + imn + ': you clicked ' + colours)
+    print('\n' + str(imn) + ': you clicked ' + str(colours))
     
     #Show plot
     plt.show()
     plt.close()
     
     #Get pixel intensity value for pt1       
-    col1_rbg = img[colours[0][1],colours[0][0]]
+    col1_rbg = img[int(colours[0][1]),int(colours[0][0])]
     if col1_rbg == 0:
         col1_rbg=1
 
     #Get pixel intensity value for pt2        
-    col2_rbg = img[colours[1][1],colours[1][0]]
+    col2_rbg = img[int(colours[1][1]),int(colours[1][0])]
     if col2_rbg == 0:
         col2_rbg=1
         

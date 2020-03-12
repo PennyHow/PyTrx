@@ -850,7 +850,6 @@ def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg,
         XYZ=np.column_stack([X,Y,Z])
         
     #Snap image plane to DEM extent
-    XYZ=np.column_stack([X[visible[:]],Y[visible[:]],Z[visible[:]]])
     uv0,dummy,inframe=projectXYZ(camloc, camdir, radial, tangen, foclen, 
                                  camcen, refimg, XYZ)
     uv0=np.column_stack([uv0,XYZ])
