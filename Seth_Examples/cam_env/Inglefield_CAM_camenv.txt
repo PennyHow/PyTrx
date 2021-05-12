@@ -1,0 +1,28 @@
+### StarDot1 (CAM) camera environment data
+ 
+### FORMAT: Camera environment name, GCP path, DEM path, Image path, 
+### Calibration path, Camera location, Yaw pitch roll
+
+Camera_environment_name # Name of CamEnv class
+CAM_2019
+
+GCP_path #Path name where Ground Control Point data can be found
+C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield Data/cam_env/GCPs_20190712.txt
+
+DEM_path #Path name where DEM data can be found
+C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield Data/cam_env/201907-Minturn-Elv-5cm-octree_dem.tif
+
+image_path #Path name where master image can be found
+C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield Data/cam_env/CAM_20190712.JPG
+
+Calibration_path #Path name where camera calibration file can be found
+[C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield Data/cam_env/StarDot1_calib.txt]
+
+Camera_location #Location of camera in xyz coordinates
+[500245.488 8724349.876 332.269]
+
+Yaw_pitch_roll #Yaw, pitch, roll of camera (set to [0 0 0] if unknown) 
+[0 0 0] 
+
+Dem_densification #Amount to densify the DEM to permit better mapping of image
+1
