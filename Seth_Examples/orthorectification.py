@@ -6,26 +6,28 @@ Created on Fri Mar  5 17:07:47 2021
 
 #Import packages
 import numpy as np
-import os
+import os, sys
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
-from pyproj import Proj
-from PyTrx.CamEnv import GCPs, CamEnv, setProjection, projectUV, projectXYZ
-import PyTrx.DEM
+sys.path.append('../')
+
+# from pyproj import Proj
+from CamEnv import GCPs, CamEnv, setProjection, projectUV, projectXYZ, optimiseCamera
+import DEM
 # from Images import CamImage
 
 # =============================================================================
 # Define camera environment
 # =============================================================================
 
-ingleCamEnv = 'C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data/cam_env/Inglefield_CAM_camenv.txt'
-ingle_calibimg = 'C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data/cam_env/CAM_20190712.JPG'
+directory = os.getcwd()
+ingleCamEnv = directory + '/cam_env/Inglefield_CAM_camenv.txt'
+ingle_calibimg = directory + '/Inglefield_Data/INGLEFIELD_CAM/2019/INGLEFIELD_CAM_StarDot1_20190712_030000.JPG'
 
 #Define data output directory
-destination = 'C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data'
+destination = directory + '/results'
 if not os.path.exists(destination):
     os.makedirs(destination)
-    
 print(destination)
 
 # Define camera environment
@@ -35,13 +37,12 @@ ingleCam = CamEnv(ingleCamEnv)
 dem = ingleCam.getDEM()
 
 # Define GCP class
-inglefield_gcps = 'C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data/cam_env/GCPs_20190712.txt'
+inglefield_gcps = directory + '/cam_env/GCPs_20190712.txt'
 gcps = GCPs(dem, inglefield_gcps, ingle_calibimg)
 ingle_xy = gcps.getGCPs()
 
 # Report calibration data
 ingleCam.reportCalibData()
-ingleCam.getCamMatrix()
 
 #Get inverse projection variables through camera info               
 invprojvars = setProjection(dem, ingleCam._camloc, ingleCam._camDirection, 
@@ -49,7 +50,15 @@ invprojvars = setProjection(dem, ingleCam._camloc, ingleCam._camDirection,
                             ingleCam._camCen, ingleCam._refImage)
 
 #Inverse project image coordinates using function from CamEnv object                       
-ingle_xyz = projectUV(ingle_xy, invprojvars)
+ingle_xyz = projectUV(ingle_xy[1], invprojvars)
+
+    
+#Optimise camera environment
+# ingleCam.optimiseCamEnv('YPR')
+# opt_projvars = optimiseCamera('YPR', [ingleCam._camloc, ingleCam._camDirection, 
+#                               ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
+#                               ingleCam._camCen, ingleCam._refImage], ingle_xy[0], 
+#                               ingle_xy[1], 'trf', show=False)
 
 #Retrieve DEM from CamEnv object
 demobj=ingleCam.getDEM()
@@ -70,7 +79,6 @@ ax1.tick_params(axis='both', which='major', labelsize=0)
 ax1.imshow(dem, origin='lower', extent=demextent, cmap='gray')
 ax1.axis([demextent[0], demextent[1], demextent[2], demextent[3]])
 cloc = ax1.scatter(post[0], post[1], c='g', s=10, label='Camera location')
-
 
 
 # # =============================================================================

@@ -101,8 +101,8 @@ class CamImage(object):
             #Check file type
             ftype=imghdr.what(path)
             if ftype is None:
-                print('File exists but not image type: ' + str(ftype))
-                return False
+                print('File exists but unknown image type: ' + str(ftype))
+                return True
             else:
                 print('File found of image type: ' + str(ftype))
                 return True
@@ -197,7 +197,11 @@ class CamImage(object):
         """Return the size of the image (which is obtained from the image Exif 
         information)."""        
         if self._imsize is None:
-            self._imsize,self._timestamp=self.getExif()
+            try:
+                self._imsize,self._timestamp=self.getExif()
+            except:
+                im = self.getImageArray()
+                self._imsize = list(im.shape)
         return self._imsize
 
         
