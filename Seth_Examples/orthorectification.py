@@ -53,13 +53,14 @@ invprojvars = setProjection(dem, ingleCam._camloc, ingleCam._camDirection,
 ingle_xyz = projectUV(ingle_xy[1], invprojvars)
 
 ingleCam.showGCPs()
-    
-# Optimise camera environment
-ingleCam.optimiseCamEnv('YPR')
-opt_projvars = optimiseCamera('YPR', [ingleCam._camloc, ingleCam._camDirection, 
-                              ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
-                              ingleCam._camCen, ingleCam._refImage], ingle_xy[0], 
-                              ingle_xy[1], 'trf', show=False)
+
+
+# # Optimise camera environment
+# ingleCam.optimiseCamEnv('YPR')
+# opt_projvars = optimiseCamera('YPR', [ingleCam._camloc, ingleCam._camDirection, 
+#                               ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
+#                               ingleCam._camCen, ingleCam._refImage], ingle_xy[0], 
+#                               ingle_xy[1], 'trf', show=False)
 
 #Retrieve DEM from CamEnv object
 demobj=ingleCam.getDEM()
