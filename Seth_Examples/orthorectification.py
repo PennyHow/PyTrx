@@ -49,6 +49,8 @@ invprojvars = setProjection(dem, ingleCam._camloc, ingleCam._camDirection,
                             ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
                             ingleCam._camCen, ingleCam._refImage)
 
+ingleCam.showGCPs()
+
 #Inverse project image coordinates using function from CamEnv object                       
 ingle_xyz = projectUV(ingle_xy[1], invprojvars)
 
