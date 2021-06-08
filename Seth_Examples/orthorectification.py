@@ -49,18 +49,17 @@ invprojvars = setProjection(dem, ingleCam._camloc, ingleCam._camDirection,
                             ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
                             ingleCam._camCen, ingleCam._refImage)
 
-ingleCam.showGCPs()
-
 #Inverse project image coordinates using function from CamEnv object                       
 ingle_xyz = projectUV(ingle_xy[1], invprojvars)
 
+ingleCam.showGCPs()
     
-#Optimise camera environment
-# ingleCam.optimiseCamEnv('YPR')
-# opt_projvars = optimiseCamera('YPR', [ingleCam._camloc, ingleCam._camDirection, 
-#                               ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
-#                               ingleCam._camCen, ingleCam._refImage], ingle_xy[0], 
-#                               ingle_xy[1], 'trf', show=False)
+# Optimise camera environment
+ingleCam.optimiseCamEnv('YPR')
+opt_projvars = optimiseCamera('YPR', [ingleCam._camloc, ingleCam._camDirection, 
+                              ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
+                              ingleCam._camCen, ingleCam._refImage], ingle_xy[0], 
+                              ingle_xy[1], 'trf', show=False)
 
 #Retrieve DEM from CamEnv object
 demobj=ingleCam.getDEM()
@@ -114,17 +113,6 @@ cloc = ax1.scatter(post[0], post[1], c='g', s=10, label='Camera location')
 # Z[Z == -9999] = np.nan
 # vals = ~np.isnan(Z)
 
-
-# # Sample DEM
-# xx_sub = xx[2000:3000, 200:2000]
-# yy_sub = yy[2000:3000, 200:2000]
-# dem_sub = Z[2000:3000, 200:2000]
-# vals_sub = ~np.isnan(dem_sub)
-# z_griddata = griddata(np.array([xx_sub[vals_sub].ravel(),
-#                                              yy_sub[vals_sub].ravel()]).T, 
-#                                              dem_sub[vals_sub].ravel(),                    
-                                                # (xx_sub,yy_sub), 
-                                                # method='nearest')
 #------------------   Export xyz locations as .txt file   ---------------------
 
 # print('\n\nSAVING TEXT FILE')
