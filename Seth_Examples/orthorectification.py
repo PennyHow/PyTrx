@@ -44,23 +44,30 @@ ingle_xy = gcps.getGCPs()
 # Report calibration data
 ingleCam.reportCalibData()
 
-#Get inverse projection variables through camera info               
-invprojvars = setProjection(dem, ingleCam._camloc, ingleCam._camDirection, 
-                            ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
-                            ingleCam._camCen, ingleCam._refImage)
-
-#Inverse project image coordinates using function from CamEnv object                       
-ingle_xyz = projectUV(ingle_xy[1], invprojvars)
-
+#Show GCPs                           
 ingleCam.showGCPs()
 
+#Show Camera plots                          
+ingleCam.showPrincipalPoint()
+ingleCam.showCalib()
 
-# # Optimise camera environment
+# #Get inverse projection variables through camera info            
+# invprojvars = setProjection(dem, ingleCam._camloc, ingleCam._camDirection, 
+#                             ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
+#                             ingleCam._camCen, ingleCam._refImage)
+
+# #Inverse project image coordinates using function from CamEnv object                       
+# ingle_xyz = projectUV(ingle_xy[1], invprojvars)
+
+
+#Optimise camera environment
 # ingleCam.optimiseCamEnv('YPR')
 # opt_projvars = optimiseCamera('YPR', [ingleCam._camloc, ingleCam._camDirection, 
 #                               ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
 #                               ingleCam._camCen, ingleCam._refImage], ingle_xy[0], 
 #                               ingle_xy[1], 'trf', show=False)
+
+
 
 #Retrieve DEM from CamEnv object
 demobj=ingleCam.getDEM()
@@ -69,9 +76,6 @@ dem=demobj.getZ()
 
 #Get camera position (xyz) from CamEnv object
 post = ingleCam._camloc
-
-#Show GCPs                           
-ingleCam.showGCPs()
 
 #Plot DEM 
 fig,(ax1) = plt.subplots(1, figsize=(15,15))
