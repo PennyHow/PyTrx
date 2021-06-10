@@ -77,16 +77,6 @@ dem=demobj.getZ()
 #Get camera position (xyz) from CamEnv object
 post = ingleCam._camloc
 
-#Plot DEM 
-fig,(ax1) = plt.subplots(1, figsize=(15,15))
-fig.canvas.set_window_title('TU1 calving event locations')
-ax1.locator_params(axis = 'x', nbins=8)
-ax1.tick_params(axis='both', which='major', labelsize=0)
-ax1.imshow(dem, origin='lower', extent=demextent, cmap='gray')
-ax1.axis([demextent[0], demextent[1], demextent[2], demextent[3]])
-cloc = ax1.scatter(post[0], post[1], c='g', s=10, label='Camera location')
-
-
 # # =============================================================================
 # # Define camera location coordinates 
 # #   Project camera lat/long coordinates to UTM (Z 19N) and then use PyTrx DEM
