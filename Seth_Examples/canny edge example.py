@@ -15,10 +15,16 @@ import glob
 import pandas as pd
 import pathlib
 from datetime import datetime
+import os, sys
+
+sys.path.append('../')
 
 
 # Load image
-image1 = imread('C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data/INGLEFIELD_CAM//2019/INGLEFIELD_CAM_StarDot1_20190712_060000.jpg', as_gray= True)
+directory = os.getcwd()
+inglecam_img1 = directory + '/Inglefield_Data/INGLEFIELD_CAM/2019/INGLEFIELD_CAM_StarDot1_20190712_030000.JPG'
+
+image1 = imread(inglecam_img1, as_gray= True)
 image1 = ndi.gaussian_filter(image1, 3)
 
 # Compute the Canny filter for two values of sigma
@@ -43,11 +49,12 @@ ax[0,2].plot(edges2line, color = "red", linewidth=1)
 ax[0,2].imshow(edges2[:, :], cmap='gray')
 ax[0,2].set_title(r'Canny filter, $\sigma=3$', fontsize=10)
 
-fig.tight_layout()
-plt.show()
+# fig.tight_layout()
+# plt.show()
 
 # Image 2
-image2 = imread('C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data/INGLEFIELD_CAM/2019/INGLEFIELD_CAM_StarDot1_20190731_210000.jpg', as_gray=True)
+inglecam_img2 = directory + '/Inglefield_Data/INGLEFIELD_CAM/2019/INGLEFIELD_CAM_StarDot1_20190731_210000.jpg'
+image2 = imread(inglecam_img2, as_gray=True)
 
 image2 = ndi.gaussian_filter(image2, 3)
 
@@ -76,7 +83,8 @@ ax[1,2].set_title(r'Canny filter, $\sigma=3$', fontsize=10)
 # plt.show()
 
 # Image 3
-image3 = imread('C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data/INGLEFIELD_CAM//2019/INGLEFIELD_CAM_StarDot1_20190810_210000.jpg', as_gray=True)
+inglecam_img3 = directory + '/Inglefield_Data/INGLEFIELD_CAM/2019/INGLEFIELD_CAM_StarDot1_20190810_210000.jpg'
+image3 = imread(inglecam_img3, as_gray=True)
 
 image3 = ndi.gaussian_filter(image3, 3)
 
@@ -112,7 +120,8 @@ plt.show()
 
 # 2019
 waterlevels2019 = []
-directory2019 = glob.glob('C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data/INGLEFIELD_CAM/2019/*')
+dir2019files = directory + '/Inglefield_Data/INGLEFIELD_CAM/2019/*'
+directory2019 = glob.glob(dir2019files)
 time_list2019 = []
 
 for i in directory2019:
@@ -164,7 +173,8 @@ plt.gca().invert_yaxis()
 
 # 2020 Data
 waterlevels2020 = []
-directory2020 = glob.glob('C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data/INGLEFIELD_CAM/2020/*')
+dir2020files = directory + '/Inglefield_Data/INGLEFIELD_CAM/2020/*'
+directory2020 = glob.glob(dir2020files)
 time_list2020 = []
 
 for i in directory2020:
@@ -219,29 +229,29 @@ plt.gca().invert_yaxis()
 # Bubbler Data
 # =============================================================================
 
-dateparse = lambda x: datetime.strptime(x, '%m/%d/%Y %H:%M:%S')
+# dateparse = lambda x: datetime.strptime(x, '%m/%d/%Y %H:%M:%S')
 
-bubdf2019 = pd.read_csv('C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data/modified_2019.csv', 
-                    parse_dates={'datetime': ['Dates', 'Times']}, date_parser=dateparse, index_col= 'datetime')
+# bubdf2019 = pd.read_csv('C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data/modified_2019.csv', 
+#                     parse_dates={'datetime': ['Dates', 'Times']}, date_parser=dateparse, index_col= 'datetime')
 
-bubdf2020 = pd.read_csv('C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data/modified_2020.csv', 
-                    parse_dates={'datetime': ['Dates', 'Times']}, date_parser=dateparse, index_col= 'datetime')
+# bubdf2020 = pd.read_csv('C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data/modified_2020.csv', 
+#                     parse_dates={'datetime': ['Dates', 'Times']}, date_parser=dateparse, index_col= 'datetime')
 
-# year2019 = bubdf.iloc[0:5050, :]
-# year2020 = bubdf.iloc[5051:, :]
-bubdf2019.resample('3H').mean()
-bubdf2020.resample('3H').mean()
+# # year2019 = bubdf.iloc[0:5050, :]
+# # year2020 = bubdf.iloc[5051:, :]
+# bubdf2019.resample('3H').mean()
+# bubdf2020.resample('3H').mean()
 
-fig, ax = plt.subplots(2,2)
+# fig, ax = plt.subplots(2,2)
 
-ax[0,0].plot(df1.index, df1['water level'])
-ax[0,0].invert_yaxis()
-ax[0,1].plot(df2.index, df2['water level'])
-ax[0,1].invert_yaxis()
-ax[1,0].scatter(bubdf2019.index, bubdf2019['ING Stage DCP-raw'])
-ax[1,1].scatter(bubdf2020.index, bubdf2020['ING Stage DCP-raw'])
+# ax[0,0].plot(df1.index, df1['water level'])
+# ax[0,0].invert_yaxis()
+# ax[0,1].plot(df2.index, df2['water level'])
+# ax[0,1].invert_yaxis()
+# ax[1,0].scatter(bubdf2019.index, bubdf2019['ING Stage DCP-raw'])
+# ax[1,1].scatter(bubdf2020.index, bubdf2020['ING Stage DCP-raw'])
 
-plt.show()
+# plt.show()
 
 
 
