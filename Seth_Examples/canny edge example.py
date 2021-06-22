@@ -38,16 +38,16 @@ rowsum = np.sum(edges2.astype(int), axis = 1)
 edges2line = [rowsum.argmax()]*cols1
 
 # display results
-fig, ax = plt.subplots(nrows=3, ncols=3)
+fig1, ax1 = plt.subplots(nrows=3, ncols=3)
 
-ax[0,0].imshow(image1, cmap='gray')
-ax[0,0].set_title('noisy image', fontsize=10)
+ax1[0,0].imshow(image1, cmap='gray')
+ax1[0,0].set_title('noisy image', fontsize=10)
 
-ax[0,1].plot(rowsum)
+ax1[0,1].plot(rowsum)
 
-ax[0,2].plot(edges2line, color = "red", linewidth=1)
-ax[0,2].imshow(edges2[:, :], cmap='gray')
-ax[0,2].set_title(r'Canny filter, $\sigma=3$', fontsize=10)
+ax1[0,2].plot(edges2line, color = "red", linewidth=1)
+ax1[0,2].imshow(edges2[:, :], cmap='gray')
+ax1[0,2].set_title(r'Canny filter, $\sigma=3$', fontsize=10)
 
 # fig.tight_layout()
 # plt.show()
@@ -70,14 +70,14 @@ edges4line = [rowsum2.argmax()]*cols2
 # display results
 # fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(8, 3))
 
-ax[1,0].imshow(image2, cmap='gray')
-ax[1,0].set_title('noisy image', fontsize=10)
+ax1[1,0].imshow(image2, cmap='gray')
+ax1[1,0].set_title('noisy image', fontsize=10)
 
-ax[1,1].plot(rowsum2)
+ax1[1,1].plot(rowsum2)
 
-ax[1,2].plot(edges4line, color = "red", linewidth=1)
-ax[1,2].imshow(edges4, cmap='gray')
-ax[1,2].set_title(r'Canny filter, $\sigma=3$', fontsize=10)
+ax1[1,2].plot(edges4line, color = "red", linewidth=1)
+ax1[1,2].imshow(edges4, cmap='gray')
+ax1[1,2].set_title(r'Canny filter, $\sigma=3$', fontsize=10)
 
 # fig.tight_layout()
 # plt.show()
@@ -100,16 +100,16 @@ edges6line = [rowsum3.argmax()]*cols3
 # display results
 # fig, ax = plt.subplots(nrows=1, ncols=3, figsize=(8, 3))
 
-ax[2,0].imshow(image3, cmap='gray')
-ax[2,0].set_title('noisy image', fontsize=10)
+ax1[2,0].imshow(image3, cmap='gray')
+ax1[2,0].set_title('noisy image', fontsize=10)
 
-ax[2,1].plot(rowsum3)
+ax1[2,1].plot(rowsum3)
 
-ax[2,2].plot(edges6line, color = "red", linewidth=1)
-ax[2,2].imshow(edges6, cmap='gray')
-ax[2,2].set_title(r'Canny filter, $\sigma=3$', fontsize=10)
+ax1[2,2].plot(edges6line, color = "red", linewidth=1)
+ax1[2,2].imshow(edges6, cmap='gray')
+ax1[2,2].set_title(r'Canny filter, $\sigma=3$', fontsize=10)
 
-fig.tight_layout()
+fig1.tight_layout()
 plt.show()
 
 
@@ -160,16 +160,23 @@ df1 = pd.DataFrame(time_list2019)
 df1.columns = ['time', 'water level']
 df1 = df1.set_index('time')
 print(df1.shape)
-plt.scatter(df1.index, df1['water level'], c = 'blue')
-plt.title('2019 unfiltered data')
-plt.gca().invert_yaxis()
+
+fig2, ax2 = plt.subplots(1)
+ax2.scatter(df1.index, df1['water level'], c = 'blue')
+ax2.tick_params(axis = 'x', labelrotation = 45)
+ax2.set_title('2019 unfiltered data')
+ax2.set_xlabel('Time')
+ax2.invert_yaxis()
 
 df1.drop(df1[df1['water level'] < (Q1_2019[0] -1.5 * IQR_2019[0])].index, inplace=True)
 df1.drop(df1[df1['water level'] > (Q3_2019[0] +1.5 *IQR_2019[0])].index, inplace=True)
 print(df1.shape)
-plt.plot(df1.index, df1['water level'], c = 'green')
-plt.title('2019 corrected data')
-plt.gca().invert_yaxis()
+fig3, ax3 = plt.subplots(1)
+ax3.plot(df1.index, df1['water level'], c = 'green')
+ax3.tick_params(axis = 'x', labelrotation = 45)
+ax3.set_title('2019 corrected data')
+ax3.set_xlabel('Time')
+ax3.invert_yaxis()
 
 # 2020 Data
 waterlevels2020 = []
@@ -205,53 +212,73 @@ for i in directory2020:
 df_filter2 = pd.DataFrame (waterlevels2020)
 df_filter2.columns = ['water level']
 z2 = np.abs(stats.zscore(df_filter2))
-Q1_2020 = df_filter2.quantile(0.25)
-Q3_2020 = df_filter2.quantile(0.75)
+Q1_2020 = df_filter2.quantile(0.3)
+Q3_2020 = df_filter2.quantile(0.7)
 IQR_2020 = Q3_2020 - Q1_2020
 
 df2 = pd.DataFrame(time_list2020)
 df2.columns = ['time', 'water level']
 df2 = df2.set_index('time')
 print(df2.shape)
-plt.scatter(df2.index, df2['water level'], c = 'blue')
-plt.title('2020 unfiltered data')
-plt.gca().invert_yaxis()
+
+fig4, ax4 = plt.subplots(1)
+ax4.scatter(df2.index, df2['water level'], c = 'blue')
+ax4.tick_params(axis = 'x', labelrotation = 45)
+ax4.set_title('2020 unfiltered data')
+ax4.set_xlabel('Time')
+ax4.invert_yaxis()
 
 df2.drop(df2[df2['water level'] < (Q1_2020[0] -1.5 * IQR_2020[0])].index, inplace=True)
 df2.drop(df2[df2['water level'] > (Q3_2020[0] +1.5 *IQR_2020[0])].index, inplace=True)
 print(df2.shape)
-plt.plot(df2.index, df2['water level'], c = 'green')
-plt.title('2020 corrected data')
-plt.gca().invert_yaxis()
+
+fig5, ax5 = plt.subplots(1)
+ax5.plot(df2.index, df2['water level'], c = 'green')
+ax5.tick_params(axis = 'x', labelrotation = 45)
+ax5.set_title('2020 corrected data')
+ax5.set_xlabel('Time')
+ax5.invert_yaxis()
 
 
 # =============================================================================
 # Bubbler Data
 # =============================================================================
 
-# dateparse = lambda x: datetime.strptime(x, '%m/%d/%Y %H:%M:%S')
+bubblerdata2019 = directory + '/Inglefield_Data/modified_2019_excel.xlsx'
+bubdf2019 = pd.read_excel(bubblerdata2019, parse_dates={'datetime': ['Dates', 'Times']}, index_col= 'datetime')
 
-# bubdf2019 = pd.read_csv('C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data/modified_2019.csv', 
-#                     parse_dates={'datetime': ['Dates', 'Times']}, date_parser=dateparse, index_col= 'datetime')
+bubblerdata2020 = directory + '/Inglefield_Data/modified_2020_excel.xlsx'
+bubdf2020 = pd.read_excel(bubblerdata2020, parse_dates={'datetime': ['Dates', 'Times']}, index_col= 'datetime')
 
-# bubdf2020 = pd.read_csv('C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield_Data/modified_2020.csv', 
-#                     parse_dates={'datetime': ['Dates', 'Times']}, date_parser=dateparse, index_col= 'datetime')
+bubdf2019 = pd.to_numeric(bubdf2019['ING Stage DCP-raw'], errors="coerce")
+bubdf2020 = pd.to_numeric(bubdf2020['ING Stage DCP-raw'], errors="coerce")
 
-# # year2019 = bubdf.iloc[0:5050, :]
-# # year2020 = bubdf.iloc[5051:, :]
-# bubdf2019.resample('3H').mean()
-# bubdf2020.resample('3H').mean()
+resampled2019 = bubdf2019.resample('3H').mean()
+resampled2020 = bubdf2020.resample('3H').mean()
 
-# fig, ax = plt.subplots(2,2)
+fig6, ax6 = plt.subplots(2,2, constrained_layout = True, sharex = 'col')
 
-# ax[0,0].plot(df1.index, df1['water level'])
-# ax[0,0].invert_yaxis()
-# ax[0,1].plot(df2.index, df2['water level'])
-# ax[0,1].invert_yaxis()
-# ax[1,0].scatter(bubdf2019.index, bubdf2019['ING Stage DCP-raw'])
-# ax[1,1].scatter(bubdf2020.index, bubdf2020['ING Stage DCP-raw'])
 
-# plt.show()
+ax6[0,0].plot(df1.index, df1['water level'])
+ax6[0,0].invert_yaxis()
+ax6[0,0].set_ylabel('Water Level (row)')
+ax6[0,0].set_title('2019 Data')
+ax6[0,1].plot(df2.index, df2['water level'])
+ax6[0,1].invert_yaxis()
+ax6[0,1].set_title('2020 Data')
+ax6[1,0].plot(resampled2019.index, resampled2019)
+ax6[1,0].set_ylabel('Raw Stage (m)')
+ax6[1,0].set_xlabel('Time')
+ax6[1,1].plot(resampled2020.index, resampled2020)
+ax6[1,1].set_xlabel('Time')
+
+ax6[0,0].tick_params(axis = 'x', labelrotation = 45)
+ax6[0,1].tick_params(axis = 'x', labelrotation = 45)
+ax6[1,0].tick_params(axis = 'x', labelrotation = 45)
+ax6[1,1].tick_params(axis = 'x', labelrotation = 45)
+
+fig6.suptitle('Inglefield Water Level Data', fontsize = 16)
+plt.show()
 
 
 
