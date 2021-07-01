@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 sys.path.append('../')
 
-# from pyproj import Proj
+from pyproj import Proj
 from CamEnv import GCPs, CamEnv, setProjection, projectUV, projectXYZ, optimiseCamera
 import DEM
 # from Images import CamImage
@@ -83,12 +83,12 @@ post = ingleCam._camloc
 # #   functionality to get elevation (Z) at that location
 # # =============================================================================
 
-# # Inglefield CAM (Right side)
-# # project camera coordinates to utm
-# camlocx = -68.988806
-# camlocy = 78.591213
-# camlocproj = Proj("+proj=utm +zone=19 +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
-# camlocproj(camlocx, camlocy)
+# Inglefield CAM (Right side)
+# project camera coordinates to utm
+camlocx = -68.988806
+camlocy = 78.591213
+camlocproj = Proj("+proj=utm +zone=19N +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+camlocproj(camlocx, camlocy)
 
 # rowcoords = dem.getData(0)[0,:]    
 # colcoords = dem.getData(1)[:,0]
