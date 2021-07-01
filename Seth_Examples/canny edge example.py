@@ -149,23 +149,24 @@ IQR_2019 = Q3_2019 - Q1_2019
 df1 = pd.DataFrame(time_list2019)
 df1.columns = ['time', 'water level']
 df1 = df1.set_index('time')
-print(df1.shape)
+print('2019 unfiltered dataframe size' + str(df1.shape))
 
-fig2, ax2 = plt.subplots(1)
+fig2, ax2 = plt.subplots(1, constrained_layout = True)
 ax2.scatter(df1.index, df1['water level'], c = 'blue')
 ax2.tick_params(axis = 'x', labelrotation = 45)
 ax2.set_title('2019 unfiltered data')
-ax2.set_xlabel('Time')
+ax2.set_ylabel('Row #')
 ax2.invert_yaxis()
 
 df1.drop(df1[df1['water level'] < (Q1_2019[0] -1.5 * IQR_2019[0])].index, inplace=True)
 df1.drop(df1[df1['water level'] > (Q3_2019[0] +1.5 *IQR_2019[0])].index, inplace=True)
-print(df1.shape)
-fig3, ax3 = plt.subplots(1)
+print('2019 filtered dataframe size' + str(df1.shape))
+
+fig3, ax3 = plt.subplots(1, constrained_layout = True)
 ax3.plot(df1.index, df1['water level'], c = 'green')
 ax3.tick_params(axis = 'x', labelrotation = 45)
 ax3.set_title('2019 corrected data')
-ax3.set_xlabel('Time')
+ax3.set_ylabel('Row #')
 ax3.invert_yaxis()
 
 # 2020 Data
@@ -209,24 +210,24 @@ IQR_2020 = Q3_2020 - Q1_2020
 df2 = pd.DataFrame(time_list2020)
 df2.columns = ['time', 'water level']
 df2 = df2.set_index('time')
-print(df2.shape)
+print('2020 unfiltered dataframe size' + str(df2.shape))
 
-fig4, ax4 = plt.subplots(1)
+fig4, ax4 = plt.subplots(1, constrained_layout = True)
 ax4.scatter(df2.index, df2['water level'], c = 'blue')
 ax4.tick_params(axis = 'x', labelrotation = 45)
 ax4.set_title('2020 unfiltered data')
-ax4.set_xlabel('Time')
+ax4.set_ylabel('Row #')
 ax4.invert_yaxis()
 
 df2.drop(df2[df2['water level'] < (Q1_2020[0] -1.5 * IQR_2020[0])].index, inplace=True)
 df2.drop(df2[df2['water level'] > (Q3_2020[0] +1.5 *IQR_2020[0])].index, inplace=True)
-print(df2.shape)
+print('2020 filtered dataframe size' + str(df2.shape))
 
-fig5, ax5 = plt.subplots(1)
+fig5, ax5 = plt.subplots(1, constrained_layout = True)
 ax5.plot(df2.index, df2['water level'], c = 'green')
 ax5.tick_params(axis = 'x', labelrotation = 45)
 ax5.set_title('2020 corrected data')
-ax5.set_xlabel('Time')
+ax5.set_ylabel('Row #')
 ax5.invert_yaxis()
 
 
@@ -282,8 +283,12 @@ mergedf2020.loc[(mergedf2020['stage_filtered'] < 0.07), 'stage_filtered'] = np.n
 fig7, ax7 = plt.subplots(2, constrained_layout = True)
 ax7[0].scatter(mergedf2019['water level'], mergedf2019['stage_filtered'])
 ax7[0].set_title('2019')
+ax7[0].set_ylabel('Raw Stage (m)')
+ax7[0].set_xlabel('Water level (row)')
 ax7[1].scatter(mergedf2020['water level'], mergedf2020['stage_filtered'])
 ax7[1].set_title('2020')
+ax7[1].set_ylabel('Raw Stage (m)')
+ax7[1].set_xlabel('Water level (row)')
 
 plt.show()
 
