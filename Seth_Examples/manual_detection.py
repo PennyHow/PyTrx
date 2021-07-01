@@ -52,7 +52,8 @@ for i in directory2019:
     choices.append(tuple([c, i, maxsum]))
         
 df = pd.DataFrame(choices, columns= ['choice', 'path', 'maxsum'])
-df['lineloc'] = ""
+
+linelocs = []
 
 for i, row in df.iterrows():
     if row['choice'] == 0:
@@ -61,6 +62,8 @@ for i, row in df.iterrows():
         plt.show()
         levelguess = input("What 'y' value for the top of the water level?")
         guess = int(levelguess)
-        row['lineloc'] = guess
+        linelocs.append(guess)
     else:
-        row['lineloc'] = row['maxsum']
+        linelocs.append(row['maxsum'])
+        
+df['lineloc'] = linelocs
