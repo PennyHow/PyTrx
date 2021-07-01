@@ -10,7 +10,7 @@ GCP_path #Path name where Ground Control Point data can be found
 ../Seth_Examples/cam_env/GCPs_20190712.txt
 
 DEM_path #Path name where DEM data can be found
-../Seth_Examples/cam_env/201907-Minturn-Elv-5cm-octree_dem.tif
+../Seth_Examples/cam_env/201907-Minturn-Elv-2cm-octree_dem.tif
 
 image_path #Path name where master image can be found
 ../Seth_Examples/Inglefield_Data/INGLEFIELD_CAM/2019/INGLEFIELD_CAM_StarDot1_20190712_030000.JPG
