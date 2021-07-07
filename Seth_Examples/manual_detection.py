@@ -31,6 +31,7 @@ directory2019 = glob.glob(dir2019files)
 choices = []
 time_list2020 = []
 
+print('\nValidate Edge Detection')
 for i in directory2019:
     
     # parse time stamp
@@ -59,7 +60,7 @@ for i in directory2019:
     plt.show()
     
     # image check
-    choice = input("is the image good? 0 = bad, 1 = good")
+    choice = input("Is the line at the top of the river water level? 0 = no, 1 = yes")
     c = int(choice)
     choices.append(tuple([time, c, i, maxsum]))
      
@@ -69,6 +70,8 @@ df = df.set_index('time')
 
 # Correct water levels
 linelocs = []
+
+print('\nInput correct water levels')
 
 for i, row in df.iterrows():
     if row['choice'] == 0:
@@ -98,6 +101,7 @@ mergedf2019.loc[(mergedf2019['stage_filtered'] < 0.07), 'stage_filtered'] = np.n
 
 ## Export DataFrame 
 mergedf2019.to_csv(directory + '/results/manual_detection_results.csv')
+print('\nData exported to CSV file... Recommended to double check values')
 
 ## Recommended to check CSV file to see if anything needs to be changed ##
 # Re-import DataFrame from CSV file
