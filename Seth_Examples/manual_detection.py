@@ -21,8 +21,10 @@ import os, sys
 sys.path.append('../')
 
 
-# Load image
+# Load images
 directory = os.getcwd()
+
+## 2019 manual detection ##
 
 dir2019files = directory + '/Inglefield_Data/INGLEFIELD_CAM/2019/*'
 directory2019 = glob.glob(dir2019files)
@@ -51,18 +53,21 @@ for i in directory2019:
     maxsum = rowsum.argmax()
     edgeline = [maxsum]*cols
     
+    # show image with rowsum line
     plt.imshow(image, cmap='gray')
     plt.plot(edgeline, color = "red", linewidth=1)
     plt.show()
     
+    # image check
     choice = input("is the image good? 0 = bad, 1 = good")
     c = int(choice)
     choices.append(tuple([time, c, i, maxsum]))
-        
+     
+# Send manual detection to Pandas DataFrame
 df = pd.DataFrame(choices, columns= ['time', 'choice', 'path', 'maxsum'])
 df = df.set_index('time')
 
-
+# Correct water levels
 linelocs = []
 
 for i, row in df.iterrows():
@@ -78,20 +83,27 @@ for i, row in df.iterrows():
         
 df['lineloc'] = linelocs
 
+## Import bubbler validation data
 bubblerdata2019 = directory + '/Inglefield_Data/modified_2019_excel.xlsx'
 bubdf2019 = pd.read_excel(bubblerdata2019, parse_dates={'datetime': ['Dates', 'Times']}, index_col= 'datetime')
-
 bubdf2019 = pd.to_numeric(bubdf2019['ING Stage DCP-raw'], errors="coerce")
 
+# Resample bubbler data 
 resampled2019 = bubdf2019.resample('3H').mean()
 
+# Merge data to single dataframe
 mergedf2019 = df.merge(resampled2019, how='right', left_on=df.index, right_on=resampled2019.index)
 mergedf2019['stage_filtered'] = mergedf2019['ING Stage DCP-raw']
 mergedf2019.loc[(mergedf2019['stage_filtered'] < 0.07), 'stage_filtered'] = np.nan
 
+## Export DataFrame 
 mergedf2019.to_csv(directory + '/results/manual_detection_results.csv')
+
+## Recommended to check CSV file to see if anything needs to be changed ##
+# Re-import DataFrame from CSV file
 mergedf2019 = pd.read_csv(directory + '/results/manual_detection_results.csv')
 
+## Data Plots ##
 fig1, ax1 = plt.subplots(2, constrained_layout = True, sharex = 'col')
 
 ax1[0].plot(mergedf2019.index, mergedf2019['lineloc'])
@@ -115,6 +127,8 @@ ax2.set_ylabel('Raw Stage (m)')
 ax2.set_xlabel('Water level (row)')
 
 plt.show()
+
+## Calculate linear regression stats
 
 x2019 = mergedf2019['stage_filtered']
 y2019 = mergedf2019['lineloc']
