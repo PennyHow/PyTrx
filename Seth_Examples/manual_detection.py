@@ -24,6 +24,7 @@ sys.path.append('../')
 # Load images
 directory = os.getcwd()
 
+
 ## 2019 manual detection ##
 
 dir2019files = directory + '/Inglefield_Data/INGLEFIELD_CAM/2019/*'
@@ -60,7 +61,7 @@ for i in directory2019:
     plt.show()
     
     # image check
-    choice = input("Is the line at the top of the river water level? 0 = no, 1 = yes")
+    choice = input("Is the line at the top of the river water level? 0 = no, 1 = yes (left), 2 = yes (right)")
     c = int(choice)
     choices.append(tuple([time, c, i, maxsum]))
      
@@ -78,9 +79,12 @@ for i, row in df.iterrows():
         image = imread(row['path'], as_gray=True)
         plt.imshow(image, cmap='gray')
         plt.show()
-        levelguess = input("What 'y' value for the top of the water level?")
+        levelguess = input("What 'y' value for the top of the water level on the left?")
         guess = int(levelguess)
         linelocs.append(guess)
+    elif row['choice'] == 2:
+        corrected = row['maxsum'] + 40
+        linelocs.append(corrected)
     else:
         linelocs.append(row['maxsum'])
         
@@ -115,6 +119,9 @@ mask2019 = ~np.isnan(x2019) & ~np.isnan(y2019)
 slope19, intercept19, r_value19, p_value19, std_err19 = stats.linregress(x2019[mask2019],y2019[mask2019])
 print('2019 lin regress values: ' + 'slope:' + str(slope19) + ' intercept:' + str(intercept19) +' r squared:' + str(r_value19) + ' p value:' + str(p_value19) + ' std error:' + str(std_err19))
 
+# spearmanr19, spearmanp19 = stats.spearmanr(x2019[mask2019], y2019[mask2019])
+# print('Spearman r squared: ' + str(spearmanr19**2))
+
 ## Data Plots ##
 fig1, ax1 = plt.subplots(2, constrained_layout = True, sharex = 'col')
 
@@ -133,17 +140,16 @@ ax1[1].tick_params(axis = 'x', labelrotation = 45)
 plt.show()
 
 fig2, ax2 = plt.subplots(constrained_layout = True)
-ax2.scatter(y2019, x2019, c = mergedf2019['choice'])
+ax2.scatter(x2019, y2019, c = mergedf2019['choice'])
+ax2.invert_yaxis()
 ax2.set_title('2019')
-ax2.set_ylabel('Filtered Stage (m)')
-ax2.set_xlabel('Water level (row)')
+ax2.set_xlabel('Filtered Stage (m)')
+ax2.set_ylabel('Water level (row)')
 
 plt.show()
 
-# mergedf2019['days_since'] = mergedf2019['key_0'] - mergedf2019['key_0'].iloc[0]
-
-percentage19 = (mergedf2019['choice'].sum()/len(mergedf2019))*100
-print('Percentage of values detected correctly: ' + str(percentage19))
+counts19 = mergedf2019['choice'].value_counts()
+print('Percentage automatically detected: ' + str((counts19[1]+counts19[2])/len(mergedf2019)*100))
 
 ## 2020 manual detection ##
 
@@ -181,7 +187,7 @@ for i in directory2020:
     plt.show()
     
     # image check
-    choice = input("Is the line at the top of the river water level? 0 = no, 1 = yes")
+    choice = input("Is the line at the top of the river water level? 0 = no, 1 = yes(left), 2 = yes (right)")
     c = int(choice)
     choices2.append(tuple([time, c, i, maxsum]))
      
@@ -199,13 +205,28 @@ for i, row in df2.iterrows():
         image = imread(row['path'], as_gray=True)
         plt.imshow(image, cmap='gray')
         plt.show()
-        levelguess = input("What 'y' value for the top of the water level?")
+        levelguess = input("What 'y' value for the top of the water level on the left?")
         guess = int(levelguess)
         linelocs2.append(guess)
+    elif row['choice'] == 2:
+        corrected = row['maxsum'] + 40
+        linelocs2.append(corrected)
     else:
         linelocs2.append(row['maxsum'])
         
 df2['lineloc'] = linelocs2
+
+lineadjust = []
+for i, row in df2.iterrows():
+    if row['choice'] == 0:
+        adjustment = row['lineloc'] - 20
+        lineadjust.append(adjustment)
+    elif row['choice'] == 2:
+        adjustment = row['lineloc'] - 10
+        lineadjust.append(adjustment)
+    else:
+        lineadjust.append(row['lineloc'])
+df2['lineadjust'] = lineadjust
 
 ## Import bubbler validation data
 bubblerdata2020 = directory + '/Inglefield_Data/modified_2020_excel.xlsx'
@@ -232,10 +253,13 @@ mergedf2020 = pd.read_csv(directory + '/results/manual_detection_results2020.csv
 ## Calculate linear regression stats
 
 x2020 = mergedf2020['stage_filtered']
-y2020 = mergedf2020['lineloc']
+y2020 = mergedf2020['lineadjust']
 mask2020 = ~np.isnan(x2020) & ~np.isnan(y2020)
 slope20, intercept20, r_value20, p_value20, std_err20 = stats.linregress(x2020[mask2020],y2020[mask2020])
 print('2020 lin regress values: ' + 'slope:' + str(slope20) + ' intercept:' + str(intercept20) +' r squared:' + str(r_value20) + ' p value:' + str(p_value20) + ' std error:' + str(std_err20))
+
+# spearmanr20, spearmanp20 = stats.spearmanr(x2020[mask2020], y2020[mask2020])
+# print('Spearman r squared: ' + str(spearmanr20**2))
 
 ## Data Plots ##
 fig3, ax3 = plt.subplots(2, constrained_layout = True, sharex = 'col')
@@ -255,15 +279,13 @@ ax3[1].tick_params(axis = 'x', labelrotation = 45)
 plt.show()
 
 fig4, ax4 = plt.subplots(constrained_layout = True)
-ax4.scatter(y2020, x2020, c= mergedf2020['choice'])
+ax4.scatter(x2020, y2020, c= mergedf2020['choice'])
+ax4.invert_yaxis()
 ax4.set_title('2020')
-ax4.set_ylabel('Filtered Stage (m)')
-ax4.set_xlabel('Water level (row)')
+ax4.set_xlabel('Filtered Stage (m)')
+ax4.set_ylabel('Water level (row)')
 
 plt.show()
 
-# mergedf2020['days_since'] = mergedf2020['key_0'] - mergedf2020['key_0'].iloc[0]
-
-percentage20 = (mergedf2020['choice'].sum()/len(mergedf2020))*100
-print('Percentage of values detected correctly: ' + str(percentage20))
-
+counts20 = mergedf2020['choice'].value_counts()
+print('Percentage automatically detected: ' + str((counts20[1]+counts20[2])/len(mergedf2020)*100))
