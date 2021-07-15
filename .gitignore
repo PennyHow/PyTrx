@@ -1,4 +1,22 @@
 Seth_Examples/Inglefield_Data/INGLEFIELD_CAM
 Seth_Examples/Inglefield_Data/INGLEFIELD_RIPS
 *.csv
-
+*.dll
+*.pdb
+/Library
+/bin
+/_pycache_
+/conda-meta
+/DLLs
+/etc
+/include
+/info
+/Lib
+/libs
+/Menu
+/Scripts
+/share
+/Shared Libraries
+/sip
+/tcl
+/Tools
