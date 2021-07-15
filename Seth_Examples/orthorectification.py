@@ -85,10 +85,10 @@ post = ingleCam._camloc
 
 # Inglefield CAM (Right side)
 # project camera coordinates to utm
-camlocx = -68.988806
-camlocy = 78.591213
-camlocproj = Proj("+proj=utm +zone=19N +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
-camlocproj(camlocx, camlocy)
+# camlocx = -68.988806
+# camlocy = 78.591213
+# camlocproj = Proj("+proj=utm +zone=19N +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
+# camlocproj(camlocx, camlocy)
 
 # rowcoords = dem.getData(0)[0,:]    
 # colcoords = dem.getData(1)[:,0]
