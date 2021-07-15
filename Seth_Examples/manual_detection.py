@@ -24,7 +24,6 @@ sys.path.append('../')
 # Load images
 directory = os.getcwd()
 
-
 ## 2019 manual detection ##
 
 dir2019files = directory + '/Inglefield_Data/INGLEFIELD_CAM/2019/*'
