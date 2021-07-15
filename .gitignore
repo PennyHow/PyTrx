@@ -20,3 +20,7 @@ Seth_Examples/Inglefield_Data/INGLEFIELD_RIPS
 /sip
 /tcl
 /Tools
+*.exe
+*.png
+*.conf
+*.pyc
