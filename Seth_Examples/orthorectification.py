@@ -14,7 +14,6 @@ sys.path.append('../')
 from pyproj import Proj
 from CamEnv import GCPs, CamEnv, setProjection, projectUV, projectXYZ, optimiseCamera
 import DEM
-# from Images import CamImage
 
 # =============================================================================
 # Define camera environment
