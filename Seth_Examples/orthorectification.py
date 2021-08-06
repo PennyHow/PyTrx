@@ -50,21 +50,21 @@ ingleCam.showGCPs()
 ingleCam.showPrincipalPoint()
 ingleCam.showCalib()
 
-# #Get inverse projection variables through camera info            
-# invprojvars = setProjection(dem, ingleCam._camloc, ingleCam._camDirection, 
-#                             ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
-#                             ingleCam._camCen, ingleCam._refImage)
+#Get inverse projection variables through camera info            
+invprojvars = setProjection(dem, ingleCam._camloc, ingleCam._camDirection, 
+                            ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
+                            ingleCam._camCen, ingleCam._refImage)
 
-# #Inverse project image coordinates using function from CamEnv object                       
-# ingle_xyz = projectUV(ingle_xy[1], invprojvars)
+#Inverse project image coordinates using function from CamEnv object                       
+ingle_xyz = projectUV(ingle_xy[1], invprojvars)
 
 
-#Optimise camera environment
-# ingleCam.optimiseCamEnv('YPR')
-# opt_projvars = optimiseCamera('YPR', [ingleCam._camloc, ingleCam._camDirection, 
-#                               ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
-#                               ingleCam._camCen, ingleCam._refImage], ingle_xy[0], 
-#                               ingle_xy[1], 'trf', show=False)
+# Optimise camera environment
+ingleCam.optimiseCamEnv('YPR')
+opt_projvars = optimiseCamera('YPR', [ingleCam._camloc, ingleCam._camDirection, 
+                              ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
+                              ingleCam._camCen, ingleCam._refImage], ingle_xy[0], 
+                              ingle_xy[1], 'trf', show=False)
 
 
 
