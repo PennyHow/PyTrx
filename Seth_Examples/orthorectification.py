@@ -10,6 +10,8 @@ import os, sys
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
 sys.path.append('../')
+import osgeo.ogr as ogr
+import osgeo.osr as osr
 
 from pyproj import Proj
 from CamEnv import GCPs, CamEnv, setProjection, projectUV, projectXYZ, optimiseCamera
@@ -59,12 +61,12 @@ invprojvars = setProjection(dem, ingleCam._camloc, ingleCam._camDirection,
 ingle_xyz = projectUV(ingle_xy[1], invprojvars)
 
 
-# Optimise camera environment
-ingleCam.optimiseCamEnv('YPR')
-opt_projvars = optimiseCamera('YPR', [ingleCam._camloc, ingleCam._camDirection, 
-                              ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
-                              ingleCam._camCen, ingleCam._refImage], ingle_xy[0], 
-                              ingle_xy[1], 'trf', show=False)
+# # Optimise camera environment
+# ingleCam.optimiseCamEnv('YPR')
+# opt_projvars = optimiseCamera('YPR', [ingleCam._camloc, ingleCam._camDirection, 
+#                               ingleCam._radCorr, ingleCam._tanCorr, ingleCam._focLen, 
+#                               ingleCam._camCen, ingleCam._refImage], ingle_xy[0], 
+#                               ingle_xy[1], 'trf', show=False)
 
 
 
@@ -76,79 +78,34 @@ dem=demobj.getZ()
 #Get camera position (xyz) from CamEnv object
 post = ingleCam._camloc
 
-# # =============================================================================
-# # Define camera location coordinates 
-# #   Project camera lat/long coordinates to UTM (Z 19N) and then use PyTrx DEM
-# #   functionality to get elevation (Z) at that location
-# # =============================================================================
-
-# Inglefield CAM (Right side)
-# project camera coordinates to utm
-# camlocx = -68.988806
-# camlocy = 78.591213
-# camlocproj = Proj("+proj=utm +zone=19N +ellps=WGS84 +datum=WGS84 +units=m +no_defs")
-# camlocproj(camlocx, camlocy)
-
-# rowcoords = dem.getData(0)[0,:]    
-# colcoords = dem.getData(1)[:,0]
-             
-# camxcoord = (np.abs(rowcoords-500247.18789250357)).argmin()
-# camycoord = (np.abs(colcoords-8724350.67101476)).argmin()
-
-# X = dem.getData(0)
-# Y = dem.getData(1)
-# Z = dem.getData(2)
-
-
-# xsize = np.linspace(0, 1, Z.shape[0])
-# ysize = np.linspace(0, 1, Z.shape[1])
-# yy, xx = np.meshgrid(ysize, xsize)
-# # Identify NaNs
-# Z[Z == -9999] = np.nan
-# vals = ~np.isnan(Z)
-
-#------------------   Export xyz locations as .txt file   ---------------------
-
-# print('\n\nSAVING TEXT FILE')
-
-
-# #Write xyz coordinates to .txt file
-# target1 = destination + 'TU1_calving_xyz.txt'
-# f = open(target1, 'w')
-# f.write('x' + '\t' + 'y' + '\t' + 'z' + '\n')
-# for i in tu1_xyz:
-#     f.write(str(i[0]) + '\t' + str(i[1]) + '\t' + str(i[2]) + '\n')                                  
-# f.close()
-
-
 # #------------------   Export xyz locations as .shp file   ---------------------
 
-# print('\n\nSAVING SHAPE FILE')
+print('\n\nSAVING SHAPE FILE')
 
 
-# #Get ESRI shapefile driver     
-# typ = 'ESRI Shapefile'        
-# driver = ogr.GetDriverByName(typ)
-# if driver is None:
-#     raise IOError('%s Driver not available:\n' % typ)
+#Get ESRI shapefile driver     
+typ = 'ESRI Shapefile'        
+driver = ogr.GetDriverByName(typ)
+if driver is None:
+    raise IOError('%s Driver not available:\n' % typ)
 
 
-# #Create data source
-# shp = destination + 'tu1_calving.shp'   
-# if os.path.exists(shp):
-#     driver.DeleteDataSource(shp)
-# ds = driver.CreateDataSource(shp)
-# if ds is None:
-#     print('Could not create file ' + str(shp))
+#Create data source
+shp = destination + 'orthorectify.shp'   
+if os.path.exists(shp):
+    driver.DeleteDataSource(shp)
+ds = driver.CreateDataSource(shp)
+if ds is None:
+    print('Could not create file ' + str(shp))
  
        
 # #Set WGS84 projection
 # proj = osr.SpatialReference()
-# proj.ImportFromEPSG(32633)
+# proj.ImportFromEPSG(32619)
 
 
 # #Create layer in data source
-# layer = ds.CreateLayer('tu1_calving', proj, ogr.wkbPoint)
+# layer = ds.CreateLayer('orthorectify', proj, ogr.wkbPoint)
   
   
 # #Add attributes to layer
@@ -160,25 +117,3 @@ post = ingleCam._camloc
 # field_style = ogr.FieldDefn('style', ogr.OFTString)        
 # field_style.SetWidth(10)    
 # layer.CreateField(field_style)                              #Calving size    
- 
-  
-# #Create point features with data attributes in layer           
-# for a,b,c,d in zip(tu1_xyz, time, region, style):
-#     count=1
-
-#     #Create feature    
-#     feature = ogr.Feature(layer.GetLayerDefn())
-
-#     #Create feature attributes    
-#     feature.SetField('id', count)
-#     feature.SetField('time', b)
-#     feature.SetField('region', c) 
-#     feature.SetField('style', d)         
-
-#     #Create feature location
-#     wkt = "POINT(%f %f)" %  (float(a[0]) , float(a[1]))
-#     point = ogr.CreateGeometryFromWkt(wkt)
-#     feature.SetGeometry(point)
-#     layer.CreateFeature(feature)
-
-
