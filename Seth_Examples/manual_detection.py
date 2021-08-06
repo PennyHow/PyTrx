@@ -143,7 +143,7 @@ ax2.scatter(x2019, y2019, c = mergedf2019['choice'])
 ax2.invert_yaxis()
 ax2.set_title('2019')
 ax2.set_xlabel('Filtered Stage (m)')
-ax2.set_ylabel('Water level (row)')
+ax2.set_ylabel('Water level (pixel)')
 
 plt.show()
 
@@ -278,11 +278,11 @@ ax3[1].tick_params(axis = 'x', labelrotation = 45)
 plt.show()
 
 fig4, ax4 = plt.subplots(constrained_layout = True)
-ax4.scatter(x2020, y2020, c= mergedf2020['choice'])
+ax4.scatter(x2020, y2020, c= mergedf2020['choice'], label=mergedf2020['choice'])
 ax4.invert_yaxis()
 ax4.set_title('2020')
 ax4.set_xlabel('Filtered Stage (m)')
-ax4.set_ylabel('Water level (row)')
+ax4.set_ylabel('Water level (pixel)')
 
 plt.show()
 
