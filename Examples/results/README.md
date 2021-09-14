@@ -1,7 +1,7 @@
 # Results from PyTrx examples 
 This folder contains the outputs of the example applications of PyTrx. Each folder contains the data and image outputs of each of the driver scripts. A selection of these outputs, along with others, are presented in the PyTrx methods paper:
 
-<h3>How et al. (2020) PyTrx: a Python-based monoscopic terrestrial photogrammetry toolset for glaciology. <i>Frontiers in Earth Science</i>, accepted, <a href="https://dx.doi.org/10.3389/feart.2020.00021">doi:10.3389/feart.2020.00021</a></h3>
+<h3>How et al. (2020) PyTrx: a Python-based monoscopic terrestrial photogrammetry toolset for glaciology. <i>Frontiers in Earth Science</i> 8:21, <a href="https://dx.doi.org/10.3389/feart.2020.00021">doi:10.3389/feart.2020.00021</a></h3>
 
 <hr>
 
