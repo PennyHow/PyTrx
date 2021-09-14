@@ -94,6 +94,7 @@ There are other useful software available for terrestrial photogrammetry in glac
 
 <a href="http://www.lancaster.ac.uk/staff/jamesm/software/pointcatcher.htm">Pointcatcher</a> - Matlab-based GUI toolbox for feature-tracking and georectification <br>
 <a href="http://imgraft.glaciology.net/">ImGRAFT</a> - Matlab toolbox for feature-tracking and georectification <br>
+<a href="https://tu-dresden.de/bu/umwelt/geo/ipf/photogrammetrie/forschung/forschungsprojekte/emt">EMT (Environmental Motion Tracking)</a> - GUI toolbox for feature-tracking and georectification <br>
 <a href="http://www.mn.uio.no/geo/english/research/projects/icemass/cias/">CIAS</a> - IDL gui for feature-tracking <br>
 <a href="https://www.geosci-model-dev.net/9/307/2016/">PRACTISE</a> - Matlab toolbox for georectification
 
