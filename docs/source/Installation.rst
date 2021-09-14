@@ -37,8 +37,6 @@ PyTrx is available through pip and can be installed with the following simple co
 **WARNING** There are difficulties with the GDAL package on pip, meaning that GDAL could not be declared explicitly as a PyTrx dependency. Please ensure that GDAL is installed separately if installing PyTrx through pip.
 
 To check that PyTrx is working, open a Python console or IDE such as Spyder, type 'import PyTrx' and hit enter, followed by 'help(PyTrx)'. If PyTrx is working correctly, this should print PyTrx's metadata, including PyTrx's license, a brief description of the toolset, and its structure. If this does not work and throws up an error, it is likely that the package dependencies are invalid so reconfigure them and then try again. Now you are all set up to use PyTrx.
-
-Be aware that the PyTrx example scripts are not included with the conda distribution of PyTrx given the size of the example dataset files. If you wish to use/adapt them, feel free to download them from the `PyTrx GitHub repository <https://github.com/PennyHow/PyTrx>`_ and use them with your installed version of PyTrx.
  
 
 PyTrx Structure 
