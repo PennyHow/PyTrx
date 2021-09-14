@@ -6,7 +6,7 @@ PyTrx citations
 
 We are happy for others to use and adapt PyTrx for their own processing needs. If used, please cite the following key publication and Digital Object Identifier:
 
-**How et al. (2020) PyTrx: a Python-based monoscopic terrestrial photogrammetry toolset for glaciology. Frontiers in Earth Science, accepted, doi:10.3389/feart.2020.00021**
+**How et al. (2020) PyTrx: a Python-based monoscopic terrestrial photogrammetry toolset for glaciology. Frontiers in Earth Science 8:21, doi:10.3389/feart.2020.00021**
 
 PyTrx has been used in the following publications. In addition to the publication above, please cite any that are applicable where possible:
 
@@ -49,7 +49,8 @@ There are other useful software available for terrestrial photogrammetry in glac
 
 * `ImGRAFT <http://imgraft.glaciology.net/>`_: Matlab toolbox for feature-tracking and georectification
 
+* `EMT (Environmental Motion Tracking) <https://tu-dresden.de/bu/umwelt/geo/ipf/photogrammetrie/forschung/forschungsprojekte/emt>`_: GUI toolbox for feature-tracking and georectification
+
 * `CIAS <http://www.mn.uio.no/geo/english/research/projects/icemass/cias/>`_: IDL gui for feature-tracking
 
 * `PRACTISE <https://www.geosci-model-dev.net/9/307/2016/>`_: Matlab toolbox for georectification
-
