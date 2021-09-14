@@ -5,7 +5,7 @@ PyTrx (short for 'Python Tracking') is a Python object-oriented toolbox created 
 
 This branch contains the PyTrx toolset along with the distribution setup for sharing documentation with PyTrx's <a href="https://pytrx.readthedocs.io/">readthedocs webpages</a>, and the <a href='https://pypi.python.org/pypi/PyTrx'>pip package installer</a>. <br>
 
-Authors: Penelope How (how@asiaq.gl), Nick Hulton, and Lynne Buie (née Addison)<br>
+Authors: Penelope How (how@geus.dk), Nick Hulton, and Lynne Buie (née Addison)<br>
 
 <hr>
 
@@ -13,7 +13,7 @@ Authors: Penelope How (how@asiaq.gl), Nick Hulton, and Lynne Buie (née Addison)
 
 We are happy for others to use and adapt PyTrx for their own processing needs. If used, please cite the following key publication and Digital Object Identifier:<br>
 
-<h3>How et al. (2020) PyTrx: a Python-based monoscopic terrestrial photogrammetry toolset for glaciology. <i>Frontiers in Earth Science</i>, <a href="https://dx.doi.org/10.3389/feart.2020.00021">doi:10.3389/feart.2020.00021</a></h3><br>
+<h3>How et al. (2020) PyTrx: a Python-based monoscopic terrestrial photogrammetry toolset for glaciology. <i>Frontiers in Earth Science</i> 8:21, <a href="https://dx.doi.org/10.3389/feart.2020.00021">doi:10.3389/feart.2020.00021</a></h3><br>
   
 PyTrx has been used in the following publications. In addition to the publication above, please cite any that are applicable where possible:<br>
 
