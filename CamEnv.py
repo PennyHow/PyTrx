@@ -515,6 +515,7 @@ class CamEnv(CamCalib):
         projvars = [self._camloc, self._camDirection, self._radCorr, 
                     self._tanCorr, self._focLen, self._camCen, self._refImage]
         
+        print(projvars)
         opt_projvars = optimiseCamera(optimise, projvars, xyz, uv, 
                                       optmethod, show)
         
