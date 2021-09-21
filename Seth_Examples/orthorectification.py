@@ -78,6 +78,20 @@ dem=demobj.getZ()
 #Get camera position (xyz) from CamEnv object
 post = ingleCam._camloc
 
+#------------------   Export xyz locations as .txt file   ---------------------
+
+print('\n\nSAVING TEXT FILE')
+
+
+#Write xyz coordinates to .txt file
+target1 = destination + 'Ingle_XYZ_projected.txt'
+f = open(target1, 'w')
+f.write('x' + '\t' + 'y' + '\t' + 'z' + '\n')
+for i in ingle_xyz:
+    f.write(str(i[0]) + '\t' + str(i[1]) + '\t' + str(i[2]) + '\n')                                  
+f.close()
+
+
 # #------------------   Export xyz locations as .shp file   ---------------------
 
 print('\n\nSAVING SHAPE FILE')
