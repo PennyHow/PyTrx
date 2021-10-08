@@ -97,7 +97,7 @@ hgout = homog.calcHomographies([hmethod, [hgmax, hgqual, hgmind], [hgwinsize,
 #----------------------   Calculate velocities   ------------------------------
 
 #Set velocity parameters
-method = 'dense'                    #Method
+vmethod = 'dense'                   #Method
 vgrid = [50,50]                     #Dense matching grid distance
 vtemplate=10                        #Template size
 vsearch=50                          #Search window size
