@@ -16,6 +16,7 @@ from scipy import interpolate
 
 #from pyproj import Proj
 from CamEnv import GCPs, CamEnv, setProjection, projectUV, projectXYZ, optimiseCamera, computeResidualsXYZ
+from PyTrx.Images import CamImage
 import DEM
 
 # =============================================================================
@@ -25,6 +26,8 @@ import DEM
 directory = os.getcwd()
 ingleCamEnv = directory + '/cam_env/Inglefield_CAM_camenv.txt'
 ingle_calibimg = directory + '/Inglefield_Data/INGLEFIELD_CAM/2019/INGLEFIELD_CAM_StarDot1_20190712_030000.JPG'
+ingle_img = CamImage(ingle_calibimg)
+
 
 #Define data output directory
 destination = directory + '/results'
@@ -41,7 +44,8 @@ dem = ingleCam.getDEM()
 # Get GCPs
 inglefield_gcps = directory + '/cam_env/GCPs_20190712.txt'
 gcps = GCPs(dem, inglefield_gcps, ingle_calibimg)
-ingle_xy = gcps.getGCPs()
+ingle_xy = ingle_img.getImageArray()
+
 
 # Report calibration data
 ingleCam.reportCalibData()
@@ -64,7 +68,7 @@ invprojvars = setProjection(dem, ingleCam._camloc, ingleCam._camDirection,
                             ingleCam._camCen, ingleCam._refImage, viewshed=False)
 
 #Inverse project image coordinates using function from CamEnv object                       
-ingle_xyz = projectUV(ingle_xy[1], invprojvars)
+ingle_xyz = projectUV(ingle_xy[:,640], invprojvars)
 
 
 # #------------------   Export xyz locations as .shp file   ---------------------
@@ -131,10 +135,10 @@ for a in ingle_xyz:
     feature.SetGeometry(point)
     layer.CreateFeature(feature)
 
-    #Free up data space
-    feature.Destroy()                       
-    count=count+1
+#     #Free up data space
+#     feature.Destroy()                       
+#     count=count+1
 
 
-#Free up data space    
-ds.Destroy() 
+# #Free up data space    
+# ds.Destroy() 
