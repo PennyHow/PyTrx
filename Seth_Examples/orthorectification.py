@@ -68,8 +68,7 @@ invprojvars = setProjection(dem, ingleCam._camloc, ingleCam._camDirection,
                             ingleCam._camCen, ingleCam._refImage, viewshed=False)
 
 #Inverse project image coordinates using function from CamEnv object                       
-ingle_xyz = projectUV(ingle_xy[:,640], invprojvars)
-
+ingle_xyz = projectUV(ingle_xy[250:,640], invprojvars)
 
 # #------------------   Export xyz locations as .shp file   ---------------------
 
@@ -80,60 +79,65 @@ print('\n\nSAVING TEXT FILE')
 target1 = destination + '/ingle_xyz.txt'
 f = open(target1, 'w')
 f.write('x' + '\t' + 'y' + '\t' + 'z' + '\n')
+
+## How would I save this with a pixel reference?##
+
 for i in ingle_xyz:
     f.write(str(i[0]) + '\t' + str(i[1]) + '\t' + str(i[2]) + '\n')                                  
 f.close()
 
-
-#------------------   Export xyz locations as .shp file   ---------------------
-
-print('\n\nSAVING SHAPE FILE')
+### Can I save this as a spreadsheet that also has a pixel point reference? ###
 
 
-#Get ESRI shapefile driver     
-typ = 'ESRI Shapefile'        
-driver = ogr.GetDriverByName(typ)
-if driver is None:
-    raise IOError('%s Driver not available:\n' % typ)
+# #------------------   Export xyz locations as .shp file   ---------------------
+
+# print('\n\nSAVING SHAPE FILE')
 
 
-#Create data source
-shp = destination + '/ingle_xyz.shp'   
-if os.path.exists(shp):
-    driver.DeleteDataSource(shp)
-ds = driver.CreateDataSource(shp)
-if ds is None:
-    print('Could not create file ' + str(shp))
+# #Get ESRI shapefile driver     
+# typ = 'ESRI Shapefile'        
+# driver = ogr.GetDriverByName(typ)
+# if driver is None:
+#     raise IOError('%s Driver not available:\n' % typ)
+
+
+# #Create data source
+# shp = destination + '/ingle_xyz.shp'   
+# if os.path.exists(shp):
+#     driver.DeleteDataSource(shp)
+# ds = driver.CreateDataSource(shp)
+# if ds is None:
+#     print('Could not create file ' + str(shp))
  
        
-#Set WGS84 projection
-proj = osr.SpatialReference()
-proj.ImportFromEPSG(32633)          #CHANGE TO VALID EPSG projection
+# #Set WGS84 projection
+# proj = osr.SpatialReference()
+# proj.ImportFromEPSG(32633)          #CHANGE TO VALID EPSG projection
 
 
-#Create layer in data source
-layer = ds.CreateLayer('ingle_xyz', proj, ogr.wkbPoint)
+# #Create layer in data source
+# layer = ds.CreateLayer('ingle_xyz', proj, ogr.wkbPoint)
   
   
-#Add attributes to layer
-layer.CreateField(ogr.FieldDefn('id', ogr.OFTInteger))      #ID    
+# #Add attributes to layer
+# layer.CreateField(ogr.FieldDefn('id', ogr.OFTInteger))      #ID    
     
   
-#Create point features with data attributes in layer           
-for a in ingle_xyz:
-    count=1
+# #Create point features with data attributes in layer           
+# for a in ingle_xyz:
+#     count=1
 
-    #Create feature    
-    feature = ogr.Feature(layer.GetLayerDefn())
+#     #Create feature    
+#     feature = ogr.Feature(layer.GetLayerDefn())
 
-    #Create feature attributes    
-    feature.SetField('id', count)
+#     #Create feature attributes    
+#     feature.SetField('id', count)
       
-    #Create feature location
-    wkt = "POINT(%f %f)" %  (float(a[0]) , float(a[1]))
-    point = ogr.CreateGeometryFromWkt(wkt)
-    feature.SetGeometry(point)
-    layer.CreateFeature(feature)
+#     #Create feature location
+#     wkt = "POINT(%f %f)" %  (float(a[0]) , float(a[1]))
+#     point = ogr.CreateGeometryFromWkt(wkt)
+#     feature.SetGeometry(point)
+#     layer.CreateFeature(feature)
 
 #     #Free up data space
 #     feature.Destroy()                       
