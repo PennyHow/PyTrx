@@ -18,6 +18,7 @@ from scipy import interpolate
 from CamEnv import GCPs, CamEnv, setProjection, projectUV, projectXYZ, optimiseCamera, computeResidualsXYZ
 from PyTrx.Images import CamImage
 import DEM
+import pandas as pd
 
 # =============================================================================
 # Define camera environment
@@ -44,20 +45,19 @@ dem = ingleCam.getDEM()
 # Get GCPs
 inglefield_gcps = directory + '/cam_env/GCPs_20190712.txt'
 gcps = GCPs(dem, inglefield_gcps, ingle_calibimg)
-ingle_xy = ingle_img.getImageArray()
 
+xy = np.arange(-350,350).reshape(2, 350)
+xy = np.swapaxes(xy, 0, 1)
+xy[:,0].fill(640)
+# wholearray = []
+# for i in range(0,1280):
+#     xy = np.arange(-350,350).reshape(2, 350)
+#     xy = np.swapaxes(xy, 0, 1)
+#     xy[:,0].fill(i)
+#     wholearray.append(xy)
 
 # Report calibration data
 ingleCam.reportCalibData()
-
-
-##Show GCPs                           
-#ingleCam.showGCPs()
-#
-##Show Camera plots                          
-#ingleCam.showPrincipalPoint()
-#ingleCam.showCalib()
-
 
 # Optimise camera environment
 ingleCam.optimiseCamEnv('YPR', 'trf', show=False)
@@ -68,9 +68,17 @@ invprojvars = setProjection(dem, ingleCam._camloc, ingleCam._camDirection,
                             ingleCam._camCen, ingleCam._refImage, viewshed=False)
 
 #Inverse project image coordinates using function from CamEnv object                       
-ingle_xyz = projectUV(ingle_xy[250:,640], invprojvars)
+ingle_xyz = projectUV(xy, invprojvars)
+
+df = pd.DataFrame(ingle_xyz)
+df.columns= ['x', 'y', 'z']
+
 
 # #------------------   Export xyz locations as .shp file   ---------------------
+
+
+# df . csv #
+df.to_csv(directory + '/results/orthorectification_results.csv')
 
 print('\n\nSAVING TEXT FILE')
 
