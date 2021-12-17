@@ -943,6 +943,8 @@ def opticalMatch(i0, iN, p0, winsize, back_thresh, min_features):
     :type i0: arr
     :param iN: Image 2 in the image pair
     :type iN: arr
+    :param p0: vector of 2D points for which the flow needs to be found
+    :type p0: arr
     :param winsize: Window size for tracking e.g. (25,25)
     :type winsize: tuple
     :param back_thesh: Threshold for back-tracking distance (i.e. the difference between the original seeded point and the back-tracked point in im0)
