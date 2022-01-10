@@ -28,25 +28,41 @@ class Line(ImageSequence):
     """A class for handling lines/distances (e.g. glacier terminus position)
     through an image sequence, with methods to manually define pixel lines in 
     the image plane and georectify them to generate real-world coordinates and 
-    distances. The Line class object primarily inherits from the Area class.
+    distances. The Line class object primarily inherits from the Area class
     
-    :param imageList: List of images to be inputted into the :class:`PyTrx.Images.ImageSequence` object
-    :type imageList: str/list            
-    :param cameraenv: Camera environment parameters which can be read into the :class:`PyTrx.CamEnv.CamEnv` object as a text file
-    :type cameraenv: str 
-    :param hmatrix: Homography matrix
-    :type hmatrix: arr          
-    :param calibFlag: An indicator of whether images are calibrated, for the :class:`PyTrx.Images.ImageSequence` object, default to True
-    :type calibFlag: bool, optional         .          
-    :param band: String denoting the desired image band, default to 'L' (grayscale)
-    :type band: str, optional           .
-    :param equal: Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True). Default to True.
-    :type equal: bool, optional              
+    Attributes
+    ----------
+    _camEnv : PyTrx.CamEnv.CamEnv
+      Camera environment object
+    _calibFlag : bool
+      Image calibration flag
+    _hmatrix : arr
+      Homography matrix
     """     
     #Object initialisation        
     def __init__(self, imageList, cameraenv, hmatrix, calibFlag=True, band='L', 
                  equal=True):
-        '''Line object initialisation'''
+        '''Initialise Line object
+        
+        Parameters
+        ----------
+        imageList : str/list 
+          List of images to be inputted into the PyTrx.Images.ImageSequence 
+          object
+        cameraenv : str           
+          Camera environment parameters which can be read into the 
+          PyTrx.CamEnv.CamEnv object as a text file 
+        hmatrix : arr 
+          Homography matrix          
+        calibFlag : bool, optional 
+          An indicator of whether images are calibrated, for the 
+          PyTrx.Images.ImageSequence object (default=True)          
+        band : str, optional 
+          String denoting the desired image band (default='L')
+        equal : bool, optional 
+          Flag denoting whether histogram equalisation is applied to images 
+          (histogram equalisation is applied if True) (default=True)
+        '''
         #Initialise and inherit from the ImageSequence object        
         ImageSequence.__init__(self, imageList, band, equal)
 
@@ -65,10 +81,12 @@ class Line(ImageSequence):
     def calcManualLines(self):
         """Method to manually define pixel lines from an image sequence. The 
         lines are manually defined by the user on an image plot. Returns the 
-        line pixel coordinates and pixel length.
+        line pixel coordinates and pixel length
         
-        :returns: XYZ and UV line lengths and coordinates
-        :rtype: list
+        Returns
+        -------
+        lines : list 
+          XYZ and UV line lengths and coordinates
         """
         print('\n\nCOMMENCING LINE DETECTION')                        
             
@@ -123,18 +141,25 @@ def calcManualLine(img, imn, hmatrix=None, invprojvars=None):
     by clicking in the interactive image plot. This primarily operates via the 
     pyplot.ginput function which allows users to define coordinates through 
     plot interaction. If inverse projection variables are given, XYZ lines
-    and coordinates are also calculated.
+    and coordinates are also calculated
     
-    :param img: Image array for plotting.
-    :type img: arr
-    :param imn: Image name
-    :type imn: str
-    :param hmatrix: Homography matrix, default to None
-    :type hmatrix: arr, optional
-    :param invprojvars: Inverse projection variables [X,Y,Z,uv0], default to None
-    :type invprojvars: list, optional    
-    :returns: Four list elements containing: line length in xyz (list), xyz coordinates of lines (list), line length in pixels (list), and uvcoordinates of lines (list)
-    :rtype: list
+    Parameters
+    ----------
+    img : arr 
+      Image array for plotting.
+    imn : str 
+      Image name
+    hmatrix : arr, optional 
+      Homography matrix (default=None)
+    invprojvars : list, optional 
+      Inverse projection variables [X,Y,Z,uv0] (default=None)
+      
+    Returns
+    -------
+    list
+      Four list element containing: line length in xyz (list), xyz coordinates 
+      of lines (list), line length in pixels (list), and uvcoordinates of lines 
+      (list)
     """
     #Initialise figure window
     fig=plt.gcf()
@@ -191,12 +216,17 @@ def calcManualLine(img, imn, hmatrix=None, invprojvars=None):
 
 
 def getOGRLine(pts):
-    """Function to construct an OGR line from a set of uv coordinates.
+    """Function to construct an OGR line from a set of uv coordinates
     
-    :param pts: A series of uv coordinates denoting a line
-    :type pts: arr
-    :returns: A line object (ogr.Geometry) constructed from the input coordinates
-    :rtype: ogr.Geometry
+    Parameters
+    ----------
+    pts : arr 
+      A series of uv coordinates denoting a line
+
+    Returns
+    -------
+    line : ogr.Geometry
+      A line object constructed from the input coordinates
     """
     #Initially construct geometry object             
     line = ogr.Geometry(ogr.wkbLineString)
