@@ -13,6 +13,8 @@ sys.path.append('../')
 import osgeo.ogr as ogr
 import osgeo.osr as osr
 from scipy import interpolate
+from scipy import stats
+
 
 #from pyproj import Proj
 from CamEnv import GCPs, CamEnv, setProjection, projectUV, projectXYZ, optimiseCamera, computeResidualsXYZ
@@ -48,13 +50,7 @@ gcps = GCPs(dem, inglefield_gcps, ingle_calibimg)
 
 xy = np.arange(-350,350).reshape(2, 350)
 xy = np.swapaxes(xy, 0, 1)
-xy[:,0].fill(640)
-# wholearray = []
-# for i in range(0,1280):
-#     xy = np.arange(-350,350).reshape(2, 350)
-#     xy = np.swapaxes(xy, 0, 1)
-#     xy[:,0].fill(i)
-#     wholearray.append(xy)
+xy[:,0].fill(50)
 
 # Report calibration data
 ingleCam.reportCalibData()
@@ -74,7 +70,7 @@ df = pd.DataFrame(ingle_xyz)
 df.columns= ['x', 'y', 'z']
 
 
-# #------------------   Export xyz locations as .shp file   ---------------------
+# #------------------   Export xyz locations as .csv file   ---------------------
 
 
 # df . csv #
@@ -83,74 +79,103 @@ df.to_csv(directory + '/results/orthorectification_results.csv')
 print('\n\nSAVING TEXT FILE')
 
 
-#Write xyz coordinates to .txt file
-target1 = destination + '/ingle_xyz.txt'
-f = open(target1, 'w')
-f.write('x' + '\t' + 'y' + '\t' + 'z' + '\n')
+# =============================================================================
+# Orthorectify all images 
+# =============================================================================
 
-## How would I save this with a pixel reference?##
+## 2019 ##
+mergedf2019 = pd.read_csv(directory + '/results/manual_detection_results2019.csv', parse_dates=['key_0'], index_col='key_0')
 
-for i in ingle_xyz:
-    f.write(str(i[0]) + '\t' + str(i[1]) + '\t' + str(i[2]) + '\n')                                  
-f.close()
+mergedf2019_filtered = mergedf2019.loc[mergedf2019['lineloc'] <= 300]
 
-### Can I save this as a spreadsheet that also has a pixel point reference? ###
+xyz_df2019 = pd.DataFrame(columns = ['datetime', 'lineloc', 'x', 'y', 'z'])
+for index1, row1 in mergedf2019_filtered.iterrows():
+    for index2, row2 in df.iterrows():
+        if row1['lineloc'] == index2:
+            xyz_df2019 = xyz_df2019.append({'datetime': index1, 'lineloc': row1['lineloc'], 'x': row2['x'], 'y': row2['y'], 'z': row2['z'] }, ignore_index = True)
 
-
-# #------------------   Export xyz locations as .shp file   ---------------------
-
-# print('\n\nSAVING SHAPE FILE')
-
-
-# #Get ESRI shapefile driver     
-# typ = 'ESRI Shapefile'        
-# driver = ogr.GetDriverByName(typ)
-# if driver is None:
-#     raise IOError('%s Driver not available:\n' % typ)
+plt.scatter(xyz_df2019['lineloc'], xyz_df2019['z'])
+slope19, intercept19, r_value19, p_value19, std_err19 = stats.linregress(xyz_df2019['lineloc'], xyz_df2019['z'])
+print (slope19, intercept19, r_value19, p_value19)
 
 
-# #Create data source
-# shp = destination + '/ingle_xyz.shp'   
-# if os.path.exists(shp):
-#     driver.DeleteDataSource(shp)
-# ds = driver.CreateDataSource(shp)
-# if ds is None:
-#     print('Could not create file ' + str(shp))
- 
-       
-# #Set WGS84 projection
-# proj = osr.SpatialReference()
-# proj.ImportFromEPSG(32633)          #CHANGE TO VALID EPSG projection
+projectdf_z2019 = mergedf2019[['lineloc', 'stage_filtered']]
+projectdf_z2019['z']= np.nan
 
 
-# #Create layer in data source
-# layer = ds.CreateLayer('ingle_xyz', proj, ogr.wkbPoint)
-  
-  
-# #Add attributes to layer
-# layer.CreateField(ogr.FieldDefn('id', ogr.OFTInteger))      #ID    
-    
-  
-# #Create point features with data attributes in layer           
-# for a in ingle_xyz:
-#     count=1
 
-#     #Create feature    
-#     feature = ogr.Feature(layer.GetLayerDefn())
+for index, row in projectdf_z2019.iterrows():
+   # if the lineloc is <= 300, add z value from df['z'] at that index
+    if row['lineloc'] <= 300:
+        z_row = row['lineloc'].astype(int)
+        df_row = df.iloc[z_row]
+        row['z'] = df_row['z']
+    # else if lineloc > 300, z-value = slope * lineloc + intercept (y= mx + b)
+    elif row['lineloc'] > 300:
+        row['z'] = slope19 * row['lineloc'] + intercept19
+        
+fig1, ax1 = plt.subplots(2, constrained_layout = True, sharex = 'col')
 
-#     #Create feature attributes    
-#     feature.SetField('id', count)
-      
-#     #Create feature location
-#     wkt = "POINT(%f %f)" %  (float(a[0]) , float(a[1]))
-#     point = ogr.CreateGeometryFromWkt(wkt)
-#     feature.SetGeometry(point)
-#     layer.CreateFeature(feature)
+ax1[0].plot(projectdf_z2019.index, projectdf_z2019['z'])
+ax1[0].set_ylabel('Water Level (m)')
+ax1[0].set_title('2019 Data')
+ax1[0].grid(linestyle='dashed')
+ax1[1].plot(projectdf_z2019.index, projectdf_z2019['stage_filtered'])
+ax1[1].set_ylabel('Filtered Stage (m)')
+ax1[1].grid(linestyle='dashed')
 
-#     #Free up data space
-#     feature.Destroy()                       
-#     count=count+1
+ax1[0].tick_params(axis = 'x', labelrotation = 45)
+ax1[1].tick_params(axis = 'x', labelrotation = 45)
+
+plt.show()    
+
+## 2020 ##
+
+mergedf2020 = pd.read_csv(directory + '/results/manual_detection_results2020.csv', parse_dates=['key_0'], index_col='key_0')
+
+mergedf2020_filtered = mergedf2020.loc[mergedf2020['lineloc'] <= 300]
+
+xyz_df2020 = pd.DataFrame(columns = ['datetime', 'lineloc', 'x', 'y', 'z'])
+for index1, row1 in mergedf2020_filtered.iterrows():
+    for index2, row2 in df.iterrows():
+        if row1['lineloc'] == index2:
+            xyz_df2020 = xyz_df2020.append({'datetime': index1, 'lineloc': row1['lineloc'], 'x': row2['x'], 'y': row2['y'], 'z': row2['z'] }, ignore_index = True)
+
+# plt.scatter(xyz_df2020['lineloc'], xyz_df2020['z'])
+# slope20, intercept20, r_value20, p_value20, std_er20r = stats.linregress(xyz_df2020['lineloc'], xyz_df2020['z'])
+# print (slope20, intercept20, r_value20, p_value20)
+
+projectdf_z2020 = mergedf2020[['lineloc', 'stage_filtered']]
+projectdf_z2020['z']= np.nan
+
+for index, row in projectdf_z2020.iterrows():
+   # if the lineloc is <= 300, add z value from df['z'] at that index
+    if row['lineloc'] <= 300:
+        z_row = row['lineloc'].astype(int)
+        df_row = df.iloc[z_row]
+        row['z'] = df_row['z']
+    # else if lineloc > 300, z-value = slope * lineloc + intercept (y= mx + b)
+    elif row['lineloc'] > 300:
+        row['z'] = slope19 * row['lineloc'] + intercept19
+        
+fig2, ax2 = plt.subplots(2, constrained_layout = True, sharex = 'col')
+
+ax2[0].plot(projectdf_z2020.index, projectdf_z2020['z'])
+ax2[0].set_ylabel('Water Level (m)')
+ax2[0].set_title('2020 Data')
+ax2[0].grid(linestyle='dashed')
+ax2[1].plot(projectdf_z2020.index, projectdf_z2020['stage_filtered'])
+ax2[1].set_ylabel('Filtered Stage (m)')
+ax2[1].grid(linestyle='dashed')
+
+ax2[0].tick_params(axis = 'x', labelrotation = 45)
+ax2[1].tick_params(axis = 'x', labelrotation = 45)
+
+plt.show()   
 
 
-# #Free up data space    
-# ds.Destroy() 
+
+
+
+
+
