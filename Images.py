@@ -21,10 +21,7 @@ from PIL.ExifTags import TAGS
 from datetime import datetime
 from pylab import array, uint8
 from functools import reduce
-import glob
-import imghdr
-import os
-import cv2
+import glob, operator, imghdr, os, cv2, rawpy
 
 #------------------------------------------------------------------------------
 
@@ -257,35 +254,41 @@ class CamImage(object):
           Image height, image width
         timestamp : datetime.datetime
           Image time stamp
-        """
+        """     
         #Get the Exif data
         exif = {}
         if self._image is None:
-            self._image=Image.open(self._impath)
-        
-        info = self._image._getexif()
-        
-        #Put each item into the Exif dictionary
-        for tag, value in info.items():
-            decoded = TAGS.get(tag, tag)
-            exif[decoded] = value            
-        imsize=[exif['ExifImageHeight'], exif['ExifImageWidth']]
-        
-        #Construct datetime object from Exif string
-        try:
-            timestr = exif['DateTime']
-            items=timestr.split()
-            date=items[0].split(':')
-            time=items[1].split(':')
-            timestamp=datetime(int(date[0]),int(date[1]),int(date[2]),
-                               int(time[0]),int(time[1]),int(time[2]))
-        except:
-            print ('\nUnable to get valid timestamp for image file: '
-                   + self._impath)
-            timestamp=None
+            self._image = self.getImage()
             
-        return imsize, timestamp      
+        img = self._image    
 
+        #Put each item into the Exif dictionary
+        try:
+            info = img._getexif()
+            for tag, value in info.items():
+                decoded = TAGS.get(tag, tag)
+                exif[decoded] = value            
+            imsize=[exif['ExifImageHeight'], exif['ExifImageWidth']]
+
+            #Construct datetime object from Exif string
+            try:
+                timestr = exif['DateTime']
+                items=timestr.split()
+                date=items[0].split(':')
+                time=items[1].split(':')
+                timestamp=datetime(int(date[0]),int(date[1]),int(date[2]),
+                                   int(time[0]),int(time[1]),int(time[2]))
+            except:
+                print ('\nUnable to get valid timestamp for image file: '
+                       + self._impath)
+                timestamp=None
+        except:
+            print('\nUnable to read EXIF information. Extracting from array.')
+            imsize = [img.height, img.width]
+            timestamp=None
+
+        return imsize, timestamp 
+    
         
     def changeBand(self,band):
         """Change the band you want the image to represent ('r', 'b', 'g' or 
@@ -309,7 +312,12 @@ class CamImage(object):
         
     def _readImage(self):
         """Read image from file path using PIL"""
-        self._image=Image.open(self._impath)
+        try:
+            self._image=Image.open(self._impath)
+        except:
+            rawim = rawpy.imread(self._impath)
+            rawim = rawim.postprocess()
+            self._image=Image.fromarray(rawim)
     
     
     def _readImageData(self):
@@ -317,8 +325,7 @@ class CamImage(object):
         a desired band or grayscale"""               
         #Open image from file using PIL        
         if self._image is None:
-            self._image = Image.open(self._impath)
-        
+            self._readImage()
         img = self._image
         
         if self._equal is True:
@@ -336,7 +343,10 @@ class CamImage(object):
                     n = n + h[i+b]
             
             #Convert to grayscale or desired band
-            img = img.point(lut*img.layers)
+            try:
+                img = img.point(lut*img.layers)
+            except:
+                img = img.point(lut*3)
         
         if self._band == 'R':
             img,g,b = img.split()
@@ -418,7 +428,7 @@ class ImageSequence(object):
                 return None
         
         #Construction from string of file paths
-        if isinstance(imageList, str):
+        elif isinstance(imageList, str):
             print('\nImage directory path assumed. Searching for images.' + 
                   ' Attempting to add all to sequence')
             print(str(imageList))

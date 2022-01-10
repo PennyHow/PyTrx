@@ -82,6 +82,7 @@ class Area(ImageSequence):
         self._maximg = 0
         self._mask = None
         self._enhance = None
+        self._colourrange = None
         
         if hmatrix is not None:
             self._hmatrix=hmatrix
@@ -157,7 +158,8 @@ class Area(ImageSequence):
                                            self._enhance[1], self._enhance[2])
                 
                 #Define colour range
-                defineColourrange(setting, setimn, pxplot=self._pxplot)    
+                self._colourrange = defineColourrange(setting, setimn, 
+                                                      pxplot=self._pxplot)    
             
         #Set up output datasets
         area=[]
@@ -196,7 +198,8 @@ class Area(ImageSequence):
             
             #Define colour range if required
             if colour is True:
-                defineColourrange(img2, imn, pxplot=self._pxplot)
+                self._colourrange = defineColourrange(img2, imn, 
+                                                      pxplot=self._pxplot)
             
             #Calculate extent
             if self._hmatrix is not None:
@@ -370,7 +373,7 @@ class Area(ImageSequence):
             
             #Show plot
             plt.show() 
-            plt.close()
+            # plt.close()
             
             #Append all verified extents
             vpx=[]
@@ -676,7 +679,7 @@ def calcManualArea(img, imn, hmatrix=None, pxplot=None, invprojvars=None):
     
     #Show plot
     plt.show()
-    plt.close()
+    # plt.close()
 
     #Convert coordinates to array
     pxpts=[]
@@ -769,7 +772,7 @@ def defineColourrange(img, imn, pxplot=None):
     
     #Show plot
     plt.show()
-    plt.close()
+    # plt.close()
     
     #Get pixel intensity value for pt1       
     col1_rbg = img[int(colours[0][1]),int(colours[0][0])]

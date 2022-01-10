@@ -1192,7 +1192,7 @@ def optimiseCamera(optimise, projvars, GCPxyz, GCPuv, optmethod='trf',
      
     #Optimise, passing through the computeResiduals function for iterating
     out = optimize.least_squares(computeResidualsUV, params, method=optmethod, 
-                                 verbose=2, 
+                                 verbose=2, max_nfev=5000, 
                                  args=(stable, GCPxyz, GCPuv, refimg, optimise))  
 
     #If optimisation was sucessful
