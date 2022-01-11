@@ -45,7 +45,7 @@ tu1camenv='../Examples/camenv_data/camenvs/CameraEnvironmentData_TU1_2015.txt'
 tu1calving = '../Examples/results/ptsgeorectify/TU1_calving_xy.csv'
 
 #Define data output directory
-destination = '../Examples/results/ptsgeorectify/'
+destination = '../Examples/results/TU_ptsgeorectify/'
 if not os.path.exists(destination):
     os.makedirs(destination)
 

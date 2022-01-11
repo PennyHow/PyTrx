@@ -8,14 +8,14 @@ Camera_environment_name #Name of CamEnv class
 QAS_2020
 
 
-###GCP_path #Path name where Ground Control Point data can be found
+GCP_path #Path name where Ground Control Point data can be found
 ../Examples/camenv_data/gcps/QAS_2020.txt
 
 ###GCP_path #Path name where Ground Control Point data can be found
 ###../Examples/camenv_data/gcps/GCP2020_new2.txt
 
 DEM_path #Path name where DEM data can be found
-../Examples/camenv_data/dem/dem_clipped_2m.tif
+../Examples/camenv_data/dem/QAS_drone_dem.tif
 
 
 image_path #Path name where master image can be found (i.e. calibration image where GCPs have been plotted)
@@ -23,7 +23,7 @@ image_path #Path name where master image can be found (i.e. calibration image wh
 
 
 Calibration_path #Path name where camera calibration file can be found
-../Examples/camenv_data/calib/QAS_2020_modified.txt
+../Examples/camenv_data/calib/QAS_2020_1.txt
 
 
 Camera_location #Location of camera in xyz coordinates

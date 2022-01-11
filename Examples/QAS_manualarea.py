@@ -13,13 +13,15 @@ This script is part of PyTrx, an object-oriented programme created for the
 purpose of calculating real-world measurements from oblique images and 
 time-lapse image series.
 
-This driver calculates meltwater plume surface extent at Kronebreen (camera 
-site 1, KR1) for a small subset of the 2014 melt season using modules in PyTrx. 
-Specifically this script performs manual detection of supraglacial lakes 
-through sequential images of the glacier to derive surface areas which have 
-been corrected for image distortion. Previously defined pixel areas can also 
-be imported from file (this can be changed by commenting and uncommenting 
-commands in the "Calculate areas" section of this script).
+This driver calculates snow/bare ice extent at Qasigiannguit Glacier, West 
+Greenland, for a small subset of the 2020/21 melt season using modules in 
+PyTrx. Specifically this script performs manual delineation of snow regions 
+through images of the glacier to derive surface areas which have been 
+corrected for image distortion.
+
+Previously defined areas can also be imported from file (this can be changed 
+by commenting and uncommenting commands in the "Calculate areas" section of 
+this script).
 '''
 
 #Import packages
@@ -39,13 +41,11 @@ from Utilities import plotAreaPX, plotAreaXYZ
 
 #Define data inputs
 camdata = '../Examples/camenv_data/camenvs/CameraEnvironment_QAS_2020.txt'
-invmask = None  
-
-camimgs = '../Examples/images/pho_test/*.CR2'                                  #Image path
-#camimgs = '../Examples/images/QAS_EOS/*.CR2' #End of Season
+invmask = '../Examples/camenv_data/invmasks/QAS_2020_inv.jpg'  
+camimgs = '../Examples/images/QAS_2020_subset/*.CR2'
 
 #Define data output directory
-destination = '../Examples/results/manualarea/'
+destination = '../Examples/results/QAS_manualarea/'
 if not os.path.exists(destination):
     os.makedirs(destination)
     
@@ -55,13 +55,13 @@ if not os.path.exists(destination):
 #Define camera environment
 cam = CamEnv(camdata)
 
-# #Optimise camera environment
-# optparams = 'YPR'
-# cam.optimiseCamEnv(optparams)
+#Optimise camera environment
+optparams = 'YPR'
+cam.optimiseCamEnv(optparams)
 
 ##Show ground control points
-#cameraenvironment.showGCPs()
-#cameraenvironment.showResiduals()
+#cam.showGCPs()
+#cam.showResiduals()
 
 
 #---------------------   Calculate homography   -------------------------------
@@ -88,19 +88,19 @@ homogmatrix = [item[0] for item in hg]
 #------------------------   Calculate Areas   ---------------------------------
 
 #Define Area class initialisation variables
-calibFlag = False            #Detect with corrected or uncorrected images. Default = true
+calibFlag = True            #Detect with corrected or uncorrected images
 maxim = 0                   #Image number of maximum areal extent 
 imband = 'L'                #Desired image band
 equal = True                #Images with histogram equalisation?
 
 #Set up Area object, from which areal extent will be measured
-plumes = Area(camimgs, cam, homogmatrix, calibFlag, imband, equal)
+snow = Area(camimgs, cam, homogmatrix, calibFlag, imband, equal)
 
 
 #-------------------------   Calculate areas   --------------------------------
 
 #Calculate real areas
-areas = plumes.calcManualAreas()
+areas = snow.calcManualAreas()
 
 ##Import areal data from file
 #xyzfile=destination+'area_coords.txt'
@@ -117,9 +117,9 @@ uvareas = [item[1][0] for item in areas]
 uvpts = [item[1][1] for item in areas]
 
 #Get relevant camera and dem data
-imn=plumes.getImageNames()
+imn=snow.getImageNames()
 dem = cam.getDEM()
-imgset=plumes._imageSet
+imgset=snow._imageSet
 cameraMatrix=cam.getCamMatrixCV2()
 distortP=cam.getDistortCoeffsCV2()
 
@@ -143,12 +143,12 @@ FileHandler.writeAreaCoords(uvpts, xyzpts, imn,
                             destination+'uvcoords.txt', 
                             destination+'xyzcoords.txt')
    
-# #Plot areas in image plane and as XYZ polygons  
-# target2 = destination + 'outputimgs/'
-# for i in range(len(xyzpts)):
-#     plotAreaPX(uvpts[i], imgset[i].getImageCorr(cameraMatrix, distortP), 
-#                show=True, save=None)  
-#     plotAreaXYZ(xyzpts[i], dem, show=True, save=None)
+#Plot areas in image plane and as XYZ polygons  
+target2 = destination + 'outputimgs/'
+for i in range(len(xyzpts)):
+    plotAreaPX(uvpts[i], imgset[i].getImageCorr(cameraMatrix, distortP), 
+               show=True, save=None)  
+    plotAreaXYZ(xyzpts[i], dem, show=True, save=None)
     
     
 #------------------------------------------------------------------------------    

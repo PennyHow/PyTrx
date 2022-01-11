@@ -15,7 +15,6 @@ images).
 #Import packages
 from pathlib import Path
 import numpy as np
-import operator
 from PIL import Image 
 from PIL.ExifTags import TAGS
 from datetime import datetime

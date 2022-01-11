@@ -957,7 +957,7 @@ def setProjection(dem, camloc, camdir, radial, tangen, foclen, camcen, refimg,
     
     #Set inverse projection variables
     print('\nInverse projection coefficients defined')
-    invProjVars=[X,Y,Z,uv0]              
+    invProjVars=[X,Y,Z,uv0]             
     return invProjVars
             
 

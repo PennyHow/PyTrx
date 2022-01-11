@@ -55,7 +55,7 @@ caminvmask = '../Examples/camenv_data/invmasks/KR1_2014_inv.jpg'
 camimgs = '../Examples/images/KR1_2014_subset/*.JPG'
 
 #Define data output directory
-destination = '../Examples/results/manualarea/'
+destination = '../Examples/results/KR_manualarea/'
 if not os.path.exists(destination):
     os.makedirs(destination)
 

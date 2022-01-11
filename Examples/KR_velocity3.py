@@ -90,8 +90,8 @@ GCPpath = '../Examples/camenv_data/gcps/KR2_2014.txt'
 print('\nDEFINING DATA OUTPUTS')
 
 #Shapefile output (with WGS84 projection)
-target1 = '../Examples/results/velocity3/shpfiles_sparse/' 
-target2 = '../Examples/results/velocity3/shpfiles_dense/'
+target1 = '../Examples/results/KR_velocity3/shpfiles_sparse/' 
+target2 = '../Examples/results/KR_velocity3/shpfiles_dense/'
 projection = 32633
 
 

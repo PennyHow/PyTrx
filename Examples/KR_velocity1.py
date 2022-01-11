@@ -52,7 +52,7 @@ camimgs = '../Examples/images/KR2_2014_subset/*.JPG'
 
 
 #Define data output directory
-destination = '../Examples/results/velocity1/'
+destination = '../Examples/results/KR_velocity1/'
 if not os.path.exists(destination):
     os.makedirs(destination)
 

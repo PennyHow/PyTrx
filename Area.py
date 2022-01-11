@@ -563,9 +563,8 @@ def calcAutoArea(img, imn, colourrange, hmatrix=None, threshold=None,
 #    mask = cv2.filterSpeckles(mask, 1, 30, 2)
 
     #Polygonize extents using OpenCV findContours function        
-    line, hier = cv2.findContours(mask, cv2.RETR_EXTERNAL, 
-                                  cv2.CHAIN_APPROX_NONE)
-    
+    i, line, hier = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)      #OpenCV v3.4.17 and lower       
+#    i, line, hier = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)     #OpenCV v4 and higher
     print('\nDetected ' + str(len(line)) + ' regions in ' + str(imn))
     
     #Append all polygons from the polys list that have more than 
