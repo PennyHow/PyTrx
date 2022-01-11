@@ -22,7 +22,7 @@ Calibration_path #Path name where camera calibration file can be found
 Camera_location #Location of camera in xyz coordinates
 [551141.156 8710426.44 480.658]
 
-Yaw_pitch_roll #Yaw, pitch, roll of camera (set to [0 0 0] if unknown) 
+Yaw_pitch_roll #Yaw, pitch, roll of camera (estimate yaw viewing angle if YPR is unknown e.g. [180 0 0])
 [5.9929 0.174   0] 
 
 Dem_densification #Amount to densify the DEM to permit better mapping of image

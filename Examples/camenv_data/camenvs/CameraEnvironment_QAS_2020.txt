@@ -30,7 +30,7 @@ Camera_location #Location of camera in xyz coordinates
 [4.817377007794161e+05 7.115229091293148e+06 894.67]
 
 
-Yaw_pitch_roll #Yaw, pitch, roll of camera (set to [0 0 0] if unknown) 
+Yaw_pitch_roll #Yaw, pitch, roll of camera (estimate yaw viewing angle if YPR is unknown e.g. [180 0 0])
 [-0.4651 -0.0012 0.0049] 
 
 
