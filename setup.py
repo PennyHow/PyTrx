@@ -18,7 +18,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pytrx", 
-    version="1.1.0",
+    version="1.2.0",
     author="Penelope How",
     author_email="pennyruthhow@gmail.com",
     description="An object-oriented toolset for calculating velocities, surface areas and distances from oblique imagery of glacial environments",
@@ -35,6 +35,6 @@ setuptools.setup(
         "Natural Language :: English",
         "Operating System :: OS Independent",
     ],
-    install_requires=['glob2', 'matplotlib', 'numpy', 'opencv-python>=3', 'pillow', 'scipy'],
+    install_requires=['glob2', 'matplotlib', 'numpy', 'opencv-python>=3', 'pillow','rawpy', 'scipy'],
     python_requires='>=3',
 )

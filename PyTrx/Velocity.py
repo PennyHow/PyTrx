@@ -647,9 +647,9 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
       List containing information for transforming between the image plane and 
       3D scene: 1. DEM (ExplicitRaster object); 2. Projection parameters 
       (camera location, camera position, radial distortion coefficients, 
-       tangential distortion coefficients, focal length, camera centre, and 
-       reference image); 3. Inverse projection parameters (coordinate system 
-       3D scene - X, Y, Z, uv0) (default=None)       
+      tangential distortion coefficients, focal length, camera centre, and 
+      reference image); 3. Inverse projection parameters (coordinate system 
+      3D scene - X, Y, Z, uv0) (default=None)       
     theshold : int, optional 
       Threshold for template correlation (default=0.8)
     min_features : int, optional 

@@ -104,7 +104,6 @@ class Area(ImageSequence):
         verify : bool, optional 
           Flag to denote whether detected polygons should be manually verified 
           by user (default=False)
-        :type verify: bool, optional 
 
         Returns
         -------
