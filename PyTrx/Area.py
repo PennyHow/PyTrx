@@ -30,25 +30,48 @@ from CamEnv import projectUV, setProjection
 class Area(ImageSequence):
     """A class for processing change in area (i.e. a lake or plume) through an 
     image sequence, with methods to calculate extent change in an image plane 
-    (px) and real areal change via georectification.
-       
-    :param imageList: List of images, for the :class:`PyTrx.Images.ImageSequence` object
-    :type imageList: str/list            
-    :param cameraenv: Camera environment parameters which can be read into the :class:`PyTrx.CamEnv.CamEnv` object as a text file
-    :type cameraenv: str           
-    :param hmatrix: Homography matrix 
-    :type hmatrix: arr
-    :param calibFlag: An indicator of whether images are calibrated, for the :class:`PyTrx.Images.ImageSequence` object
-    :type calibFlag: bool          
-    :param band: String denoting the desired image band, default to 'L' (grayscale)
-    :type band: str, optional
-    :param equal: Flag denoting whether histogram equalisation is applied to images (histogram equalisation is applied if True). Default to True. 
-    :type equal: bool, optional                          
+    (px) and real areal change via georectification   
+
+    Attributes
+    ----------
+    _camEnv : PyTrx.CamEnv.CamEnv
+      Camera environment object
+    _calibFlag : bool
+      Camera calibration flag
+    _pxplot : list
+      Pixel plotting extent
+    _maximg : int
+      Image with maximum extent
+    _mask : arr
+      Image mask
+    _enhance : list
+      Image enhancement parameters
+    _hmatrix : arr
+      Homography matrix
     """
     #Initialisation of Area class object          
     def __init__(self, imageList, cameraenv, hmatrix, calibFlag=True, 
                  band='L', equal=True):
+        """Initialise Area object
         
+        Parameters
+        ----------
+        imageList : str/list 
+          List of images, for the PyTrx.Images.ImageSequence object
+        cameraenv : str 
+          Camera environment parameters which can be read into the 
+          PyTrx.CamEnv.CamEnv object as a text file         
+        hmatrix : arr 
+          Homography matrix 
+        calibFlag : bool 
+          An indicator of whether images are calibrated, for the 
+          PyTrx.Images.ImageSequence object
+        band : str, optional  
+          String denoting the desired image band, default is 'L' (grayscale)
+        equal : bool, optional 
+          Flag denoting whether histogram equalisation is applied to images 
+          (histogram equalisation is applied if True). Default to True  
+        """         
         #Initialise and inherit from the ImageSequence object
         ImageSequence.__init__(self, imageList, band, equal) 
         
@@ -59,6 +82,7 @@ class Area(ImageSequence):
         self._maximg = 0
         self._mask = None
         self._enhance = None
+        self._colourrange = None
         
         if hmatrix is not None:
             self._hmatrix=hmatrix
@@ -72,12 +96,20 @@ class Area(ImageSequence):
         """Detects areas of interest from a sequence of images, and returns 
         pixel and xyz areas. 
         
-        :param colour: Flag to denote whether colour range for detection should be defined for each image or only once, default to False
-        :type colour: bool, optional 
-        :param verify: Flag to denote whether detected polygons should be manually verified by user, default to False
-        :type verify: bool, optional           
-        :returns: XYZ and UV area information
-        :rtype: list
+        Parameters
+        ----------
+        colour : bool, optional 
+          Flag to denote whether colour range for detection should be defined 
+          for each image or only once (default=False)
+        verify : bool, optional 
+          Flag to denote whether detected polygons should be manually verified 
+          by user (default=False)
+        :type verify: bool, optional 
+
+        Returns
+        -------
+        list          
+          XYZ and UV area information
         """               
         print('\n\nCOMMENCING AUTOMATED AREA DETECTION')
 
@@ -126,7 +158,8 @@ class Area(ImageSequence):
                                            self._enhance[1], self._enhance[2])
                 
                 #Define colour range
-                defineColourrange(setting, setimn, pxplot=self._pxplot)    
+                self._colourrange = defineColourrange(setting, setimn, 
+                                                      pxplot=self._pxplot)    
             
         #Set up output datasets
         area=[]
@@ -165,7 +198,8 @@ class Area(ImageSequence):
             
             #Define colour range if required
             if colour is True:
-                defineColourrange(img2, imn, pxplot=self._pxplot)
+                self._colourrange = defineColourrange(img2, imn, 
+                                                      pxplot=self._pxplot)
             
             #Calculate extent
             if self._hmatrix is not None:
@@ -195,8 +229,10 @@ class Area(ImageSequence):
         input is facilitated through an interactive plot to click around the 
         area of interest
         
-        :returns: XYZ and UV area information
-        :rtype: list
+        Returns
+        -------
+        list
+          XYZ and UV area information
         """               
         '\n\nCOMMENCING MANUAL AREA DETECTION'            
         #Set up output dataset
@@ -249,12 +285,17 @@ class Area(ImageSequence):
         images with detected polygons and the user manually verifies them by 
         clicking them.
         
-        :param area: XYZ and UV area information
-        :type area: list 
-        :param invprojvars: Inverse projection variables [X,Y,Z,uv0]
-        :type invprojvars: list
-        :param verified: Verified XYZ and UV area information
-        :type verified: list 
+        Parameters
+        ----------
+        area : list 
+          XYZ and UV area information
+        invprojvars : list 
+          Inverse projection variables [X,Y,Z,uv0]
+        
+        Returns
+        -------
+        verified : list 
+          Verified XYZ and UV area information
         """
         #Create output
         verified = []
@@ -332,7 +373,7 @@ class Area(ImageSequence):
             
             #Show plot
             plt.show() 
-            plt.close()
+            # plt.close()
             
             #Append all verified extents
             vpx=[]
@@ -383,10 +424,12 @@ class Area(ImageSequence):
         """Set image in sequence which pictures the maximum extent of the area
         of interest.
         
-        :param maxMaskPath: File path to mask with maximum extent
-        :type maxMaskPath: str
-        :param maxim: Image with maximum extent
-        :type maxim: arr
+        Parameters
+        ----------
+        maxMaskPath : str 
+          File path to mask with maximum extent
+        maxim : arr 
+          Image with maximum extent
         """
         #Calibrate image if calibration flag is true
         if self._calibFlag is True:
@@ -408,14 +451,16 @@ class Area(ImageSequence):
         """Set plotting extent. Setting the plot extent will make it easier to 
         define colour ranges and verify areas.
         
-        :param xmin: X-axis minimum value.
-        :type xmin: int
-        :param xmax: X-axis maximum value.
-        :type xmax: int
-        :param ymin: Y-axis minimum value.
-        :type ymin: int
-        :param ymax: Y-axis maximum value.
-        :type ymax: int
+        Parameters
+        ----------
+        xmin : int
+          X-axis minimum value
+        xmax : int 
+          X-axis maximum value
+        ymin : int 
+          Y-axis minimum value
+        ymax : int 
+          Y-axis maximum value
         """
         self._pxplot = [xmin,xmax,ymin,ymax]
 
@@ -423,8 +468,10 @@ class Area(ImageSequence):
     def setThreshold(self, number):
         """Set threshold for number of polgons kept from an image.
         
-        :param number: Number denoting the number of detected polygons that will be retained
-        :type number: int 
+        Parameters
+        ----------
+        number : int 
+          Number denoting the number of detected polygons that will be retained
         """
         self._threshold = number
                                 
@@ -433,10 +480,10 @@ class Area(ImageSequence):
         """Manually define the RBG colour range that will be used to filter
         the image/images.
         
-        :param upper: Upper value of colour range
-        :type upper: int
-        :param lower: Lower value of colour range
-        :type lower: int
+        upper : int 
+          Upper value of colour range
+        lower : int 
+          Lower value of colour range
         """    
         print('\nColour range defined from given values:')
         print('Upper RBG boundary: ', upper)
@@ -452,12 +499,17 @@ class Area(ImageSequence):
         accordingly. See enhanceImg function for detailed explanation of the 
         parameters.
         
-        :param diff: Inputted as either 'light or 'dark', signifying the intensity of the image pixels. 'light' increases the intensity such that dark pixels become much brighter and bright pixels become slightly brighter. 'dark' decreases the intensity such that dark pixels become much darker and bright pixels become slightly darker.
-        :type diff: str
-        :param phi: Defines the intensity of all pixel values
-        :type phi: int
-        :param theta: Defines the number of "colours" in the image, e.g. 3 signifies that all the pixels will be grouped into one of three pixel values
-        :type theta: int               .
+        diff : str 
+          Inputted as either 'light or 'dark', signifying the intensity of the 
+          image pixels. 'light' increases the intensity such that dark pixels 
+          become much brighter and bright pixels become slightly brighter. 
+          'dark' decreases the intensity such that dark pixels become much 
+          darker and bright pixels become slightly darker
+        phi : int 
+          Defines the intensity of all pixel values
+        theta : int 
+          Defines the number of "colours" in the image, e.g. 3 signifies that 
+          all the pixels will be grouped into one of three pixel values              .
         """
         self._enhance = diff, phi, theta
  
@@ -472,22 +524,29 @@ def calcAutoArea(img, imn, colourrange, hmatrix=None, threshold=None,
     extract pixels within that range using the OpenCV function inRange. If a 
     threshold has been set (using the setThreshold function) then only nth 
     polygons will be retained. XYZ areas and polygon coordinates are only 
-    calculated when a set of inverse projection variables are provided.
+    calculated when a set of inverse projection variables are provided
     
-    :param img: Image array
-    :type img: arr
-    :param imn: Image name
-    :type imn: str
-    :param colourrange: RBG colour range for areas to be detected from
-    :type colourrange: list
-    :param hmatrix: Homography matrix, default to None
-    :type hmatrix: arr
-    :param threshold: Threshold number of detected areas to retain, default to None
-    :type threshold: int, optional
-    :param invprojvars: Inverse projection variables [X,Y,Z,uv0], default to None
-    :type invprojvars: list, optional
-    :returns: Four list items containing 1) the sum of total detected areas (xyz), 2) XYZ coordinates of detected areas, 3) Sum of total detected areas (px), and 4) UV coordinates of detected areas
-    :rtype: list
+    Parameters
+    ----------
+    img : arr 
+      Image array
+    imn : str 
+      Image name
+    colourrange : list
+      RBG colour range for areas to be detected from
+    hmatrix : arr 
+      Homography matrix (default=None)
+    threshold : int, optional 
+      Threshold number of detected areas to retain (default=None)
+    invprojvars : list, optional 
+      Inverse projection variables [X,Y,Z,uv0] (default=None)
+
+    Returns
+    -------
+    list
+      Four list items containing 1) the sum of total detected areas (xyz), 2) 
+      XYZ coordinates of detected areas, 3) Sum of total detected areas (px), 
+      and 4) UV coordinates of detected areas
     """                       
     #Get upper and lower RBG boundaries from colour range
     upper_boundary = colourrange[0]
@@ -499,14 +558,13 @@ def calcAutoArea(img, imn, colourrange, hmatrix=None, threshold=None,
 
     #Extract extent based on RBG range
     mask = cv2.inRange(img, lower_boundary, upper_boundary)
-
+        
 #    #Speckle filter to remove noise - needs fixing
 #    mask = cv2.filterSpeckles(mask, 1, 30, 2)
 
     #Polygonize extents using OpenCV findContours function        
-    polyimg, line, hier = cv2.findContours(mask, cv2.RETR_EXTERNAL, 
-                                           cv2.CHAIN_APPROX_NONE)
-    
+    i, line, hier = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)      #OpenCV v3.4.17 and lower       
+#    line, hier = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)     #OpenCV v4 and higher
     print('\nDetected ' + str(len(line)) + ' regions in ' + str(imn))
     
     #Append all polygons from the polys list that have more than 
@@ -580,20 +638,27 @@ def calcAutoArea(img, imn, colourrange, hmatrix=None, threshold=None,
 def calcManualArea(img, imn, hmatrix=None, pxplot=None, invprojvars=None):
     """Manually define an area in a given image. User input is facilitated
     through an interactive plot to click around the area of interest. XYZ areas
-    are calculated if a set of inverse projection variables are given.
+    are calculated if a set of inverse projection variables are given
     
-    :param img: Image array
-    :type img: arr
-    :param imn: Image name
-    :type imn: str
-    :param hmatrix: Homography matrix, default to None
-    :type hmatrix: arr    
-    :param pxplot: Plotting extent for manual area definition, default to None
-    :type pxplot: list, optional
-    :param invprojvars: Inverse projection variables [X,Y,Z,uv0], default to None
-    :type invprojvars: list, optional
-    :returns: Four list items containing 1) the sum of total detected areas (xyz), 2) XYZ coordinates of detected areas, 3) Sum of total detected areas (px), and 4) UV coordinates of detected areas
-    :rtype: list
+    Parameters
+    ----------
+    img : arr 
+      Image array
+    imn : str 
+      Image name
+    hmatrix : arr, optional 
+      Homography matrix (default=None)   
+    pxplot : list, optional 
+      Plotting extent for manual area definition (default=None)
+    invprojvars : list, optional
+      Inverse projection variables [X,Y,Z,uv0] (default=None)
+      
+    Returns
+    -------
+    list
+      Four list items containing 1) the sum of total detected areas (xyz), 2) 
+      XYZ coordinates of detected areas, 3) Sum of total detected areas (px), 
+      and 4) UV coordinates of detected areas
     """   
     #Initialise figure window and plot image
     fig=plt.gcf()
@@ -609,11 +674,11 @@ def calcManualArea(img, imn, hmatrix=None, pxplot=None, invprojvars=None):
     #Manual input of points from clicking on plot using pyplot.ginput
     rawpx = plt.ginput(n=0, timeout=0, show_clicks=True, mouse_add=1, 
                        mouse_pop=3, mouse_stop=2)
-    print('\n' + imn + ': you clicked ' + str(len(rawpx)) + ' points')
+    print('\n' + str(imn) + ': you clicked ' + str(len(rawpx)) + ' points')
     
     #Show plot
     plt.show()
-    plt.close()
+    # plt.close()
 
     #Convert coordinates to array
     pxpts=[]
@@ -670,16 +735,21 @@ def defineColourrange(img, imn, pxplot=None):
     darkest regions of the target extent that will be defined. Plot interaction 
     information: Left click to select, right click to undo selection, close the 
     image window to continue, and the window automatically times out after two 
-    clicks.
+    clicks
     
-    :param img: Image array
-    :type img: arr
-    :param imn: Image name
-    :type imn: str
-    :param pxplot: Plotting extent for manual area definition, default to None
-    :type pxplot: list, optional
-    :returns: List containing the upper and lower boundary for pixel detection
-    :rtype: list
+    Parameters
+    ----------
+    img : arr 
+      Image array
+    imn : str 
+      Image name
+    pxplot : list, optional 
+      Plotting extent for manual area definition, default to None
+
+    Returns
+    -------
+    list
+      List containing the upper and lower boundary for pixel detection
     """
     #Initialise figure window
     fig=plt.gcf()
@@ -697,19 +767,19 @@ def defineColourrange(img, imn, pxplot=None):
     colours = plt.ginput(n=2, timeout=0, show_clicks=True, mouse_add=1, 
                         mouse_pop=3, mouse_stop=2)
     
-    print('\n' + imn + ': you clicked ' + colours)
+    print('\n' + str(imn) + ': you clicked ' + str(colours))
     
     #Show plot
     plt.show()
-    plt.close()
+    # plt.close()
     
     #Get pixel intensity value for pt1       
-    col1_rbg = img[colours[0][1],colours[0][0]]
+    col1_rbg = img[int(colours[0][1]),int(colours[0][0])]
     if col1_rbg == 0:
         col1_rbg=1
 
     #Get pixel intensity value for pt2        
-    col2_rbg = img[colours[1][1],colours[1][0]]
+    col2_rbg = img[int(colours[1][1]),int(colours[1][0])]
     if col2_rbg == 0:
         col2_rbg=1
         
@@ -731,12 +801,17 @@ def defineColourrange(img, imn, pxplot=None):
     
 def getOGRArea(pts):
     """Get real world OGR polygons (.shp) from xyz poly pts with real world 
-    points which are compatible with mapping software (e.g. ArcGIS).
+    points which are compatible with mapping software (e.g. QGIS)
 
-    :param pts: UV/XYZ coordinates of a given area shape
-    :type pts: arr 
-    :returns: List of OGR geometry polygons
-    :rtype: list                           
+    Parameters
+    ----------
+    pts : arr 
+      UV/XYZ coordinates of a given area shape
+
+    Returns
+    -------
+    list
+      List of OGR geometry polygons                          
     """                      
     #Create geometries from uv/xyz coordinates using ogr                     
     ring = ogr.Geometry(ogr.wkbLinearRing)
