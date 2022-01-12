@@ -17,7 +17,6 @@ GCP_path #Path name where Ground Control Point data can be found
 DEM_path #Path name where DEM data can be found
 ../Examples/camenv_data/dem/QAS_dem.tif
 
-
 image_path #Path name where master image can be found (i.e. calibration image where GCPs have been plotted)
 ../Examples/camenv_data/refimages/QAS_2020.CR2
 
