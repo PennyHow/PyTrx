@@ -20,7 +20,7 @@ from PIL.ExifTags import TAGS
 from datetime import datetime
 from pylab import array, uint8
 from functools import reduce
-import glob, operator, imghdr, os, cv2, rawpy
+import glob, operator, imghdr, os, cv2
 
 #------------------------------------------------------------------------------
 
@@ -311,12 +311,12 @@ class CamImage(object):
         
     def _readImage(self):
         """Read image from file path using PIL"""
-        try:
-            self._image=Image.open(self._impath)
-        except:
-            rawim = rawpy.imread(self._impath)
-            rawim = rawim.postprocess()
-            self._image=Image.fromarray(rawim)
+#        try:
+        self._image=Image.open(self._impath)
+#        except:
+#            rawim = rawpy.imread(self._impath)
+#            rawim = rawim.postprocess()
+#            self._image=Image.fromarray(rawim)
     
     
     def _readImageData(self):
