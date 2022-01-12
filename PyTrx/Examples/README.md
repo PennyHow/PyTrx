@@ -39,14 +39,6 @@ The DEM distributed with PyTrx of the Tempelfjorden region is called 'TU_demzero
 <b>*Georectification of calving event point locations (TU_ptsgeorectify.py)*</b>
 <br>Example driver which demonstrates the capabilities of the georectification functions provided in PyTrx (which are based upon those available in ImGRAFT). Pre-defined points are imported which denote calving events at Tunabreen, Svalbard, that have been distinguished in the image plane. These are subsequently projected to xyz locations using the georectification functions in PyTrx. The xyz locations are plotted onto the DEM, with the colour of each point denoting the style of calving in that particular instance. The xyz locations are finally exported as a text file (.txt) and as a shape file (.shp).<br>
 
-<b>*Automated detection of snow extent (QAS_autoarea.py)*</b>
-<br>This driver calculates snow/bare ice extent at Qasigiannguit Glacier, West 
-Greenland, for a small subset of the 2020/21 melt season. Specifically, this examples performs automated detection of snow regions through images of the glacier to derive surface areas which have been corrected for image distortion.<br>
-
-<b>*Automated detection of snow extent (QAS_manualarea.py)*</b>
-<br>This driver calculates snow/bare ice extent at Qasigiannguit Glacier, West 
-Greenland, for a small subset of the 2020/21 melt season. Specifically, this examples performs manual detection of snow regions through images of the glacier to derive surface areas which have been corrected for image distortion.<br>
-
 <b>*Glacier velocity sparse feature-tracking (KR_velocity1.py)*</b>
 <br>Example driver for deriving velocities from Kronebreen, Svalbard, for a small subset of the 2014 melt season. Specifically this script performs feature-tracking through sequential daily images of the glacier to derive surface velocities (spatial average, individual point displacements and interpolated velocity maps) which have been corrected for image distortion and motion in the camera platform (i.e. image registration). This script uses images from those found in the 'KR2_2014_subset' folder, and camera environment data associated with the text file 'CameraEnvironmentData_KR2_2014.txt'.<br>
 
