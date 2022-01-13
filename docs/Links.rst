@@ -32,6 +32,7 @@ The DEM of the Tempelfjorden area provided as an example dataset for PyTrx origi
 
 The DEM distributed with PyTrx of the Tempelfjorden region is called *TU_demzero.tif*, which has been modified and manipulated from the original ArcticDEM data. The scene has been clipped to the area of interest, downgraded to 20 metre resolution, and all low-lying elevations (< 150 m) have been transformed to 0 m a.s.l. in order to project point locations and line profiles to a flat, homogeneous surface at sea level.
 
+
 Acknowledgements
 ----------------
 

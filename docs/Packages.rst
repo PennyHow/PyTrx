@@ -1,5 +1,5 @@
-PyTrx Modules
-=============
+Modules
+=======
 
 Area module
 -----------

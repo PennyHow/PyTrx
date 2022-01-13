@@ -16,8 +16,8 @@ Authors: Penelope How (how@geus.dk), Nick Hulton, and Lynne Buie (née Addison)
 
    Installation
    Guide
-   Packages
    Examples
+   Packages
    Links
 
 Indices and tables
