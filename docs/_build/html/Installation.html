@@ -1,153 +1,170 @@
 
-<!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
-  <head>
-    <meta charset="utf-8" />
-    <title>Quickstart &#8212; PyTrx 1.2.0 documentation</title><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Installation &mdash; PyTrx 1.2.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="_static/js/modernizr.min.js"></script>
+  
     
-    <link rel="stylesheet" href="_static/pydoctheme.css?2022.1" type="text/css" />
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+      <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+        <script type="text/javascript" src="_static/jquery.js"></script>
+        <script type="text/javascript" src="_static/underscore.js"></script>
+        <script type="text/javascript" src="_static/doctools.js"></script>
+        <script type="text/javascript" src="_static/language_data.js"></script>
     
-    <script type="text/javascript" id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
-    <script type="text/javascript" src="_static/jquery.js"></script>
-    <script type="text/javascript" src="_static/underscore.js"></script>
-    <script type="text/javascript" src="_static/doctools.js"></script>
-    <script type="text/javascript" src="_static/language_data.js"></script>
+    <script type="text/javascript" src="_static/js/theme.js"></script>
+
     
+
+  
+  <link rel="stylesheet" href="_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="PyTrx Guide" href="Guide.html" />
-    <link rel="prev" title="PyTrx documentation" href="index.html" /><link rel="shortcut icon" type="image/png" href="_static/py.svg" />
-            <script type="text/javascript" src="_static/copybutton.js"></script>
-            <script type="text/javascript" src="_static/menu.js"></script> 
-  </head>
-<body>
-<div class="mobile-nav">
-    <input type="checkbox" id="menuToggler" class="toggler__input" aria-controls="navigation"
-           aria-pressed="false" aria-expanded="false" role="button" aria-label="Menu" />
-    <label for="menuToggler" class="toggler__label">
-        <span></span>
-    </label>
-    <nav class="nav-content" role="navigation">
-         <a href="https://www.python.org/" class="nav-logo">
-             <img src="_static/py.svg" alt="Logo"/>
-         </a>
-        <div class="version_switcher_placeholder"></div>
-        <form role="search" class="search" action="search.html" method="get">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" class="search-icon">
-                <path fill-rule="nonzero"
-                        d="M15.5 14h-.79l-.28-.27a6.5 6.5 0 001.48-5.34c-.47-2.78-2.79-5-5.59-5.34a6.505 6.505 0 00-7.27 7.27c.34 2.8 2.56 5.12 5.34 5.59a6.5 6.5 0 005.34-1.48l.27.28v.79l4.25 4.25c.41.41 1.08.41 1.49 0 .41-.41.41-1.08 0-1.49L15.5 14zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z" fill="#444"></path>
-            </svg>
-            <input type="text" name="q" aria-label="Quick search"/>
-            <input type="submit" value="Go"/>
-        </form>
+    <link rel="next" title="Get Started" href="GetStarted.html" />
+    <link rel="prev" title="PyTrx documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="index.html" class="icon icon-home"> PyTrx
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#pytrx-set-up">PyTrx set-up</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cloning-pytrx-from-github">Cloning PyTrx from GitHub</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#installing-pytrx-through-pip">Installing PyTrx through pip</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="GetStarted.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Guide.html">Package Guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Packages.html">Modules</a></li>
+<li class="toctree-l1"><a class="reference internal" href="Links.html">Links and Acknowledgements</a></li>
+</ul>
+
+            
+          
+        </div>
+      </div>
     </nav>
-    <div class="menu-wrapper">
-        <nav class="menu" role="navigation" aria-label="main navigation">
-            <div class="language_switcher_placeholder"></div>
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Quickstart</a><ul>
-<li><a class="reference internal" href="#pytrx-set-up">PyTrx set-up</a></li>
-<li><a class="reference internal" href="#downloading-pytrx-from-github">Downloading PyTrx from GitHub</a></li>
-<li><a class="reference internal" href="#installing-pytrx-through-pip">Installing PyTrx through pip</a></li>
-<li><a class="reference internal" href="#pytrx-structure">PyTrx Structure</a><ul>
-<li><a class="reference internal" href="#camenv-py">CamEnv.py</a></li>
-<li><a class="reference internal" href="#dem-py">DEM.py</a></li>
-<li><a class="reference internal" href="#filehandler-py">FileHandler.py</a></li>
-<li><a class="reference internal" href="#images-py">Images.py</a></li>
-<li><a class="reference internal" href="#velocity-py">Velocity.py</a></li>
-<li><a class="reference internal" href="#area-py">Area.py</a></li>
-<li><a class="reference internal" href="#line-py">Line.py</a></li>
-<li><a class="reference internal" href="#utilities-py">Utilities.py</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">PyTrx documentation</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="Guide.html"
-                        title="next chapter">PyTrx Guide</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/Installation.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </nav>
-    </div>
-</div>
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">PyTrx</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="index.html">Docs</a> &raquo;</li>
+        
+      <li>Installation</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="_sources/Installation.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
   
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             accesskey="I">index</a></li>
-        <li class="right" >
-          <a href="Guide.html" title="PyTrx Guide"
-             accesskey="N">next</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="PyTrx documentation"
-             accesskey="P">previous</a> |</li>
-          <li><img src="_static/py.svg" alt="python logo" style="vertical-align: middle; margin-top: -1px"/></li>
-          <li><a href="https://www.python.org/">Python</a> &#187;</li>
-          <li class="switchers">
-            <div class="language_switcher_placeholder"></div>
-            <div class="version_switcher_placeholder"></div>
-          </li>
-          <li>
-              
-              <a href="index.html">PyTrx 1.2.0 documentation</a> &#187;
-              
-          </li>
-                <li class="right">
-                    
-
-    <div class="inline-search" role="search">
-        <form class="inline-search" action="search.html" method="get">
-          <input placeholder="Quick search" aria-label="Quick search" type="text" name="q" />
-          <input type="submit" value="Go" />
-          <input type="hidden" name="check_keywords" value="yes" />
-          <input type="hidden" name="area" value="default" />
-        </form>
-    </div>
-                     |
-                </li>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
             
-      </ul>
-    </div>    
-
-    <div class="document">
-      <div class="documentwrapper">
-        <div class="bodywrapper">
-          <div class="body" role="main">
-            
-  <div class="section" id="quickstart">
-<h1>Quickstart<a class="headerlink" href="#quickstart" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
 <div class="section" id="pytrx-set-up">
 <h2>PyTrx set-up<a class="headerlink" href="#pytrx-set-up" title="Permalink to this headline">¶</a></h2>
 <p>PyTrx has been coded with Python 3 and has been tested on Linux and Windows operating systems (it should also work on Apple operating systems too, it just hasn’t been tested). PyTrx was originally written using a Linux operating system, so the inputted file path structures given in the example scripts may differ between operating systems and it is therefore advised to check file path structures before running these.</p>
-<p>PyTrx v1.1 can either be downloaded directly from the <a class="reference external" href="https://github.com/PennyHow/PyTrx">GitHub repository</a>, or installed PyPI package manager (pip).</p>
+<p>PyTrx can either be downloaded directly from the <a class="reference external" href="https://github.com/PennyHow/PyTrx">GitHub repository</a>, or installed PyPI package manager (pip).</p>
 </div>
-<div class="section" id="downloading-pytrx-from-github">
-<h2>Downloading PyTrx from GitHub<a class="headerlink" href="#downloading-pytrx-from-github" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="cloning-pytrx-from-github">
+<h2>Cloning PyTrx from GitHub<a class="headerlink" href="#cloning-pytrx-from-github" title="Permalink to this headline">¶</a></h2>
 <p>PyTrx can be downloaded directly through the ‘clone or download’ icon on <a class="reference external" href="https://github.com/PennyHow/PyTrx">PyTrx’s GitHub repository</a>. To use PyTrx, you will need a working distribution of Python and the following key packages, which PyTrx strongly depends on:</p>
 <ul class="simple">
 <li><p>OpenCV (v3 and above): <a class="reference external" href="https://opencv.org">https://opencv.org</a></p></li>
@@ -166,160 +183,55 @@
 <p><strong>WARNING</strong> There are difficulties with the GDAL package on pip, meaning that GDAL could not be declared explicitly as a PyTrx dependency. Please ensure that GDAL is installed separately if installing PyTrx through pip.</p>
 <p>To check that PyTrx is working, open a Python console or IDE such as Spyder, type ‘import PyTrx’ and hit enter, followed by ‘help(PyTrx)’. If PyTrx is working correctly, this should print PyTrx’s metadata, including PyTrx’s license, a brief description of the toolset, and its structure. If this does not work and throws up an error, it is likely that the package dependencies are invalid so reconfigure them and then try again. Now you are all set up to use PyTrx.</p>
 </div>
-<div class="section" id="pytrx-structure">
-<h2>PyTrx Structure<a class="headerlink" href="#pytrx-structure" title="Permalink to this headline">¶</a></h2>
-<p>Detailed documentation is included in the scripts that make up PyTrx. Each script contains classes and functions for handling each aspect needed for photogrammetric processing.</p>
-<p>For beginners in programming, it is advised to look at the example applications provided and adapt them accordingly for your own use. For experienced programmers, get stuck in. Feel free to contact us if you run into major problems or have constructive comments that will help us further PyTrx and its capabilities. We will not respond to minor troubleshooting or unconstructive comments.</p>
-<div class="section" id="camenv-py">
-<h3>CamEnv.py<a class="headerlink" href="#camenv-py" title="Permalink to this headline">¶</a></h3>
-<p>Handles the associated data with the camera environment. The GCPs class handles the Ground Control Points (GCPs) and their correspondence to the associated DEM and CamImage object. The CamCalib class handles information concerning the camera calibration, i.e. the intrinsic camera matrix and lens distortion coefficients. This class contains functionality for reading in calibration files from .txt and .mat formats.
-The CamEnv compiles all the information about the camera environment from the GCPs and CamCalib classes, and also contains information about the camera object (pose and location). This is also where georectification functionality is held, with functions for projection and inverse projection. The class is initialised using a .txt file containing file path directories to all the associated data files.</p>
-</div>
-<div class="section" id="dem-py">
-<h3>DEM.py<a class="headerlink" href="#dem-py" title="Permalink to this headline">¶</a></h3>
-<p>Handles the DEM data. This currently supports .mat and .tif file types. The ExplicitRaster class represents a DEM as a numeric raster with explicit XY cell referencing in each grid cell. The class includes functions for densification, calculating viewsheds, and incorporates unbound functions that import a DEM file from .mat and .tif formats.</p>
-</div>
-<div class="section" id="filehandler-py">
-<h3>FileHandler.py<a class="headerlink" href="#filehandler-py" title="Permalink to this headline">¶</a></h3>
-<p>This module contains a set of functions for reading in data from files (such as image data and calibration information) and writing out data.</p>
-</div>
-<div class="section" id="images-py">
-<h3>Images.py<a class="headerlink" href="#images-py" title="Permalink to this headline">¶</a></h3>
-<p>Handles the image data, and the image sequence. The CamImage class holds information about a singular image and contains functionality for importing image data from file and passing specific image bands forward for subsequent processing. The ImageSequence class holds information about an image sequence, i.e. a collection of CamImage objects, from which specific images and image pairs can be called.</p>
-</div>
-<div class="section" id="velocity-py">
-<h3>Velocity.py<a class="headerlink" href="#velocity-py" title="Permalink to this headline">¶</a></h3>
-<p>Calculates velocities and homography. This can either be achieved through the Velocity class for processing velocities and homography through a series of images, or using the functions provided within the script for processing velocities and homography between an image pair.</p>
-</div>
-<div class="section" id="area-py">
-<h3>Area.py<a class="headerlink" href="#area-py" title="Permalink to this headline">¶</a></h3>
-<p>Automated and manual detection of surface areas from imagery (e.g. supraglacial lakes, meltwater plume surface extent). This can either be achieved through the Area class for defining areas of interest through a series of images, or using the functions provided within the script for defining areas of interest in a single image.</p>
-</div>
-<div class="section" id="line-py">
-<h3>Line.py<a class="headerlink" href="#line-py" title="Permalink to this headline">¶</a></h3>
-<p>Manual detection of line features from imagery (e.g. glacier terminus position). This can either be achieved through the Line class for defining line features through a series of images, or using the functions provided within the script for defining line features in a single image.</p>
-</div>
-<div class="section" id="utilities-py">
-<h3>Utilities.py<a class="headerlink" href="#utilities-py" title="Permalink to this headline">¶</a></h3>
-<p>This module contains a set of functions for plotting and interpolating data.</p>
-</div>
-</div>
 </div>
 
 
+           </div>
+           
           </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="GetStarted.html" class="btn btn-neutral float-right" title="Get Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="index.html" class="btn btn-neutral float-left" title="PyTrx documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2022, Penelope How
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
         </div>
       </div>
-      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
-        <div class="sphinxsidebarwrapper">
-  <h3><a href="index.html">Table of Contents</a></h3>
-  <ul>
-<li><a class="reference internal" href="#">Quickstart</a><ul>
-<li><a class="reference internal" href="#pytrx-set-up">PyTrx set-up</a></li>
-<li><a class="reference internal" href="#downloading-pytrx-from-github">Downloading PyTrx from GitHub</a></li>
-<li><a class="reference internal" href="#installing-pytrx-through-pip">Installing PyTrx through pip</a></li>
-<li><a class="reference internal" href="#pytrx-structure">PyTrx Structure</a><ul>
-<li><a class="reference internal" href="#camenv-py">CamEnv.py</a></li>
-<li><a class="reference internal" href="#dem-py">DEM.py</a></li>
-<li><a class="reference internal" href="#filehandler-py">FileHandler.py</a></li>
-<li><a class="reference internal" href="#images-py">Images.py</a></li>
-<li><a class="reference internal" href="#velocity-py">Velocity.py</a></li>
-<li><a class="reference internal" href="#area-py">Area.py</a></li>
-<li><a class="reference internal" href="#line-py">Line.py</a></li>
-<li><a class="reference internal" href="#utilities-py">Utilities.py</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
 
-  <h4>Previous topic</h4>
-  <p class="topless"><a href="index.html"
-                        title="previous chapter">PyTrx documentation</a></p>
-  <h4>Next topic</h4>
-  <p class="topless"><a href="Guide.html"
-                        title="next chapter">PyTrx Guide</a></p>
-  <div role="note" aria-label="source link">
-    <h3>This Page</h3>
-    <ul class="this-page-menu">
-      <li><a href="_sources/Installation.rst.txt"
-            rel="nofollow">Show Source</a></li>
-    </ul>
-   </div>
-<div id="searchbox" style="display: none" role="search">
-  <h3 id="searchlabel">Quick search</h3>
-    <div class="searchformwrapper">
-    <form class="search" action="search.html" method="get">
-      <input type="text" name="q" aria-labelledby="searchlabel" />
-      <input type="submit" value="Go" />
-    </form>
-    </div>
-</div>
-<script type="text/javascript">$('#searchbox').show(0);</script>
-        </div>
-      </div>
-      <div class="clearer"></div>
-    </div>  
-    <div class="related" role="navigation" aria-label="related navigation">
-      <h3>Navigation</h3>
-      <ul>
-        <li class="right" style="margin-right: 10px">
-          <a href="genindex.html" title="General Index"
-             >index</a></li>
-        <li class="right" >
-          <a href="Guide.html" title="PyTrx Guide"
-             >next</a> |</li>
-        <li class="right" >
-          <a href="index.html" title="PyTrx documentation"
-             >previous</a> |</li>
-          <li><img src="_static/py.svg" alt="python logo" style="vertical-align: middle; margin-top: -1px"/></li>
-          <li><a href="https://www.python.org/">Python</a> &#187;</li>
-          <li class="switchers">
-            <div class="language_switcher_placeholder"></div>
-            <div class="version_switcher_placeholder"></div>
-          </li>
-          <li>
-              
-              <a href="index.html">PyTrx 1.2.0 documentation</a> &#187;
-              
-          </li>
-                <li class="right">
-                    
+    </section>
 
-    <div class="inline-search" role="search">
-        <form class="inline-search" action="search.html" method="get">
-          <input placeholder="Quick search" aria-label="Quick search" type="text" name="q" />
-          <input type="submit" value="Go" />
-          <input type="hidden" name="check_keywords" value="yes" />
-          <input type="hidden" name="area" value="default" />
-        </form>
-    </div>
-                     |
-                </li>
-            
-      </ul>
-    </div>  
-    <div class="footer">
-    &copy; Copyright 2022, Penelope How.
-    <br />
-    This page is licensed under the Python Software Foundation License Version 2.
-    <br />
-    Examples, recipes, and other code in the documentation are additionally licensed under the Zero Clause BSD License.
-    <br />
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
     
-    <br />
+   
 
-    The Python Software Foundation is a non-profit corporation.
-<a href="https://www.python.org/psf/donations/">Please donate.</a>
-<br />
-    <br />
-
-    Last updated on None.
-    
-    <br />
-
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 2.2.0.
-    </div>
-
-  </body>
+</body>
 </html>

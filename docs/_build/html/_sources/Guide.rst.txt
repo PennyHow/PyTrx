@@ -1,5 +1,5 @@
-PyTrx Guide 
-===============
+Package Guide 
+=============
 
 Detailed documentation is included in the 8 scripts that make up PyTrx. Each script contains classes and functions for handling each aspect needed for photogrammetric processing.
 
@@ -10,6 +10,7 @@ CamEnv
 ------
 
 Handles the associated data with the camera environment. The GCPs class handles the Ground Control Points (GCPs) and their correspondence to the associated DEM and CamImage object. The CamCalib class handles information concerning the camera calibration, i.e. the intrinsic camera matrix and lens distortion coefficients. This class contains functionality for reading in calibration files from .txt and .mat formats.
+
 The CamEnv compiles all the information about the camera environment from the GCPs and CamCalib classes, and also contains information about the camera object (pose and location). This is also where georectification functionality is held, with functions for projection and inverse projection. The class is initialised using a .txt file containing file path directories to all the associated data files.
 
 

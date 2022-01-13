@@ -13,6 +13,7 @@ We will automatically detect water on the glacier based on differences in pixel 
 
 First, we need to import os (for file checking and creation) and the PyTrx packages that we are going to use.
 
+
 .. code-block:: python
 
    import os
@@ -25,6 +26,7 @@ First, we need to import os (for file checking and creation) and the PyTrx packa
 
 
 We load our camera environment and masks (for feature extraction and image registration), and set the paths to our input images and output folder.
+
 
 .. code-block:: python
    
@@ -46,6 +48,7 @@ We load our camera environment and masks (for feature extraction and image regis
 
 Next, we create a CamEnv object using our previously defined camera environment text file which contains information about the camera location and pose, and file paths to our DEM, ground control point positions, camera calibration coefficients, and reference image.       
  
+ 
 .. code-block:: python
    
    # Create camera environment
@@ -55,6 +58,7 @@ Next, we create a CamEnv object using our previously defined camera environment 
 If certain camera environment parameters are unknown or guessed, then PyTrx's optimisation parameters can be used to refine the camera environment and improve the georectification. This refinement is conducted based on the ground control points.
 
 In this case, the camera pose (yaw, pitch, roll - YPR) is unknown, so we will use the optimisation routine the refine the YPR values.
+
 
 .. code-block:: python
    
@@ -72,15 +76,10 @@ In this case, the camera pose (yaw, pitch, roll - YPR) is unknown, so we will us
    # Optimise camera                                
    cameraenvironment.optimiseCamEnv(optparams, optmethod, show=True)
 
-
-.. image:: https://github.com/PennyHow/PyTrx/blob/master/docs/_figures/KR_autoarea_residual.png
-  :width: 400
-  :alt: Kronebreen camera 5 georectification residual error
-
-
 In order to make measurements from the images, we need to ensure that motion in the camera platform is corrected for (otherwise we will see jumps in the positions of our detected lakes when the camera platform moves). 
 
 We will use PyTrx's Homography object to track static features in the image and identify camera platform motion. We can subsequently use these movements to create a homography model and correct for this motion.
+ 
          
 .. code-block:: python
    
@@ -110,6 +109,7 @@ Now we have our homography model, we can look at detecting lakes in the images. 
 
 Lakes will be identified based on the difference in pixel intensities between the water and adjacent ice. The time-lapse images will also be enhanced to aid in identifying them.
 
+
 .. code-block:: python
 
    # Set parameters to initialise Area object
@@ -127,6 +127,7 @@ Lakes will be identified based on the difference in pixel intensities between th
 
 
 We can set a number of detection parameters in our Area object to aid in the automated identification of lakes, including image enhancing, image masking, and setting athreshold for the number of detected polygons that will be retained. 
+
 
 .. code-block:: python
    
@@ -147,6 +148,7 @@ We can set a number of detection parameters in our Area object to aid in the aut
    
 Following this, we will use a pre-defined pixel value range to detect lakes from the images. In this case, pixel values between 1 and 8 will be classified as water. The calcAutoAreas function will then be executed to detect water through all the time-lapse images in our sequence.
 
+
 .. code-block:: python
 
    # Set pixel colour range, from which extents will be distinguished
@@ -154,14 +156,18 @@ Following this, we will use a pre-defined pixel value range to detect lakes from
    mincol = 1  
    lakes.setColourrange(maxcol, mincol) 
 
+
 The calcAutoAreas function will then be executed to detect water through all the time-lapse images in our sequence. The colour and verify flags can be toggled for defining the pixel colour range in each image and verifying each identified polygon manually, respectively.
+
 
 .. code-block:: python
 
    # Calculate real areas
    areas = lakes.calcAutoAreas(colour=False, verify=False)
 
+
 Now we have our detected lakes, we can plot them in both the image plane (u,v) and real-world coordinates (x,y,z) to see how they look using the plotting functions in the Utilities module.
+
 
 .. code-block:: python
 
@@ -184,19 +190,11 @@ Now we have our detected lakes, we can plot them in both the image plane (u,v) a
                   show=True, save=None)  
        plotAreaXYZ(xyzpts[i], dem, show=True, save=None)
     
-.. image:: https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/results/KR_autoarea/outputimgs/uv_KR3_140627_213000.JPG
-  :width: 400
-  :alt: Kronebreen camera 3 image detection example
-  
-  
-.. image:: https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/results/KR_autoarea/outputimgs/xyz_KR3_140627_213000.JPG
-  :width: 400
-  :alt: Kronebreen camera 3 xyz detection example  
-
-    
 And finally, we can export our identified lakes as both text files and shapefiles using the writing functions in the FileHandler module.
 
+
 .. code-block:: python
+
    # Get all image names for reference
    imn = lakes.getImageNames()
 

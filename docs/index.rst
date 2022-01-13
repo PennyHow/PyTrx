@@ -15,8 +15,8 @@ Authors: Penelope How (how@geus.dk), Nick Hulton, and Lynne Buie (née Addison)
    :caption: Contents:
 
    Installation
+   GetStarted
    Guide
-   Examples
    Packages
    Links
 
