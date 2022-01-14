@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Get Started &mdash; PyTrx 1.2.0 documentation</title>
+  <title>Getting Started &mdash; PyTrx 1.2.0 documentation</title>
   
 
   
@@ -83,14 +83,13 @@
               <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="Installation.html">Installation</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">Get Started</a><ul>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">Getting Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#automated-detection-of-supraglacial-lakes">Automated detection of supraglacial lakes</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#manual-detection-of-plume-footprints">Manual detection of plume footprints</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#manual-detection-of-terminus-profiles">Manual detection of terminus profiles</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#manual-detection-of-glacier-terminus-profiles">Manual detection of glacier terminus profiles</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#georectification-of-glacier-calving-event-point-locations">Georectification of glacier calving event point locations</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#sparse-feature-tracking">Sparse feature-tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#dense-feature-tracking">Dense feature-tracking</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#sparse-and-dense-feature-tracking">Sparse and dense feature-tracking</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#sparse-feature-tracking-to-derive-glacier-flow">Sparse feature-tracking to derive glacier flow</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#dense-feature-tracking-to-derive-glacier-flow">Dense feature-tracking to derive glacier flow</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="Guide.html">Package Guide</a></li>
@@ -141,7 +140,7 @@
     
       <li><a href="index.html">Docs</a> &raquo;</li>
         
-      <li>Get Started</li>
+      <li>Getting Started</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -160,18 +159,16 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="get-started">
-<h1>Get Started<a class="headerlink" href="#get-started" title="Permalink to this headline">¶</a></h1>
+  <div class="section" id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">¶</a></h1>
 <p>PyTrx comes with working examples to get started with. These scripts are available in the PyTrx repository
 <a class="reference external" href="https://github.com/PennyHow/PyTrx/tree/master/PyTrx/Examples">here</a>. These examples are for applications in glaciology, which can be adapted and used. We hope these are especially useful for beginners in coding.</p>
 <div class="section" id="automated-detection-of-supraglacial-lakes">
 <h2>Automated detection of supraglacial lakes<a class="headerlink" href="#automated-detection-of-supraglacial-lakes" title="Permalink to this headline">¶</a></h2>
-<p>In this example, we will derived changes in surface area of supraglacial lakes captured from Kronebreen, Svalbard, for a small subset of the 2014 melt season. This example can be found in <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/KR_autoarea.py">KR_autoarea.py</a>.</p>
-<p>We will automatically detect water on the glacier based on differences in pixel intensity and corrected for image distortion; using images from <a class="reference external" href="https://github.com/PennyHow/PyTrx/tree/master/PyTrx/Examples/images/KR3_2014_subset">Kronebreen camera 3</a> and the associated <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_KR3_2014.txt">camera environment data</a>.</p>
-<p>First, we need to import os (for file checking and creation) and the PyTrx packages that we are going to use.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
-
-<span class="kn">from</span> <span class="nn">PyTrx.CamEnv</span> <span class="kn">import</span> <span class="n">CamEnv</span>
+<p>In this example, we will derive changes in surface area of supraglacial lakes captured from Kronebreen, Svalbard, for a small subset of the 2014 melt season. This example can be found in <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/KR_autoarea.py">KR_autoarea.py</a>.</p>
+<p>We will automatically detect water on the glacier based on differences in pixel intensity and corrected for image distortion; using images from <a class="reference external" href="https://github.com/PennyHow/PyTrx/tree/master/PyTrx/Examples/images/KR3_2014_subset">Kronebreen camera 3</a> and the associated <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_KR3_2014.txt">camera environment</a>.</p>
+<p>First, we need to import the PyTrx packages that we are going to use.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PyTrx.CamEnv</span> <span class="kn">import</span> <span class="n">CamEnv</span>
 <span class="kn">from</span> <span class="nn">PyTrx.Area</span> <span class="kn">import</span> <span class="n">Area</span>
 <span class="kn">from</span> <span class="nn">PyTrx.Velocity</span> <span class="kn">import</span> <span class="n">Homography</span>
 <span class="kn">import</span> <span class="nn">PyTrx.FileHandler</span> <span class="kn">as</span> <span class="nn">FileHandler</span>
@@ -188,11 +185,6 @@
 
 <span class="c1"># Define image folder</span>
 <span class="n">camimgs</span> <span class="o">=</span> <span class="s1">&#39;../Examples/images/KR3_2014_subset/*.JPG&#39;</span>
-
-<span class="c1"># Define data output directory</span>
-<span class="n">destination</span> <span class="o">=</span> <span class="s1">&#39;../Examples/results/KR_autoarea/&#39;</span>
-<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">destination</span><span class="p">):</span>
-    <span class="n">os</span><span class="o">.</span><span class="n">makedirs</span><span class="p">(</span><span class="n">destination</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>Next, we create a CamEnv object using our previously defined camera environment text file which contains information about the camera location and pose, and file paths to our DEM, ground control point positions, camera calibration coefficients, and reference image.</p>
@@ -306,7 +298,7 @@
     <span class="n">plotAreaXYZ</span><span class="p">(</span><span class="n">xyzpts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="bp">None</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>And finally, we can export our identified lakes as both text files and shapefiles using the writing functions in the FileHandler module.</p>
+<p>And finally, we can export our identified lakes as both text files and shapefiles using the writing functions in the FileHandler module (we suggest modifying the output file paths to your desired workspace).</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get all image names for reference</span>
 <span class="n">imn</span> <span class="o">=</span> <span class="n">lakes</span><span class="o">.</span><span class="n">getImageNames</span><span class="p">()</span>
 
@@ -316,48 +308,670 @@
 
 
 <span class="c1"># Write areas to text file</span>
-<span class="n">FileHandler</span><span class="o">.</span><span class="n">writeAreaFile</span><span class="p">(</span><span class="n">uvareas</span><span class="p">,</span> <span class="n">xyzareas</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">destination</span><span class="o">+</span><span class="s1">&#39;areas.csv&#39;</span><span class="p">)</span>
+<span class="n">FileHandler</span><span class="o">.</span><span class="n">writeAreaFile</span><span class="p">(</span><span class="n">uvareas</span><span class="p">,</span> <span class="n">xyzareas</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="s1">&#39;areas.csv&#39;</span><span class="p">)</span>
 
 <span class="c1"># Write area coordinates to text file</span>
 <span class="n">FileHandler</span><span class="o">.</span><span class="n">writeAreaCoords</span><span class="p">(</span><span class="n">uvpts</span><span class="p">,</span> <span class="n">xyzpts</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span>
-                            <span class="n">destination</span><span class="o">+</span><span class="s1">&#39;uvcoords.txt&#39;</span><span class="p">,</span>
-                            <span class="n">destination</span><span class="o">+</span><span class="s1">&#39;xyzcoords.txt&#39;</span><span class="p">)</span>
+                            <span class="s1">&#39;uvcoords.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;xyzcoords.txt&#39;</span><span class="p">)</span>
 
 <span class="c1"># Write lakes to shapefiles with WGS84 projection</span>
 <span class="n">proj</span> <span class="o">=</span> <span class="mi">32633</span>
-<span class="n">FileHandler</span><span class="o">.</span><span class="n">writeAreaSHP</span><span class="p">(</span><span class="n">xyzpts</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="n">destination</span><span class="o">+</span><span class="s1">&#39;shpfiles/&#39;</span><span class="p">,</span> <span class="n">proj</span><span class="p">)</span>
+<span class="n">FileHandler</span><span class="o">.</span><span class="n">writeAreaSHP</span><span class="p">(</span><span class="n">xyzpts</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="s1">&#39;shpfiles&#39;</span><span class="p">,</span> <span class="n">proj</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="section" id="manual-detection-of-plume-footprints">
 <h2>Manual detection of plume footprints<a class="headerlink" href="#manual-detection-of-plume-footprints" title="Permalink to this headline">¶</a></h2>
-<p>Manual detection of meltwater plume extents, <em>KR_manualarea.py</em></p>
-<p>Example driver for calculating meltwater plume surface extent at Kronebreen, Svalbard, for a small subset of the 2014 melt season. Specifically this script performs manual detection of meltwater plumes through sequential images of the glacier to derive surface areas which have been corrected for image distortion. Images are imported from those found in the ‘KR1_2014_subset’ folder, and the camera environment associated with the text file ‘CameraEnvironmentData_KR1_2014.txt’</p>
+<p>In this example, we will derive meltwater plume footprints from the front of Kronebreen, Svalbard, for a small subset of the 2014 melt season. This example can be found in <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/KR_manualarea.py">KR_manualarea.py</a>.</p>
+<p>We will manually delineate meltwater plume footprints from corrected time-lapse images to derive surface areas at sea level. In this example, we will use images from <a class="reference external" href="https://github.com/PennyHow/PyTrx/tree/master/PyTrx/Examples/images/KR1_2014_subset">Kronebreen camera 1</a> and the <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_KR1_2014.txt">KR1 camera environment data</a>.</p>
+<p>First, we need to import the PyTrx packages that we are going to use.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PyTrx.CamEnv</span> <span class="kn">import</span> <span class="n">CamEnv</span>
+<span class="kn">from</span> <span class="nn">PyTrx.Area</span> <span class="kn">import</span> <span class="n">Area</span>
+<span class="kn">from</span> <span class="nn">PyTrx.Velocity</span> <span class="kn">import</span> <span class="n">Homography</span>
+<span class="kn">import</span> <span class="nn">PyTrx.FileHandler</span> <span class="kn">as</span> <span class="nn">FileHandler</span>
+</pre></div>
 </div>
-<div class="section" id="manual-detection-of-terminus-profiles">
-<h2>Manual detection of terminus profiles<a class="headerlink" href="#manual-detection-of-terminus-profiles" title="Permalink to this headline">¶</a></h2>
-<p>Manual detection of glacier terminus profiles, <em>TU_manualline.py</em></p>
-<p>Example driver for calculating terminus profiles (as line features) at Tunabreen, Svalbard, for a small subset of the 2015 melt season using modules in PyTrx. This script performs manual detection of terminus position through sequential images of the glacier to derive line profiles which have been corrected for image distortion. Images are imported from those found in the ‘TU2_2015_subset’ folder, and the camera environment associated with the text file ‘CameraEnvironmentData_TU2_2014.txt’</p>
+<p>And then define the filepaths to our camera information (for creating our camera environment), our image mask (for identifying camera motion), and our time-lapse images.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define camera info filepath</span>
+<span class="n">camdata</span> <span class="o">=</span> <span class="s1">&#39;../Examples/camenv_data/camenvs/CameraEnvironmentData_KR1_2014.txt&#39;</span>
+
+<span class="c1"># Define image mask filepath</span>
+<span class="n">caminvmask</span> <span class="o">=</span> <span class="s1">&#39;../Examples/camenv_data/invmasks/KR1_2014_inv.jpg&#39;</span>
+
+<span class="c1"># Define folder path with time-lapse images</span>
+<span class="n">camimgs</span> <span class="o">=</span> <span class="s1">&#39;../Examples/images/KR1_2014_subset/*.JPG&#39;</span>
+</pre></div>
+</div>
+<p>Next we need to create our camera environment using PyTrx’s CamEnv object. As we do not know the camera pose (yaw, pitch, roll - YPR), we can estimate this using PyTrx’s optimisation routines. The optimisation routine uses the difference between the u,v ground control points and the reprojected x,y,z ground control points to adjust and refine the camera model.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define camera environment</span>
+<span class="n">cameraenvironment</span> <span class="o">=</span> <span class="n">CamEnv</span><span class="p">(</span><span class="n">camdata</span><span class="p">)</span>
+
+<span class="c1"># Optimise camera YPR</span>
+<span class="n">cameraenvironment</span><span class="o">.</span><span class="n">optimiseCamEnv</span><span class="p">(</span><span class="s1">&#39;YPR&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To correct for motion in the camera platform, we will use PyTrx’s Homography object (found in the Velocity module) to track static features and identify camera motion. From this motion, the Homography object creates a series of homography matrices (also known as a homography model) to co-register the images to one another.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up Homography object</span>
+<span class="n">homog</span> <span class="o">=</span> <span class="n">Homography</span><span class="p">(</span><span class="n">camimgs</span><span class="p">,</span> <span class="n">cameraenvironment</span><span class="p">,</span>
+                   <span class="n">caminvmask</span><span class="p">,</span> <span class="n">calibFlag</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                   <span class="n">band</span><span class="o">=</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">equal</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># Set homography parameters</span>
+<span class="n">hmethod</span><span class="o">=</span><span class="s1">&#39;sparse&#39;</span>                <span class="c1">#Method</span>
+<span class="n">hgmax</span><span class="o">=</span><span class="mi">50000</span>                     <span class="c1">#Max number of seeding pts</span>
+<span class="n">hgqual</span><span class="o">=</span><span class="mf">0.1</span>                      <span class="c1">#Seeding corner quality</span>
+<span class="n">hgmind</span><span class="o">=</span><span class="mf">5.0</span>                      <span class="c1">#Min seeding pt distance</span>
+<span class="n">hgwinsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="mi">25</span><span class="p">)</span>               <span class="c1">#Tracking window size</span>
+<span class="n">hgback</span><span class="o">=</span><span class="mf">1.0</span>                      <span class="c1">#Back-tracking threshold</span>
+<span class="n">hgminf</span><span class="o">=</span><span class="mi">4</span>                        <span class="c1">#Min seeded pts to track</span>
+
+<span class="c1"># Calculate homography</span>
+<span class="n">hg</span> <span class="o">=</span> <span class="n">homog</span><span class="o">.</span><span class="n">calcHomographies</span><span class="p">([</span><span class="n">hmethod</span><span class="p">,</span> <span class="p">[</span><span class="n">hgmax</span><span class="p">,</span> <span class="n">hgqual</span><span class="p">,</span> <span class="n">hgmind</span><span class="p">],</span> <span class="p">[</span><span class="n">hgwinsize</span><span class="p">,</span> <span class="n">hgback</span><span class="p">,</span> <span class="n">hgminf</span><span class="p">]])</span>
+
+<span class="c1"># Extract homography model</span>
+<span class="n">homogmatrix</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">hg</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Now we can initialise our Area object and manually delineate the plume footprints using the calcManualAreas function. This should bring up a pop-up window for each image, where you can click around each plume footprint and press ‘enter’ to move to the next.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up Area object</span>
+<span class="n">plumes</span> <span class="o">=</span> <span class="n">Area</span><span class="p">(</span><span class="n">camimgs</span><span class="p">,</span> <span class="n">cameraenvironment</span><span class="p">,</span>
+              <span class="n">homogmatrix</span><span class="p">,</span> <span class="n">calibFlag</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+              <span class="n">imband</span><span class="o">=</span><span class="s1">&#39;R&#39;</span><span class="p">,</span> <span class="n">equal</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># Calculate real areas</span>
+<span class="n">areas</span> <span class="o">=</span> <span class="n">plumes</span><span class="o">.</span><span class="n">calcManualAreas</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>We will save our manually-delineated plume footprints as area and coordinate text files using the export functions in the FileHandler module.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Retrieve plume areas</span>
+<span class="n">uvareas</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">areas</span><span class="p">]</span>
+<span class="n">xyzareas</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">areas</span><span class="p">]</span>
+
+<span class="c1"># Retrieve image names</span>
+<span class="n">imn</span><span class="o">=</span><span class="n">plumes</span><span class="o">.</span><span class="n">getImageNames</span><span class="p">()</span>
+
+<span class="c1"># Write areas to text file</span>
+<span class="n">FileHandler</span><span class="o">.</span><span class="n">writeAreaFile</span><span class="p">(</span><span class="n">uvareas</span><span class="p">,</span> <span class="n">xyzareas</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="s1">&#39;areas.csv&#39;</span><span class="p">)</span>
+
+<span class="c1"># Retrieve coordinates of plume extents</span>
+<span class="n">xyzpts</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">areas</span><span class="p">]</span>
+<span class="n">uvpts</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">areas</span><span class="p">]</span>
+
+<span class="c1"># Write coordinates to text file</span>
+<span class="n">FileHandler</span><span class="o">.</span><span class="n">writeAreaCoords</span><span class="p">(</span><span class="n">uvpts</span><span class="p">,</span> <span class="n">xyzpts</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span>
+                            <span class="s1">&#39;uvcoords.txt&#39;</span><span class="p">,</span>
+                            <span class="s1">&#39;xyzcoords.txt&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And we will also export the plume footprints as shapefiles, using the same projection as our inputted DEM. These shapefiles can be used in subsequent analysis and imported into GIS software for viewing.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define projection</span>
+<span class="n">proj</span> <span class="o">=</span> <span class="mi">32633</span>
+
+<span class="c1"># Write to shapefile</span>
+<span class="n">FileHandler</span><span class="o">.</span><span class="n">writeAreaSHP</span><span class="p">(</span><span class="n">xyzpts</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="s1">&#39;shpfiles&#39;</span><span class="p">,</span> <span class="n">proj</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And finally, we can plot the plume footprints onto the time-lapse images for viewing purposes. Here is an example to plot the footprints onto RGB versions of the images, using a workflow using opencv and matplotlib.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import packages</span>
+<span class="kn">import</span> <span class="nn">glob</span><span class="o">,</span><span class="nn">cv2</span>
+<span class="kn">import</span> <span class="nn">matplotlib.image</span> <span class="kn">as</span> <span class="nn">mpimg</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+
+<span class="c1"># Get original images in directory</span>
+<span class="n">ims</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="n">camimgs</span><span class="p">))</span>
+
+<span class="c1"># Get camera correction variables</span>
+<span class="n">cameraMatrix</span><span class="o">=</span><span class="n">cameraenvironment</span><span class="o">.</span><span class="n">getCamMatrixCV2</span><span class="p">()</span>
+<span class="n">distortP</span><span class="o">=</span><span class="n">cameraenvironment</span><span class="o">.</span><span class="n">getDistortCoeffsCV2</span><span class="p">()</span>
+<span class="n">newMat</span><span class="p">,</span> <span class="n">roi</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">getOptimalNewCameraMatrix</span><span class="p">(</span><span class="n">cameraMatrix</span><span class="p">,</span> <span class="n">distortP</span><span class="p">,</span>
+                                            <span class="p">(</span><span class="mi">5184</span><span class="p">,</span><span class="mi">3456</span><span class="p">),</span><span class="mi">1</span><span class="p">,(</span><span class="mi">5184</span><span class="p">,</span><span class="mi">3456</span><span class="p">))</span>
+
+<span class="c1"># Get corresponding xy pixel areas and images</span>
+<span class="n">count</span><span class="o">=</span><span class="mi">1</span>
+<span class="k">for</span> <span class="n">p</span><span class="p">,</span><span class="n">i</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">uvpts</span><span class="p">,</span><span class="n">ims</span><span class="p">):</span>
+    <span class="n">x</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">y</span><span class="o">=</span><span class="p">[]</span>
+    <span class="k">for</span> <span class="n">ps</span> <span class="ow">in</span> <span class="n">p</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+        <span class="n">x</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ps</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="n">y</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ps</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># Read image and undistort</span>
+    <span class="n">im1</span><span class="o">=</span><span class="n">mpimg</span><span class="o">.</span><span class="n">imread</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="n">im1</span> <span class="o">=</span> <span class="n">cv2</span><span class="o">.</span><span class="n">undistort</span><span class="p">(</span><span class="n">im1</span><span class="p">,</span> <span class="n">cameraMatrix</span><span class="p">,</span> <span class="n">distortP</span><span class="p">,</span>
+                        <span class="n">newCameraMatrix</span><span class="o">=</span><span class="n">newMat</span><span class="p">)</span>
+
+ <span class="c1"># Plot image</span>
+ <span class="n">plt</span><span class="o">.</span><span class="n">figure</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">20</span><span class="p">,</span><span class="mi">10</span><span class="p">))</span>
+ <span class="n">plt</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">im1</span><span class="p">)</span>
+ <span class="n">plt</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">5184</span><span class="p">,</span><span class="mi">3456</span><span class="p">,</span><span class="mi">0</span><span class="p">])</span>
+ <span class="n">plt</span><span class="o">.</span><span class="n">xticks</span><span class="p">([])</span>
+ <span class="n">plt</span><span class="o">.</span><span class="n">yticks</span><span class="p">([])</span>
+
+ <span class="c1"># Plot pixel area</span>
+ <span class="n">plt</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="s1">&#39;#fff544&#39;</span><span class="p">,</span><span class="n">linewidth</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+
+ <span class="c1"># Save image to file</span>
+ <span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;plumeplotted&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">count</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.JPG&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+ <span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+ <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="o">+</span><span class="mi">1</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="manual-detection-of-glacier-terminus-profiles">
+<h2>Manual detection of glacier terminus profiles<a class="headerlink" href="#manual-detection-of-glacier-terminus-profiles" title="Permalink to this headline">¶</a></h2>
+<p>Here, we will delineate glacier terminus profiles (as line features) from a small subset of time-lapse images from Tunabreen, Svalbard, during the 2014 melt season. This example can be found in <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/TU_manualline.py">TU_manualline.py</a>.</p>
+<p>We will manually delineate terminus profiles from corrected time-lapse images to derive a sequence of positions representing glacier retreat. In this example, we will use images from <a class="reference external" href="https://github.com/PennyHow/PyTrx/tree/master/PyTrx/Examples/images/TU1_2015_subset">Tunabreen camera 1</a> and the associated <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_TU1_2015.txt">camera environment data</a>.</p>
+<p>First, we need to import the PyTrx packages that we are going to use.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PyTrx.CamEnv</span> <span class="kn">import</span> <span class="n">CamEnv</span>
+<span class="kn">from</span> <span class="nn">PyTrx.Line</span> <span class="kn">import</span> <span class="n">Line</span>
+<span class="kn">from</span> <span class="nn">PyTrx.Velocity</span> <span class="kn">import</span> <span class="n">Homography</span>
+<span class="kn">import</span> <span class="nn">PyTrx.FileHandler</span> <span class="kn">as</span> <span class="nn">FileHandler</span>
+<span class="kn">from</span> <span class="nn">PyTrx.Utilities</span> <span class="kn">import</span> <span class="n">plotLinePx</span><span class="p">,</span> <span class="n">plotLineXYZ</span>
+</pre></div>
+</div>
+<p>And define the paths to our camera information, image mask (for tracking static points and correcting for camera platform motion), and time-lapse images.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define data input directories</span>
+<span class="n">camdata</span> <span class="o">=</span> <span class="s1">&#39;../Examples/camenv_data/camenvs/CameraEnvironmentData_TU1_2015.txt&#39;</span>
+<span class="n">invmask</span> <span class="o">=</span> <span class="s1">&#39;../Examples/camenv_data/invmasks/TU1_2015_inv.jpg&#39;</span>
+<span class="n">camimgs</span> <span class="o">=</span> <span class="s1">&#39;../Examples/images/TU1_2015_subset/*.JPG&#39;</span>
+</pre></div>
+</div>
+<p>Firstly, we can initialise a CamEnv object which represents our camera environment, using our camera information .txt file.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Create camera environment</span>
+<span class="n">cam</span> <span class="o">=</span> <span class="n">CamEnv</span><span class="p">(</span><span class="n">camdata</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>In this example, the camera pose (yaw, pitch, roll - YPR) is unknown as it is difficult to measure this in the field. We can determine the YPR using PyTrx’s optimisation routine.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define what parameters to optimise</span>
+<span class="n">optflag</span> <span class="o">=</span> <span class="s1">&#39;YPR&#39;</span>
+
+<span class="c1"># Define optimisation method</span>
+<span class="n">optmethod</span> <span class="o">=</span> <span class="s1">&#39;trf&#39;</span>
+
+<span class="c1"># Optimise camera environment</span>
+<span class="n">cam</span><span class="o">.</span><span class="n">optimiseCamEnv</span><span class="p">(</span><span class="n">optflag</span><span class="p">,</span> <span class="n">optmethod</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>To account for motion in the camera platform, we will track static features in the image (in the areas defined by our image mask) using PyTrx’s Homography object. Here, we track selected corner features in the image to derive a homography matrix for each image pair.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set homography parameters</span>
+<span class="n">hmethod</span><span class="o">=</span><span class="s1">&#39;sparse&#39;</span>                <span class="c1">#Seeding method</span>
+<span class="n">hgwinsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="mi">25</span><span class="p">)</span>               <span class="c1">#Tracking window size</span>
+<span class="n">hgback</span><span class="o">=</span><span class="mf">1.0</span>                      <span class="c1">#Back-tracking threshold</span>
+<span class="n">hgmax</span><span class="o">=</span><span class="mi">50000</span>                     <span class="c1">#Max num of pts to seed</span>
+<span class="n">hgqual</span><span class="o">=</span><span class="mf">0.1</span>                      <span class="c1">#Corner quality for seeding</span>
+<span class="n">hgmind</span><span class="o">=</span><span class="mf">5.0</span>                      <span class="c1">#Min distance between seeded pts</span>
+<span class="n">hgminf</span><span class="o">=</span><span class="mi">4</span>                        <span class="c1">#Min num seeded pts to track</span>
+
+<span class="c1"># Set up Homography object</span>
+<span class="n">homog</span> <span class="o">=</span> <span class="n">Homography</span><span class="p">(</span><span class="n">camimgs</span><span class="p">,</span> <span class="n">cam</span><span class="p">,</span> <span class="n">invmask</span><span class="p">,</span> <span class="n">calibFlag</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">band</span><span class="o">=</span><span class="s1">&#39;L&#39;</span><span class="p">,</span>
+                   <span class="n">equal</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># Calculate homography</span>
+<span class="n">hg</span> <span class="o">=</span> <span class="n">homog</span><span class="o">.</span><span class="n">calcHomographies</span><span class="p">([</span><span class="n">hmethod</span><span class="p">,</span> <span class="p">[</span><span class="n">hgmax</span><span class="p">,</span> <span class="n">hgqual</span><span class="p">,</span> <span class="n">hgmind</span><span class="p">],</span>
+                            <span class="p">[</span><span class="n">hgwinsize</span><span class="p">,</span> <span class="n">hgback</span><span class="p">,</span> <span class="n">hgminf</span><span class="p">]])</span>
+
+<span class="c1"># Extract homography matrices</span>
+<span class="n">homogmatrix</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">hg</span><span class="p">]</span>
+</pre></div>
+</div>
+<p>Now we can manually delineate our terminus profiles from each time-lapse image using the Line object in PyTrx. First, we initialise the object, and then use the calcManualLines() function to start the manual delineations. For each image, an interactive window will open, where you can click points to trace the terminus, and press ‘enter’ when you are finished to prompt the next image to load.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up line object</span>
+<span class="n">terminus</span> <span class="o">=</span> <span class="n">Line</span><span class="p">(</span><span class="n">camimgs</span><span class="p">,</span> <span class="n">cam</span><span class="p">,</span> <span class="n">homogmatrix</span><span class="p">)</span>
+
+
+<span class="c1"># Manually define terminus lines</span>
+<span class="n">lines</span> <span class="o">=</span> <span class="n">terminus</span><span class="o">.</span><span class="n">calcManualLines</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>PyTrx’s FileHandler module can be used to export all findings to file. Here, we will write out two files containing line lengths and coordinates, shapefiles for each line geometry, and information about the homography to file.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get image names</span>
+<span class="n">imn</span><span class="o">=</span><span class="n">terminus</span><span class="o">.</span><span class="n">getImageNames</span><span class="p">()</span>
+
+<span class="c1"># Get uv and xyz lines</span>
+<span class="n">pxlines</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">]</span>
+<span class="n">xyzlines</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">]</span>
+
+<span class="c1"># Write line data to .csv file</span>
+<span class="n">FileHandler</span><span class="o">.</span><span class="n">writeLineFile</span><span class="p">(</span><span class="n">pxlines</span><span class="p">,</span> <span class="n">xyzlines</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="s1">&#39;lines.csv&#39;</span><span class="p">)</span>
+
+<span class="c1"># Write line coordinates to txt file</span>
+<span class="n">FileHandler</span><span class="o">.</span><span class="n">writeLineCoords</span><span class="p">(</span><span class="n">pxcoords</span><span class="p">,</span> <span class="n">xyzcoords</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span>
+                        <span class="s1">&#39;uvcoord.txt&#39;</span><span class="p">,</span> <span class="s1">&#39;xyzcoords.txt&#39;</span><span class="p">)</span>
+
+<span class="c1"># Get uv and xyz line coordinates</span>
+<span class="n">pxcoords</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">]</span>
+<span class="n">xyzcoords</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">]</span>
+
+
+<span class="c1"># Write shapefiles from line data</span>
+<span class="n">projection</span><span class="o">=</span><span class="mi">32633</span>
+<span class="n">FileHandler</span><span class="o">.</span><span class="n">writeLineSHP</span><span class="p">(</span><span class="n">xyzcoords</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="s1">&#39;shapefiles&#39;</span><span class="p">,</span> <span class="n">projection</span><span class="p">)</span>
+
+<span class="c1"># Write homography data to .csv file</span>
+<span class="n">FileHandler</span><span class="o">.</span><span class="n">writeHomogFile</span><span class="p">(</span><span class="n">hg</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="s1">&#39;homography.csv&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Lastly, we can view our delineated terminus profiles in both the image and the DEM space using the plotting function in PyTrx’s FileHandler module.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get dem array</span>
+<span class="n">dem</span> <span class="o">=</span> <span class="n">cam</span><span class="o">.</span><span class="n">getDEM</span><span class="p">()</span>
+
+<span class="c1"># Get image sequence as arrays</span>
+<span class="n">imgset</span><span class="o">=</span><span class="n">terminus</span><span class="o">.</span><span class="n">_imageSet</span>
+
+<span class="c1"># Retrieve image correction coefficients</span>
+<span class="n">cameraMatrix</span><span class="o">=</span><span class="n">cam</span><span class="o">.</span><span class="n">getCamMatrixCV2</span><span class="p">()</span>
+<span class="n">distortP</span><span class="o">=</span><span class="n">cam</span><span class="o">.</span><span class="n">getDistortCoeffsCV2</span><span class="p">()</span>
+
+<span class="c1"># Plot uv lines on image</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">pxcoords</span><span class="p">)):</span>
+
+   <span class="c1"># Plot lines in image plane and as XYZ lines</span>
+    <span class="n">plotLinePX</span><span class="p">(</span><span class="n">pxcoords</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+               <span class="n">imgset</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">getImageCorr</span><span class="p">(</span><span class="n">cameraMatrix</span><span class="p">,</span> <span class="n">distortP</span><span class="p">),</span>
+               <span class="n">show</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+               <span class="n">save</span><span class="o">=</span><span class="s1">&#39;uv_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">imn</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+    <span class="c1"># Plot xyz lines on DEM</span>
+    <span class="n">plotLineXYZ</span><span class="p">(</span><span class="n">xyzcoords</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">dem</span><span class="p">,</span>
+                <span class="n">show</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                <span class="n">save</span><span class="o">=</span><span class="s1">&#39;xyz_&#39;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">imn</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+</pre></div>
+</div>
 </div>
 <div class="section" id="georectification-of-glacier-calving-event-point-locations">
 <h2>Georectification of glacier calving event point locations<a class="headerlink" href="#georectification-of-glacier-calving-event-point-locations" title="Permalink to this headline">¶</a></h2>
-<p>Georectification of calving event point locations, <em>TU_ptsgeorectify.py</em></p>
-<p>Example driver which demonstrates the capabilities of the georectification functions provided in PyTrx (which are based upon those available in ImGRAFT). Pre-defined points are imported which denote calving events at Tunabreen, Svalbard, that have been distinguished in the image plane. These are subsequently projected to xyz locations using the georectification functions in PyTrx. The xyz locations are plotted onto the DEM, with the colour of each point denoting the style of calving in that particular instance. The xyz locations are finally exported as a text file (.txt) and as a shape file (.shp).</p>
+<p>Here, we will georectify some pre-defined points that denote the locations of glacier calving events at Tunabreen, Svalbard, captured from high-frequency time-lapse images. One point represents a calving event identified in the image plane, which will be imported and georectified to x,y,z coordinates using the georectification functions in PyTrx. The x,y,z coordinates will then be plotting onto the DEM, and exported to shapefile.</p>
+<p>This example can be found in <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/TU_ptsgeorectify.py">TU_ptsgeorectify.py</a>, using the <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_TU1_2015.txt">Tunabreen camera 1 environment data file</a>.</p>
+<p>First, we need to import the PyTrx functions that we are going to use along with some other packages (for GIS, data manipulation and plotting), and define the file paths to our camera environment information and point data.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Import PyTrx CamEnv functions</span>
+<span class="kn">from</span> <span class="nn">PyTrx.CamEnv</span> <span class="kn">import</span> <span class="n">CamEnv</span><span class="p">,</span> <span class="n">setProjection</span><span class="p">,</span> <span class="n">projectUV</span>
+
+<span class="c1"># Import other packages to use</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="kn">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">osgeo.ogr</span> <span class="kn">as</span> <span class="nn">ogr</span>
+<span class="kn">import</span> <span class="nn">osgeo.osr</span> <span class="kn">as</span> <span class="nn">osr</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="c1"># Define camera environment file path</span>
+<span class="n">tu1camenv</span><span class="o">=</span><span class="s1">&#39;../Examples/camenv_data/camenvs/CameraEnvironmentData_TU1_2015.txt&#39;</span>
+
+<span class="c1"># Define calving pt data file path</span>
+<span class="n">tu1calving</span> <span class="o">=</span> <span class="s1">&#39;../Examples/results/ptsgeorectify/TU1_calving_xy.csv&#39;</span>
+</pre></div>
 </div>
-<div class="section" id="sparse-feature-tracking">
-<h2>Sparse feature-tracking<a class="headerlink" href="#sparse-feature-tracking" title="Permalink to this headline">¶</a></h2>
-<p>Glacier velocities derived through feature-tracking of sparse points, <em>KR_velocity1.py</em></p>
-<p>Example driver for deriving sparse velocities from Kronebreen, Svalbard, for a small subset of the 2014 melt season. Specifically this script performs feature-tracking through sequential daily images of the glacier to derive surface velocities (spatial average, individual point displacements and interpolated velocity maps) which have been corrected for image distortion and motion in the camera platform (i.e. image registration). This script uses images from those found in the ‘KR2_2014_subset’ folder, and camera environment data associated with the text file ‘CameraEnvironmentData_KR2_2014.txt’.</p>
+<p>Next, we will load our point data (i.e. calving event locations)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Open file</span>
+<span class="n">f</span><span class="o">=</span><span class="nb">open</span><span class="p">(</span><span class="n">tu1calving</span><span class="p">,</span><span class="s1">&#39;r&#39;</span><span class="p">)</span>
+
+<span class="c1"># Read header line</span>
+<span class="n">header</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+
+<span class="c1"># Create empty variables to populate</span>
+<span class="n">time</span><span class="o">=</span><span class="p">[]</span>
+<span class="n">region</span><span class="o">=</span><span class="p">[]</span>
+<span class="n">style</span><span class="o">=</span><span class="p">[]</span>
+<span class="n">tu1_xy</span><span class="o">=</span><span class="p">[]</span>
+
+<span class="c1"># Read each line from file</span>
+<span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">readlines</span><span class="p">():</span>
+
+   <span class="c1"># Split line into variables</span>
+   <span class="n">temp</span><span class="o">=</span><span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+   <span class="c1"># Extract variables</span>
+   <span class="n">time</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()))</span>
+   <span class="n">region</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+   <span class="n">style</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())</span>
+   <span class="n">tu1_xy</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="nb">float</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()),</span> <span class="nb">float</span><span class="p">(</span><span class="n">temp</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">())])</span>
+
+<span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;{len(tu1_xy)} locations for calving events detected&#39;</span><span class="p">)</span>
+
+<span class="c1"># Change pt coordinate list to array</span>
+<span class="n">tu1_xy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">tu1_xy</span><span class="p">)</span>
+</pre></div>
 </div>
-<div class="section" id="dense-feature-tracking">
-<h2>Dense feature-tracking<a class="headerlink" href="#dense-feature-tracking" title="Permalink to this headline">¶</a></h2>
-<p>Glacier velocities derived through feature-tracking of dense grid, <em>KR_velocity2.py</em></p>
-<p>Example driver for deriving dense velocities from Kronebreen, Svalbard, for a small subset of the 2014 melt season. Specifically this script performs feature-tracking through sequential daily images of the glacier to derive surface velocities (spatial average, individual point displacements and interpolated velocity maps) which have been corrected for image distortion and motion in the camera platform (i.e. image registration). This script uses images from those found in the ‘KR2_2014_subset’ folder, and camera environment data associated with the text file ‘CameraEnvironmentData_KR2_2014.txt’.</p>
+<p>Next, we will create a CamEnv object to hold all the information about our camera. We will initialise the object with our camera environment file, which includes paths to the camera calibration, ground control point positions, reference image and DEM, along with the position of our camera and its pose represented along three axes (yaw, pitch, roll - YPR).</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define camera environment</span>
+<span class="n">tu1cam</span> <span class="o">=</span> <span class="n">CamEnv</span><span class="p">(</span><span class="n">tu1camenv</span><span class="p">)</span>
+</pre></div>
 </div>
-<div class="section" id="sparse-and-dense-feature-tracking">
-<h2>Sparse and dense feature-tracking<a class="headerlink" href="#sparse-and-dense-feature-tracking" title="Permalink to this headline">¶</a></h2>
-<p>Alternative script for glacier velocity feature-tracking with both the sparse and dense methods, <em>KR_velocity3.py</em></p>
-<p>Extended example driver for deriving velocities from Kronebreen, Svalbard, for a small subset of the 2014 melt season. This script produces the same outputs as <em>KR_velocity1.py</em> and <em>KR_velocity2.py</em>. The difference is that velocities are processed using the stand-alone functions provided in PyTrx, rather than handled by PyTrx’s class objects. This provides the user with a script that is more flexible and adaptable.</p>
+<p>Now we have our camera environment, we need to model how the three-dimensional world (represented by the DEM) is translated to the two-dimensional image plane (represented by our reference image). We will use the setProjection function in PyTrx’s CamEnv module in order to do this.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get DEM from camera environment</span>
+<span class="n">demobj</span> <span class="o">=</span> <span class="n">tu1cam</span><span class="o">.</span><span class="n">getDEM</span><span class="p">()</span>
+
+<span class="c1"># Get inverse projection variables through camera info</span>
+<span class="n">invprojvars</span> <span class="o">=</span> <span class="n">setProjection</span><span class="p">(</span><span class="n">demobj</span><span class="p">,</span> <span class="n">tu1cam</span><span class="o">.</span><span class="n">_camloc</span><span class="p">,</span> <span class="n">tu1cam</span><span class="o">.</span><span class="n">_camDirection</span><span class="p">,</span>
+                            <span class="n">tu1cam</span><span class="o">.</span><span class="n">_radCorr</span><span class="p">,</span> <span class="n">tu1cam</span><span class="o">.</span><span class="n">_tanCorr</span><span class="p">,</span> <span class="n">tu1cam</span><span class="o">.</span><span class="n">_focLen</span><span class="p">,</span>
+                            <span class="n">tu1cam</span><span class="o">.</span><span class="n">_camCen</span><span class="p">,</span> <span class="n">tu1cam</span><span class="o">.</span><span class="n">_refImage</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>With our inverse projection model, we can translate the calving event locations defined in the image plane to x,y,z coordinates with the project UV function.</p>
+<blockquote>
+<div><div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Inverse project uv coodinates to xyz coordinates</span>
+<span class="n">tu1_xyz</span> <span class="o">=</span> <span class="n">projectUV</span><span class="p">(</span><span class="n">tu1_xy</span><span class="p">,</span> <span class="n">invprojvars</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></blockquote>
+<p>To view our reprojected x,y,z points, we can plot them using the plotting functionality in matplotlib. We will plot the points over our DEM.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Retrieve DEM extent and elevation array</span>
+<span class="n">demextent</span> <span class="o">=</span> <span class="n">demobj</span><span class="o">.</span><span class="n">getExtent</span><span class="p">()</span>
+<span class="n">dem</span> <span class="o">=</span> <span class="n">demobj</span><span class="o">.</span><span class="n">getZ</span><span class="p">()</span>
+
+<span class="c1"># Get camera position (xyz) for plotting</span>
+<span class="n">post</span> <span class="o">=</span> <span class="n">tu1cam</span><span class="o">.</span><span class="n">_camloc</span>
+
+<span class="c1"># Plot DEM and camera location</span>
+<span class="n">fig</span><span class="p">,(</span><span class="n">ax1</span><span class="p">)</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span><span class="mi">15</span><span class="p">))</span>
+<span class="n">fig</span><span class="o">.</span><span class="n">canvas</span><span class="o">.</span><span class="n">set_window_title</span><span class="p">(</span><span class="s1">&#39;TU1 calving event locations&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">locator_params</span><span class="p">(</span><span class="n">axis</span> <span class="o">=</span> <span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">nbins</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">labelsize</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">imshow</span><span class="p">(</span><span class="n">dem</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="n">extent</span><span class="o">=</span><span class="n">demextent</span><span class="p">,</span> <span class="n">cmap</span><span class="o">=</span><span class="s1">&#39;gray&#39;</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="n">demextent</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">demextent</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">demextent</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">demextent</span><span class="p">[</span><span class="mi">3</span><span class="p">]])</span>
+<span class="n">cloc</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">post</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">post</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;g&#39;</span><span class="p">,</span> <span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Camera location&#39;</span><span class="p">)</span>
+
+<span class="c1"># Plot calving locations on DEM</span>
+<span class="n">xr</span> <span class="o">=</span> <span class="p">[</span><span class="n">pt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">tu1_xyz</span><span class="p">]</span>
+<span class="n">yr</span> <span class="o">=</span> <span class="p">[</span><span class="n">pt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">pt</span> <span class="ow">in</span> <span class="n">tu1_xyz</span><span class="p">]</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">xr</span><span class="p">,</span> <span class="n">yr</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span><span class="n">s</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span>
+
+<span class="c1"># Save and show plot</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="s1">&#39;TU1_calving_xyz.JPG&#39;</span><span class="p">,</span> <span class="n">dpi</span><span class="o">=</span><span class="mi">300</span><span class="p">)</span>
+<span class="n">plt</span><span class="o">.</span><span class="n">show</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>And finally we will export the inverse projected x,y,z point coordinates to a shapefile using the osgeo modules ogr and osr.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get ESRI shapefile driver</span>
+<span class="n">driver</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">GetDriverByName</span><span class="p">(</span><span class="s1">&#39;ESRI Shapefile&#39;</span> <span class="p">)</span>
+
+<span class="c1"># Create data source</span>
+<span class="n">shp</span> <span class="o">=</span> <span class="s1">&#39;tu1_calving.shp&#39;</span>
+<span class="n">ds</span> <span class="o">=</span> <span class="n">driver</span><span class="o">.</span><span class="n">CreateDataSource</span><span class="p">(</span><span class="n">shp</span><span class="p">)</span>
+<span class="k">if</span> <span class="n">ds</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+    <span class="k">print</span><span class="p">(</span><span class="n">f</span><span class="s1">&#39;Could not create file {shp}&#39;</span><span class="p">)</span>
+
+<span class="c1"># Set WGS84 projection</span>
+<span class="n">proj</span> <span class="o">=</span> <span class="n">osr</span><span class="o">.</span><span class="n">SpatialReference</span><span class="p">()</span>
+<span class="n">proj</span><span class="o">.</span><span class="n">ImportFromEPSG</span><span class="p">(</span><span class="mi">32633</span><span class="p">)</span>
+
+<span class="c1"># Create layer in data source</span>
+<span class="n">layer</span> <span class="o">=</span> <span class="n">ds</span><span class="o">.</span><span class="n">CreateLayer</span><span class="p">(</span><span class="s1">&#39;tu1_calving&#39;</span><span class="p">,</span> <span class="n">proj</span><span class="p">,</span> <span class="n">ogr</span><span class="o">.</span><span class="n">wkbPoint</span><span class="p">)</span>
+
+
+<span class="c1"># Add ID and time attributes to layer</span>
+<span class="n">layer</span><span class="o">.</span><span class="n">CreateField</span><span class="p">(</span><span class="n">ogr</span><span class="o">.</span><span class="n">FieldDefn</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">ogr</span><span class="o">.</span><span class="n">OFTInteger</span><span class="p">))</span>
+<span class="n">layer</span><span class="o">.</span><span class="n">CreateField</span><span class="p">(</span><span class="n">ogr</span><span class="o">.</span><span class="n">FieldDefn</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">ogr</span><span class="o">.</span><span class="n">OFTReal</span><span class="p">))</span>
+
+<span class="c1"># Add terminus region attribute</span>
+<span class="n">field_region</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">FieldDefn</span><span class="p">(</span><span class="s1">&#39;region&#39;</span><span class="p">,</span> <span class="n">ogr</span><span class="o">.</span><span class="n">OFTString</span><span class="p">)</span>
+<span class="n">field_region</span><span class="o">.</span><span class="n">SetWidth</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+<span class="n">layer</span><span class="o">.</span><span class="n">CreateField</span><span class="p">(</span><span class="n">field_region</span><span class="p">)</span>
+
+<span class="c1"># Add calving style attribute</span>
+<span class="n">field_style</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">FieldDefn</span><span class="p">(</span><span class="s1">&#39;style&#39;</span><span class="p">,</span> <span class="n">ogr</span><span class="o">.</span><span class="n">OFTString</span><span class="p">)</span>
+<span class="n">field_style</span><span class="o">.</span><span class="n">SetWidth</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+<span class="n">layer</span><span class="o">.</span><span class="n">CreateField</span><span class="p">(</span><span class="n">field_style</span><span class="p">)</span>
+
+
+<span class="c1"># Create point features with data attributes in layer</span>
+<span class="k">for</span> <span class="n">a</span><span class="p">,</span><span class="n">b</span><span class="p">,</span><span class="n">c</span><span class="p">,</span><span class="n">d</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">tu1_xyz</span><span class="p">,</span> <span class="n">time</span><span class="p">,</span> <span class="n">region</span><span class="p">,</span> <span class="n">style</span><span class="p">):</span>
+    <span class="n">count</span><span class="o">=</span><span class="mi">1</span>
+
+    <span class="c1"># Create feature</span>
+    <span class="n">feature</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">Feature</span><span class="p">(</span><span class="n">layer</span><span class="o">.</span><span class="n">GetLayerDefn</span><span class="p">())</span>
+
+    <span class="c1"># Write feature attributes</span>
+    <span class="n">feature</span><span class="o">.</span><span class="n">SetField</span><span class="p">(</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">count</span><span class="p">)</span>
+    <span class="n">feature</span><span class="o">.</span><span class="n">SetField</span><span class="p">(</span><span class="s1">&#39;time&#39;</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span>
+    <span class="n">feature</span><span class="o">.</span><span class="n">SetField</span><span class="p">(</span><span class="s1">&#39;region&#39;</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+    <span class="n">feature</span><span class="o">.</span><span class="n">SetField</span><span class="p">(</span><span class="s1">&#39;style&#39;</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+
+    <span class="c1"># Create feature geometry</span>
+    <span class="n">wkt</span> <span class="o">=</span> <span class="s2">&quot;POINT(</span><span class="si">%f</span><span class="s2"> </span><span class="si">%f</span><span class="s2">)&quot;</span> <span class="o">%</span>  <span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="n">point</span> <span class="o">=</span> <span class="n">ogr</span><span class="o">.</span><span class="n">CreateGeometryFromWkt</span><span class="p">(</span><span class="n">wkt</span><span class="p">)</span>
+    <span class="n">feature</span><span class="o">.</span><span class="n">SetGeometry</span><span class="p">(</span><span class="n">point</span><span class="p">)</span>
+
+    <span class="c1"># Compile feature</span>
+    <span class="n">layer</span><span class="o">.</span><span class="n">CreateFeature</span><span class="p">(</span><span class="n">feature</span><span class="p">)</span>
+
+    <span class="c1"># Close feature</span>
+    <span class="n">feature</span><span class="o">.</span><span class="n">Destroy</span><span class="p">()</span>
+    <span class="n">count</span><span class="o">=</span><span class="n">count</span><span class="o">+</span><span class="mi">1</span>
+
+<span class="c1"># Close layer</span>
+<span class="n">ds</span><span class="o">.</span><span class="n">Destroy</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="sparse-feature-tracking-to-derive-glacier-flow">
+<h2>Sparse feature-tracking to derive glacier flow<a class="headerlink" href="#sparse-feature-tracking-to-derive-glacier-flow" title="Permalink to this headline">¶</a></h2>
+<p>In this example, we will calculate glacier flow velocities from Kronebreen, Svalbard, using PyTrx’s sparse feature-tracking method. The sparse feature-tracking method using corner feature detection to identify coherent features on the glacier surface, and then tracks them between image pairs using Optical Flow.</p>
+<p>We will derive glacier velocities from a subset of time-lapse images from the 2014 melt season, which can be found in the <a class="reference external" href="https://github.com/PennyHow/PyTrx/tree/master/PyTrx/Examples/images/KR2_2014_subset">PyTrx GitHub repository</a>, using the <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_KR2_2014.txt">Kronebreen camera 2 environment data file</a>. This example can be found in <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/KR_velocity1.py">KR_velocity1.py</a>.</p>
+<p>Let’s firstly import the PyTrx modules we need.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">PyTrx.CamEnv</span> <span class="kn">import</span> <span class="n">CamEnv</span>
+<span class="kn">from</span> <span class="nn">PyTrx.Velocity</span> <span class="kn">import</span> <span class="n">Velocity</span><span class="p">,</span> <span class="n">Homography</span>
+<span class="kn">from</span> <span class="nn">PyTrx.FileHandler</span> <span class="kn">import</span> <span class="n">writeHomogFile</span><span class="p">,</span> <span class="n">writeVeloFile</span><span class="p">,</span> \
+     <span class="n">writeVeloSHP</span><span class="p">,</span> <span class="n">writeCalibFile</span>
+<span class="kn">from</span> <span class="nn">PyTrx.Utilities</span> <span class="kn">import</span> <span class="n">plotVeloPX</span><span class="p">,</span> <span class="n">plotVeloXYZ</span><span class="p">,</span> \
+     <span class="n">interpolateHelper</span><span class="p">,</span> <span class="n">plotInterpolate</span>
+</pre></div>
+</div>
+<p>And then define the file paths to our camera information, our time-lapse images, and the masks we will use to identify the regions of the image we want to use for deriving glacier flow velocities and tracking static features.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Camera environment file path</span>
+<span class="n">camdata</span> <span class="o">=</span> <span class="s1">&#39;../Examples/camenv_data/camenvs/CameraEnvironmentData_KR2_2014.txt&#39;</span>
+
+<span class="c1"># Mask for velocity feature-tracking</span>
+<span class="n">camvmask</span> <span class="o">=</span> <span class="s1">&#39;../Examples/camenv_data/masks/KR2_2014_vmask.jpg&#39;</span>
+
+<span class="c1"># Inverse mask for image registration</span>
+<span class="n">caminvmask</span> <span class="o">=</span> <span class="s1">&#39;../Examples/camenv_data/invmasks/KR2_2014_inv.jpg&#39;</span>
+
+<span class="c1"># Time-lapse images</span>
+<span class="n">camimgs</span> <span class="o">=</span> <span class="s1">&#39;../Examples/images/KR2_2014_subset/*.JPG&#39;</span>
+</pre></div>
+</div>
+<p>We will construct a CamEnv object using our camera environment file, which will hold all information about the translation of our images to x,y,z space (represented by our DEM). We will optimise our camera environment, using our pre-defined ground control points to refine the model and estimate the camera pose (i.e. yaw, pitch, roll - YPR)</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Define camera environment</span>
+<span class="n">cameraenvironment</span> <span class="o">=</span> <span class="n">CamEnv</span><span class="p">(</span><span class="n">camdata</span><span class="p">)</span>
+
+<span class="c1"># Optimise camera environment to refine camera pose</span>
+<span class="n">cameraenvironment</span><span class="o">.</span><span class="n">optimiseCamEnv</span><span class="p">(</span><span class="s1">&#39;YPR&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>We can check our camera environment parameters using a reporter and various plotting functions.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Report camera environment parameters</span>
+<span class="n">cameraenvironment</span><span class="o">.</span><span class="n">reportCamData</span><span class="p">()</span>
+
+<span class="c1"># Show ground control points</span>
+<span class="n">cameraenvironment</span><span class="o">.</span><span class="n">showGCPs</span><span class="p">()</span>
+
+<span class="c1"># Show image principal point</span>
+<span class="n">cameraenvironment</span><span class="o">.</span><span class="n">showPrincipalPoint</span><span class="p">()</span>
+
+<span class="c1"># Show ground control point residuals</span>
+<span class="n">cameraenvironment</span><span class="o">.</span><span class="n">showResiduals</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Next we will calculate the homography model using PyTrx’s Homography object. This represents correction for motion in the camera platform which, if uncorrected, can introduce false motion into our velocity measurements. We can account for this using our homography model to co-register our time-lapse images.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set homography parameters</span>
+<span class="n">hmethod</span><span class="o">=</span><span class="s1">&#39;sparse&#39;</span>                <span class="c1">#Method</span>
+<span class="n">hgwinsize</span><span class="o">=</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="mi">25</span><span class="p">)</span>               <span class="c1">#Tracking window size</span>
+<span class="n">hgback</span><span class="o">=</span><span class="mf">1.0</span>                      <span class="c1">#Back-tracking threshold</span>
+<span class="n">hgmax</span><span class="o">=</span><span class="mi">50000</span>                     <span class="c1">#Maximum number of points to seed</span>
+<span class="n">hgqual</span><span class="o">=</span><span class="mf">0.1</span>                      <span class="c1">#Corner quality for seeding</span>
+<span class="n">hgmind</span><span class="o">=</span><span class="mf">5.0</span>                      <span class="c1">#Minimum distance between seeded points</span>
+<span class="n">hgminf</span><span class="o">=</span><span class="mi">4</span>                        <span class="c1">#Minimum number of seeded points to track</span>
+
+<span class="c1"># Set up Homography object</span>
+<span class="n">homog</span> <span class="o">=</span> <span class="n">Homography</span><span class="p">(</span><span class="n">camimgs</span><span class="p">,</span> <span class="n">cameraenvironment</span><span class="p">,</span> <span class="n">caminvmask</span><span class="p">,</span> <span class="n">calibFlag</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                   <span class="n">band</span><span class="o">=</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">equal</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># Calculate homography</span>
+<span class="n">hgout</span> <span class="o">=</span> <span class="n">homog</span><span class="o">.</span><span class="n">calcHomographies</span><span class="p">([</span><span class="n">hmethod</span><span class="p">,</span> <span class="p">[</span><span class="n">hgmax</span><span class="p">,</span> <span class="n">hgqual</span><span class="p">,</span> <span class="n">hgmind</span><span class="p">],</span> <span class="p">[</span><span class="n">hgwinsize</span><span class="p">,</span>
+                             <span class="n">hgback</span><span class="p">,</span> <span class="n">hgminf</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>Now we can look at measuring the flow of the glacier using the feature-tracking functionality in PyTrx’s Velocity object. There are a number of parameters we can set to adjust our tracking conditions</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set image conditions</span>
+<span class="n">calibration</span> <span class="o">=</span> <span class="bp">True</span>               <span class="c1"># Correct images for distortion?</span>
+<span class="n">iband</span> <span class="o">=</span> <span class="s1">&#39;L&#39;</span>                     <span class="c1"># Image band to track with (R/G/B/L)</span>
+<span class="n">eq</span> <span class="o">=</span> <span class="bp">True</span>                        <span class="c1"># Images with histogram equalisation?</span>
+
+<span class="c1"># Set up Velocity object</span>
+<span class="n">velo</span><span class="o">=</span><span class="n">Velocity</span><span class="p">(</span><span class="n">camimgs</span><span class="p">,</span> <span class="n">cameraenvironment</span><span class="p">,</span> <span class="n">hgout</span><span class="p">,</span> <span class="n">camvmask</span><span class="p">,</span> <span class="n">calibFlag</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+              <span class="n">band</span><span class="o">=</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">equal</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># Set velocity parameters</span>
+<span class="n">vmethod</span> <span class="o">=</span> <span class="s1">&#39;sparse&#39;</span>              <span class="c1"># Method</span>
+<span class="n">vwinsize</span> <span class="o">=</span> <span class="p">(</span><span class="mi">25</span><span class="p">,</span><span class="mi">25</span><span class="p">)</span>              <span class="c1"># Tracking window size</span>
+<span class="n">bk</span> <span class="o">=</span> <span class="mf">1.0</span>                        <span class="c1"># Back-tracking threshold</span>
+<span class="n">mpt</span> <span class="o">=</span> <span class="mi">50000</span>                     <span class="c1"># Maximum number of points to seed</span>
+<span class="n">ql</span> <span class="o">=</span> <span class="mf">0.1</span>                        <span class="c1"># Corner quality for seeding</span>
+<span class="n">mdis</span> <span class="o">=</span> <span class="mf">5.0</span>                      <span class="c1"># Minimum distance between seeded points</span>
+<span class="n">mfeat</span> <span class="o">=</span> <span class="mi">4</span>                       <span class="c1"># Minimum number of seeded points to track</span>
+
+<span class="c1"># Calculate glacier flow velocity</span>
+<span class="n">velocities</span> <span class="o">=</span> <span class="n">velo</span><span class="o">.</span><span class="n">calcVelocities</span><span class="p">([</span><span class="n">vmethod</span><span class="p">,</span> <span class="p">[</span><span class="n">mpt</span><span class="p">,</span> <span class="n">ql</span><span class="p">,</span> <span class="n">mdis</span><span class="p">],</span> <span class="p">[</span><span class="n">vwinsize</span><span class="p">,</span> <span class="n">bk</span><span class="p">,</span>
+                                 <span class="n">mfeat</span><span class="p">]])</span>
+</pre></div>
+</div>
+<p>To export our results, we can write out our intrinsic camera matrix (which can be useful when you have optimised the intrinsic camera parameters of the camera environment) and calculated homography using the exporting functions in PyTrx’s FileHandler module.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Write out camera calibration info to .txt file</span>
+<span class="n">matrix</span><span class="p">,</span> <span class="n">tancorr</span><span class="p">,</span> <span class="n">radcorr</span> <span class="o">=</span> <span class="n">cameraenvironment</span><span class="o">.</span><span class="n">getCalibdata</span><span class="p">()</span>
+<span class="n">writeCalibFile</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">tancorr</span><span class="p">,</span> <span class="n">radcorr</span><span class="p">,</span> <span class="s1">&#39;KR2_2014_1.txt&#39;</span><span class="p">)</span>
+
+<span class="c1"># Write homography data to .csv file</span>
+<span class="n">imn</span> <span class="o">=</span> <span class="n">velo</span><span class="o">.</span><span class="n">getImageNames</span><span class="p">()</span>
+<span class="n">writeHomogFile</span><span class="p">(</span><span class="n">hgout</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="s1">&#39;homography.csv&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>And then we can export our calculated velocities to .csv file and .shp shapefiles for plotting and further analysis</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Fetch uv and xyz velocities</span>
+<span class="n">xyzvel</span><span class="o">=</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">velocities</span><span class="p">]</span>
+<span class="n">uvvel</span><span class="o">=</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">velocities</span><span class="p">]</span>
+
+<span class="c1"># Write out velocity data to .csv file</span>
+<span class="n">writeVeloFile</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">,</span> <span class="n">uvvel</span><span class="p">,</span> <span class="n">hgout</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="s1">&#39;velo_output.csv&#39;</span><span class="p">)</span>
+
+<span class="c1"># Fetch xyz pt coordinates and tracking errors</span>
+<span class="n">xyz0</span><span class="o">=</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">velocities</span><span class="p">]</span>
+<span class="n">xyzerr</span><span class="o">=</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">velocities</span><span class="p">]</span>
+
+<span class="c1"># Write points to shp file with EPSG:32633 projection</span>
+<span class="n">proj</span> <span class="o">=</span> <span class="mi">32633</span>
+<span class="n">writeVeloSHP</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">,</span> <span class="n">xyzerr</span><span class="p">,</span> <span class="n">xyz0</span><span class="p">,</span> <span class="n">imn</span><span class="p">,</span> <span class="s1">&#39;shpfiles&#39;</span><span class="p">,</span> <span class="n">proj</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If we want to view the results, we can retrieve all of our tracked points (in both the images and x,y,z coordinates) and plot them over the top of our images and DEM.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Get calibration coefficients for plotting corrected images</span>
+<span class="n">cameraMatrix</span><span class="o">=</span><span class="n">cameraenvironment</span><span class="o">.</span><span class="n">getCamMatrixCV2</span><span class="p">()</span>
+<span class="n">distortP</span><span class="o">=</span><span class="n">cameraenvironment</span><span class="o">.</span><span class="n">getDistortCoeffsCV2</span><span class="p">()</span>
+
+<span class="c1"># Get images for overlaying uv pts</span>
+<span class="n">imgset</span><span class="o">=</span><span class="n">velo</span><span class="o">.</span><span class="n">_imageSet</span>
+
+<span class="c1"># Get DEM array for overlaying xyz pts</span>
+<span class="n">dem</span><span class="o">=</span><span class="n">cameraenvironment</span><span class="o">.</span><span class="n">getDEM</span><span class="p">()</span>
+
+<span class="c1"># Get uv seeded and tracked point positions</span>
+<span class="n">uv0</span><span class="o">=</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">velocities</span><span class="p">]</span>
+<span class="n">uv1corr</span><span class="o">=</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">3</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">velocities</span><span class="p">]</span>
+
+<span class="c1"># Get xyz seeded and tracked point positions</span>
+<span class="n">xyz0</span><span class="o">=</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">velocities</span><span class="p">]</span>
+<span class="n">xyz1</span><span class="o">=</span><span class="p">[</span><span class="n">item</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">2</span><span class="p">]</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">velocities</span><span class="p">]</span>
+
+<span class="c1"># Cycle through data from image pairs</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">imn</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+
+    <span class="c1"># Get image name and print</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Visualising data for &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">imn</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
+
+    <span class="c1"># Plot uv velocity points on image plane</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Plotting image plane output&#39;</span><span class="p">)</span>
+    <span class="n">plotVeloPX</span><span class="p">(</span><span class="n">uvvel</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">uv0</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">uv1corr</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+               <span class="n">imgset</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">getImageCorr</span><span class="p">(</span><span class="n">cameraMatrix</span><span class="p">,</span> <span class="n">distortP</span><span class="p">),</span>
+               <span class="n">show</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="s1">&#39;uv_&#39;</span><span class="o">+</span><span class="n">imn</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+
+    <span class="c1"># Plot xyz velocity points on dem</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Plotting XYZ output&#39;</span><span class="p">)</span>
+    <span class="n">plotVeloXYZ</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">xyz0</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">xyz1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
+                <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span> <span class="n">save</span><span class="o">=</span><span class="s1">&#39;xyz_&#39;</span><span class="o">+</span><span class="n">imn</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+
+    <span class="c1"># Plot interpolation map with linear interpolation</span>
+    <span class="k">print</span><span class="p">(</span><span class="s1">&#39;Plotting interpolation map&#39;</span><span class="p">)</span>
+    <span class="n">grid</span><span class="p">,</span> <span class="n">pointsextent</span> <span class="o">=</span> <span class="n">interpolateHelper</span><span class="p">(</span><span class="n">xyzvel</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">xyz0</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">xyz1</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="s1">&#39;linear&#39;</span><span class="p">)</span>
+    <span class="n">plotInterpolate</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">pointsextent</span><span class="p">,</span> <span class="n">dem</span><span class="p">,</span> <span class="n">show</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+                    <span class="n">save</span><span class="o">=</span><span class="s1">&#39;interp_&#39;</span><span class="o">+</span><span class="n">imn</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+</pre></div>
+</div>
+<p>Additionally, we can export our velocities as gridded ASCII files. These files are recognised by many mapping software, such as ArcGIS and QGIS, and can be imported to create raster surfaces.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># import numpy for grid operations</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="c1"># Cycle through velocity data from image pairs</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">velo</span><span class="o">.</span><span class="n">getLength</span><span class="p">()</span><span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+
+    <span class="c1"># Change all the nans to -999.999 and flip the y axis</span>
+    <span class="n">grid</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">grid</span><span class="p">)]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">999.999</span>
+    <span class="n">grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">flipud</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+
+    <span class="c1"># Open new file with write permissions</span>
+    <span class="n">imn</span><span class="o">=</span><span class="n">velo</span><span class="o">.</span><span class="n">_imageSet</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">getImageName</span><span class="p">()</span>
+    <span class="n">afile</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">imn</span> <span class="o">+</span> <span class="s1">&#39;_interpmap.txt&#39;</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span>
+
+ <span class="c1"># Make a list for each raster header variable, with the label and value</span>
+ <span class="n">col</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;ncols&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+ <span class="n">row</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;nrows&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+ <span class="n">x</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;xllcorner&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pointsextent</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
+ <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;yllcorner&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">pointsextent</span><span class="p">[</span><span class="mi">2</span><span class="p">])]</span>
+ <span class="n">cell</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cellsize&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="mf">10.</span><span class="p">)]</span>
+ <span class="n">nd</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;NODATA_value&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="o">-</span><span class="mf">999.999</span><span class="p">)]</span>
+
+ <span class="c1"># Write each header line on a new line of the file</span>
+ <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span><span class="p">,</span><span class="n">row</span><span class="p">,</span><span class="n">x</span><span class="p">,</span><span class="n">y</span><span class="p">,</span><span class="n">cell</span><span class="p">,</span><span class="n">nd</span><span class="p">]</span>
+ <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">header</span><span class="p">:</span>
+     <span class="n">afile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+ <span class="c1"># Iterate through each row and column value</span>
+ <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span>
+     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">grid</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span>
+
+         <span class="c1"># Write each data value to the row, separated by spaces</span>
+         <span class="n">afile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">grid</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="n">j</span><span class="p">])</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+
+     <span class="c1"># New line at end of row</span>
+     <span class="n">afile</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+
+ <span class="c1"># Close file</span>
+ <span class="n">afile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="dense-feature-tracking-to-derive-glacier-flow">
+<h2>Dense feature-tracking to derive glacier flow<a class="headerlink" href="#dense-feature-tracking-to-derive-glacier-flow" title="Permalink to this headline">¶</a></h2>
+<p>PyTrx’s dense feature-tracking utilises traditional cross-correlation template matching to track a regular grid of points between an image pair. In this example, we calculate glacier flow velocities from Kronebreen, Svalbard, using a similar workflow to the sparse feature-tracking workflow shown previously.</p>
+<p>This workflow can be found in <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/KR_velocity2.py">KR_velocity2.py</a>, and a merged workflow using both sparse and dense feature-tracking can be found in <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/KR_velocity2.py">KR_velocity2.py</a>. The main difference in the merged workflow is that velocities are processed using the stand-alone functions provided in PyTrx, rather than handled by PyTrx’s class objects. This provides the user with a script that is more flexible and adaptable.</p>
+<p>The main difference in the dense feature-tracking workflow (compared to the sparse workflow) is in the input variables to the Velocity object’s calcVelocities function. When the tracking method is set to ‘dense’ then the following variables can be defined – grid spacing, template and search window size, template matching method, threshold correlation, and minimum number of tracked points.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="c1"># Set up Velocity object</span>
+<span class="n">velo</span><span class="o">=</span><span class="n">Velocity</span><span class="p">(</span><span class="n">camimgs</span><span class="p">,</span> <span class="n">cameraenvironment</span><span class="p">,</span> <span class="n">hgout</span><span class="p">,</span> <span class="n">camvmask</span><span class="p">,</span> <span class="n">calibFlag</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span>
+              <span class="n">band</span><span class="o">=</span><span class="s1">&#39;L&#39;</span><span class="p">,</span> <span class="n">equal</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+
+<span class="c1"># Set velocity tracking parameters</span>
+<span class="n">vmethod</span> <span class="o">=</span> <span class="s1">&#39;dense&#39;</span>                   <span class="c1"># Method</span>
+<span class="n">vgrid</span> <span class="o">=</span> <span class="p">[</span><span class="mi">50</span><span class="p">,</span><span class="mi">50</span><span class="p">]</span>                     <span class="c1"># Dense matching grid distance</span>
+<span class="n">vtemplate</span> <span class="o">=</span> <span class="mi">10</span>                      <span class="c1"># Template size</span>
+<span class="n">vsearch</span> <span class="o">=</span> <span class="mi">50</span>                        <span class="c1"># Search window size</span>
+<span class="n">vmethod</span> <span class="o">=</span> <span class="s1">&#39;cv2.TM_CCORR_NORMED&#39;</span>     <span class="c1"># Method for template matching</span>
+<span class="n">vthres</span> <span class="o">=</span> <span class="mf">0.8</span>                        <span class="c1"># Threshold average template correlation</span>
+<span class="n">vminf</span> <span class="o">=</span> <span class="mi">5</span>                           <span class="c1"># Minimum number of tracked points</span>
+
+<span class="c1"># Calculate dense velocities</span>
+<span class="n">velocities</span> <span class="o">=</span> <span class="n">velo</span><span class="o">.</span><span class="n">calcVelocities</span><span class="p">([</span><span class="n">vmethod</span><span class="p">,</span> <span class="n">vgrid</span><span class="p">,</span> <span class="p">[</span><span class="n">vmethod</span><span class="p">,</span> <span class="n">vtemplate</span><span class="p">,</span> <span class="n">vsearch</span><span class="p">,</span>
+                                 <span class="n">vthres</span><span class="p">,</span> <span class="n">vminf</span><span class="p">]])</span>
+</pre></div>
+</div>
 </div>
 </div>
 

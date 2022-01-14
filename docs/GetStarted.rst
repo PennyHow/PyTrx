@@ -1,5 +1,5 @@
 Getting Started
-===========
+===============
 
 PyTrx comes with working examples to get started with. These scripts are available in the PyTrx repository 
 `here <https://github.com/PennyHow/PyTrx/tree/master/PyTrx/Examples>`_. These examples are for applications in glaciology, which can be adapted and used. We hope these are especially useful for beginners in coding.
@@ -9,7 +9,7 @@ Automated detection of supraglacial lakes
 -----------------------------------------
 In this example, we will derive changes in surface area of supraglacial lakes captured from Kronebreen, Svalbard, for a small subset of the 2014 melt season. This example can be found in `KR_autoarea.py <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/KR_autoarea.py>`_.
 
-We will automatically detect water on the glacier based on differences in pixel intensity and corrected for image distortion; using images from `Kronebreen camera 3 <https://github.com/PennyHow/PyTrx/tree/master/PyTrx/Examples/images/KR3_2014_subset>`_ and the associated `camera environment data <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_KR3_2014.txt>`_.
+We will automatically detect water on the glacier based on differences in pixel intensity and corrected for image distortion; using images from `Kronebreen camera 3 <https://github.com/PennyHow/PyTrx/tree/master/PyTrx/Examples/images/KR3_2014_subset>`_ and the associated `camera environment <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_KR3_2014.txt>`_.
 
 First, we need to import the PyTrx packages that we are going to use.
 
@@ -214,7 +214,7 @@ Manual detection of plume footprints
 
 In this example, we will derive meltwater plume footprints from the front of Kronebreen, Svalbard, for a small subset of the 2014 melt season. This example can be found in `KR_manualarea.py <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/KR_manualarea.py>`_.
 
-We will manually delineate meltwater plume footprints from corrected time-lapse images to derive surface areas at sea level. In this example, we will use images from `Kronebreen camera 1 <https://github.com/PennyHow/PyTrx/tree/master/PyTrx/Examples/images/KR1_2014_subset>`_ and the associated `camera environment data <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_KR1_2014.txt>`_.
+We will manually delineate meltwater plume footprints from corrected time-lapse images to derive surface areas at sea level. In this example, we will use images from `Kronebreen camera 1 <https://github.com/PennyHow/PyTrx/tree/master/PyTrx/Examples/images/KR1_2014_subset>`_ and the `KR1 camera environment data <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_KR1_2014.txt>`_.
 
 First, we need to import the PyTrx packages that we are going to use.
 
@@ -732,7 +732,7 @@ Sparse feature-tracking to derive glacier flow
 
 In this example, we will calculate glacier flow velocities from Kronebreen, Svalbard, using PyTrx's sparse feature-tracking method. The sparse feature-tracking method using corner feature detection to identify coherent features on the glacier surface, and then tracks them between image pairs using Optical Flow. 
 
-We will derive glacier velocities from a subset of time-lapse images from the 2014 melt season, which can be found `here <https://github.com/PennyHow/PyTrx/tree/master/PyTrx/Examples/images/KR2_2014_subset>`_, using the `Kronebreen camera 2 environment data file <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_KR2_2014.txt>`_. This example can be found in `KR_velocity1.py <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/KR_velocity1.py>`_.
+We will derive glacier velocities from a subset of time-lapse images from the 2014 melt season, which can be found in the `PyTrx GitHub repository <https://github.com/PennyHow/PyTrx/tree/master/PyTrx/Examples/images/KR2_2014_subset>`_, using the `Kronebreen camera 2 environment data file <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_KR2_2014.txt>`_. This example can be found in `KR_velocity1.py <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/KR_velocity1.py>`_.
 
 Let's firstly import the PyTrx modules we need.
 
@@ -822,6 +822,7 @@ Now we can look at measuring the flow of the glacier using the feature-tracking 
 
     
 .. code-block:: python
+
    # Set image conditions
    calibration = True 		    # Correct images for distortion?
    iband = 'L'                     # Image band to track with (R/G/B/L)
