@@ -1,4 +1,4 @@
-Get Started
+Getting Started
 ===========
 
 PyTrx comes with working examples to get started with. These scripts are available in the PyTrx repository 
@@ -540,7 +540,7 @@ Georectification of glacier calving event point locations
 
 Here, we will georectify some pre-defined points that denote the locations of glacier calving events at Tunabreen, Svalbard, captured from high-frequency time-lapse images. One point represents a calving event identified in the image plane, which will be imported and georectified to x,y,z coordinates using the georectification functions in PyTrx. The x,y,z coordinates will then be plotting onto the DEM, and exported to shapefile.  
 
-This example can be found in `TU_ptsgeorectify.py <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/TU_ptsgeorectify.py>`_, using the `Tunabreen camera 1 environment data file<https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_TU1_2015.txt>`_.
+This example can be found in `TU_ptsgeorectify.py <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/TU_ptsgeorectify.py>`_, using the `Tunabreen camera 1 environment data file <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_TU1_2015.txt>`_.
 
 First, we need to import the PyTrx functions that we are going to use along with some other packages (for GIS, data manipulation and plotting), and define the file paths to our camera environment information and point data.
 
@@ -638,11 +638,9 @@ To view our reprojected x,y,z points, we can plot them using the plotting functi
    # Retrieve DEM extent and elevation array
    demextent = demobj.getExtent()
    dem = demobj.getZ()
-
    
    # Get camera position (xyz) for plotting
    post = tu1cam._camloc            
- 
    
    # Plot DEM and camera location
    fig,(ax1) = plt.subplots(1, figsize=(15,15))
@@ -725,32 +723,282 @@ And finally we will export the inverse projected x,y,z point coordinates to a sh
        feature.Destroy()                       
        count=count+1
 
-# Close layer    
-ds.Destroy()
+   # Close layer    
+   ds.Destroy()
 
               
 Sparse feature-tracking to derive glacier flow
 ----------------------------------------------
 
-Glacier velocities derived through feature-tracking of sparse points, *KR_velocity1.py*
+In this example, we will calculate glacier flow velocities from Kronebreen, Svalbard, using PyTrx's sparse feature-tracking method. The sparse feature-tracking method using corner feature detection to identify coherent features on the glacier surface, and then tracks them between image pairs using Optical Flow. 
 
-Example driver for deriving sparse velocities from Kronebreen, Svalbard, for a small subset of the 2014 melt season. Specifically this script performs feature-tracking through sequential daily images of the glacier to derive surface velocities (spatial average, individual point displacements and interpolated velocity maps) which have been corrected for image distortion and motion in the camera platform (i.e. image registration). This script uses images from those found in the 'KR2_2014_subset' folder, and camera environment data associated with the text file 'CameraEnvironmentData_KR2_2014.txt'.
+We will derive glacier velocities from a subset of time-lapse images from the 2014 melt season, which can be found `here <https://github.com/PennyHow/PyTrx/tree/master/PyTrx/Examples/images/KR2_2014_subset>`_, using the `Kronebreen camera 2 environment data file <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/camenv_data/camenvs/CameraEnvironmentData_KR2_2014.txt>`_. This example can be found in `KR_velocity1.py <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/KR_velocity1.py>`_.
+
+Let's firstly import the PyTrx modules we need.
+
+
+.. code-block:: python
+
+   from PyTrx.CamEnv import CamEnv
+   from PyTrx.Velocity import Velocity, Homography
+   from PyTrx.FileHandler import writeHomogFile, writeVeloFile, \
+        writeVeloSHP, writeCalibFile
+   from PyTrx.Utilities import plotVeloPX, plotVeloXYZ, \
+        interpolateHelper, plotInterpolate
+
+
+And then define the file paths to our camera information, our time-lapse images, and the masks we will use to identify the regions of the image we want to use for deriving glacier flow velocities and tracking static features. 
+
+
+.. code-block:: python
+  
+   # Camera environment file path
+   camdata = '../Examples/camenv_data/camenvs/CameraEnvironmentData_KR2_2014.txt'
+   
+   # Mask for velocity feature-tracking
+   camvmask = '../Examples/camenv_data/masks/KR2_2014_vmask.jpg'
+   
+   # Inverse mask for image registration
+   caminvmask = '../Examples/camenv_data/invmasks/KR2_2014_inv.jpg'
+   
+   # Time-lapse images
+   camimgs = '../Examples/images/KR2_2014_subset/*.JPG'
+
+
+We will construct a CamEnv object using our camera environment file, which will hold all information about the translation of our images to x,y,z space (represented by our DEM). We will optimise our camera environment, using our pre-defined ground control points to refine the model and estimate the camera pose (i.e. yaw, pitch, roll - YPR)
+
+
+.. code-block:: python
+
+   # Define camera environment
+   cameraenvironment = CamEnv(camdata)
+
+   # Optimise camera environment to refine camera pose
+   cameraenvironment.optimiseCamEnv('YPR')
+
+
+We can check our camera environment parameters using a reporter and various plotting functions.
+
+
+.. code-block:: python
+
+   # Report camera environment parameters
+   cameraenvironment.reportCamData()
+   
+   # Show ground control points
+   cameraenvironment.showGCPs()
+   
+   # Show image principal point
+   cameraenvironment.showPrincipalPoint()
+   
+   # Show ground control point residuals
+   cameraenvironment.showResiduals()
+
+
+Next we will calculate the homography model using PyTrx's Homography object. This represents correction for motion in the camera platform which, if uncorrected, can introduce false motion into our velocity measurements. We can account for this using our homography model to co-register our time-lapse images.
+
+
+.. code-block:: python
+
+   # Set homography parameters
+   hmethod='sparse'                #Method
+   hgwinsize=(25,25)               #Tracking window size
+   hgback=1.0                      #Back-tracking threshold
+   hgmax=50000                     #Maximum number of points to seed
+   hgqual=0.1                      #Corner quality for seeding 
+   hgmind=5.0                      #Minimum distance between seeded points
+   hgminf=4                        #Minimum number of seeded points to track
+
+   # Set up Homography object
+   homog = Homography(camimgs, cameraenvironment, caminvmask, calibFlag=True, 
+                      band='L', equal=True)
+
+   # Calculate homography
+   hgout = homog.calcHomographies([hmethod, [hgmax, hgqual, hgmind], [hgwinsize, 
+                                hgback, hgminf]])
+
+
+Now we can look at measuring the flow of the glacier using the feature-tracking functionality in PyTrx's Velocity object. There are a number of parameters we can set to adjust our tracking conditions
+
+    
+.. code-block:: python
+   # Set image conditions
+   calibration = True 		    # Correct images for distortion?
+   iband = 'L'                     # Image band to track with (R/G/B/L)
+   eq = True  			    # Images with histogram equalisation?
+   
+   # Set up Velocity object
+   velo=Velocity(camimgs, cameraenvironment, hgout, camvmask, calibFlag=True, 
+                 band='L', equal=True) 
+                                  
+   # Set velocity parameters
+   vmethod = 'sparse'              # Method
+   vwinsize = (25,25)              # Tracking window size
+   bk = 1.0                        # Back-tracking threshold  
+   mpt = 50000                     # Maximum number of points to seed
+   ql = 0.1                        # Corner quality for seeding
+   mdis = 5.0                      # Minimum distance between seeded points
+   mfeat = 4                       # Minimum number of seeded points to track
+
+   # Calculate glacier flow velocity
+   velocities = velo.calcVelocities([vmethod, [mpt, ql, mdis], [vwinsize, bk, 
+                                    mfeat]])                                   
+
+To export our results, we can write out our intrinsic camera matrix (which can be useful when you have optimised the intrinsic camera parameters of the camera environment) and calculated homography using the exporting functions in PyTrx's FileHandler module.
+
+
+.. code-block:: python
+  
+   # Write out camera calibration info to .txt file
+   matrix, tancorr, radcorr = cameraenvironment.getCalibdata()
+   writeCalibFile(matrix, tancorr, radcorr, 'KR2_2014_1.txt')
+      
+   # Write homography data to .csv file
+   imn = velo.getImageNames()
+   writeHomogFile(hgout, imn, 'homography.csv')
+
+
+And then we can export our calculated velocities to .csv file and .shp shapefiles for plotting and further analysis 
+
+
+.. code-block:: python
+
+   # Fetch uv and xyz velocities 
+   xyzvel=[item[0][0] for item in velocities]
+   uvvel=[item[1][0] for item in velocities]
+   
+   # Write out velocity data to .csv file
+   writeVeloFile(xyzvel, uvvel, hgout, imn, 'velo_output.csv') 
+
+   # Fetch xyz pt coordinates and tracking errors
+   xyz0=[item[0][1] for item in velocities]
+   xyzerr=[item[0][3] for item in velocities]
+
+   # Write points to shp file with EPSG:32633 projection
+   proj = 32633                            
+   writeVeloSHP(xyzvel, xyzerr, xyz0, imn, 'shpfiles', proj)   
+
+
+If we want to view the results, we can retrieve all of our tracked points (in both the images and x,y,z coordinates) and plot them over the top of our images and DEM.
+
+  
+.. code-block:: python
+
+   # Get calibration coefficients for plotting corrected images
+   cameraMatrix=cameraenvironment.getCamMatrixCV2()
+   distortP=cameraenvironment.getDistortCoeffsCV2() 
+
+   # Get images for overlaying uv pts
+   imgset=velo._imageSet
+      
+   # Get DEM array for overlaying xyz pts
+   dem=cameraenvironment.getDEM()
+   
+   # Get uv seeded and tracked point positions
+   uv0=[item[1][1] for item in velocities] 
+   uv1corr=[item[1][3] for item in velocities]
+      
+   # Get xyz seeded and tracked point positions
+   xyz0=[item[0][1] for item in velocities]
+   xyz1=[item[0][2] for item in velocities]
+
+   # Cycle through data from image pairs   
+   for i in range(len(imn)-1):
+ 
+       # Get image name and print
+       print('\nVisualising data for ' + str(imn[i]))
+
+       # Plot uv velocity points on image plane   
+       print('Plotting image plane output')
+       plotVeloPX(uvvel[i], uv0[i], uv1corr[i], 
+                  imgset[i].getImageCorr(cameraMatrix, distortP), 
+                  show=True, save='uv_'+imn[i])
+
+
+       # Plot xyz velocity points on dem  
+       print('Plotting XYZ output')
+       plotVeloXYZ(xyzvel[i], xyz0[i], xyz1[i], 
+                   dem, show=True, save='xyz_'+imn[i])
+    
+                
+       # Plot interpolation map with linear interpolation
+       print('Plotting interpolation map')
+       grid, pointsextent = interpolateHelper(xyzvel[i], xyz0[i], xyz1[i], 'linear')
+       plotInterpolate(grid, pointsextent, dem, show=True, 
+                       save='interp_'+imn[i])                        
+
+
+Additionally, we can export our velocities as gridded ASCII files. These files are recognised by many mapping software, such as ArcGIS and QGIS, and can be imported to create raster surfaces.
+
+
+.. code-block:: python
+
+   # import numpy for grid operations
+   import numpy as np
+
+   # Cycle through velocity data from image pairs   
+   for i in range(velo.getLength()-1): 
+    
+       # Change all the nans to -999.999 and flip the y axis
+       grid[np.isnan(grid)] = -999.999     
+       grid = np.flipud(grid)  
+    
+       # Open new file with write permissions
+       imn=velo._imageSet[i].getImageName()
+       afile = open(imn + '_interpmap.txt','w')
+    
+    # Make a list for each raster header variable, with the label and value
+    col = ['ncols', str(grid.shape[1])]
+    row = ['nrows', str(grid.shape[0])]
+    x = ['xllcorner', str(pointsextent[0])]
+    y = ['yllcorner', str(pointsextent[2])]
+    cell = ['cellsize', str(10.)]
+    nd = ['NODATA_value', str(-999.999)]
+    
+    # Write each header line on a new line of the file
+    header = [col,row,x,y,cell,nd]       
+    for i in header:
+        afile.write(' '.join(i) + '\n')
+    
+    # Iterate through each row and column value
+    for i in range(grid.shape[0]): 
+        for j in range(grid.shape[1]):
+            
+            # Write each data value to the row, separated by spaces
+            afile.write(str(grid[i,j]) + ' ')
+            
+        # New line at end of row
+        afile.write('\n')
+    
+    # Close file
+    afile.close() 
 
 
 Dense feature-tracking to derive glacier flow
 ---------------------------------------------
 
-Glacier velocities derived through feature-tracking of dense grid, *KR_velocity2.py*
+PyTrx's dense feature-tracking utilises traditional cross-correlation template matching to track a regular grid of points between an image pair. In this example, we calculate glacier flow velocities from Kronebreen, Svalbard, using a similar workflow to the sparse feature-tracking workflow shown previously. 
 
-Example driver for deriving dense velocities from Kronebreen, Svalbard, for a small subset of the 2014 melt season. Specifically this script performs feature-tracking through sequential daily images of the glacier to derive surface velocities (spatial average, individual point displacements and interpolated velocity maps) which have been corrected for image distortion and motion in the camera platform (i.e. image registration). This script uses images from those found in the 'KR2_2014_subset' folder, and camera environment data associated with the text file 'CameraEnvironmentData_KR2_2014.txt'.
+This workflow can be found in `KR_velocity2.py <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/KR_velocity2.py>`_, and a merged workflow using both sparse and dense feature-tracking can be found in `KR_velocity2.py <https://github.com/PennyHow/PyTrx/blob/master/PyTrx/Examples/KR_velocity2.py>`_. The main difference in the merged workflow is that velocities are processed using the stand-alone functions provided in PyTrx, rather than handled by PyTrx's class objects. This provides the user with a script that is more flexible and adaptable.
 
+The main difference in the dense feature-tracking workflow (compared to the sparse workflow) is in the input variables to the Velocity object's calcVelocities function. When the tracking method is set to 'dense' then the following variables can be defined -- grid spacing, template and search window size, template matching method, threshold correlation, and minimum number of tracked points.
 
-Sparse and dense feature-tracking
-----------------------------------
+.. code-block:: python 
 
-Alternative script for glacier velocity feature-tracking with both the sparse and dense methods, *KR_velocity3.py*
+   # Set up Velocity object
+   velo=Velocity(camimgs, cameraenvironment, hgout, camvmask, calibFlag=True, 
+                 band='L', equal=True) 
 
-Extended example driver for deriving velocities from Kronebreen, Svalbard, for a small subset of the 2014 melt season. This script produces the same outputs as *KR_velocity1.py* and *KR_velocity2.py*. The difference is that velocities are processed using the stand-alone functions provided in PyTrx, rather than handled by PyTrx's class objects. This provides the user with a script that is more flexible and adaptable.
-
-
-
+   # Set velocity tracking parameters
+   vmethod = 'dense'                   # Method
+   vgrid = [50,50]                     # Dense matching grid distance
+   vtemplate = 10                      # Template size
+   vsearch = 50                        # Search window size
+   vmethod = 'cv2.TM_CCORR_NORMED'     # Method for template matching
+   vthres = 0.8                        # Threshold average template correlation
+   vminf = 5                           # Minimum number of tracked points
+   
+   # Calculate dense velocities
+   velocities = velo.calcVelocities([vmethod, vgrid, [vmethod, vtemplate, vsearch, 
+                                    vthres, vminf]])   
+                                 
