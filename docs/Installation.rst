@@ -38,7 +38,7 @@ PyTrx is available through pip and can be installed with the following simple co
 
 Be warned that there are difficulties with the GDAL package on pip, meaning that GDAL could not be declared explicitly as a PyTrx dependency in the pip package compiling. Please ensure that GDAL is installed separately if installing PyTrx through pip.
 
-If you still run into problems then we suggest creating a new environment with the .yml environment file <https://github.com/PennyHow/PyTrx/blob/master/environment.yml>`_ provided in the PyTrx repository, which contains all of PyTrx's dependencies. Then the PyTrx pip package can be installed afterwards.
+If you still run into problems then we suggest creating a new conda environment with the .yml environment file <https://github.com/PennyHow/PyTrx/blob/master/environment.yml>`_ provided in the PyTrx repository, which contains all of PyTrx's dependencies. Then the PyTrx pip package can be installed afterwards in this fresh environment.
 
 
 .. code-block:: bash

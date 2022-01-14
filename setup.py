@@ -35,6 +35,6 @@ setuptools.setup(
         "Natural Language :: English",
         "Operating System :: OS Independent",
     ],
-    install_requires=['glob2', 'matplotlib', 'numpy', 'opencv-python>=3', 'pillow','rawpy', 'scipy'],
+    install_requires=['glob2', 'matplotlib', 'numpy', 'opencv-python>=3', 'pillow', 'scipy'],
     python_requires='>=3',
 )
