@@ -20,10 +20,10 @@ import cv2, ogr, unittest
 from PIL import Image
 
 #Import PyTrx functions and classes
-from FileHandler import readMask
-from Images import ImageSequence, enhanceImage
-import Velocity
-from CamEnv import projectUV, setProjection
+from PyTrx.FileHandler import readMask
+from PyTrx.Images import ImageSequence, enhanceImage
+import PyTrx.Velocity as Velocity
+from PyTrx.CamEnv import projectUV, setProjection
 
 #------------------------------------------------------------------------------
 class Area(ImageSequence):
