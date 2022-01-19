@@ -18,7 +18,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pytrx", 
-    version="1.2.2",
+    version="1.2.3",
     author="Penelope How",
     author_email="pennyruthhow@gmail.com",
     description="An object-oriented toolset for calculating velocities, surface areas and distances from oblique imagery of glacial environments",
