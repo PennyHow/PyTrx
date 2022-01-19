@@ -15,18 +15,17 @@ ImGRAFT are noted in related script comments.
 """
 
 #Import PyTrx packages
-from Utilities import plotGCPs, plotCalib, plotResiduals, plotPrincipalPoint
-from FileHandler import readImg, readGCPs, readMatrixDistortion 
-from DEM import ExplicitRaster,load_DEM,voxelviewshed
-from Images import CamImage
+from PyTrx.Utilities import plotGCPs, plotCalib, plotResiduals, plotPrincipalPoint
+from PyTrx.FileHandler import readImg, readGCPs, readMatrixDistortion 
+from PyTrx.DEM import ExplicitRaster,load_DEM,voxelviewshed
+from PyTrx.Images import CamImage
 
 #Import other packages
 import matplotlib.pyplot as plt
 from scipy import interpolate
 from scipy import optimize
 import numpy as np
-import cv2
-import glob
+import cv2, glob, unittest
 
 #------------------------------------------------------------------------------
 
@@ -1436,7 +1435,15 @@ def computeResidualsUV(params, stable, GCPxyz, GCPuv, refimg,
  
 #------------------------------------------------------------------------------
 
-#if __name__ == "__main__":   
-#    print '\nProgram finished'
+class TestCamEnv(unittest.TestCase):
+    def test_getRotation(self):
+        actual = getRotation(np.array([0, 0, 0]))
+        expected = np.array([-0.,-1.,-0.,-0.,-0.,-1.,1.,0.,-0.], 
+                            dtype=np.float64).reshape(3,3)
+        self.assertIn(actual, expected)
+        
+if __name__ == "__main__":   
+    unittest.main()       
+
 
 #------------------------------------------------------------------------------   

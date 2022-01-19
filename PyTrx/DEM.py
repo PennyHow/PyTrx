@@ -13,11 +13,9 @@ this data into the PyTrx.CamEnv.CamEnv object class.
 #Import packages
 import numpy as np
 import scipy.io as sio
-import gdal
-import math
+import gdal, math, struct, unittest
 from scipy import interpolate
 from gdalconst import GA_ReadOnly 
-import struct
 from scipy.interpolate import RectBivariateSpline
 
 #------------------------------------------------------------------------------
@@ -492,7 +490,39 @@ def voxelviewshed(dem, viewpoint):
    
 #------------------------------------------------------------------------------
 
-#if __name__ == "__main__":   
-#    print '\nProgram finished'
+#------------------------------------------------------------------------------
+    
+class TestDEM(unittest.TestCase): 
+    
+    def test_ExplicitRaster(self):
+        x = np.array([0,1,2,3,4,5,6,7,8,9]).reshape(1,10).repeat(10,axis=0)
+        y = np.array([0,1,2,3,4,5,6,7,8,9]).reshape(10,1).repeat(10,axis=1)
+        dem = ExplicitRaster(x, y, np.random.rand(10,10), nodata=float('nan'))
+        self.assertIsNotNone(dem) 
+        
+    def test_getRows(self):
+        x = np.array([0,1,2,3,4,5,6,7,8,9]).reshape(1,10).repeat(10,axis=0)
+        y = np.array([0,1,2,3,4,5,6,7,8,9]).reshape(10,1).repeat(10,axis=1)
+        dem = ExplicitRaster(x, y, np.random.rand(10,10), nodata=float('nan'))
+        actual = dem.getRows()        
+        self.assertEqual(actual, 10)
+    
+    def test_subset(self):
+        x = np.array([0,1,2,3,4,5,6,7,8,9]).reshape(1,10).repeat(10,axis=0)
+        y = np.array([0,1,2,3,4,5,6,7,8,9]).reshape(10,1).repeat(10,axis=1)
+        dem = ExplicitRaster(x, y, np.random.rand(10,10), nodata=float('nan'))
+        dem2 = dem.subset(0,3,0,3)
+        actual = dem2.getRows()        
+        self.assertEqual(actual, 3)                
+
+    def test_voxelviewshed(self):
+        x = np.array([0,1,2,3,4,5,6,7,8,9]).reshape(1,10).repeat(10,axis=0)
+        y = np.array([0,1,2,3,4,5,6,7,8,9]).reshape(10,1).repeat(10,axis=1)
+        dem = ExplicitRaster(x, y, np.random.rand(10,10), nodata=float('nan'))
+        v = voxelviewshed(dem, [0,0,0])    
+        self.assertIsInstance(v, np.ndarray)              
+    
+if __name__ == "__main__":   
+    unittest.main()  
 
 #------------------------------------------------------------------------------   

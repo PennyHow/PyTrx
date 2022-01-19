@@ -15,12 +15,12 @@ Determining real-world distances from oblique imagery.
 #Import packages
 import matplotlib.pyplot as plt
 import numpy as np
-import ogr
+import ogr, unittest
 
 #Import PyTrx functions and classes
-import Velocity
-from Images import ImageSequence
-from CamEnv import projectUV, setProjection
+import PyTrx.Velocity as Velocity
+from PyTrx.Images import ImageSequence
+from PyTrx.CamEnv import projectUV, setProjection
 
 #------------------------------------------------------------------------------
 
@@ -244,8 +244,14 @@ def getOGRLine(pts):
         
 
 #------------------------------------------------------------------------------
-
-#if __name__ == "__main__":   
-#    print '\nProgram finished'
+    
+class TestLine(unittest.TestCase): 
+ 
+    def test_getOGRLine(self):
+        l = getOGRLine(np.array([[0,0],[0,1]]).astype(np.float64))
+        self.assertEqual(l.Length(),1.0)
+              
+if __name__ == "__main__":   
+    unittest.main() 
 
 #------------------------------------------------------------------------------   

@@ -18,8 +18,7 @@ method and a grid of evenly space points in the dense method
 
 #Import packages
 import numpy as np
-import cv2
-import math
+import cv2, math, unittest
 from matplotlib import path
 import matplotlib.pyplot as plt
 from scipy import interpolate
@@ -27,9 +26,9 @@ from PIL import Image
 import numpy.ma as ma
 
 #Import PyTrx functions and classes
-from FileHandler import readMask
-from Images import ImageSequence
-from CamEnv import projectUV, projectXYZ, setProjection
+from PyTrx.FileHandler import readMask
+from PyTrx.Images import ImageSequence
+from PyTrx.CamEnv import projectUV, projectXYZ, setProjection
 
 #------------------------------------------------------------------------------
 class Homography(ImageSequence):
@@ -1525,3 +1524,13 @@ def readDEMmask(dem, img, invprojvars, demMaskPath=None):
             print('\nFailed to write file: ' + str(demMaskPath))
         
     return demMask
+
+#------------------------------------------------------------------------------
+    
+class TestVelocity(unittest.TestCase):
+    def test_apply_persp_homographyPts(self):
+        a = apply_persp_homographyPts([[1,0],[1,2]], [[1,1,1],[1,1,1],[1,1,1]])
+        self.assertIsNotNone(a)  
+
+if __name__ == "__main__":   
+    unittest.main()  

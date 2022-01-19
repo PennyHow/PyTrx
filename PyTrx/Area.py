@@ -16,15 +16,15 @@ imagery; and (2) Determining real-world surface areas from oblique imagery.
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
-import cv2
+import cv2, ogr, unittest
 from PIL import Image
-import ogr
+from packaging import version
 
 #Import PyTrx functions and classes
-from FileHandler import readMask
-from Images import ImageSequence, enhanceImage
-import Velocity
-from CamEnv import projectUV, setProjection
+from PyTrx.FileHandler import readMask
+from PyTrx.Images import ImageSequence, enhanceImage
+import PyTrx.Velocity as Velocity
+from PyTrx.CamEnv import projectUV, setProjection
 
 #------------------------------------------------------------------------------
 class Area(ImageSequence):
@@ -561,9 +561,11 @@ def calcAutoArea(img, imn, colourrange, hmatrix=None, threshold=None,
 #    #Speckle filter to remove noise - needs fixing
 #    mask = cv2.filterSpeckles(mask, 1, 30, 2)
 
-    #Polygonize extents using OpenCV findContours function        
-    i, line, hier = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)      #OpenCV v3.4.17 and lower       
-#    line, hier = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)     #OpenCV v4 and higher
+    #Polygonize extents using OpenCV findContours function
+    if version.parse(cv2.__version__) > version.parse("3.4.17"):
+    	line, hier = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)     #OpenCV v4 and higher
+    else:
+    	i, line, hier = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)      #OpenCV v3.4.17 and lower   
 
     print('\nDetected ' + str(len(line)) + ' regions in ' + str(imn))
     
@@ -824,3 +826,18 @@ def getOGRArea(pts):
     poly = ogr.Geometry(ogr.wkbPolygon)
     poly.AddGeometry(ring)
     return poly
+
+#------------------------------------------------------------------------------
+    
+class TestArea(unittest.TestCase): 
+
+    def test_calcAutoArea(self):
+        a = calcAutoArea(np.random.rand(5184,3456),'image', [1,10])
+        self.assertIsNotNone(a)
+ 
+    def test_getOGRArea(self):
+        p = getOGRArea(np.array([[0,1],[1,1],[1,0],[0,0]]))
+        self.assertEqual(p.Area(),1.0)
+              
+if __name__ == "__main__":   
+    unittest.main()  

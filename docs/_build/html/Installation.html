@@ -35,7 +35,7 @@
   <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="Get Started" href="GetStarted.html" />
+    <link rel="next" title="Getting Started" href="GetStarted.html" />
     <link rel="prev" title="PyTrx documentation" href="index.html" /> 
 </head>
 
@@ -84,11 +84,11 @@
 <ul class="current">
 <li class="toctree-l1 current"><a class="current reference internal" href="#">Installation</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#pytrx-set-up">PyTrx set-up</a></li>
-<li class="toctree-l2"><a class="reference internal" href="#cloning-pytrx-from-github">Cloning PyTrx from GitHub</a></li>
 <li class="toctree-l2"><a class="reference internal" href="#installing-pytrx-through-pip">Installing PyTrx through pip</a></li>
+<li class="toctree-l2"><a class="reference internal" href="#cloning-pytrx-from-github">Cloning PyTrx from GitHub</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="GetStarted.html">Get Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="GetStarted.html">Getting Started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Guide.html">Package Guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Packages.html">Modules</a></li>
 <li class="toctree-l1"><a class="reference internal" href="Links.html">Links and Acknowledgements</a></li>
@@ -163,25 +163,48 @@
 <p>PyTrx has been coded with Python 3 and has been tested on Linux and Windows operating systems (it should also work on Apple operating systems too, it just hasn’t been tested). PyTrx was originally written using a Linux operating system, so the inputted file path structures given in the example scripts may differ between operating systems and it is therefore advised to check file path structures before running these.</p>
 <p>PyTrx can either be downloaded directly from the <a class="reference external" href="https://github.com/PennyHow/PyTrx">GitHub repository</a>, or installed PyPI package manager (pip).</p>
 </div>
-<div class="section" id="cloning-pytrx-from-github">
-<h2>Cloning PyTrx from GitHub<a class="headerlink" href="#cloning-pytrx-from-github" title="Permalink to this headline">¶</a></h2>
-<p>PyTrx can be downloaded directly through the ‘clone or download’ icon on <a class="reference external" href="https://github.com/PennyHow/PyTrx">PyTrx’s GitHub repository</a>. To use PyTrx, you will need a working distribution of Python and the following key packages, which PyTrx strongly depends on:</p>
-<ul class="simple">
-<li><p>OpenCV (v3 and above): <a class="reference external" href="https://opencv.org">https://opencv.org</a></p></li>
-<li><p>GDAL (v2 and above): <a class="reference external" href="https://gisinternals.com">https://gisinternals.com</a></p></li>
-<li><p>Pillow (PIL) (v5 and above): <a class="reference external" href="https://pythonware.com">https://pythonware.com</a></p></li>
-</ul>
-<p>Be aware that these dependencies may not necessarily be installed with your distribution of Python (e.g. PythonXY, Anaconda), so you may have to install them separately. The .yml environment file provided in the GitHub repository can be used to <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">set up an environment</a> that holds all of the necessary Python packages to run PyTrx.</p>
-<p>PyTrx has been tried and tested with the following dependency version configuration: <em>OpenCV=3.4.2</em>, <em>GDAL=2.3.2</em>, and <em>PIL=5.3</em>. PyTrx also needs other packages, which are commonly included with distributions of Python: <em>datetime</em>, <em>glob</em>, <em>imghdr</em>, <em>math</em>, <em>Matplotlib</em>, <em>NumPy</em>, <em>operator</em>, <em>os</em>, <em>pathlib</em>, <em>PyLab</em>, <em>SciPy</em>, <em>struct</em>, and <em>sys</em>. Compatibility with all newer versions of these packages are highly likely.</p>
-</div>
 <div class="section" id="installing-pytrx-through-pip">
 <h2>Installing PyTrx through pip<a class="headerlink" href="#installing-pytrx-through-pip" title="Permalink to this headline">¶</a></h2>
 <p>PyTrx is available through pip and can be installed with the following simple command:</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pytrx</span>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>pip install pytrx
 </pre></div>
 </div>
-<p><strong>WARNING</strong> There are difficulties with the GDAL package on pip, meaning that GDAL could not be declared explicitly as a PyTrx dependency. Please ensure that GDAL is installed separately if installing PyTrx through pip.</p>
-<p>To check that PyTrx is working, open a Python console or IDE such as Spyder, type ‘import PyTrx’ and hit enter, followed by ‘help(PyTrx)’. If PyTrx is working correctly, this should print PyTrx’s metadata, including PyTrx’s license, a brief description of the toolset, and its structure. If this does not work and throws up an error, it is likely that the package dependencies are invalid so reconfigure them and then try again. Now you are all set up to use PyTrx.</p>
+<p>Be warned that there are difficulties with the GDAL package on pip, meaning that gdal could not be declared explicitly as a PyTrx dependency in the pip package compiling. Please ensure that gdal is installed separately if installing PyTrx through pip. You should be able to create a new environment, install GDAL and the other dependencies with conda, and then install PyTrx with pip.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda create --name pytrx <span class="nv">python</span><span class="o">=</span><span class="m">3</span>.7
+
+conda install gdal opencv pillow scipy matplotlib spyder
+
+pip install pytrx
+</pre></div>
+</div>
+<p>If you still run into problems then we suggest creating a new conda environment from the .yml environment file &lt;<a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/environment.yml">https://github.com/PennyHow/PyTrx/blob/master/environment.yml</a>&gt;`_ provided in the PyTrx repository, as described <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">here</a>. Then the PyTrx pip package can be installed afterwards in this fresh environment.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env create --file environment.yml
+
+pip install pytrx
+</pre></div>
+</div>
+<p>To check that PyTrx is working, open a Python console or IDE such as Spyder, and try to import PyTrx</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">PyTrx</span>
+
+<span class="n">help</span><span class="p">(</span><span class="n">PyTrx</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>If PyTrx is working correctly, the help statement should print PyTrx’s metadata, including PyTrx’s license, a brief description of the toolset, and its structure. If this does not work and throws up an error, it is likely that the package dependencies are invalid so reconfigure them and then try again.</p>
+</div>
+<div class="section" id="cloning-pytrx-from-github">
+<h2>Cloning PyTrx from GitHub<a class="headerlink" href="#cloning-pytrx-from-github" title="Permalink to this headline">¶</a></h2>
+<p>PyTrx can be cloned from <a class="reference external" href="https://github.com/PennyHow/PyTrx">PyTrx’s GitHub repository</a>, or using git.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone https://github.com/PennyHow/PyTrx.git
+</pre></div>
+</div>
+<p>The repository can be installed in your python environment by navigating to the top level of the repository and using pip to install the local package.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -m pip install -e .
+</pre></div>
+</div>
+<p>Or you can use PyTrx in a python environment with the installed dependencies. We recommend installing PyTrx’s dependencies with conda.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda install gdal opencv pillow scipy matplotlib spyder
+</pre></div>
+</div>
 </div>
 </div>
 
@@ -193,7 +216,7 @@
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="GetStarted.html" class="btn btn-neutral float-right" title="Get Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="GetStarted.html" class="btn btn-neutral float-right" title="Getting Started" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="index.html" class="btn btn-neutral float-left" title="PyTrx documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
