@@ -18,6 +18,7 @@ from matplotlib.lines import Line2D
 import numpy as np
 import cv2, ogr, unittest
 from PIL import Image
+from packaging import version
 
 #Import PyTrx functions and classes
 from PyTrx.FileHandler import readMask
@@ -560,9 +561,11 @@ def calcAutoArea(img, imn, colourrange, hmatrix=None, threshold=None,
 #    #Speckle filter to remove noise - needs fixing
 #    mask = cv2.filterSpeckles(mask, 1, 30, 2)
 
-    #Polygonize extents using OpenCV findContours function        
-    i, line, hier = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)      #OpenCV v3.4.17 and lower       
-#    line, hier = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)     #OpenCV v4 and higher
+    #Polygonize extents using OpenCV findContours function
+    if version.parse(cv2.__version__) > version.parse("3.4.17"):
+    	line, hier = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)     #OpenCV v4 and higher
+    else:
+    	i, line, hier = cv2.findContours(mask,cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_NONE)      #OpenCV v3.4.17 and lower   
 
     print('\nDetected ' + str(len(line)) + ' regions in ' + str(imn))
     
