@@ -1,4 +1,4 @@
-name: pytrx
+name: pytrx3
 channels:
   - defaults
 dependencies:
@@ -11,7 +11,7 @@ dependencies:
   - astroid=2.6.6=py37h06a4308_0
   - async_generator=1.10=py37h28b3542_0
   - atomicwrites=1.4.0=py_0
-  - attrs=21.2.0=pyhd3eb1b0_0
+  - attrs=21.4.0=pyhd3eb1b0_0
   - autopep8=1.6.0=pyhd3eb1b0_0
   - babel=2.9.1=pyhd3eb1b0_0
   - backcall=0.2.0=pyhd3eb1b0_0
@@ -242,4 +242,7 @@ dependencies:
   - zipp=3.7.0=pyhd3eb1b0_0
   - zlib=1.2.11=h7f8727e_4
   - zstd=1.4.9=haebb681_0
-prefix: /home/pho/anaconda3/envs/pytrx
+  - pip:
+    - glob2==0.7
+    - pytrx==1.2.3
+prefix: /home/pho/anaconda3/envs/pytrx3
