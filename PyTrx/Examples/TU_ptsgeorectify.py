@@ -28,14 +28,14 @@ import osgeo.ogr as ogr
 import osgeo.osr as osr
 import matplotlib.pyplot as plt
 
-#Import PyTrx modules (from PyTrx file directory)
-import sys
-sys.path.append('../')
-from CamEnv import CamEnv, setProjection, projectUV
+# #Import PyTrx modules (from PyTrx file directory)
+# import sys
+# sys.path.append('../')
+# from CamEnv import CamEnv, setProjection, projectUV
               
-##If you have pip/conda installed PyTrx then comment out the PyTrx module
-##imports above and uncomment these ones below
-#from PyTrx.CamEnv import CamEnv, setProjection, projectUV
+#If you have pip/conda installed PyTrx then comment out the PyTrx module
+#imports above and uncomment these ones below
+from PyTrx.CamEnv import CamEnv, setProjection, projectUV
 
 
 #-----------------------------   Map data files   -----------------------------

@@ -20,7 +20,7 @@ from PIL.ExifTags import TAGS
 from datetime import datetime
 from pylab import array, uint8
 from functools import reduce
-import glob, operator, imghdr, os, cv2
+import glob, operator, unittest, imghdr, os, cv2
 
 #------------------------------------------------------------------------------
 
@@ -574,10 +574,14 @@ def enhanceImage(img, diff, phi, theta):
     #Return enhanced image
     return img1
 
-
 #------------------------------------------------------------------------------
-
-#if __name__ == "__main__":   
-#    print '\nProgram finished'        
+    
+class TestImages(unittest.TestCase):
+    def test_enhanceImage(self):
+        i = enhanceImage(np.random.rand(5084,3456), 'light', 50, 20)
+        self.assertIsInstance(i, np.ndarray)
+        
+if __name__ == "__main__":   
+    unittest.main()       
 
 #------------------------------------------------------------------------------

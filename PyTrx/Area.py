@@ -16,9 +16,8 @@ imagery; and (2) Determining real-world surface areas from oblique imagery.
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
-import cv2
+import cv2, ogr, unittest
 from PIL import Image
-import ogr
 
 #Import PyTrx functions and classes
 from FileHandler import readMask
@@ -824,3 +823,18 @@ def getOGRArea(pts):
     poly = ogr.Geometry(ogr.wkbPolygon)
     poly.AddGeometry(ring)
     return poly
+
+#------------------------------------------------------------------------------
+    
+class TestArea(unittest.TestCase): 
+
+    def test_calcAutoArea(self):
+        a = calcAutoArea(np.random.rand(5184,3456),'image', [1,10])
+        self.assertIsNotNone(a)
+ 
+    def test_getOGRArea(self):
+        p = getOGRArea(np.array([[0,1],[1,1],[1,0],[0,0]]))
+        self.assertEqual(p.Area(),1.0)
+              
+if __name__ == "__main__":   
+    unittest.main()  
