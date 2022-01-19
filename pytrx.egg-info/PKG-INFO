@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: pytrx
-Version: 1.2.1
+Version: 1.2.2
 Summary: An object-oriented toolset for calculating velocities, surface areas and distances from oblique imagery of glacial environments
 Home-page: https://github.com/PennyHow/PyTrx
 Author: Penelope How
