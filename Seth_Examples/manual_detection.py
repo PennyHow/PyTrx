@@ -22,7 +22,8 @@ sys.path.append('../')
 
 
 # Load images
-directory = os.getcwd()
+# directory = os.getcwd()
+directory = 'C:///Users/sgoldst3/Inglefield/PyTrx/Seth_Examples'
 
 ## 2019 manual detection ##
 
@@ -88,6 +89,18 @@ for i, row in df.iterrows():
         linelocs.append(row['maxsum'])
         
 df['lineloc'] = linelocs
+
+# lineadjust1 = []
+# for i, row in df.iterrows():
+#     if row['choice'] == 0:
+#         adjustment = row['lineloc'] - 20
+#         lineadjust1.append(adjustment)
+#     elif row['choice'] == 2:
+#         adjustment = row['lineloc'] - 10
+#         lineadjust1.append(adjustment)
+#     else:
+#         lineadjust1.append(row['lineloc'])
+# df['lineadjust'] = lineadjust1
 
 ## Import bubbler validation data
 bubblerdata2019 = directory + '/Inglefield_Data/modified_2019_excel.xlsx'
@@ -215,17 +228,17 @@ for i, row in df2.iterrows():
         
 df2['lineloc'] = linelocs2
 
-lineadjust = []
+lineadjust2 = []
 for i, row in df2.iterrows():
     if row['choice'] == 0:
         adjustment = row['lineloc'] - 20
-        lineadjust.append(adjustment)
+        lineadjust2.append(adjustment)
     elif row['choice'] == 2:
         adjustment = row['lineloc'] - 10
-        lineadjust.append(adjustment)
+        lineadjust2.append(adjustment)
     else:
-        lineadjust.append(row['lineloc'])
-df2['lineadjust'] = lineadjust
+        lineadjust2.append(row['lineloc'])
+df2['lineadjust'] = lineadjust2
 
 ## Import bubbler validation data
 bubblerdata2020 = directory + '/Inglefield_Data/modified_2020_excel.xlsx'
@@ -288,3 +301,130 @@ plt.show()
 
 counts20 = mergedf2020['choice'].value_counts()
 print('Percentage automatically detected: ' + str((counts20[1]+counts20[2])/len(mergedf2020)*100))
+
+
+## 2021 ##
+
+dir2021files = directory + '/Inglefield_Data/INGLEFIELD_CAM/2021/*'
+directory2021 = glob.glob(dir2021files)
+choices3 = []
+time_list21 = []
+
+print('\nValidate Edge Detection')
+for i in directory2021:
+    
+    # parse time stamp
+    filename = pathlib.Path(i)
+    filename = filename.stem
+    filename = filename.split("_")[-2:]
+    filename = ["".join(filename)]
+    filename = filename[0]
+    time = datetime.strptime(filename, '%Y%m%d%H%M%S')
+    # Read and filter image
+    image = imread(i, as_gray=True)
+    image = ndi.gaussian_filter(image, 3)
+       
+    # Compute the Canny filter for two values of sigma
+    edges = feature.canny(image, sigma=3)
+
+    # Compute row with most edges
+    rows, cols = edges.shape
+    rowsum = np.sum(edges.astype(int), axis = 1)
+    maxsum = rowsum.argmax()
+    edgeline = [maxsum]*cols
+    
+    # show image with rowsum line
+    plt.imshow(image, cmap='gray')
+    plt.plot(edgeline, color = "red", linewidth=1)
+    plt.show()
+    
+    # image check
+    choice = input("Is the line at the top of the river water level? 0 = no, 1 = yes(left), 2 = yes (right)")
+    c = int(choice)
+    choices3.append(tuple([time, c, i, maxsum]))
+     
+# Send manual detection to Pandas DataFrame
+df3 = pd.DataFrame(choices3, columns= ['time', 'choice', 'path', 'maxsum'])
+df3 = df3.set_index('time')
+
+# Correct water levels
+linelocs3 = []
+
+print('\nInput correct water levels')
+
+for i, row in df3.iterrows():
+    if row['choice'] == 0:
+        image = imread(row['path'], as_gray=True)
+        plt.imshow(image, cmap='gray')
+        plt.show()
+        levelguess = input("What 'y' value for the top of the water level on the left?")
+        guess = int(levelguess)
+        linelocs3.append(guess)
+    elif row['choice'] == 2:
+        corrected = row['maxsum'] + 40
+        linelocs3.append(corrected)
+    else:
+        linelocs3.append(row['maxsum'])
+        
+df3['lineloc'] = linelocs3
+
+# lineadjust = []
+# for i, row in df3.iterrows():
+#     if row['choice'] == 0:
+#         adjustment = row['lineloc'] - 20
+#         lineadjust.append(adjustment)
+#     elif row['choice'] == 2:
+#         adjustment = row['lineloc'] - 10
+#         lineadjust.append(adjustment)
+#     else:
+#         lineadjust.append(row['lineloc'])
+# df3['lineadjust'] = lineadjust
+
+## Export DataFrame 
+df3.to_csv(directory + '/results/manual_detection_results2021.csv')
+print('\nData exported to CSV file... Recommended to double check values')
+
+## Recommended to check CSV file to see if anything needs to be changed ##
+# Re-import DataFrame from CSV file
+df3 = pd.read_csv(directory + '/results/manual_detection_results2021.csv', parse_dates=['time'], index_col='time')
+
+
+# ## Calculate linear regression stats
+
+# x2021 = mergedf2020['stage_filtered']
+# y2021 = mergedf2020['lineadjust']
+# mask2020 = ~np.isnan(x2020) & ~np.isnan(y2020)
+# slope20, intercept20, r_value20, p_value20, std_err20 = stats.linregress(x2020[mask2020],y2020[mask2020])
+# print('2020 lin regress values: ' + 'slope:' + str(slope20) + ' intercept:' + str(intercept20) +' r squared:' + str(r_value20) + ' p value:' + str(p_value20) + ' std error:' + str(std_err20))
+
+# spearmanr20, spearmanp20 = stats.spearmanr(x2020[mask2020], y2020[mask2020])
+# print('Spearman r squared: ' + str(spearmanr20**2))
+
+## Data Plots ##
+fig5, ax5 = plt.subplots(1, constrained_layout = True, sharex = 'col')
+
+ax5.plot(df3.index, df3['lineloc'])
+ax5.invert_yaxis()
+ax5.set_ylabel('Water Level (row)')
+ax5.set_title('2021 Data')
+ax5.grid(linestyle='dashed')
+# ax3[1].plot(mergedf2020.index, x2020)
+# ax3[1].set_ylabel('Filtered Stage (m)')
+# ax3[1].grid(linestyle='dashed')
+
+ax5.tick_params(axis = 'x', labelrotation = 45)
+# ax3[1].tick_params(axis = 'x', labelrotation = 45)
+
+plt.show()
+
+# fig4, ax4 = plt.subplots(constrained_layout = True)
+# ax4.scatter(x2020, y2020, c= mergedf2020['choice'], label=mergedf2020['choice'])
+# ax4.invert_yaxis()
+# ax4.set_title('2020')
+# ax4.set_xlabel('Filtered Stage (m)')
+# ax4.set_ylabel('Water level (pixel)')
+
+plt.show()
+
+counts21 = df3['choice'].value_counts()
+print('Percentage automatically detected: ' + str((counts21[1]+counts21[2])/len(df3)*100))
