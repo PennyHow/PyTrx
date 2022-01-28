@@ -27,6 +27,7 @@ import pandas as pd
 # =============================================================================
 
 directory = os.getcwd()
+
 ingleCamEnv = directory + '/cam_env/Inglefield_CAM_camenv.txt'
 ingle_calibimg = directory + '/Inglefield_Data/INGLEFIELD_CAM/2019/INGLEFIELD_CAM_StarDot1_20190712_030000.JPG'
 ingle_img = CamImage(ingle_calibimg)
@@ -123,6 +124,7 @@ ax1[0].grid(linestyle='dashed')
 ax1[1].plot(projectdf_z2019.index, projectdf_z2019['stage_filtered'])
 ax1[1].set_ylabel('Filtered Stage (m)')
 ax1[1].grid(linestyle='dashed')
+ax1[1].set_ylim(-2, 3)
 
 ax1[0].tick_params(axis = 'x', labelrotation = 45)
 ax1[1].tick_params(axis = 'x', labelrotation = 45)
@@ -167,11 +169,79 @@ ax2[0].grid(linestyle='dashed')
 ax2[1].plot(projectdf_z2020.index, projectdf_z2020['stage_filtered'])
 ax2[1].set_ylabel('Filtered Stage (m)')
 ax2[1].grid(linestyle='dashed')
+ax2[1].set_ylim(-2, 3)
 
 ax2[0].tick_params(axis = 'x', labelrotation = 45)
 ax2[1].tick_params(axis = 'x', labelrotation = 45)
 
 plt.show()   
+
+fig3, ax3 = plt.subplots(constrained_layout = True)
+ax3.scatter(projectdf_z2019['stage_filtered'], projectdf_z2019['z'])
+ax3.set_title('2019 correlation')
+ax3.set_xlabel('Filtered Stage (m)')
+ax3.set_ylabel('Water level (pixel)')
+
+plt.show()
+# slope19_corr, intercept19_corr, r_value19_corr, p_value19_corr, std_err19_corr = stats.linregress(projectdf_z2019['stage_filtered'], projectdf_z2019['z'])
+# print (slope19_corr, intercept19_corr, r_value19_corr, p_value19_corr)
+
+## 2021 ##
+
+df2021 = pd.read_csv(directory + '/results/manual_detection_results2021.csv', parse_dates=['time'], index_col='time')
+df2021['z']= np.nan
+
+df2021_filtered = df2021.loc[df2021['lineloc'] <= 300]
+
+xyz_df2021 = pd.DataFrame(columns = ['datetime', 'lineloc', 'x', 'y', 'z'])
+for index1, row1 in df2021_filtered.iterrows():
+    for index2, row2 in df.iterrows():
+        if row1['lineloc'] == index2:
+            xyz_df2021 = xyz_df2021.append({'datetime': index1, 'lineloc': row1['lineloc'], 'x': row2['x'], 'y': row2['y'], 'z': row2['z'] }, ignore_index = True)
+
+# plt.scatter(xyz_df2020['lineloc'], xyz_df2020['z'])
+# slope20, intercept20, r_value20, p_value20, std_er20r = stats.linregress(xyz_df2020['lineloc'], xyz_df2020['z'])
+# print (slope20, intercept20, r_value20, p_value20)
+
+# projectdf_z2021 = df2021[['lineloc']]
+# projectdf_z2021['z']= np.nan
+
+for index, row in df2021.iterrows():
+   # if the lineloc is <= 300, add z value from df['z'] at that index
+    if row['lineloc'] <= 300:
+        z_row = row['lineloc']
+        df_row = df.iloc[z_row]
+        row['z'] = df_row['z']
+    # else if lineloc > 300, z-value = slope * lineloc + intercept (y= mx + b)
+    elif row['lineloc'] > 300:
+        row['z'] = slope19 * row['lineloc'] + intercept19
+
+        
+fig4, ax4 = plt.subplots(1, constrained_layout = True, sharex = 'col')
+
+ax4.plot(df2021.index, df2021['z'])
+ax4.set_ylabel('Water Level (m)')
+ax4.set_title('2021 Data')
+ax4.grid(linestyle='dashed')
+# ax4[1].plot(projectdf_z2020.index, projectdf_z2020['stage_filtered'])
+# ax4[1].set_ylabel('Filtered Stage (m)')
+# ax4[1].grid(linestyle='dashed')
+# ax4[1].set_ylim(-2, 3)
+
+ax4.tick_params(axis = 'x', labelrotation = 45)
+# ax4[1].tick_params(axis = 'x', labelrotation = 45)
+
+plt.show()   
+
+# fig3, ax3 = plt.subplots(constrained_layout = True)
+# ax3.scatter(projectdf_z2019['stage_filtered'], projectdf_z2019['z'])
+# ax3.set_title('2019 correlation')
+# ax3.set_xlabel('Filtered Stage (m)')
+# ax3.set_ylabel('Water level (pixel)')
+
+# plt.show()
+# slope19_corr, intercept19_corr, r_value19_corr, p_value19_corr, std_err19_corr = stats.linregress(projectdf_z2019['stage_filtered'], projectdf_z2019['z'])
+# print (slope19_corr, intercept19_corr, r_value19_corr, p_value19_corr)
 
 
 
