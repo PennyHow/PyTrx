@@ -380,51 +380,65 @@ df3['lineloc'] = linelocs3
 #         lineadjust.append(row['lineloc'])
 # df3['lineadjust'] = lineadjust
 
+## Import bubbler validation data
+bubblerdata2021 = directory + '/Inglefield_Data/modified_2021_excel.xlsx'
+bubdf2021 = pd.read_excel(bubblerdata2021, parse_dates={'datetime': ['Dates', 'Times']}, index_col= 'datetime')
+bubdf2021 = pd.to_numeric(bubdf2021['ING Stage DCP-raw'], errors="coerce")
+
+# Resample bubbler data 
+resampled2021 = bubdf2021.resample('3H').mean()
+
+# Merge data to single dataframe
+mergedf2021 = df3.merge(resampled2021, how='right', left_on=df3.index, right_on=resampled2021.index)
+mergedf2021['stage_filtered'] = mergedf2021['ING Stage DCP-raw']
+mergedf2021.loc[(mergedf2021['stage_filtered'] < 0.07), 'stage_filtered'] = np.nan
+
+
 ## Export DataFrame 
-df3.to_csv(directory + '/results/manual_detection_results2021.csv')
+mergedf2021.to_csv(directory + '/results/manual_detection_results2021.csv')
 print('\nData exported to CSV file... Recommended to double check values')
 
 ## Recommended to check CSV file to see if anything needs to be changed ##
 # Re-import DataFrame from CSV file
-df3 = pd.read_csv(directory + '/results/manual_detection_results2021.csv', parse_dates=['time'], index_col='time')
+mergedf2021 = pd.read_csv(directory + '/results/manual_detection_results2021.csv', parse_dates=['key_0'], index_col='key_0')
 
 
-# ## Calculate linear regression stats
+## Calculate linear regression stats
 
-# x2021 = mergedf2020['stage_filtered']
-# y2021 = mergedf2020['lineadjust']
-# mask2020 = ~np.isnan(x2020) & ~np.isnan(y2020)
-# slope20, intercept20, r_value20, p_value20, std_err20 = stats.linregress(x2020[mask2020],y2020[mask2020])
-# print('2020 lin regress values: ' + 'slope:' + str(slope20) + ' intercept:' + str(intercept20) +' r squared:' + str(r_value20) + ' p value:' + str(p_value20) + ' std error:' + str(std_err20))
+x2021 = mergedf2021['stage_filtered']
+y2021 = mergedf2021['lineloc']
+mask2021 = ~np.isnan(x2021) & ~np.isnan(y2021)
+slope21, intercept21, r_value21, p_value21, std_err21 = stats.linregress(x2021[mask2021],y2021[mask2021])
+print('2021 lin regress values: ' + 'slope:' + str(slope21) + ' intercept:' + str(intercept21) +' r squared:' + str(r_value21) + ' p value:' + str(p_value21) + ' std error:' + str(std_err21))
 
 # spearmanr20, spearmanp20 = stats.spearmanr(x2020[mask2020], y2020[mask2020])
 # print('Spearman r squared: ' + str(spearmanr20**2))
 
 ## Data Plots ##
-fig5, ax5 = plt.subplots(1, constrained_layout = True, sharex = 'col')
+fig5, ax5 = plt.subplots(2, constrained_layout = True, sharex = 'col')
 
-ax5.plot(df3.index, df3['lineloc'])
-ax5.invert_yaxis()
-ax5.set_ylabel('Water Level (row)')
-ax5.set_title('2021 Data')
-ax5.grid(linestyle='dashed')
-# ax3[1].plot(mergedf2020.index, x2020)
-# ax3[1].set_ylabel('Filtered Stage (m)')
-# ax3[1].grid(linestyle='dashed')
+ax5[0].plot(mergedf2021.index, y2021)
+ax5[0].invert_yaxis()
+ax5[0].set_ylabel('Water Level (row)')
+ax5[0].set_title('2021 Data')
+ax5[0].grid(linestyle='dashed')
+ax5[1].plot(mergedf2021.index, x2021)
+ax5[1].set_ylabel('Filtered Stage (m)')
+ax5[1].grid(linestyle='dashed')
 
-ax5.tick_params(axis = 'x', labelrotation = 45)
-# ax3[1].tick_params(axis = 'x', labelrotation = 45)
-
-plt.show()
-
-# fig4, ax4 = plt.subplots(constrained_layout = True)
-# ax4.scatter(x2020, y2020, c= mergedf2020['choice'], label=mergedf2020['choice'])
-# ax4.invert_yaxis()
-# ax4.set_title('2020')
-# ax4.set_xlabel('Filtered Stage (m)')
-# ax4.set_ylabel('Water level (pixel)')
+ax5[0].tick_params(axis = 'x', labelrotation = 45)
+ax5[1].tick_params(axis = 'x', labelrotation = 45)
 
 plt.show()
 
-counts21 = df3['choice'].value_counts()
-print('Percentage automatically detected: ' + str((counts21[1]+counts21[2])/len(df3)*100))
+fig6, ax6 = plt.subplots(constrained_layout = True)
+ax6.scatter(x2021, y2021, c= mergedf2021['choice'], label=mergedf2021['choice'])
+ax6.invert_yaxis()
+ax6.set_title('2021')
+ax6.set_xlabel('Filtered Stage (m)')
+ax6.set_ylabel('Water level (pixel)')
+
+plt.show()
+
+counts21 = mergedf2021['choice'].value_counts()
+print('Percentage automatically detected: ' + str((counts21[1]+counts21[2])/len(mergedf2021)*100))
