@@ -6,6 +6,7 @@ Created on Fri Mar  5 17:07:47 2021
 
 #Import packages
 import numpy as np
+import numpy.ma as ma
 import os, sys
 import matplotlib.pyplot as plt
 from scipy.interpolate import griddata
@@ -27,6 +28,8 @@ import pandas as pd
 # =============================================================================
 
 directory = os.getcwd()
+directory = 'C:///Users/sgoldst3/Inglefield/PyTrx/Seth_Examples'
+
 
 ingleCamEnv = directory + '/cam_env/Inglefield_CAM_camenv.txt'
 ingle_calibimg = directory + '/Inglefield_Data/INGLEFIELD_CAM/2019/INGLEFIELD_CAM_StarDot1_20190712_030000.JPG'
@@ -113,7 +116,11 @@ for index, row in projectdf_z2019.iterrows():
     elif row['lineloc'] > 300:
         row['z'] = slope19 * row['lineloc'] + intercept19
         
-projectdf_z2019['z_normalized'] = projectdf_z2019['z']-projectdf_z2019['z'].mean()    
+projectdf_z2019['z_normalized'] = projectdf_z2019['z']-projectdf_z2019['z'].mean()   
+
+projectdf_z2019['bubbler_resampled'] = projectdf_z2019['stage_filtered'].resample('1D').mean()
+projectdf_z2019['z_resampled'] = projectdf_z2019['z_normalized'].resample('1D').mean()
+
 
 fig1, ax1 = plt.subplots(2, constrained_layout = True, sharex = 'col')
 
@@ -161,7 +168,10 @@ for index, row in projectdf_z2020.iterrows():
     elif row['lineloc'] > 300:
         row['z'] = slope19 * row['lineloc'] + intercept19
         
-projectdf_z2020['z_normalized'] = projectdf_z2020['z']-projectdf_z2020['z'].mean()    
+projectdf_z2020['z_normalized'] = projectdf_z2020['z']-projectdf_z2020['z'].mean()  
+
+projectdf_z2020['bubbler_resampled'] = projectdf_z2020['stage_filtered'].resample('1D').mean()
+projectdf_z2020['z_resampled'] = projectdf_z2020['z_normalized'].resample('1D').mean()  
         
 fig2, ax2 = plt.subplots(2, constrained_layout = True, sharex = 'col')
 
@@ -193,7 +203,7 @@ xyz_df2021 = pd.DataFrame(columns = ['datetime', 'lineloc', 'x', 'y', 'z'])
 for index1, row1 in mergedf2021_filtered.iterrows():
     for index2, row2 in df.iterrows():
         if row1['lineloc'] == index2:
-            xyz_df2020 = xyz_df2020.append({'datetime': index1, 'lineloc': row1['lineloc'], 'x': row2['x'], 'y': row2['y'], 'z': row2['z'] }, ignore_index = True)
+            xyz_df2021 = xyz_df2021.append({'datetime': index1, 'lineloc': row1['lineloc'], 'x': row2['x'], 'y': row2['y'], 'z': row2['z'] }, ignore_index = True)
 
 # plt.scatter(xyz_df2020['lineloc'], xyz_df2020['z'])
 # slope20, intercept20, r_value20, p_value20, std_er20r = stats.linregress(xyz_df2020['lineloc'], xyz_df2020['z'])
@@ -213,6 +223,9 @@ for index, row in projectdf_z2021.iterrows():
         row['z'] = slope19 * row['lineloc'] + intercept19
         
 projectdf_z2021['z_normalized'] = projectdf_z2021['z']-projectdf_z2021['z'].mean()    
+
+projectdf_z2021['bubbler_resampled'] = projectdf_z2021['stage_filtered'].resample('1D').mean()
+projectdf_z2021['z_resampled'] = projectdf_z2021['z_normalized'].resample('1D').mean()
 
 fig4, ax4 = plt.subplots(2, constrained_layout = True, sharex = 'col')
 
@@ -235,25 +248,74 @@ plt.show()
 # Scatter plots#
 
 
-fig5, ax5 = plt.subplots(3, constrained_layout = True)
+fig5, ax5 = plt.subplots(nrows=2, ncols=3, sharex = 'col', sharey= 'row')
 
-ax5[0].scatter(projectdf_z2019['stage_filtered'], projectdf_z2019['z_normalized'])
-ax5[0].set_title('2019 correlation')
-ax5[0].set_xlabel('Filtered Stage (m)')
-ax5[0].set_ylabel('Water level (m)')
+fig5.suptitle("Water Level/Pressure Transducer Correlation")
 
-ax5[1].scatter(projectdf_z2020['stage_filtered'], projectdf_z2020['z_normalized'])
-ax5[1].set_title('2020 correlation')
-ax5[1].set_xlabel('Filtered Stage (m)')
-ax5[1].set_ylabel('Water level (m)')
+ax5[0,0].scatter(projectdf_z2019['stage_filtered'], projectdf_z2019['z_normalized'])
+ax5[0,0].set_title('2019')
+# ax5[0,0].set_xlabel('Filtered Stage (m)')
+ax5[0,0].set_ylabel('Water level (m)')
 
-ax5[2].scatter(projectdf_z2021['stage_filtered'], projectdf_z2021['z_normalized'])
-ax5[2].set_title('2021 correlation')
-ax5[2].set_xlabel('Filtered Stage (m)')
-ax5[2].set_ylabel('Water level (m)')
+ax5[0,1].scatter(projectdf_z2020['stage_filtered'], projectdf_z2020['z_normalized'])
+ax5[0,1].set_title('2020')
+# ax5[0,1].set_xlabel('Filtered Stage (m)')
+# ax5[0,1].set_ylabel('Water level (m)')
+
+ax5[0,2].scatter(projectdf_z2021['stage_filtered'], projectdf_z2021['z_normalized'])
+ax5[0,2].set_title('2021')
+# ax5[0,2].set_xlabel('Filtered Stage (m)')
+# ax5[0,2].set_ylabel('Water level (m)')
+
+ax5[1,0].scatter(projectdf_z2019['bubbler_resampled'], projectdf_z2019['z_resampled'])
+# ax5[1,0].set_title('2019 correlation')
+ax5[1,0].set_xlabel('Filtered Stage (m)')
+ax5[1,0].set_ylabel('Water level (m)')
+
+ax5[1,1].scatter(projectdf_z2020['bubbler_resampled'], projectdf_z2020['z_resampled'])
+# ax5[1,1].set_title('2020 correlation')
+ax5[1,1].set_xlabel('Filtered Stage (m)')
+# ax5[0,1].set_ylabel('Water level (m)')
+
+ax5[1,2].scatter(projectdf_z2021['bubbler_resampled'], projectdf_z2021['z_resampled'])
+# ax5[1,2].set_title('2021 correlation')
+ax5[1,2].set_xlabel('Filtered Stage (m)')
+# ax5[0,2].set_ylabel('Water level (m)')
+
+
+# fig5.add_subplot(1, 1, 1, frame_on=False)
+
+# # Hiding the axis ticks and tick labels of the bigger plot
+# # ax5.tick_params(labelcolor="none", bottom=False, left=False)
+
+# # Adding the x-axis and y-axis labels for the bigger plot
+# fig5.xlabel('Filtered Stage (m)', fontsize=15, fontweight='bold')
+# fig5.ylabel('Water Level (m)', fontsize=15, fontweight='bold')
+
 
 plt.show()
 
+## Linear Regression stats
+#2019
+projectdf_z2019_2 = projectdf_z2019.dropna()
+slope19_hour, intercept19_hour, r_value19_hour, p_value19_hour, std_err19_hour = stats.linregress(projectdf_z2019_2['stage_filtered'],projectdf_z2019_2['z_normalized'])
+print('2019 lin regress values (3 hours): ' + 'slope:' + str(slope19_hour) + ' intercept:' + str(intercept19_hour) +' r squared:' + str(r_value19_hour) + ' p value:' + str(p_value19_hour) + ' std error:' + str(std_err19_hour))
+# 
+slope19_day, intercept19_day, r_value19_day, p_value19_day, std_err19_day = stats.linregress(projectdf_z2019_2['bubbler_resampled'],projectdf_z2019_2['z_resampled'])
+print('2019 lin regress values (days): ' + 'slope:' + str(slope19_day) + ' intercept:' + str(intercept19_day) +' r squared:' + str(r_value19_day) + ' p value:' + str(p_value19_day) + ' std error:' + str(std_err19_day))
 
+#2020
+projectdf_z2020_2 = projectdf_z2020.dropna()
+slope20_hour, intercept20_hour, r_value20_hour, p_value20_hour, std_err20_hour = stats.linregress(projectdf_z2020_2['stage_filtered'],projectdf_z2020_2['z_normalized'])
+print('2020 lin regress values (3 hours): ' + 'slope:' + str(slope20_hour) + ' intercept:' + str(intercept20_hour) +' r squared:' + str(r_value20_hour) + ' p value:' + str(p_value20_hour) + ' std error:' + str(std_err20_hour))
+# 
+slope20_day, intercept20_day, r_value20_day, p_value20_day, std_err20_day = stats.linregress(projectdf_z2020_2['bubbler_resampled'],projectdf_z2020_2['z_resampled'])
+print('2020 lin regress values (days): ' + 'slope:' + str(slope20_day) + ' intercept:' + str(intercept20_day) +' r squared:' + str(r_value20_day) + ' p value:' + str(p_value20_day) + ' std error:' + str(std_err20_day))
 
-
+#2021
+projectdf_z2021_2 = projectdf_z2021.dropna()
+slope21_hour, intercept21_hour, r_value21_hour, p_value21_hour, std_err21_hour = stats.linregress(projectdf_z2021_2['stage_filtered'],projectdf_z2021_2['z_normalized'])
+print('2021 lin regress values (3 hours): ' + 'slope:' + str(slope21_hour) + ' intercept:' + str(intercept21_hour) +' r squared:' + str(r_value21_hour) + ' p value:' + str(p_value21_hour) + ' std error:' + str(std_err21_hour))
+# 
+slope21_day, intercept21_day, r_value21_day, p_value21_day, std_err21_day = stats.linregress(projectdf_z2021_2['bubbler_resampled'],projectdf_z2021_2['z_resampled'])
+print('2021 lin regress values (days): ' + 'slope:' + str(slope21_day) + ' intercept:' + str(intercept21_day) +' r squared:' + str(r_value21_day) + ' p value:' + str(p_value21_day) + ' std error:' + str(std_err21_day))
