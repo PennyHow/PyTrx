@@ -22,7 +22,7 @@ sys.path.append('../')
 
 
 # Load images
-# directory = os.getcwd()
+directory = os.getcwd()
 directory = 'C:///Users/sgoldst3/Inglefield/PyTrx/Seth_Examples'
 
 ## 2019 manual detection ##
