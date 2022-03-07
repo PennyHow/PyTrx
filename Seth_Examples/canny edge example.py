@@ -48,12 +48,12 @@ ax1[0,1].plot(rowsum)
 ax1[0,1].set_title('# of edge pixels by row')
 
 ax1[0,2].plot(edges2line, color = "red", linewidth=1)
-ax1[0,2].imshow(edges2[:, :], cmap='gray')
+ax1[0,2].imshow(edges1, cmap='gray')
 ax1[0,2].set_title('Canny filter, $\sigma=3$')
 
 
 # Image 2
-inglecam_img2 = directory + '/Inglefield_Data/INGLEFIELD_CAM/2020/INGLEFIELD_CAM_StarDot1_20200726_000000.jpg'
+inglecam_img2 = directory + '/Inglefield_Data/INGLEFIELD_CAM/2019/INGLEFIELD_CAM_StarDot1_20190810_210000.jpg'
 image2 = imread(inglecam_img2, as_gray=True)
 
 image2 = ndi.gaussian_filter(image2, 3)
@@ -68,16 +68,16 @@ rowsum2 = np.sum(edges4.astype(int), axis = 1)
 edges4line = [rowsum2.argmax()]*cols2
 
 ax1[1,0].imshow(image2, cmap='gray')
-ax1[1,0].set_ylabel('7/26/2020', fontsize=10)
+ax1[1,0].set_ylabel('8/10/2019', fontsize=10)
 
 ax1[1,1].plot(rowsum2)
 
 ax1[1,2].plot(edges4line, color = "red", linewidth=1)
-ax1[1,2].imshow(edges4, cmap='gray')
+ax1[1,2].imshow(edges3, cmap='gray')
 
 
 # Image 3
-inglecam_img3 = directory + '/Inglefield_Data/INGLEFIELD_CAM/2019/INGLEFIELD_CAM_StarDot1_20190810_210000.jpg'
+inglecam_img3 = directory + '/Inglefield_Data/INGLEFIELD_CAM/2019/INGLEFIELD_CAM_StarDot1_20190904_000000.jpg'
 image3 = imread(inglecam_img3, as_gray=True)
 
 image3 = ndi.gaussian_filter(image3, 3)
@@ -92,12 +92,12 @@ rowsum3 = np.sum(edges6.astype(int), axis = 1)
 edges6line = [rowsum3.argmax()]*cols3
 
 ax1[2,0].imshow(image3, cmap='gray')
-ax1[2,0].set_ylabel('8/10/2019', fontsize=10)
+ax1[2,0].set_ylabel('9/04/2019', fontsize=10)
 
 ax1[2,1].plot(rowsum3)
 
 ax1[2,2].plot(edges6line, color = "red", linewidth=1)
-ax1[2,2].imshow(edges6, cmap='gray')
+ax1[2,2].imshow(edges5, cmap='gray')
 
 fig1.tight_layout()
 plt.show()
