@@ -259,36 +259,48 @@ fig5, ax5 = plt.subplots(nrows=2, ncols=3, sharex = 'col', sharey= 'row')
 
 ax5[0,0].scatter(projectdf_z2019['stage_filtered'], projectdf_z2019['z_normalized'], facecolors='none', edgecolors='black')
 ax5[0,0].set_title('2019')
+ax5[0,0].grid(linestyle= 'dashed')
 # ax5[0,0].set_xlabel('Filtered Stage (m)')
 # ax5[0,0].set_ylabel('Water level (m)')
 
 ax5[0,1].scatter(projectdf_z2020['stage_filtered'], projectdf_z2020['z_normalized'], facecolors='none', edgecolors='black')
 ax5[0,1].set_title('2020')
+ax5[0,1].grid(linestyle= 'dashed')
+
 # ax5[0,1].set_xlabel('Filtered Stage (m)')
 # ax5[0,1].set_ylabel('Water level (m)')
 
 ax5[0,2].scatter(projectdf_z2021['stage_filtered'], projectdf_z2021['z_normalized'], facecolors='none', edgecolors='black')
 ax5[0,2].set_title('2021')
+ax5[0,2].grid(linestyle= 'dashed')
+
 # ax5[0,2].set_xlabel('Filtered Stage (m)')
 # ax5[0,2].set_ylabel('Water level (m)')
 
 ax5[1,0].scatter(projectdf_z2019['bubbler_resampled'], projectdf_z2019['z_resampled'], facecolors='none', edgecolors='black')
+ax5[1,0].grid(linestyle= 'dashed')
+
 # ax5[1,0].set_title('2019 correlation')
 # ax5[1,0].set_xlabel('Filtered Stage (m)')
 # ax5[1,0].set_ylabel('Water level (m)')
 
 ax5[1,1].scatter(projectdf_z2020['bubbler_resampled'], projectdf_z2020['z_resampled'], facecolors='none', edgecolors='black')
+ax5[1,1].grid(linestyle= 'dashed')
+
 # ax5[1,1].set_title('2020 correlation')
 # ax5[1,1].set_xlabel('Filtered Stage (m)')
 # ax5[0,1].set_ylabel('Water level (m)')
 
 ax5[1,2].scatter(projectdf_z2021['bubbler_resampled'], projectdf_z2021['z_resampled'], facecolors='none', edgecolors='black')
+ax5[1,2].grid(linestyle= 'dashed')
+
 # ax5[1,2].set_title('2021 correlation')
 # ax5[1,2].set_xlabel('Filtered Stage (m)')
 # ax5[0,2].set_ylabel('Water level (m)')
 
 fig5.text(0.5, 0.02, 'Bubbler Stage (m)', ha='center')
 fig5.text(0.04, 0.5, 'Camera Water Level (m)', va='center', rotation='vertical')
+fig5.constrained_layout()
 
 # fig5.add_subplot(1, 1, 1, frame_on=False)
 
