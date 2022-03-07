@@ -121,12 +121,13 @@ projectdf_z2019['z_normalized'] = projectdf_z2019['z']-projectdf_z2019['z'].mean
 projectdf_z2019['bubbler_resampled'] = projectdf_z2019['stage_filtered'].resample('1D').mean()
 projectdf_z2019['z_resampled'] = projectdf_z2019['z_normalized'].resample('1D').mean()
 
+projectdf_z2019['nice_datetimes']= projectdf_z2019.index.strftime("%b %d")
+
 
 fig1, ax1 = plt.subplots(2, constrained_layout = True, sharex = 'col')
 
 ax1[0].plot(projectdf_z2019.index, projectdf_z2019['z_normalized'])
 ax1[0].set_ylabel('Water Level (m)')
-ax1[0].set_title('2019 Data')
 ax1[0].grid(linestyle='dashed')
 ax1[0].set_ylim(-4, 4)
 ax1[1].plot(projectdf_z2019.index, projectdf_z2019['stage_filtered'])
@@ -172,12 +173,14 @@ projectdf_z2020['z_normalized'] = projectdf_z2020['z']-projectdf_z2020['z'].mean
 
 projectdf_z2020['bubbler_resampled'] = projectdf_z2020['stage_filtered'].resample('1D').mean()
 projectdf_z2020['z_resampled'] = projectdf_z2020['z_normalized'].resample('1D').mean()  
+
+projectdf_z2020['nice_datetimes']= projectdf_z2020.index.strftime("%b %d")
         
+
 fig2, ax2 = plt.subplots(2, constrained_layout = True, sharex = 'col')
 
 ax2[0].plot(projectdf_z2020.index, projectdf_z2020['z_normalized'])
 ax2[0].set_ylabel('Water Level (m)')
-ax2[0].set_title('2020 Data')
 ax2[0].grid(linestyle='dashed')
 ax2[0].set_ylim(-4, 4)
 ax2[1].plot(projectdf_z2020.index, projectdf_z2020['stage_filtered'])
@@ -227,22 +230,24 @@ projectdf_z2021['z_normalized'] = projectdf_z2021['z']-projectdf_z2021['z'].mean
 projectdf_z2021['bubbler_resampled'] = projectdf_z2021['stage_filtered'].resample('1D').mean()
 projectdf_z2021['z_resampled'] = projectdf_z2021['z_normalized'].resample('1D').mean()
 
-fig4, ax4 = plt.subplots(2, constrained_layout = True, sharex = 'col')
 
-ax4[0].plot(projectdf_z2021.index, projectdf_z2021['z_normalized'])
-ax4[0].set_ylabel('Water Level (m)')
-ax4[0].set_title('2021 Data')
-ax4[0].grid(linestyle='dashed')
-ax4[0].set_ylim(-4, 5)
-ax4[1].plot(projectdf_z2021.index, projectdf_z2021['stage_filtered'])
-ax4[1].set_ylabel('Filtered Stage (m)')
-ax4[1].grid(linestyle='dashed')
-ax4[1].set_ylim(-4, 5)
+projectdf_z2021['nice_datetimes']= projectdf_z2021.index.strftime("%b %d")
 
-ax4[0].tick_params(axis = 'x', labelrotation = 45)
-ax4[1].tick_params(axis = 'x', labelrotation = 45)
+# fig4, ax4 = plt.subplots(2, constrained_layout = True, sharex = 'col')
 
-plt.show()   
+# ax4[0].plot(projectdf_z2021.index, projectdf_z2021['z_normalized'])
+# ax4[0].set_ylabel('Water Level (m)')
+# ax4[0].grid(linestyle='dashed')
+# ax4[0].set_ylim(-4, 5)
+# ax4[1].plot(projectdf_z2021.index, projectdf_z2021['stage_filtered'])
+# ax4[1].set_ylabel('Filtered Stage (m)')
+# ax4[1].grid(linestyle='dashed')
+# ax4[1].set_ylim(-4, 5)
+
+# ax4[0].tick_params(axis = 'x', labelrotation = 45)
+# ax4[1].tick_params(axis = 'x', labelrotation = 45)
+
+# plt.show()   
 
 
 # Scatter plots#
@@ -250,38 +255,40 @@ plt.show()
 
 fig5, ax5 = plt.subplots(nrows=2, ncols=3, sharex = 'col', sharey= 'row')
 
-fig5.suptitle("Water Level/Pressure Transducer Correlation")
+# fig5.suptitle("Water Level/Pressure Transducer Correlation")
 
-ax5[0,0].scatter(projectdf_z2019['stage_filtered'], projectdf_z2019['z_normalized'])
+ax5[0,0].scatter(projectdf_z2019['stage_filtered'], projectdf_z2019['z_normalized'], facecolors='none', edgecolors='black')
 ax5[0,0].set_title('2019')
 # ax5[0,0].set_xlabel('Filtered Stage (m)')
-ax5[0,0].set_ylabel('Water level (m)')
+# ax5[0,0].set_ylabel('Water level (m)')
 
-ax5[0,1].scatter(projectdf_z2020['stage_filtered'], projectdf_z2020['z_normalized'])
+ax5[0,1].scatter(projectdf_z2020['stage_filtered'], projectdf_z2020['z_normalized'], facecolors='none', edgecolors='black')
 ax5[0,1].set_title('2020')
 # ax5[0,1].set_xlabel('Filtered Stage (m)')
 # ax5[0,1].set_ylabel('Water level (m)')
 
-ax5[0,2].scatter(projectdf_z2021['stage_filtered'], projectdf_z2021['z_normalized'])
+ax5[0,2].scatter(projectdf_z2021['stage_filtered'], projectdf_z2021['z_normalized'], facecolors='none', edgecolors='black')
 ax5[0,2].set_title('2021')
 # ax5[0,2].set_xlabel('Filtered Stage (m)')
 # ax5[0,2].set_ylabel('Water level (m)')
 
-ax5[1,0].scatter(projectdf_z2019['bubbler_resampled'], projectdf_z2019['z_resampled'])
+ax5[1,0].scatter(projectdf_z2019['bubbler_resampled'], projectdf_z2019['z_resampled'], facecolors='none', edgecolors='black')
 # ax5[1,0].set_title('2019 correlation')
-ax5[1,0].set_xlabel('Filtered Stage (m)')
-ax5[1,0].set_ylabel('Water level (m)')
+# ax5[1,0].set_xlabel('Filtered Stage (m)')
+# ax5[1,0].set_ylabel('Water level (m)')
 
-ax5[1,1].scatter(projectdf_z2020['bubbler_resampled'], projectdf_z2020['z_resampled'])
+ax5[1,1].scatter(projectdf_z2020['bubbler_resampled'], projectdf_z2020['z_resampled'], facecolors='none', edgecolors='black')
 # ax5[1,1].set_title('2020 correlation')
-ax5[1,1].set_xlabel('Filtered Stage (m)')
+# ax5[1,1].set_xlabel('Filtered Stage (m)')
 # ax5[0,1].set_ylabel('Water level (m)')
 
-ax5[1,2].scatter(projectdf_z2021['bubbler_resampled'], projectdf_z2021['z_resampled'])
+ax5[1,2].scatter(projectdf_z2021['bubbler_resampled'], projectdf_z2021['z_resampled'], facecolors='none', edgecolors='black')
 # ax5[1,2].set_title('2021 correlation')
-ax5[1,2].set_xlabel('Filtered Stage (m)')
+# ax5[1,2].set_xlabel('Filtered Stage (m)')
 # ax5[0,2].set_ylabel('Water level (m)')
 
+fig5.text(0.5, 0.02, 'Bubbler Stage (m)', ha='center')
+fig5.text(0.04, 0.5, 'Camera Water Level (m)', va='center', rotation='vertical')
 
 # fig5.add_subplot(1, 1, 1, frame_on=False)
 
@@ -293,6 +300,39 @@ ax5[1,2].set_xlabel('Filtered Stage (m)')
 # fig5.ylabel('Water Level (m)', fontsize=15, fontweight='bold')
 
 
+plt.show()
+
+fig6, ax6 = plt.subplots(3)
+fig6.tight_layout()
+ax6[0].plot(projectdf_z2019.index, projectdf_z2019['z_normalized'], color = 'black', label='Camera Water Levels')
+ax6[0].plot(projectdf_z2019.index, projectdf_z2019['stage_filtered'], color = 'red', label='Bubbler Stage')
+ax6[0].grid(linestyle='dashed')
+ax6[0].set_ylim(-5, 5)
+ax6[0].set_ylabel('2019')
+ax6[0].set_xticklabels(projectdf_z2019['nice_datetimes'], fontsize=10)
+ax6[0].tick_params(axis='both', which='major', direction='out', labelsize=10, width=2)
+
+
+ax6[1].plot(projectdf_z2020.index, projectdf_z2020['z_normalized'], color = 'black')
+ax6[1].plot(projectdf_z2020.index, projectdf_z2020['stage_filtered'], color = 'red')
+ax6[1].grid(linestyle='dashed')
+ax6[1].set_ylim(-5, 5)
+ax6[1].set_ylabel('2020')
+ax6[1].set_xticklabels(projectdf_z2020['nice_datetimes'], fontsize=10)
+ax6[1].tick_params(axis='both', which='major', direction='out', labelsize=10, width=2)
+
+
+ax6[2].plot(projectdf_z2021.index, projectdf_z2021['z_normalized'], color = 'black')
+ax6[2].plot(projectdf_z2021.index, projectdf_z2021['stage_filtered'], color = 'red')
+ax6[2].grid(linestyle='dashed')
+ax6[2].set_ylim(-5, 5)
+ax6[2].set_ylabel('2021')
+ax6[2].set_xticklabels(projectdf_z2021['nice_datetimes'], fontsize=10)
+ax6[2].tick_params(axis='both', which='major', direction='out', labelsize=10, width=2)
+
+# ax6.set_xticks(np.arange(times[0], times[-1], 15))
+# ax6.set_xticklabels(projectdf_z2021['nice_datetimes'], fontsize=10)
+fig6.legend(loc='upper right')
 plt.show()
 
 ## Linear Regression stats
