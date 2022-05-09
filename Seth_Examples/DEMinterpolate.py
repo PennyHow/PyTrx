@@ -67,7 +67,7 @@ def geotiff_write(outfile, geotransform, projection, data, nodata=None):
     return 1
 
 # Import DEM
-dem, gt, proj, nodata = geotiff_read('C:/Users/sethn/Documents/Inglefield/envs/pytrx/Inglefield Data/201907-Minturn-Elv-5cm-octree_dem.tif')
+dem, gt, proj, nodata = geotiff_read('C:/Users/sgoldst3/Inglefield/PyTrx\Seth_Examples/cam_env/201907-Minturn-Elv-5cm-octree_dem_clipped.tif')
 x = np.linspace(0, 1, dem.shape[0])
 y = np.linspace(0, 1, dem.shape[1])
 yy, xx = np.meshgrid(y, x)
