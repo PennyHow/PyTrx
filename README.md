@@ -1,6 +1,23 @@
-# Datasets and processing scripts for Goldstein et al. Proglacial river stage derived from orthorectified time-lapse camera images, Inglefield Land, Northwest Greenland
+# Proglacial river stage derived from orthorectified time-lapse camera images, Inglefield Land, Northwest Greenland
 
-This repository holds the datasets and processing scripts for processing the time-lapse images and water stage datasets from a proglacial river in Inglefield Land, Northwest Greenland. 
+Datasets and processing scripts for Goldstein et al. Proglacial river stage derived from orthorectified time-lapse camera images, Inglefield Land, Northwest Greenland
+
+
+## Datasets
+
+The following datasets are provided:
+
++ Time-lapse camera information, including camera calibration variables and ground control point positions
+
++ TLS DEM of the area of interest
+
++ Time-lapse images of the river from 2019 and 2020
+
++ River stage datasets from 2019, 2020 and 2021
+
++ Water level data in pixel and projected positions
+
++ Production copies of Figures 4, 5, 6 and 7 (which are outputs of the Python scripts)
 
 
 ## Processing scripts
@@ -39,21 +56,3 @@ The repository can then be cloned to a local workspace using git.
 ```bash
 git clone https://github.com/sethnavon/InglefieldData
 ```
-
-
-## Datasets
-
-The following datasets are provided:
-
-+ Time-lapse camera information, including camera calibration variables and ground control point positions
-
-+ TLS DEM of the area of interest
-
-+ Time-lapse images of the river from 2019 and 2020
-
-+ River stage datasets from 2019, 2020 and 2021
-
-+ Water level data in pixel and projected positions
-
-+ Production copies of Figures 4, 5, 6 and 7 (which are outputs of the Python scripts)
-
