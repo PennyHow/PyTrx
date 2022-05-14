@@ -7,11 +7,11 @@ Datasets and processing scripts for Goldstein et al. Proglacial river stage deri
 
 The following datasets are provided:
 
-+ Time-lapse camera information, including camera calibration variables and ground control point positions
++ Time-lapse camera information, including calibration variables and ground control point positions
 
 + TLS DEM of the area of interest
 
-+ Time-lapse images of the river from 2019 and 2020
++ Time-lapse images of the river from 2019, 2020 and 2021
 
 + River stage datasets from 2019, 2020 and 2021
 
