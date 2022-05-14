@@ -38,17 +38,18 @@ The Python scripts held here include:
 To run the provided Python scripts, we recommend using conda to set up a Python environment and then cloning this repository. Dependencies can be installed using conda and pip.
  
 ```bash
-conda create --name py38 python=3.8
-conda activate py38
+conda create --name pytrx3 python=3.8
+conda activate pytrx3
 
 conda install gdal opencv matplotlib pandas pillow scipy scikit-image
 pip install pytrx 
 ```
 
-Or you can create a Python environment with all the installe dependencies using the environment file provided in this repository.
+Or you can create a Python environment with all the installed dependencies using the environment file provided in this repository. For troubleshooting, see the set-up guide in the [PyTrx repo](https://github.com/PennyHow/PyTrx) and [readthedocs installation readme](https://pytrx.readthedocs.io/en/latest/Installation.html#). 
 
 ```bash
 conda env create --file environment.yml
+conda activate pytrx3
 ```
 
 The repository can then be cloned to a local workspace using git.
