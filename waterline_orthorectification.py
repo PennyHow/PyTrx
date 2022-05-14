@@ -190,25 +190,25 @@ def constructSeries(lines, lines_filtered, proj):
      return projectdf_z
  
 # Construct 2019 series and export
-mergedf2019 = pd.read_csv('cam_results/manual_detection_results2019.csv', 
+mergedf2019 = pd.read_csv('results/manual_detection_results2019.csv', 
                           parse_dates=['key_0'], index_col='key_0')
 mergedf2019_filtered = mergedf2019.loc[mergedf2019['lineloc'] <= 300]
 projectdf_z2019 = constructSeries(mergedf2019, mergedf2019_filtered, df)
-projectdf_z2019.to_csv('cam_results/projectedresults2019.csv')
+projectdf_z2019.to_csv('results/projectedresults2019.csv')
 
 # Construct 2020 series and export
-mergedf2020 = pd.read_csv('cam_results/manual_detection_results2020.csv', 
+mergedf2020 = pd.read_csv('results/manual_detection_results2020.csv', 
                           parse_dates=['key_0'], index_col='key_0')
 mergedf2020_filtered = mergedf2020.loc[mergedf2020['lineloc'] <= 300]
 projectdf_z2020 = constructSeries(mergedf2020, mergedf2020_filtered, df)
-projectdf_z2020.to_csv('cam_results/projectedresults2020.csv')
+projectdf_z2020.to_csv('results/projectedresults2020.csv')
 
 # Construct 2021 series and export
-mergedf2021 = pd.read_csv('cam_results/manual_detection_results2021.csv', 
+mergedf2021 = pd.read_csv('results/manual_detection_results2021.csv', 
                           parse_dates=['key_0'], index_col='key_0')
 mergedf2021_filtered = mergedf2021.loc[mergedf2021['lineloc'] <= 300]
 projectdf_z2021 = constructSeries(mergedf2021, mergedf2021_filtered, df)
-projectdf_z2021.to_csv('cam_results/projectedresults2021.csv')
+projectdf_z2021.to_csv('results/projectedresults2021.csv')
 
 
 # =============================================================================
