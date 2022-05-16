@@ -323,15 +323,16 @@ plt.show()
 # Plot three-year time-series 
 # =============================================================================
 
-def pltSeries(ax, df, dt1, dt2, pos, dt_form):
+def pltSeries(ax, df, dt1, dt2, pos, dt_form, label1=None, label2=None):
     '''Plot yearly record as subplot time-series'''
     ax[pos].plot(df.index, df['z_normalized'], color='black', 
-                label='Camera Derived Stage')
+                label=label1)
     ax[pos].plot(df.index, df['stage_filtered'], color='#1f77b4', 
-                label='Pressure Transducer Stage')
+                label=label2)
     ax[pos].grid(linestyle='dashed')
     ax[pos].set_ylim(-5, 5)
     ax[pos].set_xlim([dt1, dt2])
+    ax[pos].set_ylabel(str(dt1.year) + ' stage (m)')
     ax[pos].xaxis.set_major_formatter(dt_form)
     ax[pos].tick_params(axis='both', which='major', direction='out', 
                         labelsize=10, width=2)
@@ -346,7 +347,8 @@ pltSeries(ax, projectdf_z2019, datetime.date(2019, 6, 8),
 pltSeries(ax, projectdf_z2020, datetime.date(2020, 6, 8), 
           datetime.date(2020, 9, 8), 1, date_form)
 pltSeries(ax, projectdf_z2021, datetime.date(2021, 6, 8), 
-          datetime.date(2021, 9, 8), 2, date_form)
+          datetime.date(2021, 9, 8), 2, date_form, 'Camera Derived Stage',
+          'Pressure Transducer Stage')
 fig.legend(bbox_to_anchor=(0.72,0))
 
 # Save and show plot
