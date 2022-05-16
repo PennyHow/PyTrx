@@ -282,7 +282,7 @@ pltTimeSeries(projectdf_z2021)
 
 def pltScatter(ax, var1, var2, pos1, pos2, label=None):
     '''Plot two variables as scatter subplot'''
-    ax[pos1,pos2].scatter(var1, var2, facecolors='none', edgecolors='black')
+    ax[pos1,pos2].scatter(var1, var2, facecolors='none', edgecolors='blue')
     ax[pos1,pos2].grid(linestyle= 'dashed')
     ax[pos1,pos2].set_ylim(bottom = -0.5, top =4.5)
     ax[pos1,pos2].set_xlim(left = -0.5, right =4.5)

@@ -21,7 +21,7 @@ cam_data/calib.txt
 Camera_location #Location of camera in xyz coordinates
 [500245.488 8724349.876 332.269]
 
-Yaw_pitch_roll #Yaw, pitch, roll of camera (set to [0 0 0] if unknown) 
+Yaw_pitch_roll #Yaw, pitch, roll estimate 
 [180 0 0] 
 
 Dem_densification #Amount to densify the DEM to permit better mapping of image
