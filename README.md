@@ -35,7 +35,7 @@ The Python scripts held here include:
 
 ### Python set-up
 
-To run the provided Python scripts, we recommend using conda to set up a Python environment and then cloning this repository. Dependencies can be installed using conda and pip.
+To run the provided Python scripts, we recommend using conda to set up a Python environment and then cloning this repository. Dependencies can be installed using conda and pip. This is set up to use the latest version (1.2.3) of PyTrx.
  
 ```bash
 conda create --name pytrx3 python=3.8
