@@ -311,7 +311,7 @@ pltScatter(ax, projectdf_z2021['bubbler_resampled'],
            projectdf_z2021['z_resampled'], 1, 2)
 
 # Add annotations
-fig.text(0.5, 0.02, 'Pressure Transducer Stage (m)', ha='center')
+fig.text(0.5, 0.02, 'Bubble-Gauge Stage (m)', ha='center')
 fig.text(0.04, 0.5, 'Camera Derived Stage (m)', va='center', rotation='vertical')
 
 # Save and show plot
@@ -348,7 +348,7 @@ pltSeries(ax, projectdf_z2020, datetime.date(2020, 6, 8),
           datetime.date(2020, 9, 8), 1, date_form)
 pltSeries(ax, projectdf_z2021, datetime.date(2021, 6, 8), 
           datetime.date(2021, 9, 8), 2, date_form, 'Camera Derived Stage',
-          'Pressure Transducer Stage')
+          'Bubble-Gauge Stage')
 fig.legend(bbox_to_anchor=(0.72,0))
 
 # Save and show plot
