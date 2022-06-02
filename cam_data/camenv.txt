@@ -13,7 +13,7 @@ DEM_path #Path name where DEM data can be found
 cam_data/dem_clipped.tif
 
 image_path #Path name where master image can be found
-cam_data/images/2019/INGLEFIELD_CAM_StarDot1_20190712_030000.jpg
+cam_data/images/2019/INGLEFIELD_CAM_StarDot1_20190712_030000.JPG
 
 Calibration_path #Path name where camera calibration file can be found
 cam_data/calib.txt
