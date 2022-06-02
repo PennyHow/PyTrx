@@ -38,7 +38,7 @@ for i in [inglecam_img1, inglecam_img2, inglecam_img3]:
     
     # Plot
     ax1[a,0].imshow(im, cmap='gray')
-    ax1[a,1].plot(rowsum)
+    ax1[a,1].plot(rowsum, np.arange(rows1))
     ax1[a,2].plot(edges2line, color = "red", linewidth=1)
     ax1[a,2].imshow(edge1, cmap='gray')
     
@@ -48,6 +48,15 @@ for i in [inglecam_img1, inglecam_img2, inglecam_img3]:
     ax1[a,0].set_ylabel(date, fontsize=10)
     
     a+=1
+    
+    for row in range(3):
+        ax1[row,1].invert_yaxis()
+
+    ## Make sure all axes have same size/shape
+    for row in range(3):
+        for col in range(3):
+            ax1[row,col].set_box_aspect(im.shape[0]/im.shape[1])
+        # plt.tight_layout()
 
 # Save and show plot
 fig1.tight_layout()
