@@ -244,6 +244,11 @@ def getStats(df, year):
                                                     df_na['z_resampled'])
     print(f'\n{year} linear regression values (days)') 
     print(f'r squared: {rval} \nstd error: {stderr}')
+    
+    meanlvl = df_na.mean(['stage_filtered'])
+    print(f'\n\n{year} mean water level')
+    print(f'r squared: {meanlvl}')
+    
 
 # Get stats for each time-series year
 getStats(projectdf_z2019, '2019')
