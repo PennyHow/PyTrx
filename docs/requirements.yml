@@ -3,13 +3,11 @@ channels:
   - defaults
   - conda-forge
 dependencies:
-  - anaconda
   - gdal>=2.3
   - glob2
   - matplotlib
   - numpy
   - opencv>=3.4
   - pillow
-  - pip
   - python>=3.6
   - scipy>=1.3.0
