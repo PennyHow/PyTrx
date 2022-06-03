@@ -3,6 +3,8 @@
 
 PyTrx (short for 'Python Tracking') is a Python object-oriented toolbox created for the purpose of calculating real-world measurements from oblique images and time-lapse image series. Its primary purpose is to obtain velocities, surface areas, and distances from imagery of glacial environments. <br>
 
+This branch contains the PyTrx toolset along with the distribution setup for sharing documentation with PyTrx's <a href="https://pytrx.readthedocs.io/">readthedocs webpages</a>, and the <a href='https://pypi.python.org/pypi/PyTrx'>pip package installer</a>. <br>
+
 Authors: Penelope How (pho@geus.dk), Nick Hulton, and Lynne Buie (née Addison)<br>
 
 <hr>
@@ -30,9 +32,10 @@ Addison (2015) PyTrx: feature tracking software for automated production of glac
 <hr>
 
 <h3>Permissions and acknowledgements</h3>
-<b>Example image sets</b> distributed with PyTrx were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. <br><br> 
+<b>Example image sets</b> from Svalbard glaciers were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. <br><br> 
 <b>The DEM of the Kongsfjorden area</b> provided as an example dataset for PyTrx originates from the freely available DEM dataset provided by the <a href="https://geodata.npolar.no/">Norwegian Polar Institute</a>, data product 'S0 Terrengmodell - Delmodell_5m_2009_13822_33 (GeoTIFF)'  <a href="https://doi.org/10.21334/npolar.2014.dce53a47">doi:10.21334/npolar.2014.dce53a47</a>. This data is licensed under the <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0) license</a>.<br><br>
 <b>The DEM of the Tempelfjorden area</b> provided as an example dataset for PyTrx originates from <a href="https://www.pgc.umn.edu/data/arcticdem/">ArcticDEM</a>, Scene ID WV01_20130714_1020010 (July 14, 2013). <a href="https://www.pgc.umn.edu/guides/arcticdem/additional-information/">There is no license for the ArcticDEM data and it can be used and distributed freely</a>. The DEM was created from DigitalGlobe, Inc., imagery and funded under National Science Foundation awards 1043681, 1559691, and 1542736. <br><br>
+<b>Example image sets and UAV-derived DEM from Qasigiannguit glacier are used courtesy of <a href="https://www.asiaq-greenlandsurvey.gl/frontpage/">Asiaq Greenland Survey</a> as part of Messerli et al. (In Review), through GlacioBasis Nuuk under the <a href="https://g-e-m.dk/">GEM (Greenland Ecosystem Monitoring) programme</a>.<br><br>
 Refer to the readme document in the Examples folder of this repository for more information on the DEMs provided and distributed with PyTrx.<br><br>
 Parts of the <b>georectification functions</b> in the PyTrx toolbox were inspired and translated from <a href="http://imgraft.glaciology.net/">ImGRAFT</a>, a photogrammetry toolbox for Matlab (<a href="https://www.geosci-instrum-method-data-syst.net/4/23/2015/gi-4-23-2015.pdf">Messerli and Grinsted, 2015</a>). Where possible, ImGRAFT has been credited for in the corresponding PyTrx scripts (primarily some passages in the CamEnv.py script) and cited in relevant PyTrx publications. 
 
@@ -82,9 +85,9 @@ PyTrx has been coded with Python 3 and has been tested on Linux and Windows oper
 <b>GDAL (v2 and above):</b> <a href="http://www.gisinternals.com/archive.php">gisinternals.com</a><br>
 <b>Pillow (PIL) (v5 and above):</b> <a href="http://www.pythonware.com/products/pil/">pythonware.com</a><br><br>
 
-PyTrx can either be downloaded directly from the GitHub repository, or installed using a package manager such as conda or pip. If downloading directly from GitHub, be aware that these dependencies may not necessarily be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to install them. These can be specified using the .yml environment file provided in this repository. PyTrx has been tried and tested with the following dependency version configuration: <b>OpenCV=3.4.2</b>, <b>GDAL=2.3.2</b>, and <b>PIL=5.3</b>. PyTrx also needs other packages, which are commonly included with distributions of Python: <b>datetime</b>, <b>glob</b>, <b>imghdr</b>, <b>math</b>, <b>Matplotlib</b>, <b>NumPy</b>, <b>operator</b>, <b>os</b>, <b>pathlib</b>, <b>PyLab</b>, <b>SciPy</b>, <b>struct</b>, and <b>sys</b>. Compatibility with all newer versions of these packages are highly likely.<br>
+PyTrx can either be downloaded directly from the GitHub repository, or installed using pip. If downloading directly from GitHub, be aware that these dependencies may not necessarily be installed with distributions of Python (e.g. PythonXY, Anaconda), so you may have to install them. These can be specified using the .yml environment file provided in this repository. PyTrx has been tried and tested with the following dependency version configuration: <b>OpenCV=3.4.2</b>, <b>GDAL=2.3.2</b>, and <b>PIL=5.3</b>. PyTrx also needs other packages, which are commonly included with distributions of Python: <b>datetime</b>, <b>glob</b>, <b>imghdr</b>, <b>math</b>, <b>Matplotlib</b>, <b>NumPy</b>, <b>operator</b>, <b>os</b>, <b>pathlib</b>, <b>PyLab</b>, <b>SciPy</b>, <b>struct</b>, and <b>sys</b>. Compatibility with all newer versions of these packages are highly likely.<br>
 
-If you are installing PyTrx through a package manager, we recommend using <a href="https://docs.conda.io/en/latest/">conda</a>. Be aware that the PyTrx example scripts are not included with this distribution of PyTrx given the size of the example dataset files. PyTrx is also available through pip, although difficulties with the GDAL package on pip meant that GDAL could not be declared explicitly as a PyTrx dependency. Please ensure that GDAL is installed separately if installing PyTrx through pip. Please see our <a href="https://pytrx.readthedocs.io/en/latest/Installation.html">readthedocs page on setting up PyTrx</a> for more details.
+Be aware that the PyTrx example scripts are not included with the pip distribution of PyTrx given the size of the example dataset files. Please also ensure that GDAL is installed separately if installing PyTrx through pip. See our <a href="https://pytrx.readthedocs.io/en/latest/Installation.html">readthedocs page on setting up PyTrx</a> for more details.
 
 <hr>
 
