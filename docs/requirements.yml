@@ -12,4 +12,5 @@ dependencies:
   - pip
   - scipy>=1.3.0
   - pip:
+    - osgeo
     - pytrx
