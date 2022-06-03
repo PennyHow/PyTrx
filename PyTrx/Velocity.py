@@ -674,7 +674,10 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
     displacement_tolerance_rel=2.0
     
     #Seed point grid
-    xyz0, uv0 = seedGrid(campars[0], griddistance, campars[1], mask)
+    if campars!=None:
+        xyz0, uv0 = seedGridDEM(campars[0], griddistance, campars[1], mask)
+    else:
+        uv0 = seedGridIm(im0, griddistance, mask)
     
     print(str(uv0.shape[0]) + ' templates generated')
     
@@ -682,7 +685,7 @@ def calcDenseVelocity(im0, im1, griddistance, method, templatesize,
     pts, ptserrors = templateMatch(im0, im1, uv0, templatesize, searchsize, 
                                    threshold, min_features, method)
  
-    #Pass empty object if tracking was insufficient
+    #Pass empty object if tremzacking was insufficient
     if pts==None:
         print('\nNo features to undertake velocity measurements')
         return None        
@@ -917,9 +920,10 @@ def calcSparseHomography(img1, img2, mask, correct, method=cv2.RANSAC,
 
 
 def calcDenseHomography(img1, img2, mask, correct, griddistance, templatesize, 
-                        searchsize, dem, projvars, trackmethod=cv2.TM_CCORR_NORMED, 
-                        homogmethod=cv2.RANSAC, ransacReprojThreshold=5.0, 
-                        threshold=0.8, min_features=4):
+                        searchsize, dem=None, projvars=None, 
+                        trackmethod=cv2.TM_CCORR_NORMED, homogmethod=cv2.RANSAC, 
+                        ransacReprojThreshold=5.0, threshold=0.8, 
+                        min_features=4):
     """Function to supplement correction for movement in the camera 
     platform given an image pair (i.e. image registration). Returns the 
     homography representing tracked image movement, and the tracked 
@@ -942,12 +946,13 @@ def calcDenseHomography(img1, img2, mask, correct, griddistance, templatesize,
       Template window size in im0 for matching
     searchsize : int 
       Search window size in im1 for matching 
-    dem : PyTrx.DEM.ExplicitRaster
-      DEM object
-    projvars : list
+    dem : PyTrx.DEM.ExplicitRaster, optional
+      DEM object, if defining grid from DEM
+    projvars : list, optional
       List containing projection parameters (camera location, camera position, 
       radial distortion coefficients, tangential distortion coefficients, 
-      focal length, camera centre, and reference image) 
+      focal length, camera centre, and reference image), if defining grid from
+      DEM
     trackmethod : int 
       Method for tmeplate matching: cv2.TM_CCOEFF - Cross-coefficient; 
       cv2.TM_CCOEFF_NORMED - Normalised cross-coeff; cv2.TM_CCORR - Cross 
@@ -975,8 +980,11 @@ def calcDenseHomography(img1, img2, mask, correct, griddistance, templatesize,
       interpolated homography matrix and the equivalent tracked points
     """         
     #Generate grid for tracking
-    xyz0, uv0 = seedGrid(dem, griddistance, projvars, mask)
-            
+    if dem!=None:
+        xyz0, uv0 = seedGridDEM(dem, griddistance, projvars, mask)
+    else:
+        uv0 = seedGridIm(img1, griddistance, mask)
+           
     #Template match between images
     points, ptserrors = templateMatch(img1, img2, uv0, templatesize, searchsize, 
                                       threshold, min_features, trackmethod)
@@ -1353,7 +1361,7 @@ def seedCorners(im, mask, maxpoints, quality, mindist, min_features):
         return p0
 
 
-def seedGrid(dem, griddistance, projvars, mask):
+def seedGridDEM(dem, griddistance, projvars, mask):
     """Define pixel grid at a specified grid distance, taking into 
     consideration the image size and image mask
     
@@ -1438,6 +1446,44 @@ def seedGrid(dem, griddistance, projvars, mask):
     uv = np.array(uv, dtype='float32').reshape((-1,1,2))  
     
     return xyz, uv
+
+def seedGridIm(im, griddistance, mask):
+    """Define pixel grid at a specified grid distance, taking into 
+    consideration the image size and image mask
+    
+    Parameters
+    ----------
+    im : arr
+      Image array
+    griddistance : list 
+      Grid spacing, defined by two values representing pixel row and column 
+      spacing     
+    mask : arr 
+      Mask array for masking image
+
+    Returns
+    -------
+    uv : arr
+      Grid point positions in the image coordinate system 
+    """
+    #Get mask and fill masked image values with NaN values
+    if mask is not None:
+        im = ma.masked_array(im, np.logical_not(mask))
+        im = im.filled(np.nan) 
+    
+    #Define point spacings in image space
+    samplex = round((im.shape[1]-0)/griddistance[0])
+    sampley = round((im.shape[0]-0)/griddistance[1])
+    
+    #Define grid in image space
+    linx = np.linspace(0, im.shape[1], samplex)
+    liny = np.linspace(0, im.shape[0], sampley)
+    
+    #Construct mesh grid as uv coordinates
+    meshx, meshy = np.meshgrid(linx, liny)    
+    uv = [[round(a),round(b)] for a,b in zip(meshx.flatten(), meshy.flatten())] 
+    
+    return uv
 
 def readDEMmask(dem, img, invprojvars, demMaskPath=None):
     """Read/generate DEM mask for subsequent grid generation. If a valid 
