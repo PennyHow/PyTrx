@@ -3,7 +3,6 @@ channels:
   - defaults
   - conda-forge
 dependencies:
-  - gdal>=2.3
   - glob2
   - matplotlib
   - numpy
@@ -12,5 +11,5 @@ dependencies:
   - pip
   - scipy>=1.3.0
   - pip:
-    - osgeo
+    - gdal>=2.3
     - pytrx

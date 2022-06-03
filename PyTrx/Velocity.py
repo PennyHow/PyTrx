@@ -1362,8 +1362,9 @@ def seedCorners(im, mask, maxpoints, quality, mindist, min_features):
 
 
 def seedGridDEM(dem, griddistance, projvars, mask):
-    """Define pixel grid at a specified grid distance, taking into 
-    consideration the image size and image mask
+    """Define DEM grid at a specified grid distance, taking into 
+    consideration the DEM size and mask. Georectify to 
+    generate corresponding pixel grid
     
     Parameters
     ----------
