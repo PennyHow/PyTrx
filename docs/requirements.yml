@@ -7,7 +7,6 @@ dependencies:
   - glob2
   - matplotlib
   - numpy
-  - osgeo
   - opencv>=3.4
   - pillow
   - pip
