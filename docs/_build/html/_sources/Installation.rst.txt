@@ -32,23 +32,23 @@ Be warned that there are difficulties with the GDAL package on pip, meaning that
    pip install pytrx
 
 
-If you still run into problems then we suggest creating a new conda environment from the .yml environment file <https://github.com/PennyHow/PyTrx/blob/master/environment.yml>`_ provided in the PyTrx repository, as described `here <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_. Then the PyTrx pip package can be installed afterwards in this fresh environment.
+If you still run into problems then we suggest creating a new conda environment from the .yml environment file <https://github.com/PennyHow/PyTrx/blob/master/environment.yml>`_ provided in the PyTrx repository, as described `here <https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html>`_. This includes a fresh install of PyTrx.
 
 
 .. code-block:: bash
 
    conda env create --file environment.yml
    
-   pip install pytrx
-   
 
-To check that PyTrx is working, open a Python console or IDE such as Spyder, and try to import PyTrx
+To check that PyTrx is working, open a Python console or IDE such as Spyder, and try to import PyTrx, PyTrx's help guide, and one of PyTrx's modules as a test.
 
 .. code-block:: python
 
    import PyTrx
    
    help(PyTrx)
+   
+   from PyTrx import Area
    
 If PyTrx is working correctly, the help statement should print PyTrx's metadata, including PyTrx's license, a brief description of the toolset, and its structure. If this does not work and throws up an error, it is likely that the package dependencies are invalid so reconfigure them and then try again.
 

@@ -18,9 +18,14 @@ import numpy as np
 import ogr, unittest
 
 #Import PyTrx functions and classes
-import PyTrx.Velocity as Velocity
-from PyTrx.Images import ImageSequence
-from PyTrx.CamEnv import projectUV, setProjection
+try:
+    import Velocity as Velocity
+    from Images import ImageSequence
+    from CamEnv import projectUV, setProjection
+except:    
+    import PyTrx.Velocity as Velocity
+    from PyTrx.Images import ImageSequence
+    from PyTrx.CamEnv import projectUV, setProjection
 
 #------------------------------------------------------------------------------
 

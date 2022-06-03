@@ -16,15 +16,21 @@ imagery; and (2) Determining real-world surface areas from oblique imagery.
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
-import cv2, ogr, unittest
+import cv2, ogr, unittest, sys
 from PIL import Image
 from packaging import version
 
 #Import PyTrx functions and classes
-from PyTrx.FileHandler import readMask
-from PyTrx.Images import ImageSequence, enhanceImage
-import PyTrx.Velocity as Velocity
-from PyTrx.CamEnv import projectUV, setProjection
+try:
+    from FileHandler import readMask
+    from Images import ImageSequence, enhanceImage
+    import Velocity as Velocity
+    from CamEnv import projectUV, setProjection
+except:
+    from PyTrx.FileHandler import readMask
+    from PyTrx.Images import ImageSequence, enhanceImage
+    import PyTrx.Velocity as Velocity
+    from PyTrx.CamEnv import projectUV, setProjection
 
 #------------------------------------------------------------------------------
 class Area(ImageSequence):
