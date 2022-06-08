@@ -1,6 +1,4 @@
-#PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
-#
-#PyTrx is licensed under a MIT License.
+#PyTrx (c) is licensed under a MIT License.
 #
 #You should have received a copy of the license along with this
 #work. If not, see <https://choosealicense.com/licenses/mit/>.
@@ -18,9 +16,14 @@ import numpy as np
 import ogr, unittest
 
 #Import PyTrx functions and classes
-import PyTrx.Velocity as Velocity
-from PyTrx.Images import ImageSequence
-from PyTrx.CamEnv import projectUV, setProjection
+try:
+    import Velocity as Velocity
+    from Images import ImageSequence
+    from CamEnv import projectUV, setProjection
+except:    
+    import PyTrx.Velocity as Velocity
+    from PyTrx.Images import ImageSequence
+    from PyTrx.CamEnv import projectUV, setProjection
 
 #------------------------------------------------------------------------------
 

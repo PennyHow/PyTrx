@@ -1,7 +1,5 @@
 '''
-PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
-
-PyTrx is licensed under a MIT License.
+PyTrx (c) is licensed under a MIT License.
 
 You should have received a copy of the license along with this
 work. If not, see <https://choosealicense.com/licenses/mit/>.
@@ -23,28 +21,26 @@ commands in the "Calculate areas" section of this script).
 '''
 
 #Import packages
-import os
+import os, cv2, glob, sys
 import matplotlib.pyplot as plt
 import matplotlib.image as mpimg
 import cv2
 import glob
 
-# #Import PyTrx modules (from PyTrx file directory)
-# import sys
-# sys.path.append('../')
-# from Area import Area
-# from Velocity import Homography
-# from CamEnv import CamEnv
-# import FileHandler 
-# from Utilities import plotAreaPX, plotAreaXYZ
-
-#If you have pip/conda installed PyTrx then comment out the PyTrx module
-#imports above and uncomment these ones below
-from PyTrx.Area import Area
-from PyTrx.Velocity import Homography
-from PyTrx.CamEnv import CamEnv
-from PyTrx import FileHandler 
-from PyTrx.Utilities import plotAreaPX, plotAreaXYZ
+# #Import PyTrx modules
+try:
+    sys.path.append('../')
+    from Area import Area
+    from Velocity import Homography
+    from CamEnv import CamEnv
+    import FileHandler 
+    from Utilities import plotAreaPX, plotAreaXYZ
+except:
+    from PyTrx.Area import Area
+    from PyTrx.Velocity import Homography
+    from PyTrx.CamEnv import CamEnv
+    from PyTrx import FileHandler 
+    from PyTrx.Utilities import plotAreaPX, plotAreaXYZ
 
 
 #-----------------------------   Map data files   -----------------------------

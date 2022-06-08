@@ -1,7 +1,7 @@
 Package Guide 
 =============
 
-Detailed documentation is included in the 8 scripts that make up PyTrx. Each script contains classes and functions for handling each aspect needed for photogrammetric processing.
+Detailed documentation is included in the scripts that make up PyTrx. Each script contains classes and functions for handling each aspect needed for photogrammetric processing.
 
 For beginners in programming, it is advised to look at the example applications provided in the `GitHub repository <https://github.com/PennyHow/PyTrx>`_ and adapt them accordingly for your own use. For experienced programmers, get stuck in. Feel free to contact us if you run into major problems or have constructive comments that will help us further PyTrx and its capabilities. We will not respond to minor troubleshooting or unconstructive comments.
 

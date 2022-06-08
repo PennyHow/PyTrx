@@ -1,7 +1,5 @@
 '''
-PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
-
-PyTrx is licensed under a MIT License.
+PyTrx (c) is licensed under a MIT License.
 
 You should have received a copy of the license along with this
 work. If not, see <https://choosealicense.com/licenses/mit/>.
@@ -23,19 +21,17 @@ and as a shape file (.shp).
 
 #Import packages
 import numpy as np
-import os
+import os, sys
 import osgeo.ogr as ogr
 import osgeo.osr as osr
 import matplotlib.pyplot as plt
 
-# #Import PyTrx modules (from PyTrx file directory)
-# import sys
-# sys.path.append('../')
-# from CamEnv import CamEnv, setProjection, projectUV
-              
-#If you have pip/conda installed PyTrx then comment out the PyTrx module
-#imports above and uncomment these ones below
-from PyTrx.CamEnv import CamEnv, setProjection, projectUV
+# #Import PyTrx modules
+try:
+    sys.path.append('../')
+    from CamEnv import CamEnv, setProjection, projectUV
+except:              
+    from PyTrx.CamEnv import CamEnv, setProjection, projectUV
 
 
 #-----------------------------   Map data files   -----------------------------

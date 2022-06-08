@@ -1,6 +1,4 @@
-#PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
-#
-#PyTrx is licensed under a MIT License.
+#PyTrx (c) is licensed under a MIT License.
 #
 #You should have received a copy of the license along with this
 #work. If not, see <https://choosealicense.com/licenses/mit/>.
@@ -15,11 +13,17 @@ ImGRAFT are noted in related script comments.
 """
 
 #Import PyTrx packages
-from PyTrx.Utilities import plotGCPs, plotCalib, plotResiduals, plotPrincipalPoint
-from PyTrx.FileHandler import readImg, readGCPs, readMatrixDistortion 
-from PyTrx.DEM import ExplicitRaster,load_DEM,voxelviewshed
-from PyTrx.Images import CamImage
-
+try:
+    from Utilities import plotGCPs, plotCalib, plotResiduals, plotPrincipalPoint
+    from FileHandler import readImg, readGCPs, readMatrixDistortion 
+    from DEM import ExplicitRaster,load_DEM,voxelviewshed
+    from Images import CamImage
+except:
+    from PyTrx.Utilities import plotGCPs, plotCalib, plotResiduals, plotPrincipalPoint
+    from PyTrx.FileHandler import readImg, readGCPs, readMatrixDistortion 
+    from PyTrx.DEM import ExplicitRaster,load_DEM,voxelviewshed
+    from PyTrx.Images import CamImage
+    
 #Import other packages
 import matplotlib.pyplot as plt
 from scipy import interpolate

@@ -1,7 +1,5 @@
 '''
-PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
-
-PyTrx is licensed under a MIT License.
+PyTrx (c) is licensed under a MIT License.
 
 You should have received a copy of the license along with this
 work. If not, see <https://choosealicense.com/licenses/mit/>.
@@ -23,26 +21,20 @@ registration).
 '''
 
 #Import packages
-import os
+import os, sys
 import numpy as np
 
-# #Import PyTrx modules (from PyTrx file directory)
-# import sys
-# sys.path.append('../')
-# from CamEnv import CamEnv
-# from Velocity import Velocity, Homography
-# from FileHandler import writeHomogFile, writeVeloFile, writeVeloSHP, writeCalibFile
-# from Utilities import plotVeloPX, plotVeloXYZ, interpolateHelper, plotInterpolate
-
-#If you have pip/conda installed PyTrx then comment out the PyTrx module
-#imports above and uncomment these ones below
-from PyTrx.CamEnv import CamEnv
-from PyTrx.Velocity import Velocity, Homography
-from PyTrx.FileHandler import writeHomogFile, writeVeloFile, writeVeloSHP, writeCalibFile
-from PyTrx.Utilities import plotVeloPX, plotVeloXYZ, interpolateHelper, plotInterpolate
-
-
-
+try:
+    sys.path.append('../')
+    from CamEnv import CamEnv
+    from Velocity import Velocity, Homography
+    from FileHandler import writeHomogFile, writeVeloFile, writeVeloSHP, writeCalibFile
+    from Utilities import plotVeloPX, plotVeloXYZ, interpolateHelper, plotInterpolate
+except:
+    from PyTrx.CamEnv import CamEnv
+    from PyTrx.Velocity import Velocity, Homography
+    from PyTrx.FileHandler import writeHomogFile, writeVeloFile, writeVeloSHP, writeCalibFile
+    from PyTrx.Utilities import plotVeloPX, plotVeloXYZ, interpolateHelper, plotInterpolate    
 
 #-------------------------   Map data sources   -------------------------------
 

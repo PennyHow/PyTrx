@@ -32,11 +32,13 @@ The DEM of the Tempelfjorden area provided as an example dataset for PyTrx origi
 
 The DEM distributed with PyTrx of the Tempelfjorden region is called *TU_demzero.tif*, which has been modified and manipulated from the original ArcticDEM data. The scene has been clipped to the area of interest, downgraded to 20 metre resolution, and all low-lying elevations (< 150 m) have been transformed to 0 m a.s.l. in order to project point locations and line profiles to a flat, homogeneous surface at sea level.
 
+The example image sets and UAV-derived DEM from Qasigiannguit glacier are used courtesy of `Asiaq Greenland Survey <https://www.asiaq-greenlandsurvey.gl/frontpage/>`_ as part of Messerli et al. (In Review), through GlacioBasis Nuuk under the `GEM (Greenland Ecosystem Monitoring) programme <https://g-e-m.dk/>`_. The DEM file provided as *QAS_drone_dem.tif* was acquired from UAV surveying in September 2020 and downgraded to 20 metre resolution.
+
 
 Acknowledgements
 ----------------
 
-This work would not have been possible without the CRIOS (Calving Rates and Impact on Sea Level) project, who own the example image sets distributed with PyTrx.
+PyTrx was initially developed and released as part of the `CRIOS (Calving Rates and Impact on Sea Level) <https://www.researchinsvalbard.no/project/20000000-0000-0000-0000-000000007037/project-info>`_ project. Example image sets and camera data from Svalbard glaciers are provided by CRIOS. PyTrx's continued development and maintenance is funded by an `ESA Living Planet Fellowship <https://eo4society.esa.int/projects/griml/>`_.
 
 Parts of the georectification functions in the PyTrx toolbox were inspired and translated from `ImGRAFT <http://imgraft.glaciology.net/>`_, a photogrammetry toolbox for Matlab (`Messerli and Grinsted, 2015 <https://www.geosci-instrum-method-data-syst.net/4/23/2015/gi-4-23-2015.html>`_). Where possible, ImGRAFT has been credited for in the corresponding PyTrx scripts (primarily some passages in the CamEnv.py script) and cited in relevant PyTrx publications.
 

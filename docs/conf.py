@@ -22,7 +22,7 @@ copyright = '2022, Penelope How'
 author = 'Penelope How'
 
 # The full version, including alpha/beta/rc tags
-release = '1.2.0'
+release = '1.2.4'
 
 
 # -- General configuration ---------------------------------------------------
@@ -39,6 +39,8 @@ extensions = [
 napoleon_google_docstring = False
 napoleon_numpy_docstring = True
 napoleon_use_ivar = True
+
+autodoc_mock_imports = ['_gdal', 'gdal', 'gdalconst', 'ogr', 'PyTrx']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

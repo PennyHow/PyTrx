@@ -1,7 +1,5 @@
 '''
-PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
-
-PyTrx is licensed under a MIT License.
+PyTrx (c) is licensed under a MIT License.
 
 You should have received a copy of the license along with this
 work. If not, see <https://choosealicense.com/licenses/mit/>.
@@ -25,24 +23,22 @@ section of this script).
 '''
 
 #Import packages
-import os
+import os, sys
 
-# #Import PyTrx modules (from PyTrx file directory)
-# import sys
-# sys.path.append('../')
-# from Line import Line
-# from Velocity import Homography
-# from CamEnv import CamEnv
-# import FileHandler
-# from Utilities import plotLinePX, plotLineXYZ
-
-#If you have pip/conda installed PyTrx then comment out the PyTrx module
-#imports above and uncomment these ones below
-from PyTrx.Line import Line
-from PyTrx.Velocity import Homography
-from PyTrx.CamEnv import CamEnv
-from PyTrx import FileHandler
-from PyTrx.Utilities import plotLinePX, plotLineXYZ
+# #Import PyTrx modules
+try:
+    sys.path.append('../')
+    from Line import Line
+    from Velocity import Homography
+    from CamEnv import CamEnv
+    import FileHandler
+    from Utilities import plotLinePX, plotLineXYZ
+except:
+    from PyTrx.Line import Line
+    from PyTrx.Velocity import Homography
+    from PyTrx.CamEnv import CamEnv
+    from PyTrx import FileHandler
+    from PyTrx.Utilities import plotLinePX, plotLineXYZ
 
 
 
