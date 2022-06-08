@@ -1,34 +1,80 @@
-# Example applications of PyTrx
+# PyTrx
+<a href='https://pytrx.readthedocs.io/en/latest/?badge=latest'> <img src='https://readthedocs.org/projects/pytrx/badge/?version=latest' alt='Documentation status' /></a> <a href="https://badge.fury.io/py/pytrx"><img src="https://badge.fury.io/py/pytrx.svg" alt="PyPI status" height="18"></a><br>
 
-This folder contains example applications of PyTrx. Specifically it contains script drivers and the associated data with these examples. These can easily be adapted to different datasets and applications. A selection of these examples, along with others, are presented in the PyTrx methods paper:
+PyTrx (short for 'Python Tracking') is a Python object-oriented toolbox created for the purpose of calculating real-world measurements from oblique images and time-lapse image series. Its primary purpose is to obtain velocities, surface areas, and distances from imagery of glacial environments. <br>
+
+<hr>
+
+<h3>PyTrx citations</h3>
+
+We are happy for others to use and adapt PyTrx for their own processing needs. If used, please cite the following key publication and Digital Object Identifier:<br>
 
 <h3>How et al. (2020) PyTrx: a Python-based monoscopic terrestrial photogrammetry toolset for glaciology. <i>Frontiers in Earth Science</i> 8:21, <a href="https://dx.doi.org/10.3389/feart.2020.00021">doi:10.3389/feart.2020.00021</a></h3>
 
-Please see the <a href="https://pytrx.readthedocs.io/en/latest/GetStarted.html">readthedocs page</a> for a comprehensive walkthrough of a selection of these examples.
+PyTrx has been used in the following publications. In addition to the publication above, please cite any that are applicable where possible:<br>
 
-## Data provided with PyTrx
+<b>*PyTrx used for georectification of glacier calving event locations*</b><br>
+How et al. (2019) Calving controlled by melt-undercutting: detailed mechanisms revealed through time-lapse observations. <i>Annals of Glaciology</i> 60 (78), 20-31, <a href="https://dx.doi.org/10.1017/aog.2018.28">doi:10.1017/aog.2018.28</a><br>
 
-### Image sets
+<b>*PhD thesis by Penelope How, for which PyTrx was developed primarily*</b><br>
+How (2018) Dynamical change at tidewater glaciers examined using time-lapse photogrammetry. PhD thesis, University of Edinburgh, UK, <a href="https://hdl.handle.net/1842/31103">https://hdl.handle.net/1842/31103</a><br>
 
-Example image sets from Svalbard glaciers were collected as part of <a href="https://www.researchinsvalbard.no/project/7037">CRIOS</a> (Calving Rates and Impact On Sea level), and are used here with permission. <br>
+<b>*PyTrx used for detection of supraglacial lakes and meltwater plumes*</b><br>
+How et al. (2017) Rapidly changing subglacial hydrological pathways at a tidewater glacier revealed through simultaneous observations of water pressure, supraglacial lakes, meltwater plumes and surface velocities. <i>The Cryosphere</i> 11, 2691-2710, <a href="https://doi.org/10.5194/tc-11-2691-2017">doi:10.5194/tc-11-2691-2017</a><br>
 
-Example image sets from Qasigiannguit glacier are used courtesy of <a href="https://www.asiaq-greenlandsurvey.gl/frontpage/">Asiaq Greenland Survey</a> as part of Messerli et al. (In Review), through GlacioBasis Nuuk under the <a href="https://g-e-m.dk/">GEM (Greenland Ecosystem Monitoring) programme</a>.<br>
-
-### Digital Elevation Models (DEMs)
-
-<b>*1. Kongsfjorden DEMs*</b><br>
-The DEM of the Kongsfjorden area provided as an example dataset for PyTrx originates from the freely available DEM dataset provided by the <a href="https://geodata.npolar.no/">Norwegian Polar Institute</a>, data product 'S0 Terrengmodell - Delmodell_5m_2009_13822_33 (GeoTIFF)'. This data is licensed under the <a href="https://creativecommons.org/licenses/by/4.0/">Creative Commons Attribution 4.0 International (CC BY 4.0) license</a>:<br>
-
-Norwegian Polar Institute (2014). Terrengmodell Svalbard (S0 Terrengmodell) [Data set]. Norwegian Polar Institute. <a href="https://doi.org/10.21334/npolar.2014.dce53a47">doi:10.21334/npolar.2014.dce53a47</a><br>
-
-The two DEMs distributed with PyTrx for the Kongsfjorden region are 'KR_demsmooth.tif' and 'KR_demzero.tif', which have been modified and manipulated from the original NPI data. In both cases, the scene has been clipped to the area of interest, downgraded to 20 metre resolution, and smoothed using a linear interpolation method. The latter of these DEMs has been manipulated in order to better represent the terminus position of Kronebreen in 2014 (the time at which the images were taken) and project meltwater plumes to a flat, homogeneous surface at sea level. <br>
-
-<b>*2. Tempelfjorden DEM*</b><br>
-The DEM of the Tempelfjorden area provided as an example dataset for PyTrx originates from <a href="https://www.pgc.umn.edu/data/arcticdem/">ArcticDEM</a>, Scene ID: WV01_20130714_1020010 (July 14, 2013). <a href="https://www.pgc.umn.edu/guides/arcticdem/additional-information/">There is no license for the ArcticDEM data and it can be used and distributed freely</a>. The DEM was created from DigitalGlobe, Inc., imagery and funded under National Science Foundation awards 1043681, 1559691, and 1542736. <br>
-
-The DEM distributed with PyTrx of the Tempelfjorden region is called 'TU_demzero.tif', which has been modified and manipulated from the original ArcticDEM data. The scene has been clipped to the area of interest, downgraded to 20 metre resolution, and all low-lying elevations (< 150 m) have been transformed to 0 m a.s.l. in order to project point locations and line profiles to a flat, homogeneous surface at sea level. <br>
-
-<b>*3. Qasigiannguit glacier*</b><br>
-The DEM of Qasigiannguit glacier is provided courtesy of <a href="https://www.asiaq-greenlandsurvey.gl/frontpage/">Asiaq Greenland Survey</a>. The DEM was acquired from UAV surveys in September 2020, as part of GlacioBasis Nuuk under the <a href="https://g-e-m.dk/">GEM (Greenland Ecosystem Monitoring) programme.</a> The version provided here has been downgraded to 20 metre resolution.<br>
+<b>*MSc thesis by Lynne Buie, where PyTrx was created in its earliest form*</b><br>
+Addison (2015) PyTrx: feature tracking software for automated production of glacier velocity. MSc thesis, University of Edinburgh, UK, <a href="https://hdl.handle.net/1842/11794">https://hdl.handle.net/1842/11794</a><br>
 
 <hr>
+
+<h3>Installation</h3>
+
+The PyTrx installation has been tested on Linux and Windows operating systems (it should also work on Apple operating systems too, it just hasn't been tested). PyTrx is primarily available through pip:
+
+```bash
+pip install pytrx
+```
+Be warned that there are difficulties with the GDAL package on pip, meaning that gdal could not be declared explicitly as a PyTrx dependency in the pip package compiling. Please ensure that gdal is installed separately if installing PyTrx through pip. You should be able to create a new environment, install GDAL and the other dependencies with conda, and then install PyTrx with pip.
+
+```bash
+conda create --name pytrx python=3.7
+conda install gdal opencv pillow scipy matplotlib spyder
+pip install pytrx
+```
+
+Be aware that the PyTrx example scripts in this repository are not included with the pip distribution of PyTrx, given the size of the example dataset files. Either download these separately, or create a new conda environment (using the <a href="https://github.com/PennyHow/PyTrx/blob/master/environment.yml">.yml environment file</a> provided) and clone the PyTrx GitHub repository:
+
+```bash
+conda env create --file environment.yml
+git clone https://github.com/PennyHow/PyTrx.git
+```
+
+See our <a href="https://pytrx.readthedocs.io/en/latest/Installation.html">readthedocs page on setting up PyTrx</a> for more details.
+
+<hr>
+
+<h3>Permissions and acknowledgements</h3>
+
+PyTrx was initially developed and released as part of the  <a href="https://www.researchinsvalbard.no/project/20000000-0000-0000-0000-000000007037/project-info"> CRIOS (Calving Rates and Impact on Sea Level</a> project. PyTrx's continued development and maintenance is funded by an <a href="https://eo4society.esa.int/projects/griml/">ESA Living Planet Fellowship</a>.<br>
+
+Parts of the <b>georectification functions</b> in the PyTrx toolbox were inspired and translated from <a href="http://imgraft.glaciology.net/">ImGRAFT</a>, a photogrammetry toolbox for Matlab (<a href="https://www.geosci-instrum-method-data-syst.net/4/23/2015/gi-4-23-2015.pdf">Messerli and Grinsted, 2015</a>). Where possible, ImGRAFT has been credited for in the corresponding PyTrx scripts (primarily some passages in the CamEnv.py script) and cited in relevant PyTrx publications. <br>
+
+See PyTrx's <a href="https://pytrx.readthedocs.io/en/latest/Links.html">readthedocs</a> for all permissions and acknowledgements.
+
+<hr>
+ 
+<h3>Links</h3>
+
+There are other useful software available for terrestrial photogrammetry in glaciology: <br>
+
+<a href="http://www.lancaster.ac.uk/staff/jamesm/software/pointcatcher.htm">Pointcatcher</a> - Matlab-based GUI toolbox for feature-tracking and georectification <br>
+<a href="http://imgraft.glaciology.net/">ImGRAFT</a> - Matlab toolbox for feature-tracking and georectification <br>
+<a href="https://tu-dresden.de/bu/umwelt/geo/ipf/photogrammetrie/forschung/forschungsprojekte/emt">EMT (Environmental Motion Tracking)</a> - GUI toolbox for feature-tracking and georectification <br>
+<a href="http://www.mn.uio.no/geo/english/research/projects/icemass/cias/">CIAS</a> - IDL gui for feature-tracking <br>
+<a href="https://www.geosci-model-dev.net/9/307/2016/">PRACTISE</a> - Matlab toolbox for georectification
+
+<hr>
+
+<h3>Copyright</h3>
+
+PyTrx is licensed under a <a href="https://choosealicense.com/licenses/mit/">MIT License</a>.

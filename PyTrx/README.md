@@ -9,7 +9,8 @@ PyTrx (short for 'Python Tracking') is a Python object-oriented toolbox created 
 
 We are happy for others to use and adapt PyTrx for their own processing needs. If used, please cite the following key publication and Digital Object Identifier:<br>
 
-<h3>How et al. (2020) PyTrx: a Python-based monoscopic terrestrial photogrammetry toolset for glaciology. <i>Frontiers in Earth Science</i> 8:21, <a href="https://dx.doi.org/10.3389/feart.2020.00021">doi:10.3389/feart.2020.00021</a></h3><br>
+<h3>How et al. (2020) PyTrx: a Python-based monoscopic terrestrial photogrammetry toolset for glaciology. <i>Frontiers in Earth Science</i> 8:21, <a href="https://dx.doi.org/10.3389/feart.2020.00021">doi:10.3389/feart.2020.00021</a></h3>
+
 PyTrx has been used in the following publications. In addition to the publication above, please cite any that are applicable where possible:<br>
 
 <b>*PyTrx used for georectification of glacier calving event locations*</b><br>
