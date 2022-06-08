@@ -131,7 +131,7 @@ We can set a number of detection parameters in our Area object to aid in the aut
    lakes.setEnhance(diff, phi, theta)
 
    # Set mask and image number with maximum area of interest 
-   maxim = 0                 t 
+   maxim = 0                 
    lakes.setMax(camamask,maxim)                   
 
    # Set polygon threshold (i.e. number of polygons kept)

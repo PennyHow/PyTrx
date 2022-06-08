@@ -32,6 +32,8 @@ The DEM of the Tempelfjorden area provided as an example dataset for PyTrx origi
 
 The DEM distributed with PyTrx of the Tempelfjorden region is called *TU_demzero.tif*, which has been modified and manipulated from the original ArcticDEM data. The scene has been clipped to the area of interest, downgraded to 20 metre resolution, and all low-lying elevations (< 150 m) have been transformed to 0 m a.s.l. in order to project point locations and line profiles to a flat, homogeneous surface at sea level.
 
+The example image sets and UAV-derived DEM from Qasigiannguit glacier are used courtesy of `Asiaq Greenland Survey <https://www.asiaq-greenlandsurvey.gl/frontpage/>`_ as part of Messerli et al. (In Review), through GlacioBasis Nuuk under the `GEM (Greenland Ecosystem Monitoring) programme <https://g-e-m.dk/>`_. The DEM file provided as *QAS_drone_dem.tif* was acquired from UAV surveying in September 2020 and downgraded to 20 metre resolution.
+
 
 Acknowledgements
 ----------------
