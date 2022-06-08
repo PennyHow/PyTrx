@@ -244,5 +244,5 @@ dependencies:
   - zstd=1.4.9=haebb681_0
   - pip:
     - glob2==0.7
-    - pytrx==1.2.3
+    - pytrx==1.2.4
 prefix: /home/pho/anaconda3/envs/pytrx3
