@@ -1,7 +1,5 @@
 '''
-PyTrx (c) by Penelope How, Nick Hulton, Lynne Buie
-
-PyTrx is licensed under a MIT License.
+PyTrx (c) is licensed under a MIT License.
 
 You should have received a copy of the license along with this
 work. If not, see <https://choosealicense.com/licenses/mit/>.
@@ -20,7 +18,7 @@ setuptools.setup(
     name="pytrx", 
     version="1.2.4",
     author="Penelope How",
-    author_email="pennyruthhow@gmail.com",
+    author_email="pho@geus.dk",
     description="An object-oriented toolset for calculating velocities, surface areas and distances from oblique imagery of glacial environments",
     long_description=long_description,
     long_description_content_type="text/markdown",

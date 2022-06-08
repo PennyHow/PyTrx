@@ -96,11 +96,15 @@ conda install gdal opencv pillow scipy matplotlib spyder
 pip install pytrx
 </pre></div>
 </div>
-<p>If you still run into problems then we suggest creating a new conda environment from the .yml environment file &lt;<a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/environment.yml">https://github.com/PennyHow/PyTrx/blob/master/environment.yml</a>&gt;`_ provided in the PyTrx repository, as described <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">here</a>. This includes a fresh install of PyTrx.</p>
+<p>If you still run into problems then we suggest creating a new conda environment from the <a class="reference external" href="https://github.com/PennyHow/PyTrx/blob/master/environment.yml">.yml environment file</a> provided in the PyTrx repository, as described <a class="reference external" href="https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html">here</a>. This includes a fresh install of PyTrx.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>conda env create --file environment.yml
 </pre></div>
 </div>
-<p>To check that PyTrx is working, open a Python console or IDE such as Spyder, and try to import PyTrx, PyTrx’s help guide, and one of PyTrx’s modules as a test.</p>
+<p>To check that PyTrx is working, some simple unit tests can be run from the command line.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>python -m unittest PyTrx.Area PyTrx.CamEnv PyTrx.DEM PyTrx.Line PyTrx.Velocity
+</pre></div>
+</div>
+<p>Additionally, open a Python console or IDE such as Spyder, and try to import PyTrx, PyTrx’s help guide, and one of PyTrx’s modules as a test.</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">PyTrx</span>
 
 <span class="n">help</span><span class="p">(</span><span class="n">PyTrx</span><span class="p">)</span>
@@ -108,7 +112,7 @@ pip install pytrx
 <span class="kn">from</span> <span class="nn">PyTrx</span> <span class="kn">import</span> <span class="n">Area</span>
 </pre></div>
 </div>
-<p>If PyTrx is working correctly, the help statement should print PyTrx’s metadata, including PyTrx’s license, a brief description of the toolset, and its structure. If this does not work and throws up an error, it is likely that the package dependencies are invalid so reconfigure them and then try again.</p>
+<p>If PyTrx is working correctly, the unit tests should run successfully and the help statement should print PyTrx’s metadata, including PyTrx’s license, a brief description of the toolset, and its structure. If this does not work and throws up an error, it is likely that the package dependencies are invalid so reconfigure them and then try again.</p>
 </section>
 <section id="cloning-pytrx-from-github">
 <h2>Cloning PyTrx from GitHub<a class="headerlink" href="#cloning-pytrx-from-github" title="Permalink to this headline"></a></h2>
