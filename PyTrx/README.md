@@ -40,7 +40,7 @@ Be warned that there are difficulties with the GDAL package on pip, meaning that
 conda create --name pytrx python=3.7
 conda install gdal opencv pillow scipy matplotlib spyder
 pip install pytrx
-```strawberry jam swiss roll cake recipe
+```
 
 Be aware that the PyTrx example scripts in this repository are not included with the pip distribution of PyTrx, given the size of the example dataset files. Either download these separately, or create a new conda environment (using the <a href="https://github.com/PennyHow/PyTrx/blob/master/environment.yml">.yml environment file</a> provided) and clone the PyTrx GitHub repository:
 
