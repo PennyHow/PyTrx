@@ -10,7 +10,6 @@ PyTrx (short for 'Python Tracking') is a Python object-oriented toolbox created 
 We are happy for others to use and adapt PyTrx for their own processing needs. If used, please cite the following key publication and Digital Object Identifier:<br>
 
 <h3>How et al. (2020) PyTrx: a Python-based monoscopic terrestrial photogrammetry toolset for glaciology. <i>Frontiers in Earth Science</i> 8:21, <a href="https://dx.doi.org/10.3389/feart.2020.00021">doi:10.3389/feart.2020.00021</a></h3><br>
-  
 PyTrx has been used in the following publications. In addition to the publication above, please cite any that are applicable where possible:<br>
 
 <b>*PyTrx used for georectification of glacier calving event locations*</b><br>
@@ -55,11 +54,11 @@ See our <a href="https://pytrx.readthedocs.io/en/latest/Installation.html">readt
 
 <h3>Permissions and acknowledgements</h3>
 
-PyTrx was initially developed and released as part of the  <a href="https://www.researchinsvalbard.no/project/20000000-0000-0000-0000-000000007037/project-info"> CRIOS (Calving Rates and Impact on Sea Level</a> project. PyTrx's continued development and maintenance is funded by an <a href="https://eo4society.esa.int/projects/griml/">ESA Living Planet Fellowship</a>.<br><br>
+PyTrx was initially developed and released as part of the  <a href="https://www.researchinsvalbard.no/project/20000000-0000-0000-0000-000000007037/project-info"> CRIOS (Calving Rates and Impact on Sea Level</a> project. PyTrx's continued development and maintenance is funded by an <a href="https://eo4society.esa.int/projects/griml/">ESA Living Planet Fellowship</a>.<br>
 
-Parts of the <b>georectification functions</b> in the PyTrx toolbox were inspired and translated from <a href="http://imgraft.glaciology.net/">ImGRAFT</a>, a photogrammetry toolbox for Matlab (<a href="https://www.geosci-instrum-method-data-syst.net/4/23/2015/gi-4-23-2015.pdf">Messerli and Grinsted, 2015</a>). Where possible, ImGRAFT has been credited for in the corresponding PyTrx scripts (primarily some passages in the CamEnv.py script) and cited in relevant PyTrx publications. <br><br>
+Parts of the <b>georectification functions</b> in the PyTrx toolbox were inspired and translated from <a href="http://imgraft.glaciology.net/">ImGRAFT</a>, a photogrammetry toolbox for Matlab (<a href="https://www.geosci-instrum-method-data-syst.net/4/23/2015/gi-4-23-2015.pdf">Messerli and Grinsted, 2015</a>). Where possible, ImGRAFT has been credited for in the corresponding PyTrx scripts (primarily some passages in the CamEnv.py script) and cited in relevant PyTrx publications. <br>
 
-See PyTrx's <a href="https://pytrx.readthedocs.io/en/latest/Links.html">readthedocs</a> for full acknowledgements and permissions.
+See PyTrx's <a href="https://pytrx.readthedocs.io/en/latest/Links.html">readthedocs</a> for all permissions and acknowledgements.
 
 <hr>
  
