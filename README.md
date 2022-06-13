@@ -37,7 +37,8 @@ pip install pytrx
 Be warned that there are difficulties with the GDAL package on pip, meaning that gdal could not be declared explicitly as a PyTrx dependency in the pip package compiling. Please ensure that gdal is installed separately if installing PyTrx through pip. You should be able to create a new environment, install GDAL and the other dependencies with conda, and then install PyTrx with pip.
 
 ```bash
-conda create --name pytrx python=3.7
+conda create --name pytrx3 python=3.7
+conda activate pytrx3
 conda install gdal opencv pillow scipy matplotlib spyder
 pip install pytrx
 ```
@@ -46,6 +47,7 @@ Be aware that the PyTrx example scripts in this repository are not included with
 
 ```bash
 conda env create --file environment.yml
+conda activate pytrx3
 git clone https://github.com/PennyHow/PyTrx.git
 ```
 
