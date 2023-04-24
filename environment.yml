@@ -245,4 +245,3 @@ dependencies:
   - pip:
     - glob2==0.7
     - pytrx==1.2.4
-prefix: /home/pho/anaconda3/envs/pytrx3
