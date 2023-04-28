@@ -13,14 +13,19 @@ Determining real-world distances from oblique imagery.
 #Import packages
 import matplotlib.pyplot as plt
 import numpy as np
-import ogr, unittest
+import unittest
 
+try:
+    from osgeo import ogr
+except ImportError:
+    import ogr
+    
 #Import PyTrx functions and classes
 try:
     import Velocity as Velocity
     from Images import ImageSequence
     from CamEnv import projectUV, setProjection
-except:    
+except ImportError:    
     import PyTrx.Velocity as Velocity
     from PyTrx.Images import ImageSequence
     from PyTrx.CamEnv import projectUV, setProjection

@@ -18,7 +18,7 @@ try:
     from FileHandler import readImg, readGCPs, readMatrixDistortion 
     from DEM import ExplicitRaster,load_DEM,voxelviewshed
     from Images import CamImage
-except:
+except ImportError:
     from PyTrx.Utilities import plotGCPs, plotCalib, plotResiduals, plotPrincipalPoint
     from PyTrx.FileHandler import readImg, readGCPs, readMatrixDistortion 
     from PyTrx.DEM import ExplicitRaster,load_DEM,voxelviewshed

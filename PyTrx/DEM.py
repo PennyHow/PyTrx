@@ -11,11 +11,16 @@ this data into the PyTrx.CamEnv.CamEnv object class.
 #Import packages
 import numpy as np
 import scipy.io as sio
-import gdal, math, struct, unittest
-from scipy import interpolate
-from gdalconst import GA_ReadOnly 
+import math, struct, unittest
+from scipy import interpolate 
 from scipy.interpolate import RectBivariateSpline
 
+try:
+    from osgeo import gdal
+    import osgeo.gdalconst.GA_ReadOnly as GA_ReadOnly
+except ImportError:
+    import gdal
+    from gdalconst import GA_ReadOnly 
 #------------------------------------------------------------------------------
 
 class ExplicitRaster(object):   

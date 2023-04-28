@@ -14,10 +14,15 @@ import numpy as np
 import operator
 import matplotlib.pyplot as plt
 import scipy.io as sio
-from osgeo import ogr,osr
 import os
 from functools import reduce
-
+  
+try:
+    from osgeo import ogr, osr
+except ImportError:
+    import ogr
+    import osr
+    
 #------------------------------------------------------------------------------   
 
 def readMask(img, writeMask=None):

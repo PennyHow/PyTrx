@@ -28,7 +28,7 @@ try:
     from FileHandler import readMask
     from Images import ImageSequence
     from CamEnv import projectUV, projectXYZ, setProjection
-except:
+except ImportError:
     from PyTrx.FileHandler import readMask
     from PyTrx.Images import ImageSequence
     from PyTrx.CamEnv import projectUV, projectXYZ, setProjection

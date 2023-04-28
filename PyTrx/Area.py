@@ -14,17 +14,22 @@ imagery; and (2) Determining real-world surface areas from oblique imagery.
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 import numpy as np
-import cv2, ogr, unittest, sys
+import cv2, unittest
 from PIL import Image
 from packaging import version
 
+try:
+    from osgeo import ogr
+except ImportError:
+    import ogr
+    
 #Import PyTrx functions and classes
 try:
     from FileHandler import readMask
     from Images import ImageSequence, enhanceImage
     import Velocity as Velocity
     from CamEnv import projectUV, setProjection
-except:
+except ImportError:
     from PyTrx.FileHandler import readMask
     from PyTrx.Images import ImageSequence, enhanceImage
     import PyTrx.Velocity as Velocity
