@@ -17,4 +17,4 @@ formats:
   
 python:
   install:
-  - requirements: docs/requirements.yml
+  - requirements: docs/requirements.txt
