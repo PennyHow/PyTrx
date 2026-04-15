@@ -1,6 +1,4 @@
-name: pytrx37
 channels:
-  - defaults
   - conda-forge
 dependencies:
   - gdal>=2.3
